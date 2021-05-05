@@ -19,6 +19,18 @@
 #include <cstdarg>
 #include <string>
 
+#define STR_FORMAT_VARIABLE(OPERATOR)\
+        va_list vl;\
+        va_start(vl, fmt);\
+        int size = vsnprintf(0, 0, fmt, vl) + sizeof('\0');\
+        va_end(vl);\
+        char *buffer = new char [size];\
+        va_start(vl, fmt);\
+        size = vsnprintf(buffer, size, fmt, vl);\
+        va_end(vl);\
+        this_string OPERATOR std::string(buffer, size);\
+        delete[] buffer
+
 class StrFormat
 {
   private:
@@ -26,20 +38,19 @@ class StrFormat
   public:
     StrFormat(const char* fmt, ...)
     {
-      va_list vl;
-      va_start(vl, fmt);
-      int size = vsnprintf(0, 0, fmt, vl) + sizeof('\0');
-      va_end(vl);
-      char *buffer = new char [size];
-      va_start(vl, fmt);
-      size = vsnprintf(buffer, size, fmt, vl);
-      va_end(vl);
-      this_string = std::string(buffer, size);
-      delete[] buffer;
+      STR_FORMAT_VARIABLE(=);
     }
-    std::string str(void) 
+    std::string str(void) const
     {
       return this_string;
+    }
+    void append(std::string &more)
+    {
+      this_string += more;
+    }
+    void append(const char* fmt, ...)
+    {
+      STR_FORMAT_VARIABLE(+=);
     }
 };
 #endif

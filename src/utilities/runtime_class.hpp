@@ -25,6 +25,10 @@ class RunTimeClass
     start_time = end_time;
     return elapsed_micro;
   }
+  size_t show(const std::string &msg)
+  {
+   return this->show(msg.c_str());
+  }
   size_t elapsed(void)
   {
     auto end_time = std::chrono::high_resolution_clock::now();
