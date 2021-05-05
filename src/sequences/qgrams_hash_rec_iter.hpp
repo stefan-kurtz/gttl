@@ -24,8 +24,6 @@
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/max_qgram_length.hpp"
 
-typedef CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH> CyclicBuffer_uint8;
-
 /* Implementation of iterator class follows concept described in
    https://davidgorski.ca/posts/stl-iterators/ */
 
@@ -38,6 +36,8 @@ template<int _alpha_size,
 class QgramRecHashValueIterator
 {
   using SequenceBaseType = char;
+  using CyclicBuffer_uint8 = CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH>;
+
   struct Iterator
   {
     private:
@@ -105,7 +105,7 @@ class QgramRecHashValueIterator
       }
       bool operator != (const Iterator& other) const
       {
-        return next_char_ptr < other.end_of_sequence;
+        return static_cast<bool>(next_char_ptr < other.end_of_sequence);
       }
   };
 
