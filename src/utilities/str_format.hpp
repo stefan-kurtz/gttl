@@ -36,7 +36,7 @@ class StrFormat
   private:
     std::string this_string{};
   public:
-    StrFormat(const char* fmt, ...)
+    StrFormat(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)))
     {
       STR_FORMAT_VARIABLE(=);
     }
@@ -48,9 +48,10 @@ class StrFormat
     {
       this_string += more;
     }
-    void append(const char* fmt, ...)
+    void append(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)))
     {
       STR_FORMAT_VARIABLE(+=);
     }
 };
+
 #endif
