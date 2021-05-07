@@ -1,3 +1,5 @@
+#ifndef GTTL_SEQ_ITERATOR_HPP
+#define GTTL_SEQ_ITERATOR_HPP
 #include <iostream>
 #include <string>
 #include "utilities/gttl_line_iterator.hpp"
@@ -96,3 +98,4 @@ class GttlSeqIterator
       return Iterator(header,sequence,gttl_li,true);
     }
 };
+#endif
