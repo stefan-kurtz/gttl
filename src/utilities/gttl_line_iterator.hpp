@@ -25,18 +25,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <ios>
-
-#ifndef QLI_WITHOUT_ZLIB
-#include <zlib.h>
-typedef gzFile QliFpType;
-#define qli_fp_type_open(FP, MODE) gzopen(FP, MODE)
-#define qli_fp_type_close(FP) gzclose(FP)
-#else
-typedef FILE * QliFpType;
-#include <cstdio>
-#define qli_fp_type_open(FP, MODE) fopen(FP, MODE)
-#define qli_fp_type_close(FP) fclose(FP)
-#endif
+#include "utilities/gttl_file_open.hpp"
 
 template<int buf_size>
 class GttlLineIterator
