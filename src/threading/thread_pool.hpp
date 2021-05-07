@@ -24,11 +24,11 @@ static void gttl_thread_apply_thread_func(GttlThreadFunc thread_func,
 class GttlThreadPool
 {
   public:
-  GttlThreadPool(size_t num_threads, size_t number_of_tasks, 
+  GttlThreadPool(size_t num_threads, size_t number_of_tasks,
                  GttlThreadFunc thread_func,void *thread_data)
   {
     assert(num_threads >= 1 && number_of_tasks > 0);
-    if (num_threads > 1) 
+    if (num_threads > 1)
     {
       std::thread *threads = new std::thread [num_threads];
       VirtualQueue vq(number_of_tasks);

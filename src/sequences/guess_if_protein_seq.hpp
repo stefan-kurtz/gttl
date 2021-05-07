@@ -53,7 +53,7 @@ bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 int guess_if_protein_file(const char *progname,const char *filename)
 {
   const int buf_size = 1 << 14;
-  QliFpType in_fp = qli_fp_type_open(filename,"r");
+  GttlFpType in_fp = gttl_fp_type_open(filename,"r");
 
   if (in_fp == nullptr)
   {
@@ -86,7 +86,7 @@ int guess_if_protein_file(const char *progname,const char *filename)
     std::cerr << progname << ": " << ext.what() << std::endl;
     haserr = true;
   }
-  qli_fp_type_close(in_fp);
+  gttl_fp_type_close(in_fp);
   if (haserr)
   {
     return -1;

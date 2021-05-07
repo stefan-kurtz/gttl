@@ -28,7 +28,7 @@ class GttlFastQIterator
     GttlLineIterator<buf_size> gttl_li;
 
   public:
-    GttlFastQIterator(QliFpType _in_fp) :
+    GttlFastQIterator(GttlFpType _in_fp) :
       gttl_li(GttlLineIterator<buf_size>(_in_fp))
     {
     }

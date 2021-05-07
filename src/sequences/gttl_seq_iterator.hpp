@@ -84,7 +84,7 @@ class GttlSeqIterator
                 sequence{};
     GttlLineIterator<buf_size> gttl_li;
   public:
-    GttlSeqIterator(QliFpType _in_fp) :
+    GttlSeqIterator(GttlFpType _in_fp) :
         gttl_li(GttlLineIterator<buf_size>(_in_fp))
     {
       gttl_li.separator_set('>');

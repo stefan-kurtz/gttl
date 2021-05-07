@@ -32,7 +32,7 @@ class GttlLineIterator
 {
   private:
     char buffer[buf_size+1], *bufptr = buffer, *bufend = buffer;
-    QliFpType in_fp;
+    GttlFpType in_fp;
     char separator;
     bool exhausted,
          endofunit;
@@ -58,7 +58,7 @@ class GttlLineIterator
       return false;
     }
  public:
-    GttlLineIterator(QliFpType _in_fp) :
+    GttlLineIterator(GttlFpType _in_fp) :
         in_fp(_in_fp),
         separator(EOF),
         exhausted(false),

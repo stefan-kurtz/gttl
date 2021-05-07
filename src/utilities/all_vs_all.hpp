@@ -29,7 +29,7 @@ class GttlThreadData
 
 template<typename T,typename R,typename Data,R (*process_pair)(T &,T &),
          void (*process_result)(size_t,size_t,size_t,R,Data &)>
-static void gttl_thread_runner(size_t thread_id,size_t task_num, 
+static void gttl_thread_runner(size_t thread_id,size_t task_num,
                                void *v_thread_data)
 {
   GttlThreadData<T,Data> *thread_data
