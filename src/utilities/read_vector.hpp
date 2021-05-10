@@ -1,3 +1,5 @@
+#ifndef READ_VECTOR_HPP
+#define READ_VECTOR_HPP
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -34,3 +36,4 @@ std::vector<T> gttl_read_vector(const char *filename)
   }
   return vec;
 }
+#endif

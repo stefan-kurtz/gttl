@@ -1,3 +1,5 @@
+#ifndef FIXED_SIZE_PQ_HPP
+#define FIXED_SIZE_PQ_HPP
 #include <cassert>
 #include <cstdbool>
 #include <cstdlib>
@@ -61,3 +63,4 @@ class FixedSizePriorityQueue
     return elements[idx];
   }
 };
+#endif

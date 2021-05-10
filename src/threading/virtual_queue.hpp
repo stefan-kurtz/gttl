@@ -1,5 +1,5 @@
-#ifndef ATOMIC_QUEUE_HPP
-#define ATOMIC_QUEUE_HPP
+#ifndef VIRTUAL_QUEUE_HPP
+#define VIRTUAL_QUEUE_HPP
 #include <cstdlib>
 #include <atomic>
 

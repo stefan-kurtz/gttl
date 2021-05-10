@@ -1,3 +1,5 @@
+#ifndef ALL_VS_ALL_HPP
+#define ALL_VS_ALL_HPP
 #include <iostream>
 #include <cstddef>
 #include "threading/thread_pool.hpp"
@@ -60,3 +62,4 @@ void gttl_all_vs_all(std::vector<T> &tasks,Data &data,size_t num_threads=1)
                                (void *) &thread_data);
   }
 }
+#endif

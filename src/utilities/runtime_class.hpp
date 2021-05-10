@@ -1,3 +1,5 @@
+#ifndef RUN_TIME_CLASS_HPP
+#define RUN_TIME_CLASS_HPP
 #include <iostream>
 #include <chrono>
 
@@ -40,3 +42,4 @@ class RunTimeClass
     start_time = std::chrono::high_resolution_clock::now();
   }
 };
+#endif
