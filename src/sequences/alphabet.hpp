@@ -6,9 +6,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
-template <int _size, uint8_t _undefined_rank>
-class Alphabet
-{
+template <int _size, uint8_t _undefined_rank> class Alphabet {
   const char *nucleotides = "AaCcGgTtUu";
   const char *amino_acids = "ACDEFGHIKLMNPQRSTVWY";
   static constexpr const uint8_t symbolmap[UCHAR_MAX + 1] = {
@@ -277,25 +275,20 @@ class Alphabet
       /* 254 */ _undefined_rank,
       /* 255 */ _undefined_rank};
 
- public:
+public:
   constexpr Alphabet(void) { static_assert(_size == 4 || _size == 20); }
-  constexpr uint8_t undefined_rank(void) const noexcept
-  {
+  constexpr uint8_t undefined_rank(void) const noexcept {
     return _undefined_rank;
   }
   constexpr size_t size(void) const noexcept { return _size; }
-  constexpr uint8_t char_to_rank(unsigned char cc) const noexcept
-  {
+  constexpr uint8_t char_to_rank(unsigned char cc) const noexcept {
     return this->symbolmap[static_cast<int>(cc)];
   }
-  constexpr const char *characters(void) const noexcept
-  {
-    if constexpr (_size == 4)
-    {
+  constexpr const char *characters(void) const noexcept {
+    if constexpr (_size == 4) {
       return nucleotides;
     }
-    if constexpr (_size == 20)
-    {
+    if constexpr (_size == 20) {
       return amino_acids;
     }
     return nullptr;

@@ -86,10 +86,4 @@ print('''  };
     return nullptr;
   }
 };
-
-namespace alpha /* for compatibility with masker, to be removed later. */
-{
-  using dna_alpha = Alphabet<4, 4>;
-  using protein_alpha = Alphabet<20, 20>;
-}
 #endif''')
