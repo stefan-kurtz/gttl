@@ -3,7 +3,7 @@
 
 int main(void)
 {
-  alphabet::GttlAlphabet_4 dna_alpha{};
+  alphabet::GttlAlphabet_UL_4 dna_alpha{};
   static_assert(dna_alpha.char_to_rank('A') == 0);
   static_assert(dna_alpha.char_to_rank('a') == 0);
   static_assert(dna_alpha.char_to_rank('C') == 1);

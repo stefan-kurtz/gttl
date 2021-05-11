@@ -367,7 +367,9 @@ class GttlAlphabet
 namespace alphabet
 {
   static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
-  using GttlAlphabet_4 = GttlAlphabet<nucleotides_upper_lower,4>;
+  using GttlAlphabet_UL_4 = GttlAlphabet<nucleotides_upper_lower,4>;
+  static constexpr const char nucleotides_upper[] = "A|C|G|TU";
+  using GttlAlphabet_U_4 = GttlAlphabet<nucleotides_upper_lower,4>;
   static constexpr const char amino_acids[]
     = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
   using GttlAlphabet_20 = GttlAlphabet<amino_acids,20>;

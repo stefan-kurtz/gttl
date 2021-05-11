@@ -65,27 +65,25 @@ static uint64_t aux_data_integer_code_asize20(size_t qgram_length)
                                         qgram_length-1));
 }
 
-typedef QgramRecHashValueIterator<4,
-                                  4,
-                                  first_qgram_integer_code<4>,
-                                  int,
-                                  aux_data_integer_code_asize4,
-                                  next_qgram_integer_code_asize4>
-        InvertibleIntegercodeIterator4;
-
-typedef QgramRecHashValueIterator<4,
-                                  0,
-                                  first_qgram_integer_code<4>,
-                                  int,
-                                  aux_data_integer_code_asize4,
-                                  next_qgram_integer_code_asize4>
-        InvertibleIntegercodeIterator4_Wildcard2_a;
-
-typedef QgramRecHashValueIterator<20,
-                                  20,
-                                  first_qgram_integer_code<20>,
-                                  uint64_t,
-                                  aux_data_integer_code_asize20,
-                                  next_qgram_integer_code_asize20>
-        InvertibleIntegercodeIterator20;
+using InvertibleIntegercodeIterator4
+  = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
+                              4,
+                              first_qgram_integer_code<4>,
+                              int,
+                              aux_data_integer_code_asize4,
+                              next_qgram_integer_code_asize4>;
+using InvertibleIntegercodeIterator4_Wildcard2_a
+  = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
+                              0,
+                              first_qgram_integer_code<4>,
+                              int,
+                              aux_data_integer_code_asize4,
+                              next_qgram_integer_code_asize4>;
+using InvertibleIntegercodeIterator20
+  = QgramRecHashValueIterator<alphabet::amino_acids,
+                              20,
+                              first_qgram_integer_code<20>,
+                              uint64_t,
+                              aux_data_integer_code_asize20,
+                              next_qgram_integer_code_asize20>;
 #endif

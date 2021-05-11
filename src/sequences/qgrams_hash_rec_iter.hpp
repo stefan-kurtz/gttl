@@ -27,7 +27,7 @@
 /* Implementation of iterator class follows concept described in
    https://davidgorski.ca/posts/stl-iterators/ */
 
-template<int _alpha_size,
+template<const char *_char_spec,
          uint8_t _undefined_rank,
          uint64_t first_hash_value_get(const uint8_t *,size_t),
          typename AuxData,
@@ -41,7 +41,7 @@ class QgramRecHashValueIterator
   struct Iterator
   {
     private:
-      Alphabet<_alpha_size,_undefined_rank> &alphabet;
+      GttlAlphabet<_char_spec,_undefined_rank> &alphabet;
       CyclicBuffer_uint8 &current_window;
       const SequenceBaseType *next_char_ptr;
       bool last_qgram_was_processed;
@@ -57,7 +57,7 @@ class QgramRecHashValueIterator
       using reference = uint64_t&;
 
       /* Constructor for begin() */
-      Iterator(Alphabet<_alpha_size,_undefined_rank> &_alphabet,
+      Iterator(GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
                size_t _qgram_length,
                CyclicBuffer_uint8 &_current_window,
                pointer _sequence,
@@ -74,7 +74,7 @@ class QgramRecHashValueIterator
       {
       }
       /* Constructor for end() */
-      Iterator(Alphabet<_alpha_size,_undefined_rank> &_alphabet,
+      Iterator(GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
                CyclicBuffer_uint8 &_current_window,
                pointer _end_of_sequence) :
         alphabet(_alphabet),
@@ -119,7 +119,7 @@ class QgramRecHashValueIterator
 #ifndef NDEBUG
     uint8_t qgram_buffer[MAX_QGRAM_LENGTH];
 #endif
-    Alphabet<_alpha_size,_undefined_rank> alphabet;
+    GttlAlphabet<_char_spec,_undefined_rank> alphabet;
   public:
     QgramRecHashValueIterator(size_t _qgram_length,
                               const SequenceBaseType *_sequence,
@@ -127,10 +127,10 @@ class QgramRecHashValueIterator
       qgram_length(_qgram_length),
       sequence(_sequence),
       seqlen(_seqlen),
-      alpha_size(static_cast<uint64_t>(_alpha_size)),
+      alpha_size(static_cast<uint64_t>(alphabet.size())),
       max_integer_code(qgram_length == 32
                          ? UINT64_MAX
-                         : std::pow(_alpha_size,_qgram_length)-1)
+                         : std::pow(alpha_size,_qgram_length)-1)
     {
       current_window.initialize(_qgram_length);
     }
