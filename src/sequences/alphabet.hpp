@@ -344,5 +344,32 @@ class GttlAlphabet
     constexpr char rank_to_char(uint8_t r) const noexcept {
       return characters[r];
     }
+    void char2rank_all(void)
+    {
+      std::cout << "# alphabet size\t" << _size << std::endl;
+      std::cout << "# undefined_rank\t" << static_cast<int>(_undefined_rank)
+                << std::endl;
+      for (const char *s = char_spec; *s != '\0'; s++)
+      {
+        if (*s != '|')
+        {
+          uint8_t r = this->char_to_rank(static_cast<unsigned char>(*s));
+          std::cout << *s << "\t" << static_cast<int>(r) << std::endl;
+        }
+      }
+      for (size_t idx = 0; idx < _size; idx++)
+      {
+        std::cout << idx << "\t" << rank_to_char(idx) << std::endl;
+      }
+    }
 };
+
+namespace alphabet
+{
+  static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
+  using GttlAlphabet_4 = GttlAlphabet<nucleotides_upper_lower,4>;
+  static constexpr const char amino_acids[]
+    = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
+  using GttlAlphabet_20 = GttlAlphabet<amino_acids,20>;
+}
 #endif
