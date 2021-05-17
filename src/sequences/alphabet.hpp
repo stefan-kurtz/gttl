@@ -3,6 +3,7 @@
 #include <climits>
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <array>
 
 template <uint8_t undef,const char *str>
