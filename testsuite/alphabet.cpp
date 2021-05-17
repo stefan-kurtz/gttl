@@ -18,6 +18,10 @@ int main(void)
   static_assert(dna_alpha.rank_to_char(1) == 'C');
   static_assert(dna_alpha.rank_to_char(2) == 'G');
   static_assert(dna_alpha.rank_to_char(3) == 'T');
+  static_assert((dna_alpha.characters_get())[0] == 'A');
+  static_assert((dna_alpha.characters_get())[1] == 'C');
+  static_assert((dna_alpha.characters_get())[2] == 'G');
+  static_assert((dna_alpha.characters_get())[3] == 'T');
   dna_alpha.char2rank_all();
   alphabet::GttlAlphabet_20 protein_alpha{};
   static_assert(protein_alpha.char_to_rank('A') == 0);

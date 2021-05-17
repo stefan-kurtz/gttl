@@ -362,6 +362,10 @@ class GttlAlphabet
         std::cout << idx << "\t" << rank_to_char(idx) << std::endl;
       }
     }
+    constexpr const char *characters_get(void) const noexcept
+    {
+      return characters.data();
+    }
 };
 
 namespace alphabet
