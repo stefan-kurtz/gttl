@@ -142,6 +142,7 @@ static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
 
 typedef std::vector<std::pair<size_t,size_t>> NonWildCardRangeVector;
 
+template<char wildcard>
 class NonWildCardRangeIterator
 {
   private:
@@ -164,7 +165,6 @@ class NonWildCardRangeIterator
     std::vector<std::pair<size_t,size_t>> enumerate(void)
     {
       NonWildCardRangeVector non_wildcard_ranges{};
-      const char wildcard = 'N';
       if (*sequence == wildcard)
       {
         current = (const char *) gttl_memcchr(sequence+1,wildcard,seqlen - 1);
