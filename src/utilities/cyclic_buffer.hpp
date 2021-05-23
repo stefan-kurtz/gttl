@@ -50,6 +50,11 @@ class CyclicBuffer
     num_elems++;
     space[max_num_elems - num_elems] = new_elem;
   }
+  void append(Basetype new_elem)
+  {
+    assert(num_elems < max_num_elems);
+    space[num_elems++] = new_elem;
+  }
   Basetype shift(Basetype new_elem)
   {
     assert(max_num_elems == num_elems);
@@ -70,10 +75,19 @@ class CyclicBuffer
     }
     return space + static_cast<size_t>(first);
   }
-  const Basetype *pointer_to_array(void)
+  const Basetype *pointer_to_array(void) const noexcept
   {
     assert(num_elems == max_num_elems);
     return &space[0];
+  }
+  size_t size(void) const noexcept
+  {
+    return num_elems;
+  }
+  void reset(void) noexcept
+  {
+    num_elems = 0;
+    first = 0;
   }
 };
 #endif
