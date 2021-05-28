@@ -5,8 +5,8 @@
 #include <thread>
 #include "virtual_queue.hpp"
 
-typedef void (*GttlThreadFunc)(size_t thread_id,size_t task_num,
-                               void *thread_data);
+using GttlThreadFunc = void (*)(size_t thread_id,size_t task_num,
+                                void *thread_data);
 
 static void gttl_thread_apply_thread_func(GttlThreadFunc thread_func,
                                           void *thread_data,

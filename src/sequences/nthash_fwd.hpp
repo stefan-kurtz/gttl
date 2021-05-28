@@ -176,10 +176,10 @@ static uint64_t NTF64_first_hash_value_get(const uint8_t *kmerSeq, size_t k)
   return hVal;
 }
 
-typedef struct
+struct NThashAux
 {
   uint64_t msTab31l_33r_or[4+1];
-} NThashAux;
+};
 
 static NThashAux NTF64_aux_data_get(size_t qgram_length)
 {
