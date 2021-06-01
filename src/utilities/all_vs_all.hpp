@@ -6,14 +6,14 @@
 
 template<typename T,typename R,typename Data,
          size_t (*first_index)(size_t),
-         R (*process_pair)(T &,T &),
+         R (*process_pair)(T &,size_t,size_t),
          void (*process_result)(size_t,size_t,size_t,R,Data &)>
 static void gttl_one_vs_all(Data &data,size_t thread_id,
-                            size_t idx,std::vector<T> &tasks)
+                            size_t idx,T &tasks)
 {
   for (size_t j = first_index(idx); j < tasks.size(); j++)
   {
-    process_result(thread_id,idx,j,process_pair(tasks[idx],tasks[j]),data);
+    process_result(thread_id,idx,j,process_pair(tasks,idx,j),data);
   }
 }
 
@@ -21,19 +21,17 @@ template<typename T,typename Data>
 class GttlThreadData
 {
   public:
-    std::vector<T> &tasks;
+    T &tasks;
     Data &data;
-  GttlThreadData(std::vector<T> &_t,Data &_d) :
-    tasks(_t),
+  GttlThreadData(T &_tasks,Data &_d) :
+    tasks(_tasks),
     data(_d)
   {
   }
 };
 
-
-
 template<typename T,typename R,typename Data,size_t (*first_index)(size_t),
-         R (*process_pair)(T &,T &),
+         R (*process_pair)(T &,size_t,size_t),
          void (*process_result)(size_t,size_t,size_t,R,Data &)>
 static void gttl_thread_runner(size_t thread_id,size_t task_num,
                                void *v_thread_data)
@@ -46,9 +44,9 @@ static void gttl_thread_runner(size_t thread_id,size_t task_num,
 }
 
 template<typename T,typename R,typename Data,
-         size_t (*first_index)(size_t),R (*process_pair)(T &,T &),
+         size_t (*first_index)(size_t),R (*process_pair)(T &,size_t,size_t),
          void (*process_result)(size_t,size_t,size_t,R,Data &)>
-void gttl_all_vs_all(std::vector<T> &tasks,Data &data,size_t num_threads=1)
+void gttl_all_vs_all(T &tasks,Data &data,size_t num_threads=1)
 {
   assert(num_threads >= 1);
   if (num_threads == 1)
