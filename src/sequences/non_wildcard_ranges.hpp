@@ -140,7 +140,7 @@ static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
   return nullptr;
 }
 
-typedef std::vector<std::pair<size_t,size_t>> NonWildCardRangeVector;
+using NonWildCardRangeVector = std::vector<std::pair<size_t,size_t>>;
 
 template<char wildcard>
 class NonWildCardRangeIterator
