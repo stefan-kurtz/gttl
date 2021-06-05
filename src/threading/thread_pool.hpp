@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <thread>
+#include <vector>
 #include "virtual_queue.hpp"
 
 using GttlThreadFunc = void (*)(size_t thread_id,size_t task_num,
@@ -30,19 +31,18 @@ class GttlThreadPool
     assert(num_threads >= 1 && number_of_tasks > 0);
     if (num_threads > 1)
     {
-      std::thread *threads = new std::thread [num_threads];
+      std::vector<std::thread> threads{};
       VirtualQueue vq(number_of_tasks);
       for (size_t thd = 0; thd < num_threads; thd++)
       {
-        threads[thd] = std::thread(gttl_thread_apply_thread_func,
-                                   thread_func,thread_data,
-                                   &vq, thd);
+        threads.push_back(std::thread(gttl_thread_apply_thread_func,
+                                      thread_func,thread_data,
+                                      &vq, thd));
       }
-      for (size_t thd = 0; thd < num_threads; thd++)
+      for (auto &th : threads)
       {
-        threads[thd].join();
+        th.join();
       }
-      delete[] threads;
     } else
     {
       for (size_t task_num = 0; task_num < number_of_tasks; task_num++)
