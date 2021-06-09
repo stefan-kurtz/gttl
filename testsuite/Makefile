@@ -3,6 +3,7 @@ CFLAGS=-g -m64 -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter 
 CPPFLAGS=-I../src/
 CXXFLAGS=-std=c++17
 LDFLAGS=-g -m64
+LDLIBS=-lm -lz -lpthread
 SYSTEM?=$(shell uname -s)
 
 ifeq ($(debug),yes)
@@ -30,7 +31,7 @@ test:${EXECS}
 	done
 
 %.x:%.cpp
-	$(CXX) $< -o $@ $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
+	$(CXX) $< -o $@ $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) ${LDLIBS}
 
 .PHONY:clean
 clean:
