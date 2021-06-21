@@ -53,7 +53,7 @@ bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 int guess_if_protein_file(const char *progname,const char *filename)
 {
   const int buf_size = 1 << 14;
-  GttlFpType in_fp = gttl_fp_type_open(filename,"r");
+  GttlFpType in_fp = gttl_fp_type_open(filename,"rb");
 
   if (in_fp == nullptr)
   {

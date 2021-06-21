@@ -14,10 +14,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef NON_WILDCARD_RANGES_HPP
 #define NON_WILDCARD_RANGES_HPP
 #include <vector>
-#define GTTL_UNALIGNED(X) ((size_t)(X) & (sizeof (long) - 1))
+#define GTTL_UNALIGNED(X) (size_t(X) & (sizeof (long) - 1))
 #define GTTL_ULONG_BYTES  sizeof(unsigned long)
 
 static bool has_null_byte(unsigned long v)
@@ -26,10 +27,11 @@ static bool has_null_byte(unsigned long v)
   return  ~((((v & mask) + mask) | v) | mask);
 }
 
-inline void *gttl_memchr(const void *src_void,int search_char, size_t length)
+inline const void *gttl_memchr(const void *src_void,int search_char,
+                               size_t length)
 {
-  const unsigned char *src = (const unsigned char *) src_void;
-  const unsigned char delim = (char) search_char;
+  const unsigned char *src = static_cast<const unsigned char *>(src_void);
+  const unsigned char delim = static_cast<unsigned char>(search_char);
 
   while (GTTL_UNALIGNED (src))
   {
@@ -39,7 +41,7 @@ inline void *gttl_memchr(const void *src_void,int search_char, size_t length)
     }
     if (*src == delim)
     {
-      return (void *) src;
+      return static_cast<const void *>(src);
     }
     src++;
   }
@@ -54,7 +56,7 @@ inline void *gttl_memchr(const void *src_void,int search_char, size_t length)
        the word-sized segment with a word-sized block of the search
        character and then detecting for the presence of NUL in the
        result.  */
-    unsigned long *asrc = (unsigned long *) src;
+    const unsigned long *asrc = reinterpret_cast<const unsigned long *>(src);
     const unsigned long copied_byte = ~0UL/255 * search_char;
     do
     {
@@ -67,14 +69,14 @@ inline void *gttl_memchr(const void *src_void,int search_char, size_t length)
     } while (length >= GTTL_ULONG_BYTES);
     /* If there are fewer than GTTL_ULONG_BYTES characters left,
        then we resort to the bytewise loop.  */
-    src = (unsigned char *) asrc;
+    src = reinterpret_cast<const unsigned char *>(asrc);
   }
 
   while (length--)
   {
     if (*src == delim)
     {
-      return (void *) src;
+      return static_cast<const void *>(src);
     }
     src++;
   }
@@ -82,13 +84,14 @@ inline void *gttl_memchr(const void *src_void,int search_char, size_t length)
 }
 
 /* locates the first occurrence in string referenced by src_void, where
-   search_char (converted to an unsigned char) does not occur.
-   return nullptr if all occurrences in string are search_char. */
+   search_char (converted to an unsigned char) does _not_ occur.
+   return nullptr if all occurrences in string are search_char.  */
 
-static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
+template<char search_char>
+static const void *gttl_memcchr(const void *src_void, size_t length)
 {
-  const unsigned char *src = (const unsigned char *) src_void;
-  const unsigned char delim = (char) search_char;
+  const unsigned char *src = static_cast<const unsigned char *>(src_void);
+  constexpr const unsigned char delim = static_cast<unsigned char>(search_char);
 
   while (GTTL_UNALIGNED (src))
   {
@@ -98,7 +101,7 @@ static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
     }
     if (*src != delim)
     {
-      return (void *) src;
+      return static_cast<const void *>(src);
     }
     src++;
   }
@@ -113,8 +116,9 @@ static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
        the word-sized segment with a word-sized block of the search
        character and then detecting for the presence of NUL in the
        result.  */
-    unsigned long *asrc = (unsigned long *) src;
-    const unsigned long copied_byte = ~0UL/255 * search_char;
+    const unsigned long *asrc = reinterpret_cast<const unsigned long *>(src);
+    constexpr const unsigned long copied_byte
+      = ~0UL/255 * static_cast<unsigned long>(search_char);
     do
     {
       if (*asrc != copied_byte)
@@ -126,14 +130,14 @@ static void *gttl_memcchr(const void *src_void,int search_char, size_t length)
     } while (length >= GTTL_ULONG_BYTES);
     /* If there are fewer than GTTL_ULONG_BYTES characters left,
        then we resort to the bytewise loop.  */
-    src = (unsigned char *) asrc;
+    src = reinterpret_cast<const unsigned char *>(asrc);
   }
 
   while (length--)
   {
     if (*src != delim)
     {
-      return (void *) src;
+      return static_cast<const void *>(src);
     }
     src++;
   }
@@ -147,18 +151,20 @@ class NonWildCardRangeIterator
 {
   private:
     const char *sequence, *current, *endptr;
-    size_t seqlen;
+    size_t seqlen, minimum_length;
     size_t remaining(const char *curr)
     {
       assert(curr <= endptr);
-      return (size_t) (endptr - curr);
+      return static_cast<size_t>(endptr - curr);
     }
   public:
-    NonWildCardRangeIterator(const char *_sequence,size_t _seqlen) :
-      sequence(_sequence),
-      current(nullptr),
-      endptr(_sequence + _seqlen),
-      seqlen(_seqlen)
+    NonWildCardRangeIterator(const char *_sequence,size_t _seqlen,
+                             size_t _minimum_length = 1)
+      : sequence(_sequence),
+        current(nullptr),
+        endptr(_sequence + _seqlen),
+        seqlen(_seqlen),
+        minimum_length(_minimum_length)
     {
       assert(_seqlen > 0 && _sequence != NULL);
     }
@@ -167,7 +173,8 @@ class NonWildCardRangeIterator
       NonWildCardRangeVector non_wildcard_ranges{};
       if (*sequence == wildcard)
       {
-        current = (const char *) gttl_memcchr(sequence+1,wildcard,seqlen - 1);
+        current = static_cast<const char *>(gttl_memcchr<wildcard>(sequence+1,
+                                                                   seqlen - 1));
         if (current == NULL)
         {
           return non_wildcard_ranges;
@@ -180,20 +187,28 @@ class NonWildCardRangeIterator
       do
       {
         assert(*current != wildcard);
-        const char *next_wildcard
-          = (const char *) memchr(current+1,wildcard,remaining(current+1));
-        size_t start = (size_t) (current - sequence);
+        const char *next_wildcard = static_cast<const char *>
+                                    (memchr(current+1,wildcard,
+                                            remaining(current+1)));
+        const size_t start = static_cast<size_t>(current - sequence);
         if (next_wildcard == NULL)
         {
           assert(start <= seqlen - 1);
-          non_wildcard_ranges.push_back({start,seqlen-1});
+          if (seqlen - start >= minimum_length)
+          {
+            non_wildcard_ranges.push_back({start,seqlen-1});
+          }
           break;
         }
-        size_t width = (size_t) (next_wildcard - current);
+        const size_t width = static_cast<size_t>(next_wildcard - current);
         assert(width > 0);
-        non_wildcard_ranges.push_back({start,start + width - 1});
-        current = (const char *) gttl_memcchr(next_wildcard+1,wildcard,
-                                         remaining(next_wildcard+1));
+        if (width >= minimum_length)
+        {
+          non_wildcard_ranges.push_back({start,start + width - 1});
+        }
+        current = static_cast<const char *>(gttl_memcchr<wildcard>
+                                             (next_wildcard+1,
+                                              remaining(next_wildcard+1)));
       } while (current != NULL);
       return non_wildcard_ranges;
     }
