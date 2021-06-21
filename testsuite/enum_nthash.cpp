@@ -29,6 +29,7 @@
 #include "sequences/non_wildcard_ranges.hpp"
 
 #ifndef NDEBUG
+template<char wildcard>
 static void verify_non_wildcard_ranges(const std::string &sequence,
             NonWildCardRangeVector &non_wildcard_ranges)
 {
@@ -37,17 +38,17 @@ static void verify_non_wildcard_ranges(const std::string &sequence,
   {
     for (size_t idx = wildcard_start; idx < std::get<0>(nwr_it); idx++)
     {
-      assert(sequence.at(idx) == 'N');
+      assert(sequence.at(idx) == wildcard);
     }
     for (size_t idx = std::get<0>(nwr_it); idx <= std::get<1>(nwr_it); idx++)
     {
-      assert(sequence.at(idx) != 'N');
+      assert(sequence.at(idx) != wildcard);
     }
     wildcard_start = std::get<1>(nwr_it) + 1;
   }
   for (size_t idx = wildcard_start; idx < sequence.size(); idx++)
   {
-    assert(sequence.at(idx) == 'N');
+    assert(sequence.at(idx) == wildcard);
   }
 }
 
@@ -71,28 +72,28 @@ static std::pair<uint64_t,size_t> apply_qgram_iterator(size_t qgram_length,
                                      const char *sequence,
                                      size_t this_length)
 {
-        uint8_t *qgram_buffer = new uint8_t [qgram_length];
+  uint8_t *qgram_buffer = new uint8_t [qgram_length];
 #ifndef NDEBUG
-        alphabet::GttlAlphabet_UL_4 dna_alphabet;
+  alphabet::GttlAlphabet_UL_4 dna_alphabet;
 #endif
-        uint64_t sum_hash_values = 0;
-        size_t pos = 0;
-        QgramNtHashFwdIterator4 qgiter(qgram_length,sequence,this_length);
-        for (auto const &&code_pair : qgiter)
-        {
-          if (std::get<1>(code_pair) == 0)
-          {
-            sum_hash_values += std::get<0>(code_pair);
+  uint64_t sum_hash_values = 0;
+  size_t pos = 0;
+  QgramNtHashFwdIterator4 qgiter(qgram_length,sequence,this_length);
+  for (auto const &&code_pair : qgiter)
+  {
+    if (std::get<1>(code_pair) == 0)
+    {
+      sum_hash_values += std::get<0>(code_pair);
 #ifndef NDEBUG
-            qgrams_nt_fwd_compare(dna_alphabet,qgram_buffer,
-                                  sequence + pos,qgram_length,
-                                  std::get<0>(code_pair));
+      qgrams_nt_fwd_compare(dna_alphabet,qgram_buffer,
+                            sequence + pos,qgram_length,
+                            std::get<0>(code_pair));
 #endif
-          }
-          pos++;
-        }
-        delete [] qgram_buffer;
-        return {sum_hash_values,pos};
+    }
+    pos++;
+  }
+  delete [] qgram_buffer;
+  return {sum_hash_values,pos};
 }
 
 static int enumerate_nt_hash_fwd(const char *progname,
@@ -110,11 +111,10 @@ static int enumerate_nt_hash_fwd(const char *progname,
               << std::endl;
     return -1;
   }
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"r");
+  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    fprintf(stderr,"%s: Cannot open \"%s\"\n",progname,
-                                              inputfilename);
+    fprintf(stderr,"%s: Cannot open \"%s\"\n",progname, inputfilename);
     return -1;
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
@@ -138,7 +138,7 @@ static int enumerate_nt_hash_fwd(const char *progname,
       NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());
       sequence_ranges = nwcr_it.enumerate();
 #ifndef NDEBUG
-      verify_non_wildcard_ranges(sequence,sequence_ranges);
+      verify_non_wildcard_ranges<'N'>(sequence,sequence_ranges);
 #endif
       for (auto &&nwr_it : sequence_ranges)
       {
