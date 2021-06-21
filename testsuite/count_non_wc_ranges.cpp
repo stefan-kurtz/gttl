@@ -29,52 +29,32 @@
 #include "sequences/non_wildcard_ranges.hpp"
 
 #ifndef NDEBUG
-static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
-                                  uint8_t *qgram_buffer,
-                                  const char *orig_qgram,
-                                  size_t qgram_length,
-                                  uint64_t expected_hash_value)
+template<char wildcard>
+static void verify_non_wildcard_ranges(const std::string &sequence,
+            NonWildCardRangeVector &non_wildcard_ranges)
 {
-  for (size_t idx = 0; idx < qgram_length; idx++)
+  size_t wildcard_start = 0;
+  for (auto &&nwr_it : non_wildcard_ranges)
   {
-    qgram_buffer[idx] = alphabet.char_to_rank(orig_qgram[idx]);
-  }
-  uint64_t bf_hash_value = NTF64_first_hash_value_get(qgram_buffer,
-                                                      qgram_length);
-  assert(bf_hash_value == expected_hash_value);
-}
-#endif
-
-static std::pair<uint64_t,size_t> apply_qgram_iterator(size_t qgram_length,
-                                     const char *sequence,
-                                     size_t this_length)
-{
-  uint8_t *qgram_buffer = new uint8_t [qgram_length];
-#ifndef NDEBUG
-  alphabet::GttlAlphabet_UL_4 dna_alphabet;
-#endif
-  uint64_t sum_hash_values = 0;
-  size_t pos = 0;
-  QgramNtHashFwdIterator4 qgiter(qgram_length,sequence,this_length);
-  for (auto const &&code_pair : qgiter)
-  {
-    if (std::get<1>(code_pair) == 0)
+    for (size_t idx = wildcard_start; idx < std::get<0>(nwr_it); idx++)
     {
-      sum_hash_values += std::get<0>(code_pair);
-#ifndef NDEBUG
-      qgrams_nt_fwd_compare(dna_alphabet,qgram_buffer,
-                            sequence + pos,qgram_length,
-                            std::get<0>(code_pair));
-#endif
+      assert(sequence.at(idx) == wildcard);
     }
-    pos++;
+    for (size_t idx = std::get<0>(nwr_it); idx <= std::get<1>(nwr_it); idx++)
+    {
+      assert(sequence.at(idx) != wildcard);
+    }
+    wildcard_start = std::get<1>(nwr_it) + 1;
   }
-  delete [] qgram_buffer;
-  return {sum_hash_values,pos};
+  for (size_t idx = wildcard_start; idx < sequence.size(); idx++)
+  {
+    assert(sequence.at(idx) == wildcard);
+  }
 }
+#endif
 
-static int enumerate_nt_hash_fwd(const char *progname,
-                                 const char *inputfilename,size_t qgram_length)
+static int count_non_wildcard_ranges(const char *progname,
+                                     const char *inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
   int ret = guess_if_protein_file(progname,inputfilename);
@@ -84,7 +64,7 @@ static int enumerate_nt_hash_fwd(const char *progname,
   }
   if (ret != 0)
   {
-    std::cerr << "Usage: " << progname << ": can only handle DNA sequences"
+    std::cerr << "Usage: " << progname << ": can only handle DNA sequences" 
               << std::endl;
     return -1;
   }
@@ -97,9 +77,10 @@ static int enumerate_nt_hash_fwd(const char *progname,
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
   size_t num_of_sequences = 0;
+  size_t non_wildcard_ranges_total_length = 0;
+  size_t non_wildcard_ranges_max_length = 0;
+  size_t non_wildcard_ranges_number = 0;
   size_t max_sequence_length = 0;
-  uint64_t sum_hash_values = 0;
-  size_t count_all_qgrams = 0;
   bool haserr = false;
   try
   {
@@ -108,19 +89,22 @@ static int enumerate_nt_hash_fwd(const char *progname,
       auto sequence = std::get<1>(si);
       total_length += sequence.size();
       max_sequence_length = std::max(max_sequence_length,sequence.size());
-      std::vector<std::pair<size_t,size_t>> sequence_ranges;
       NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());
-      sequence_ranges = nwcr_it.enumerate();
+      std::vector<std::pair<size_t,size_t>> sequence_ranges 
+        = nwcr_it.enumerate();
+#ifndef NDEBUG
+      verify_non_wildcard_ranges<'N'>(sequence,sequence_ranges);
+#endif
       for (auto &&nwr_it : sequence_ranges)
       {
         std::pair<uint64_t,size_t> result;
         const size_t this_length = std::get<1>(nwr_it) -
                                    std::get<0>(nwr_it) + 1;
-        const char *seqptr = sequence.data() + std::get<0>(nwr_it);
-        result = apply_qgram_iterator(qgram_length,seqptr,this_length);
-        sum_hash_values += std::get<0>(result);
-        count_all_qgrams += std::get<1>(result);
+        non_wildcard_ranges_total_length += this_length;
+        non_wildcard_ranges_max_length
+          = std::max(non_wildcard_ranges_max_length,this_length);
       }
+      non_wildcard_ranges_number += sequence_ranges.size();
       num_of_sequences++;
     }
   }
@@ -134,11 +118,18 @@ static int enumerate_nt_hash_fwd(const char *progname,
     printf("# num_of_sequences\t%lu\n",num_of_sequences);
     printf("# total_length\t%lu\n",total_length);
     printf("# max_sequence_length\t%lu\n",max_sequence_length);
+    printf("# non_wildcard_ranges_number\t%lu\n",non_wildcard_ranges_number);
+    printf("# non_wildcard_ranges_total_length\t%lu\n",
+              non_wildcard_ranges_total_length);
+    printf("# non_wildcard_ranges_max_length\t%lu\n",
+              non_wildcard_ranges_max_length);
     printf("# num_of_sequences.bits\t%d\n",gt_required_bits(num_of_sequences));
     printf("# max_sequence_length.bits\t%d\n",
             gt_required_bits<size_t>(max_sequence_length));
-    printf("# count_all_qgrams=%lu\n",count_all_qgrams);
-    printf("# sum_hash_values=%lu\n",(unsigned long) sum_hash_values);
+    printf("# non_wildcard_ranges_number.bits\t%d\n",
+              gt_required_bits<size_t>(non_wildcard_ranges_number));
+    printf("# non_wildcard_ranges_max_length.bits\t%d\n",
+              gt_required_bits<size_t>(non_wildcard_ranges_max_length));
   }
   gttl_fp_type_close(in_fp);
   return haserr ? -1 : 0;
@@ -146,12 +137,11 @@ static int enumerate_nt_hash_fwd(const char *progname,
 
 int main(int argc,char *argv[])
 {
-  const size_t qgram_length = 18;
   const char *progname = argv[0];
   bool haserr = false;
   for (int idx = 1; idx < argc; idx++)
   {
-    if (enumerate_nt_hash_fwd(progname,argv[idx],qgram_length) != 0)
+    if (count_non_wildcard_ranges(progname,argv[idx]) != 0)
     {
       haserr = true;
       break;
