@@ -3,8 +3,27 @@
 import argparse, sys, shutil, os
 from mysubprocess import mysubprocess_expect
 
+def files2msg_get(p):
+  return {'{}/testdata/empty.fna'.format(p)
+              : ', line 1: corrupted sequence',
+          '{}/testdata/only_header.fna'.format(p)
+              : ', line 2: corrupted sequence',
+          '{}/testdata/only_sequence.fna'.format(p)
+              : ', line 2: corrupted sequence',
+          '{}/testdata/first_corrupt.fna'.format(p)
+              : ', line 4: corrupted sequence',
+          '{}/testdata/second_corrupt.fna'.format(p)
+              : ', line 4: corrupted sequence',
+          '{}/testdata/protein.fsa'.format(p)
+              : ': can only handle DNA sequences',
+          '{}/testdata/non_existing.fna'.format(p)
+              : ': cannot open file',
+         }
+
 def parse_arguments():
   p = argparse.ArgumentParser(description='run program for error cases')
+  p.add_argument('-p','--path',type=str,default='..',
+                  help='specify path of test files, default is ..')
   p.add_argument('-v','--valgrind',action='store_true',default=False,
                   help='run program with valgrind')
   p.add_argument('program_call',type=str,help='specify program to call')
@@ -29,15 +48,7 @@ the expected error code (which is EXIT_FAILURE in the
 C/C++-source) is always 1.
 '''
 
-files2msg \
-  = {'../testdata/empty.fna' : ', line 1: corrupted sequence',
-     '../testdata/only_header.fna' : ', line 2: corrupted sequence',
-     '../testdata/only_sequence.fna'  : ', line 2: corrupted sequence',
-     '../testdata/first_corrupt.fna'  : ', line 4: corrupted sequence',
-     '../testdata/second_corrupt.fna' : ', line 4: corrupted sequence',
-     '../testdata/protein.fsa' : ': can only handle DNA sequences',
-     '../testdata/non_existing.fna' : ': cannot open file',
-    }
+files2msg = files2msg_get(args.path)
 
 expected_error_code = 1
 for filename, msg in files2msg.items():
