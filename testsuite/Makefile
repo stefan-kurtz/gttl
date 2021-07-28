@@ -29,10 +29,21 @@ test:${EXECS}
 	  echo "$$prog";\
 	  ./$$prog;\
 	done
+	./check_err.py enum_nthash.x
+	./check_err.py count_non_wc_ranges.x
 
-%.x:%.cpp
-	$(CXX) $< -o $@ $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) ${LDLIBS}
+%.o:%.cpp
+	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@ 
+
+%.x:%.o
+	$(CXX) ${LDFLAGS} $< -o $@ ${LDLIBS}
+
+.PHONY:code_check
+code_check:
+	code_check.py -wt `find . -name '*.cpp'`
 
 .PHONY:clean
 clean:
 	${RM} -r *.x *.x.dSYM/
+
+-include ${wildcard *.d}

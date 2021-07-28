@@ -21,9 +21,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <ios>
 #include "utilities/mathsupport.hpp"
-#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
@@ -53,26 +51,21 @@ static void verify_non_wildcard_ranges(const std::string &sequence,
 }
 #endif
 
-static int count_non_wildcard_ranges(const char *progname,
-                                     const char *inputfilename)
+static void count_non_wildcard_ranges(const char *inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  int ret = guess_if_protein_file(progname,inputfilename);
-  if (ret == -1)
+  const bool is_protein = guess_if_protein_file(inputfilename);
+
+  if (is_protein)
   {
-    return -1;
-  }
-  if (ret != 0)
-  {
-    std::cerr << "Usage: " << progname << ": can only handle DNA sequences" 
-              << std::endl;
-    return -1;
+    throw std::string(": can only handle DNA sequences");
+    /* check_err.py checked */
   }
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    fprintf(stderr,"%s: Cannot open \"%s\"\n",progname, inputfilename);
-    return -1;
+    throw std::string(": cannot open file");
+    /* check_err.py checked */
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
@@ -81,8 +74,8 @@ static int count_non_wildcard_ranges(const char *progname,
   size_t non_wildcard_ranges_max_length = 0;
   size_t non_wildcard_ranges_number = 0;
   size_t max_sequence_length = 0;
-  bool haserr = false;
-  try
+  try /* need this, as the catch needs to close the file pointer
+         to prevent a memory leak */
   {
     for (auto &&si : gttl_si)
     {
@@ -90,7 +83,7 @@ static int count_non_wildcard_ranges(const char *progname,
       total_length += sequence.size();
       max_sequence_length = std::max(max_sequence_length,sequence.size());
       NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());
-      std::vector<std::pair<size_t,size_t>> sequence_ranges 
+      std::vector<std::pair<size_t,size_t>> sequence_ranges
         = nwcr_it.enumerate();
 #ifndef NDEBUG
       verify_non_wildcard_ranges<'N'>(sequence,sequence_ranges);
@@ -108,31 +101,27 @@ static int count_non_wildcard_ranges(const char *progname,
       num_of_sequences++;
     }
   }
-  catch (std::ios_base::failure const &ext)
+  catch (std::string &msg)
   {
-    std::cerr << progname << ": " << ext.what() << std::endl;
-    haserr = true;
+    gttl_fp_type_close(in_fp);
+    throw msg;
   }
-  if (!haserr)
-  {
-    printf("# num_of_sequences\t%lu\n",num_of_sequences);
-    printf("# total_length\t%lu\n",total_length);
-    printf("# max_sequence_length\t%lu\n",max_sequence_length);
-    printf("# non_wildcard_ranges_number\t%lu\n",non_wildcard_ranges_number);
-    printf("# non_wildcard_ranges_total_length\t%lu\n",
-              non_wildcard_ranges_total_length);
-    printf("# non_wildcard_ranges_max_length\t%lu\n",
-              non_wildcard_ranges_max_length);
-    printf("# num_of_sequences.bits\t%d\n",gt_required_bits(num_of_sequences));
-    printf("# max_sequence_length.bits\t%d\n",
-            gt_required_bits<size_t>(max_sequence_length));
-    printf("# non_wildcard_ranges_number.bits\t%d\n",
-              gt_required_bits<size_t>(non_wildcard_ranges_number));
-    printf("# non_wildcard_ranges_max_length.bits\t%d\n",
-              gt_required_bits<size_t>(non_wildcard_ranges_max_length));
-  }
+  printf("# num_of_sequences\t%lu\n",num_of_sequences);
+  printf("# total_length\t%lu\n",total_length);
+  printf("# max_sequence_length\t%lu\n",max_sequence_length);
+  printf("# non_wildcard_ranges_number\t%lu\n",non_wildcard_ranges_number);
+  printf("# non_wildcard_ranges_total_length\t%lu\n",
+            non_wildcard_ranges_total_length);
+  printf("# non_wildcard_ranges_max_length\t%lu\n",
+            non_wildcard_ranges_max_length);
+  printf("# num_of_sequences.bits\t%d\n",gt_required_bits(num_of_sequences));
+  printf("# max_sequence_length.bits\t%d\n",
+          gt_required_bits<size_t>(max_sequence_length));
+  printf("# non_wildcard_ranges_number.bits\t%d\n",
+            gt_required_bits<size_t>(non_wildcard_ranges_number));
+  printf("# non_wildcard_ranges_max_length.bits\t%d\n",
+            gt_required_bits<size_t>(non_wildcard_ranges_max_length));
   gttl_fp_type_close(in_fp);
-  return haserr ? -1 : 0;
 }
 
 int main(int argc,char *argv[])
@@ -141,8 +130,14 @@ int main(int argc,char *argv[])
   bool haserr = false;
   for (int idx = 1; idx < argc; idx++)
   {
-    if (count_non_wildcard_ranges(progname,argv[idx]) != 0)
+    try
     {
+      count_non_wildcard_ranges(argv[idx]);
+    }
+    catch (std::string &msg)
+    {
+      std::cerr << progname << ": file \"" << argv[idx] << "\""
+                << msg << std::endl;
       haserr = true;
       break;
     }

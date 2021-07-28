@@ -22,9 +22,8 @@
 #include <cstring>
 
 #include <string>
-#include <stdexcept>
 #include <algorithm>
-#include <ios>
+#include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"
 
 template<int buf_size>
@@ -36,6 +35,7 @@ class GttlLineIterator
     char separator;
     bool exhausted,
          endofunit;
+    size_t line_number;
     bool fill_buffer(void)
     {
 #ifndef QLI_WITHOUT_ZLIB
@@ -62,12 +62,17 @@ class GttlLineIterator
         in_fp(_in_fp),
         separator(EOF),
         exhausted(false),
-        endofunit(false)
+        endofunit(false),
+        line_number(0)
     {
     }
     void separator_set(char _separator)
     {
       separator = _separator;
+    }
+    size_t line_number_get(void) const noexcept
+    {
+      return line_number;
     }
     bool more_lines(void)
     {
@@ -107,16 +112,17 @@ class GttlLineIterator
               endofunit = true;
             }
           }
+          line_number++;
           return true;
         }
         if (exhausted)
         {
           if (*(bufptr - 1) != '\n')
           {
-            throw std::ios_base::failure("file does not end with newline "
-                                         "character");
+            StrFormat msg("line %lu: missing newline character",line_number+1);
           }
           endofunit = true;
+          line_number++;
           return true;
         }
       }

@@ -54,14 +54,21 @@ class GttlSeqIterator
           }
           if (current_string == &sequence)
           {
-            throw (std::ios_base::failure("last sequence has only header but "
-                                          "no sequence content"));
+            StrFormat msg(", line %lu: corrupted sequence",
+                           gttl_li.line_number_get()+1);
+            throw msg.str(); /* check_err.py checked */
           }
           if (!found_end)
           {
             exhausted = true;
           }
           last_seq_was_processed = true;
+        }
+        if (sequence.size() == 0 || sequence[0] == '>')
+        {
+          StrFormat msg(", line %lu: corrupted sequence",
+                           gttl_li.line_number_get()+1);
+          throw msg.str(); /* check_err.py checked */
         }
         return {header,sequence};
       }

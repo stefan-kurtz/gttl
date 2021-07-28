@@ -22,6 +22,7 @@
 #include <climits>
 #include <algorithm>
 #include <iostream>
+#include "utilities/str_format.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 
 /* checks first chars of sequence, returns true if sequence is
@@ -50,21 +51,20 @@ bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
   return false;
 }
 
-int guess_if_protein_file(const char *progname,const char *filename)
+bool guess_if_protein_file(const char *filename)
 {
   const int buf_size = 1 << 14;
   GttlFpType in_fp = gttl_fp_type_open(filename,"rb");
 
   if (in_fp == nullptr)
   {
-    fprintf(stderr,"%s: Cannot open \"%s\"\n",progname, filename);
-    return -1;
+    throw std::string(": cannot open file");
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
-  bool haserr = false;
   bool decided_if_protein = false;
-  try
+  try /* need this, as the catch needs to close the file pointer
+         to prevent a memory leak */
   {
     for (auto &&si : gttl_si)
     {
@@ -81,21 +81,17 @@ int guess_if_protein_file(const char *progname,const char *filename)
       }
     }
   }
-  catch (std::ios_base::failure const &ext)
+  catch (std::string &ext)
   {
-    std::cerr << progname << ": " << ext.what() << std::endl;
-    haserr = true;
+    gttl_fp_type_close(in_fp);
+    throw ext;
   }
   gttl_fp_type_close(in_fp);
-  if (haserr)
-  {
-    return -1;
-  }
   if (decided_if_protein) /* have found evidence of protein in
                              GUESS_SIZE_TO_DECIDE first characters */
   {
-    return 1; /* it is a protein */
+    return true; /* it is a protein */
   }
-  return 0;
+  return false;
 }
 #endif
