@@ -18,6 +18,8 @@ def files2msg_get(p):
               : ': can only handle DNA sequences',
           '{}/testdata/non_existing.fna'.format(p)
               : ': cannot open file',
+          '{}/testdata/no_eol.fna'.format(p)
+              : ', line 2: missing newline character',
          }
 
 def parse_arguments():

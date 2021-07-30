@@ -119,7 +119,9 @@ class GttlLineIterator
         {
           if (*(bufptr - 1) != '\n')
           {
-            StrFormat msg("line %lu: missing newline character",line_number+1);
+            StrFormat msg(", line %lu: missing newline character",
+                          line_number+1);
+            throw msg.str();
           }
           endofunit = true;
           line_number++;
