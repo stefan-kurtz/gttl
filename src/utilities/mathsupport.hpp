@@ -42,7 +42,7 @@ inline int gt_required_bits(Numtype value)
 #endif
 }
 
-double mega_bytes(size_t bytes)
+inline double mega_bytes(size_t bytes)
 {
   return (double) bytes/(static_cast<size_t>(1024 * 1024));
 }
