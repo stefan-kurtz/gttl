@@ -6,6 +6,8 @@ from mysubprocess import mysubprocess_expect
 def files2msg_get(p):
   return {'{}/testdata/empty.fna'.format(p)
               : ', line 1: corrupted sequence',
+          '{}/testdata/fake.fna.gz'.format(p)
+              : ', line 1: corrupted sequence',
           '{}/testdata/only_header.fna'.format(p)
               : ', line 2: corrupted sequence',
           '{}/testdata/only_sequence.fna'.format(p)
