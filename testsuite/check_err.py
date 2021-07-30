@@ -14,6 +14,8 @@ def files2msg_get(p):
               : ', line 4: corrupted sequence',
           '{}/testdata/second_corrupt.fna'.format(p)
               : ', line 4: corrupted sequence',
+          '{}/testdata/middle_of_3_err.fna'.format(p)
+              : ', line 6: corrupted sequence',
           '{}/testdata/protein.fsa'.format(p)
               : ': can only handle DNA sequences',
           '{}/testdata/non_existing.fna'.format(p)
