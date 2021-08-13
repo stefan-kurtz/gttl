@@ -25,12 +25,9 @@ EXECS=${subst .cpp,.x,${SRC}}
 all:${EXECS}
 
 test:${EXECS}
-	@for prog in ${EXECS}; do \
-	  echo "$$prog";\
-	  ./$$prog;\
-	done
-	./check_err.py enum_nthash.x
-	./check_err.py count_non_wc_ranges.x
+	./check_err.py --fail_for_protein_sequence enum_nthash.x
+	./check_err.py --fail_for_protein_sequence count_non_wc_ranges.x
+	./check_err.py multiseq_mn.x
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@ 
@@ -44,6 +41,6 @@ code_check:
 
 .PHONY:clean
 clean:
-	${RM} -r *.x *.x.dSYM/
+	${RM} -r *.[odx] *.x.dSYM/
 
 -include ${wildcard *.d}

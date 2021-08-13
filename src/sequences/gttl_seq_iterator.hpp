@@ -96,6 +96,10 @@ class GttlSeqIterator
     {
       gttl_li.separator_set('>');
     }
+    size_t line_number(void) const noexcept
+    {
+      return gttl_li.line_number_get();
+    }
     Iterator begin()
     {
       return Iterator(header,sequence,gttl_li,false);

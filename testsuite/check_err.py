@@ -3,8 +3,8 @@
 import argparse, sys, shutil, os
 from mysubprocess import mysubprocess_expect
 
-def files2msg_get(p):
-  return {'{}/testdata/empty.fna'.format(p)
+def files2msg_get(fail_for_protein_sequence,p):
+  d = {'{}/testdata/empty.fna'.format(p)
               : ', line 1: corrupted sequence',
           '{}/testdata/fake.fna.gz'.format(p)
               : ', line 1: corrupted sequence',
@@ -18,18 +18,21 @@ def files2msg_get(p):
               : ', line 4: corrupted sequence',
           '{}/testdata/middle_of_3_err.fna'.format(p)
               : ', line 6: corrupted sequence',
-          '{}/testdata/protein.fsa'.format(p)
-              : ': can only handle DNA sequences',
           '{}/testdata/non_existing.fna'.format(p)
               : ': cannot open file',
           '{}/testdata/no_eol.fna'.format(p)
               : ', line 2: missing newline character',
          }
+  if fail_for_protein_sequence:
+    d['{}/testdata/protein.fsa'.format(p)] = ': can only handle DNA sequences'
+  return d
 
 def parse_arguments():
   p = argparse.ArgumentParser(description='run program for error cases')
   p.add_argument('-p','--path',type=str,default='..',
                   help='specify path of test files, default is ..')
+  p.add_argument('--fail_for_protein_sequence',action='store_true',
+                 default=False,help='fail for protein sequence')
   p.add_argument('-v','--valgrind',action='store_true',default=False,
                   help='run program with valgrind')
   p.add_argument('program_call',type=str,help='specify program to call')
@@ -54,7 +57,7 @@ the expected error code (which is EXIT_FAILURE in the
 C/C++-source) is always 1.
 '''
 
-files2msg = files2msg_get(args.path)
+files2msg = files2msg_get(args.fail_for_protein_sequence,args.path)
 
 expected_error_code = 1
 for filename, msg in files2msg.items():
