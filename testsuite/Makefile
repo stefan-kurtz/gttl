@@ -35,16 +35,6 @@ else
   endif
 endif
 
-ifeq ($(SYSTEM),Darwin)
-  ifneq (,$(findstring g++-,$(CXX)))
-    COMPILER_PATH=$(shell which ${CXX})
-    COMPILER_DIR=$(shell dirname ${COMPILER_PATH})
-    COMPILER_ROOT=$(shell dirname ${COMPILER_DIR})
-    CPPFLAGS+=-I ${COMPILER_ROOT}/include
-    LDLIBS+=-L ${COMPILER_ROOT}/lib
-  endif
-endif
-
 SRC=${wildcard  *.cpp}
 EXECS=${subst .cpp,.x,${SRC}}
 

@@ -147,7 +147,7 @@ class GttlMultiseq
       return sequences_total_length;
     }
 
-    unsigned char padding_symbol_get(void) const noexcept
+    unsigned char padding_char_get(void) const noexcept
     {
       return padding_char;
     }
