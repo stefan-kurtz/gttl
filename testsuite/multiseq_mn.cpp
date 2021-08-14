@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
       case 'w':
         if (sscanf(optarg,"%d",&width) != 1 || width < 0)
         {
-          std::cerr << argv[0] << ": argument to option -" << optopt
+          std::cerr << argv[0] << ": argument to option -"
+                    << static_cast<char>(opt)
                     << " must be non-negative integer"
                     << std::endl;
           return EXIT_FAILURE;
@@ -60,15 +61,15 @@ int main(int argc, char *argv[])
       case 0:
         break;
       case ':':
-        std::cerr << argv[0] << ": Option -" << optopt << " requires an "
-                                "argument" << std::endl;
+        std::cerr << argv[0] << ": Option -" << optopt
+                             << " requires an argument" << std::endl;
         usage_output(true,argv[0]);
         return EXIT_FAILURE;
     }
   }
   if (optind > argc-1)
   {
-    std::cerr << argv[0] << ": missing filename" << std::endl;
+    std::cerr << argv[0] << ": missing filename argument" << std::endl;
     usage_output(true,argv[0]);
     return EXIT_FAILURE;
   }

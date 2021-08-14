@@ -58,7 +58,7 @@ class GttlMultiseq
         {
           std::string header = std::get<0>(si);
           std::string sequence = std::get<1>(si);
-  
+
           sequences_total_length += sequence.size();
           assert(header.size() >= 2 &&
                  header[0] == '>' && header[header.size()-1] == '\n');
