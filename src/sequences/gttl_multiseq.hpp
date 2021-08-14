@@ -5,7 +5,7 @@ class GttlMultiseq
   private:
     size_t total_length, num_of_sequences, max_sequence_length;
     int max_seq_num_bits,
-        max_sequence_length_bits;
+        max_seq_length_bits;
   public:
     GttlMultiseq(const char *inputfile) :
       total_length(0),
@@ -39,7 +39,7 @@ class GttlMultiseq
     gttl_fp_type_close(in_fp);
     assert (num_of_sequences > 0);
     max_seq_num_bits = gt_required_bits(num_of_sequences-1);
-    max_sequence_length_bits = gt_required_bits(max_sequence_length);
+    max_seq_length_bits = gt_required_bits(max_sequence_length);
   }
   size_t total_length_get(void) const noexcept
   {
@@ -57,12 +57,12 @@ class GttlMultiseq
   {
     return max_seq_num_bits;
   }
-  int max_sequence_length_bits_get() const noexcept
+  int max_seq_length_bits_get() const noexcept
   {
-    return max_sequence_length_bits;
+    return max_seq_length_bits;
   }
   int sequence_bits_get() const noexcept
   {
-    return max_seq_num_bits + max_sequence_length_bits;
+    return max_seq_num_bits + max_seq_length_bits;
   }
 };
