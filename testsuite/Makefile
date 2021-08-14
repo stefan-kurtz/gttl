@@ -1,21 +1,47 @@
 CXX?=g++
-CFLAGS=-g -m64 -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -pedantic
-CPPFLAGS=-I../src/
-CXXFLAGS=-std=c++17
-LDFLAGS=-g -m64
+CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -funroll-loops -O3
+CPPFLAGS=-I ../src
+LD=${CXX}
 LDLIBS=-lm -lz -lpthread
+CXXFLAGS=-std=c++17
 SYSTEM?=$(shell uname -s)
+MACHINE?=$(shell uname -m)
 
 ifeq ($(debug),yes)
   CFLAGS += -g
+  LDFLAGS += -g
+  ifneq (${sanitize},no)
+    ifneq (${MACHINE},arm64)
+      CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+      LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
+    endif
+  endif
 else
-  CFLAGS += -DNDEBUG -march=native
+  CFLAGS += -DNDEBUG
+  ifeq ($(SYSTEM),Darwin)
+  else
+    LDLIBS+=-ldl
+  endif
+endif
+
+ifeq ($(CXX),clang++)
+  TIME_OPTION=
+else
+  ifeq ($(CXX),/usr/bin/clang++)
+    TIME_OPTION=
+  else
+    TIME_OPTION=-time
+    CFLAGS+=-Wno-psabi
+  endif
 endif
 
 ifeq ($(SYSTEM),Darwin)
-  ifeq ($(debug),yes)
-    CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-    LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  ifneq (,$(findstring g++-,$(CXX)))
+    COMPILER_PATH=$(shell which ${CXX})
+    COMPILER_DIR=$(shell dirname ${COMPILER_PATH})
+    COMPILER_ROOT=$(shell dirname ${COMPILER_DIR})
+    CPPFLAGS+=-I ${COMPILER_ROOT}/include
+    LDLIBS+=-L ${COMPILER_ROOT}/lib
   endif
 endif
 

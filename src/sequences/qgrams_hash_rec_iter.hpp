@@ -126,12 +126,12 @@ class QgramRecHashValueIterator
                               size_t _seqlen):
       qgram_length(_qgram_length),
       sequence(_sequence),
-      seqlen(_seqlen),
-      alpha_size(static_cast<uint64_t>(alphabet.size())),
-      max_integer_code(qgram_length == 32
-                         ? UINT64_MAX
-                         : std::pow(alpha_size,_qgram_length)-1)
+      seqlen(_seqlen)
     {
+      alpha_size = static_cast<uint64_t>(alphabet.size());
+      max_integer_code = qgram_length == 32
+                           ? UINT64_MAX
+                           : std::pow(alpha_size,_qgram_length) - 1;
       current_window.initialize(_qgram_length);
     }
     Iterator begin()

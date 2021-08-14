@@ -90,7 +90,6 @@ static void count_non_wildcard_ranges(const char *inputfilename)
 #endif
       for (auto &&nwr_it : sequence_ranges)
       {
-        std::pair<uint64_t,size_t> result;
         const size_t this_length = std::get<1>(nwr_it) -
                                    std::get<0>(nwr_it) + 1;
         non_wildcard_ranges_total_length += this_length;
