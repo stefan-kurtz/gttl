@@ -16,6 +16,7 @@
 */
 #ifndef MATHSUPPORT_HPP
 #define MATHSUPPORT_HPP
+#include <cstddef>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
@@ -39,6 +40,20 @@ inline int gt_required_bits(Numtype value)
     value >>= 1;
   }
   return count;
+#endif
+}
+
+inline size_t popcount_uint64_t(uint64_t value)
+{
+#if __has_builtin(__builtin_popcountl)
+  return __builtin_popcountl(static_cast<long>(value));
+#else
+  size_t pc = 0;
+  for (; value != 0; value &= value - 1)
+  {
+    pc++;
+  }
+  return pc;
 #endif
 }
 
