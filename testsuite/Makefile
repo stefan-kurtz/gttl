@@ -52,7 +52,7 @@ test:${EXECS}
 	@./multiseq_mn.x ../testdata/at1MB.fna | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./enum_nthash.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_nthash.tsv
 	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv 
-	@echo "Congratulations. Tests passed."
+	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@

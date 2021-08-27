@@ -1,7 +1,7 @@
 #include <getopt.h>
 #include <iostream>
 #include "utilities/runtime_class.hpp"
-#include "sequences/multiseq.hpp"
+#include "sequences/gttl_multiseq.hpp"
 
 static void usage_output(bool error_case,const char *progname)
 {
@@ -93,10 +93,10 @@ int main(int argc, char *argv[])
   }
   std::cout << "# filename\t" << argv[optind] << std::endl;
   std::cout << "# number of sequences\t"
-            << multiseq->number_of_sequences_get()
+            << multiseq->sequences_number_get()
             << std::endl;
   std::cout << "# total length\t"
-            << multiseq->total_length_get()
+            << multiseq->sequences_total_length_get()
             << std::endl;
   delete multiseq;
 }
