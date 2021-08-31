@@ -1,29 +1,42 @@
 #include <cstddef>
+#include <cassert>
 
 template<typename T>
-class Span {
+class Span
+{
    T* ptr;
-   size_t len;
+   size_t num_elements;
 
 public:
-    Span(T* _ptr, size_t _len) noexcept
-        : ptr(_ptr),
-          len(_len)
+    Span(T* _ptr, size_t _num_elements) noexcept
+      : ptr(_ptr),
+        num_elements(_num_elements)
     {}
 
-    T const& operator[](size_t idx) const noexcept {
-        return ptr[idx];
+    T const& operator[](size_t idx) const noexcept
+    {
+      assert(idx < num_elements);
+      return ptr[idx];
     }
 
-    size_t size() const noexcept {
-        return len;
+    T const& operator++() noexcept
+    {
+      ptr++;
+      return *this;
     }
 
-    T* begin() noexcept {
-        return ptr;
+    size_t size() const noexcept
+    {
+      return num_elements;
     }
 
-    T* end() noexcept {
-        return ptr + len;
+    T* begin() noexcept
+    {
+      return ptr;
+    }
+
+    T* end() noexcept
+    {
+      return ptr + num_elements;
     }
 };
