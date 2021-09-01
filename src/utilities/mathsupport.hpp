@@ -16,11 +16,15 @@
 */
 #ifndef MATHSUPPORT_HPP
 #define MATHSUPPORT_HPP
+#include <cstdint>
 #include <cstddef>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
 #endif
+
+#define GTTL_BITS2MAXVALUE(BITS) ((BITS) == 64 ? UINT64_MAX \
+                                               : ((uint64_t(1) << (BITS)) - 1))
 
 template<typename Numtype>
 inline int gt_required_bits(Numtype value)
