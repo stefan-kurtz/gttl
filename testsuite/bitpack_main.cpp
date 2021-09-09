@@ -3,6 +3,7 @@
 #include <random>
 #include <iostream>
 #include <iomanip>
+#include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/bitpack.hpp"
@@ -21,7 +22,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 #endif
 }
 
-#define RUN_TEST_CASES\
+#define RUN_TEST_CASES(COUNTER)\
         for (size_t idx = 0; idx < num_values; idx++)\
         {\
           uint8_t be_tmp[sizeof_unit];\
@@ -48,20 +49,13 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
                         << std::endl;\
               exit(EXIT_FAILURE);\
             }\
-            successes++;\
+            (COUNTER)++;\
           } \
         }
 
-int main(int argc,char *argv[])
+static void runner(bool large,size_t num_values)
 {
-  long read_long;
-  size_t successes = 0;
-  if (argc != 2 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
-  {
-    std::cerr << "Usage: " << argv[0] << ": <num_of_value>" << std::endl;
-    return EXIT_FAILURE;
-  }
-  size_t num_values = static_cast<size_t>(read_long);
+  size_t successes8 = 0, successes9 = 0;
   std::mt19937_64 rgen_first;
   for (int second_bits = 1; second_bits <= 16; second_bits++)
   {
@@ -75,17 +69,45 @@ int main(int argc,char *argv[])
       std::uniform_int_distribution<uint64_t> dis_first(0, first_max);
       if (first_bits + second_bits > 64)
       {
-        constexpr const int sizeof_unit = 9;
-        GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
-        RUN_TEST_CASES
+        if (large)
+        {
+          constexpr const int sizeof_unit = 9;
+          GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
+          RUN_TEST_CASES(successes9)
+        }
       } else
       {
-        constexpr const int sizeof_unit = 8;
-        GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
-        RUN_TEST_CASES
+        if (!large)
+        {
+          constexpr const int sizeof_unit = 8;
+          GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
+          RUN_TEST_CASES(successes8)
+        }
       }
     }
   }
-  std::cout << "# bitpack.successes\t" << successes << std::endl;
+  if (large)
+  {
+    std::cout << "# bitpack.successes9\t" << successes9 << std::endl;
+  } else
+  {
+    std::cout << "# bitpack.successes8\t" << successes8 << std::endl;
+  }
+}
+
+int main(int argc,char *argv[])
+{
+  long read_long;
+  if (argc != 2 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
+  {
+    std::cerr << "Usage: " << argv[0] << ": <num_of_value>" << std::endl;
+    return EXIT_FAILURE;
+  }
+  RunTimeClass rt_small;
+  runner(false,static_cast<size_t>(read_long));
+  rt_small.show("8 bytes");
+  RunTimeClass rt_large;
+  runner(true,static_cast<size_t>(read_long));
+  rt_small.show("9 bytes");
   return EXIT_SUCCESS;
 }
