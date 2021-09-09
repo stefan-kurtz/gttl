@@ -21,6 +21,7 @@
 #include <climits>
 #include <array>
 #include <cstdint>
+#include <iostream>
 
 template <int sizeof_unit,int bit_groups>
 class GttlBitPack
@@ -115,6 +116,23 @@ class GttlBitPack
       }
       return ((code << overflow_left_shift) |
               static_cast<uint64_t>(byte_encoding[8])) & max_overflow;
+    }
+
+    template<int idx>
+    int bit_group_size(void) const noexcept
+    {
+      static_assert(idx < bit_groups);
+      return bit_group_sizes[idx];
+    }
+
+    void pretty_print(const char *tag) const noexcept
+    {
+      std::cout << "# " << tag << std::endl;
+      for (size_t idx = 0; idx < bit_groups; idx++)
+      {
+        std::cout << "# bit_group\t" << idx << "\t" << bit_group_sizes[idx]
+                  << std::endl;
+      }
     }
 };
 #endif
