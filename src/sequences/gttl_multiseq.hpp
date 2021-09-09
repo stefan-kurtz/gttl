@@ -155,7 +155,7 @@ class GttlMultiseq
     sequences_length_bits = gt_required_bits(sequences_maximum_length);
   }
 
-  ~GttlMultiseq()
+  ~GttlMultiseq(void)
   {
     if (store)
     {
@@ -182,17 +182,17 @@ class GttlMultiseq
     return sequences_maximum_length;
   }
 
-  int sequences_length_bits_get() const noexcept
+  int sequences_length_bits_get(void) const noexcept
   {
     return sequences_length_bits;
   }
 
-  int sequences_number_bits_get() const noexcept
+  int sequences_number_bits_get(void) const noexcept
   {
     return sequences_number_bits;
   }
 
-  int sequences_bits_get() const noexcept
+  int sequences_bits_get(void) const noexcept
   {
     return sequences_number_bits_get() + sequences_length_bits_get();
   }
@@ -211,29 +211,30 @@ class GttlMultiseq
     /* To Check whether there are any problems considering the pointer at
     sequences_number goes out of bound and is used for the length of the last
     sequence */
-    return (size_t)(sequence_ptr[seqnum + 1] - sequence_ptr[seqnum] - 1);
+    return static_cast<size_t>(sequence_ptr[seqnum + 1] -
+                               sequence_ptr[seqnum] - 1);
   }
 
   /* Returns a pointer to the sequence with number seqnum */
   const char *sequence_ptr_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < );
+    assert(store && seqnum < sequences_number_get());
     return sequence_ptr[seqnum];
   }
 
   /* Returns length of header. */
   size_t header_length_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get &&
+    assert(store && seqnum < sequences_number_get() &&
            header_ptr[seqnum] < header_ptr[seqnum + 1]);
-    return (size_t)(header_ptr[seqnum + 1] - header_ptr[seqnum]);
+    return static_cast<size_t>(header_ptr[seqnum + 1] - header_ptr[seqnum]);
   }
 
   /* Returns length of header,
    * short version from start to first space(excluded). */
   size_t short_header_length_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get &&
+    assert(store && seqnum < sequences_number_get() &&
            header_ptr[seqnum] < header_ptr[seqnum + 1]);
     const char *itr;
     for (itr = header_ptr[seqnum];
