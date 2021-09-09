@@ -7,6 +7,7 @@
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/bitpack.hpp"
+#include "uint64_encoding.hpp"
 
 static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 {
@@ -22,6 +23,13 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 #endif
 }
 
+#define COMPARE(V1,V2) if ((V1) != (V2))\
+                       {\
+                         std::cerr << #V1 << "=" << V1 << " != " \
+                                   << V2 << "=" << #V2 << std::endl;\
+                         exit(EXIT_FAILURE);\
+                       }
+
 #define RUN_TEST_CASES(COUNTER)\
         for (size_t idx = 0; idx < num_values; idx++)\
         {\
@@ -36,21 +44,10 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
             memcpy(be_tmp,be,sizeof_unit);\
             const uint64_t first_value_dec = bp.decode_at<0>(be_tmp);\
             const uint64_t second_value_dec = bp.decode_at<1>(be_tmp);\
-            if (first_value != first_value_dec)\
-            {\
-              std::cerr << "first_value=" << first_value << " != " \
-                        << first_value_dec << "=first_value_dec" << std::endl;\
-              exit(EXIT_FAILURE);\
-            }\
-            if (second_value != second_value_dec)\
-            {\
-              std::cerr << "second_value=" << second_value << " != " \
-                        << second_value_dec << "=second_value_dec" \
-                        << std::endl;\
-              exit(EXIT_FAILURE);\
-            }\
+            COMPARE(first_value,first_value_dec)\
+            COMPARE(second_value,second_value_dec)\
             (COUNTER)++;\
-          } \
+          }\
         }
 
 static void runner(bool large,size_t num_values)
