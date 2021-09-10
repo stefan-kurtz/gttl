@@ -24,7 +24,7 @@
 #include <iostream>
 
 template <int sizeof_unit,int bit_groups>
-class GttlBitPack
+class GttlBitPacker
 {
   private:
     union
@@ -39,7 +39,7 @@ class GttlBitPack
     uint64_t max_overflow; /* only needed for sizeof_unit > 8 */
 
   public:
-    GttlBitPack(const std::array<int, bit_groups> _bit_group_sizes) :
+    GttlBitPacker(const std::array<int, bit_groups> _bit_group_sizes) :
       overflow_left_shift(0),
       max_overflow(0)
     {
@@ -104,6 +104,11 @@ class GttlBitPack
       return value.byte_encoding;
     }
 
+    uint64_t code_get(void) const noexcept
+    {
+      return value.code;
+    }
+
     template<int idx>
     uint64_t decode_at(const uint8_t *byte_encoding) const noexcept
     {
@@ -116,6 +121,29 @@ class GttlBitPack
       }
       return ((code << overflow_left_shift) |
               static_cast<uint64_t>(byte_encoding[8])) & max_overflow;
+    }
+
+    template<int idx>
+    uint64_t decode_at(uint64_t code) const noexcept
+    {
+      assert (sizeof_unit == 8);
+      static_assert(idx < bit_groups);
+      return (code >> shift_tab[idx]) & mask_tab[idx];
+    }
+
+    uint64_t decode_at0(uint64_t code) const noexcept
+    {
+      return decode_at<0>(code);
+    }
+
+    uint64_t decode_at1(uint64_t code) const noexcept
+    {
+      return decode_at<1>(code);
+    }
+
+    uint64_t decode_at2(uint64_t code) const noexcept
+    {
+      return decode_at<2>(code);
     }
 
     template<int idx>

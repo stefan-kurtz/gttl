@@ -6,7 +6,7 @@
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
-#include "utilities/bitpack.hpp"
+#include "utilities/bitpacker.hpp"
 #include "uint64_encoding.hpp"
 
 static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
@@ -69,7 +69,7 @@ static void runner(bool direct,bool large,size_t num_values)
         if (large)
         {
           constexpr const int sizeof_unit = 9;
-          GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
+          GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
           RUN_TEST_CASES(successes9)
         }
       } else
@@ -96,7 +96,7 @@ static void runner(bool direct,bool large,size_t num_values)
           } else
           {
             constexpr const int sizeof_unit = 8;
-            GttlBitPack<sizeof_unit,2> bp({first_bits,second_bits});
+            GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
             RUN_TEST_CASES(successes8)
           }
         }
