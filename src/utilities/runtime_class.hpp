@@ -14,7 +14,7 @@ class RunTimeClass
   }
   size_t to_ms(size_t time_microseconds)
   {
-    return time_microseconds/1000;
+    return time_microseconds/size_t(1000);
   }
   size_t show(const char *msg)
   {

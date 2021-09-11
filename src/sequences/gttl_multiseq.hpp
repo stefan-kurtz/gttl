@@ -311,12 +311,12 @@ class GttlMultiseq
       size_t seqnum) const noexcept
   {
     assert(store && seqnum < sequences_number_get());
-    const char *head_ptr = (const char *) header_ptr[seqnum];
-    const char *seq_ptr = (const char *) sequence_ptr[seqnum];
+    const char *head_ptr = static_cast<const char *>(header_ptr[seqnum]);
+    const char *seq_ptr = static_cast<const char *>(sequence_ptr[seqnum]);
     const size_t header_len = header_length_get(seqnum);
     const size_t seq_len = sequence_length_get(seqnum);
-    return std::tuple<const char *, size_t, const char *, size_t>(
-        head_ptr, header_len, seq_ptr, seq_len);
+    return std::tuple<const char *, size_t, const char *, size_t>
+                     (head_ptr, header_len, seq_ptr, seq_len);
   }
 };
 uint8_t GttlMultiseq::static_count = 0;
