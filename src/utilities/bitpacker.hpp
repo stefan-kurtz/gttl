@@ -14,8 +14,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef BITPACK_HPP
-#define BITPACK_HPP
+#ifndef BITPACKER2_HPP
+#define BITPACKER2_HPP
 
 #include <cassert>
 #include <climits>
@@ -25,21 +25,15 @@
 #include "utilities/mathsupport.hpp"
 
 template <int sizeof_unit,int bit_groups>
-class GttlBitPacker
+struct GttlBitPacker
 {
   private:
-    union
-    {
-      uint8_t byte_encoding[sizeof_unit];
-      uint64_t code;
-    } value;
     std::array<int, bit_groups> bit_group_sizes;
+  public:
     std::array<int, bit_groups> shift_tab;
     std::array<uint64_t, bit_groups> mask_tab;
     int overflow_left_shift; /* only needed for sizeof_unit > 8 */
     uint64_t max_overflow; /* only needed for sizeof_unit > 8 */
-
-  public:
     GttlBitPacker(void) {}
     GttlBitPacker(const std::array<int, bit_groups> _bit_group_sizes) :
       overflow_left_shift(0),
@@ -79,94 +73,6 @@ class GttlBitPacker
         max_overflow = GTTL_BITS2MAXVALUE(overflow_bits);
         overflow_left_shift = overflow_bits - remaining_bits;
       }
-    }
-
-    const uint8_t *encode(const std::array<uint64_t, bit_groups> &arr)
-    {
-      value.code = 0;
-      if constexpr (sizeof_unit == 8)
-      {
-        for (int idx = 0; idx < bit_groups; idx++)
-        {
-          assert(arr[idx] <= mask_tab[idx]);
-          value.code |= (arr[idx] << shift_tab[idx]);
-        }
-      } else
-      {
-        value.code = 0;
-        for (int idx = 0; idx < bit_groups - 1; idx++)
-        {
-          assert(arr[idx] <= mask_tab[idx]);
-          value.code |= (arr[idx] << shift_tab[idx]);
-        }
-        const uint64_t overflow_value = arr[bit_groups-1];
-        assert(overflow_value <= max_overflow);
-        value.code |= (overflow_value >> overflow_left_shift);
-        value.byte_encoding[8] = static_cast<uint8_t>(overflow_value);
-      }
-      return value.byte_encoding;
-    }
-
-    uint64_t code_get(void) const noexcept
-    {
-      return value.code;
-    }
-
-    template<int idx>
-    uint64_t decode_at(const uint8_t *byte_encoding) const noexcept
-    {
-      static_assert(idx < bit_groups);
-      const uint64_t code
-        = *(reinterpret_cast<const uint64_t *>(byte_encoding));
-      if constexpr (sizeof_unit == 8 || idx < bit_groups - 1)
-      {
-        return (code >> shift_tab[idx]) & mask_tab[idx];
-      }
-      return ((code << overflow_left_shift) |
-              static_cast<uint64_t>(byte_encoding[8])) & max_overflow;
-    }
-
-    uint64_t decode_at0(const uint8_t *byte_encoding) const noexcept
-    {
-      return decode_at<0>(byte_encoding);
-    }
-
-    uint64_t decode_at1(const uint8_t *byte_encoding) const noexcept
-    {
-      return decode_at<1>(byte_encoding);
-    }
-
-    uint64_t decode_at2(const uint8_t *byte_encoding) const noexcept
-    {
-      return decode_at<2>(byte_encoding);
-    }
-
-    uint64_t decode_at3(const uint8_t *byte_encoding) const noexcept
-    {
-      return decode_at<3>(byte_encoding);
-    }
-
-    template<int idx>
-    uint64_t decode_at(uint64_t code) const noexcept
-    {
-      assert (sizeof_unit == 8);
-      static_assert(idx < bit_groups);
-      return (code >> shift_tab[idx]) & mask_tab[idx];
-    }
-
-    uint64_t decode_at0(uint64_t code) const noexcept
-    {
-      return decode_at<0>(code);
-    }
-
-    uint64_t decode_at1(uint64_t code) const noexcept
-    {
-      return decode_at<1>(code);
-    }
-
-    uint64_t decode_at2(uint64_t code) const noexcept
-    {
-      return decode_at<2>(code);
     }
 
     int bit_group_size_get(int idx) const noexcept

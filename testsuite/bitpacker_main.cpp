@@ -6,11 +6,12 @@
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
-#include "utilities/bitpacker.hpp"
+#include "utilities/bytes_unit.hpp"
 #include "uint64_encoding.hpp"
 
 static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 {
+#undef SHOWUINT64
 #ifdef SHOWUINT64
   int shift = 56;
   for (size_t j = 0; j < sizeof(value); j++)
@@ -33,17 +34,15 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 #define RUN_TEST_CASES(COUNTER)\
         for (size_t idx = 0; idx < num_values; idx++)\
         {\
-          uint8_t be_tmp[sizeof_unit];\
           const uint64_t first_value = dis_first(rgen_first);\
           for (uint64_t second_value = 0; second_value <= second_max; \
                second_value++)\
           {\
             show_uint64_t_bytes(first_value);\
             show_uint64_t_bytes(second_value);\
-            const uint8_t *be = bp.encode({first_value,second_value});\
-            memcpy(be_tmp,be,sizeof_unit);\
-            const uint64_t first_value_dec = bp.decode_at<0>(be_tmp);\
-            const uint64_t second_value_dec = bp.decode_at<1>(be_tmp);\
+            BytesUnit<sizeof_unit,2> bu(bp,{first_value,second_value});\
+            const uint64_t first_value_dec = bu.decode_at<0>(bp);\
+            const uint64_t second_value_dec = bu.decode_at<1>(bp);\
             COMPARE(first_value,first_value_dec)\
             COMPARE(second_value,second_value_dec)\
             (COUNTER)++;\
@@ -105,16 +104,16 @@ static void runner(bool direct,bool large,size_t num_values)
   }
   if (large)
   {
-    std::cout << "# bitpack.successes9\t" << successes9 << std::endl;
+    std::cout << "# bitpacker.successes9\t" << successes9 << std::endl;
   } else
   {
     if (direct)
     {
-      std::cout << "# bitpack.direct_successes8\t" << direct_successes8
+      std::cout << "# bitpacker.direct_successes8\t" << direct_successes8
                 << std::endl;
     } else
     {
-      std::cout << "# bitpack.successes8\t" << successes8 << std::endl;
+      std::cout << "# bitpacker.successes8\t" << successes8 << std::endl;
     }
   }
 }
@@ -128,14 +127,17 @@ int main(int argc,char *argv[])
     return EXIT_FAILURE;
   }
   const size_t num_values = static_cast<size_t>(read_long);
+
   RunTimeClass rt_small_direct;
   runner(true,false,num_values);
   rt_small_direct.show("8 bytes direct");
+
   RunTimeClass rt_small;
   runner(false,false,num_values);
   rt_small.show("8 bytes");
+
   RunTimeClass rt_large;
   runner(false,true,num_values);
-  rt_small.show("9 bytes");
+  rt_large.show("9 bytes");
   return EXIT_SUCCESS;
 }
