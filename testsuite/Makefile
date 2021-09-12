@@ -53,6 +53,7 @@ test:${EXECS}
 	@./enum_nthash.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_nthash.tsv
 	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv 
 	@./bitpacker_main.x 100
+	@./endian.x
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp

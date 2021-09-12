@@ -10,7 +10,7 @@ template<int sizeof_unit,int bit_groups>
 class BytesUnit
 {
   private:
-    uint8_t array[sizeof_unit];
+    uint8_t bytes[sizeof_unit];
   public:
     BytesUnit(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
@@ -36,9 +36,9 @@ class BytesUnit
         const uint64_t overflow_value = to_be_encoded[bit_groups-1];
         assert(overflow_value <= bitpacker.max_overflow);
         integer |= (overflow_value >> bitpacker.overflow_left_shift);
-        array[8] = static_cast<uint8_t>(overflow_value);
+        bytes[8] = static_cast<uint8_t>(overflow_value);
       }
-      memcpy(&array[0],reinterpret_cast<uint8_t *>(&integer),8);
+      memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),8);
     }
 
     template<int idx>
@@ -46,14 +46,15 @@ class BytesUnit
                        const noexcept
     {
       static_assert(idx < bit_groups);
-      const uint64_t integer = *(reinterpret_cast<const uint64_t *>(array));
+      const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
+
       if constexpr (sizeof_unit == 8 || idx < bit_groups - 1)
       {
         return (integer >> bitpacker.shift_tab[idx]) &
                bitpacker.mask_tab[idx];
       }
       return ((integer << bitpacker.overflow_left_shift) |
-              static_cast<uint64_t>(array[8])) & bitpacker.max_overflow;
+              static_cast<uint64_t>(bytes[8])) & bitpacker.max_overflow;
     }
 
     uint64_t decode_at0(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
@@ -82,13 +83,13 @@ class BytesUnit
 
     BytesUnit& operator=(BytesUnit& other)
     {
-      memcpy(&array[0],&other.array[0],sizeof_unit);
+      memcpy(&bytes[0],&other.bytes[0],sizeof_unit);
       return *this;
     }
 
     bool operator != (const BytesUnit& other) const noexcept
     {
-      return memcmp(&array[0],&other.array[0],sizeof_unit) != 0;
+      return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) != 0;
     }
 
     void show(void) const noexcept
@@ -96,7 +97,7 @@ class BytesUnit
       for (size_t j = 0; j < sizeof_unit; j++)
       {
         std::cout << std::right << std::setw(4)
-                  << static_cast<int>(array[j])
+                  << static_cast<int>(bytes[j])
                   << (j == sizeof_unit - 1 ? "\n" : " ");
       }
     }
