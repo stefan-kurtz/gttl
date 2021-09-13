@@ -92,6 +92,16 @@ class BytesUnit
       return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) != 0;
     }
 
+    bool operator == (const BytesUnit& other) const noexcept
+    {
+      return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) == 0;
+    }
+
+    bool operator < (const BytesUnit& other) const noexcept
+    {
+      return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) < 0;
+    }
+
     void show(void) const noexcept
     {
       for (size_t j = 0; j < sizeof_unit; j++)
