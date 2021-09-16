@@ -17,6 +17,31 @@
 
 class GttlMultiseq
 {
+  struct Iterator
+  {
+    private:
+      char **sequence_ptr;
+      size_t seqnum;
+    public:
+      Iterator(char **_sequence_ptr,size_t _seqnum) :
+        sequence_ptr(_sequence_ptr),
+        seqnum(_seqnum) {}
+      std::string operator*(void) const
+      {
+        return std::string(sequence_ptr[seqnum],
+                           static_cast<size_t>(sequence_ptr[seqnum + 1] -
+                                               sequence_ptr[seqnum] - 1));
+      }
+      Iterator& operator++() /* prefix increment*/
+      {
+        seqnum++;
+        return *this;
+      }
+      bool operator != (const Iterator& other) const noexcept
+      {
+        return seqnum != other.seqnum;
+      }
+  };
  private:
   bool store;
   size_t sequences_number,
@@ -80,10 +105,12 @@ class GttlMultiseq
         throw msg;
       }
       gttl_fp_type_reset(in_fp);
-      sequence_ptr = static_cast<char **>(
-          malloc((sequences_number + 1) * sizeof *sequence_ptr));
-      header_ptr = static_cast<char **>(
-          malloc((sequences_number + 1) * sizeof *header_ptr));
+      sequence_ptr
+        = static_cast<char **>(malloc((sequences_number + 1) *
+                                      sizeof *sequence_ptr));
+      header_ptr
+        = static_cast<char **>(malloc((sequences_number + 1) *
+                                      sizeof *header_ptr));
 
       /* sequence_ptr[0] is malloced to area of size for all symbols
          (sequences_total_length) and padding sumbols, one per sequence,
@@ -317,6 +344,14 @@ class GttlMultiseq
     const size_t seq_len = sequence_length_get(seqnum);
     return std::tuple<const char *, size_t, const char *, size_t>
                      (head_ptr, header_len, seq_ptr, seq_len);
+  }
+  Iterator begin()
+  {
+    return Iterator(sequence_ptr,0);
+  }
+  Iterator end()
+  {
+    return Iterator(nullptr,sequences_number);
   }
 };
 uint8_t GttlMultiseq::static_count = 0;
