@@ -339,13 +339,13 @@ class GttlAlphabet
       return _undefined_rank;
     }
     constexpr size_t size(void) const noexcept { return _size; }
-    constexpr uint8_t char_to_rank(unsigned char cc) const noexcept {
+    constexpr uint8_t char_to_rank(char cc) const noexcept {
       return _symbolmap[static_cast<int>(cc)];
     }
     constexpr char rank_to_char(uint8_t r) const noexcept {
       return characters[r];
     }
-    void char2rank_all(void)
+    void pretty_print(void)
     {
       std::cout << "# alphabet size\t" << _size << std::endl;
       std::cout << "# undefined_rank\t" << static_cast<int>(_undefined_rank)
@@ -354,7 +354,7 @@ class GttlAlphabet
       {
         if (*s != '|')
         {
-          uint8_t r = this->char_to_rank(static_cast<unsigned char>(*s));
+          uint8_t r = this->char_to_rank(*s);
           std::cout << *s << "\t" << static_cast<int>(r) << std::endl;
         }
       }
@@ -366,6 +366,15 @@ class GttlAlphabet
     constexpr const char *characters_get(void) const noexcept
     {
       return characters.data();
+    }
+
+    void char2rank_in_place(char *char_seq,size_t len) const noexcept
+    {
+      uint8_t *byte_seq = reinterpret_cast<uint8_t *>(char_seq);
+      for (size_t idx = 0; idx < len; idx++)
+      {
+        byte_seq[idx] = char_to_rank(char_seq[idx]);
+      }
     }
 };
 

@@ -43,6 +43,7 @@ class GttlMultiseq
       }
   };
  private:
+  bool rank_sequences;
   bool store;
   size_t sequences_number,
          sequences_total_length,
@@ -60,7 +61,8 @@ class GttlMultiseq
   /* Constructor
    Inputfile should be in Fasta format, throws std::string */
   GttlMultiseq(const char *inputfile, bool _store = true)
-      : store(_store),
+      : rank_sequences(false),
+        store(_store),
         sequences_number(0),
         sequences_total_length(0),
         sequences_maximum_length(0),
@@ -182,6 +184,16 @@ class GttlMultiseq
     sequences_length_bits = gt_required_bits(sequences_maximum_length);
   }
 
+  bool has_rank_sequences(void) const noexcept
+  {
+    return rank_sequences;
+  }
+
+  void set_rank_sequences(void) noexcept
+  {
+    rank_sequences = true;
+  }
+
   ~GttlMultiseq(void)
   {
     if (store)
@@ -243,7 +255,7 @@ class GttlMultiseq
   }
 
   /* Returns a pointer to the sequence with number seqnum */
-  const char *sequence_ptr_get(size_t seqnum) const noexcept
+  char *sequence_ptr_get(size_t seqnum) const noexcept
   {
     assert(store && seqnum < sequences_number_get());
     return sequence_ptr[seqnum];

@@ -22,12 +22,12 @@ int main(void)
   static_assert((dna_alpha.characters_get())[1] == 'C');
   static_assert((dna_alpha.characters_get())[2] == 'G');
   static_assert((dna_alpha.characters_get())[3] == 'T');
-  dna_alpha.char2rank_all();
+  dna_alpha.pretty_print();
   alphabet::GttlAlphabet_20 protein_alpha{};
   static_assert(protein_alpha.char_to_rank('A') == 0);
   static_assert(protein_alpha.char_to_rank('W') == 18);
   static_assert(protein_alpha.char_to_rank('Y') == 19);
   static_assert(protein_alpha.char_to_rank('X') == 20);
-  protein_alpha.char2rank_all();
+  protein_alpha.pretty_print();
   return EXIT_SUCCESS;
 }
