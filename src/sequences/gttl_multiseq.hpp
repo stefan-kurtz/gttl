@@ -43,7 +43,6 @@ class GttlMultiseq
       }
   };
  private:
-  bool rank_sequences;
   bool store;
   size_t sequences_number,
          sequences_total_length,
@@ -61,8 +60,7 @@ class GttlMultiseq
   /* Constructor
    Inputfile should be in Fasta format, throws std::string */
   GttlMultiseq(const char *inputfile, bool _store = true)
-      : rank_sequences(false),
-        store(_store),
+      : store(_store),
         sequences_number(0),
         sequences_total_length(0),
         sequences_maximum_length(0),
@@ -182,16 +180,6 @@ class GttlMultiseq
     gttl_fp_type_close(in_fp);
     sequences_number_bits = gt_required_bits(sequences_number - 1);
     sequences_length_bits = gt_required_bits(sequences_maximum_length);
-  }
-
-  bool has_rank_sequences(void) const noexcept
-  {
-    return rank_sequences;
-  }
-
-  void set_rank_sequences(void) noexcept
-  {
-    rank_sequences = true;
   }
 
   ~GttlMultiseq(void)
