@@ -24,6 +24,8 @@
 #include <iostream>
 #include "utilities/mathsupport.hpp"
 
+static constexpr const bool  show_bit_groups = false;
+
 template <int sizeof_unit,int bit_groups>
 struct GttlBitPacker
 {
@@ -43,6 +45,11 @@ struct GttlBitPacker
       static_assert(bit_groups >= 2);
       for (idx = 0; idx < bit_groups; idx++)
       {
+        if constexpr (show_bit_groups)
+        {
+          std::cout << "group " << idx << ", size="  << _bit_group_sizes[idx]
+                    << std::endl;
+        }
         bit_group_sizes[idx] = _bit_group_sizes[idx];
         assert(_bit_group_sizes[idx] <= 64);
         if (count + _bit_group_sizes[idx] > 64)
