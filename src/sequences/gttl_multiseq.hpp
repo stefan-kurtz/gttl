@@ -54,7 +54,7 @@ class GttlMultiseq
 
   // static counter for all instances of the class
   static uint8_t static_count;
-  unsigned char padding_char;
+  uint8_t padding_char;
 
  public:
   /* Constructor
@@ -65,11 +65,11 @@ class GttlMultiseq
         sequences_total_length(0),
         sequences_maximum_length(0),
         headers_total_length(0),
-        padding_char(UCHAR_MAX - static_count)
+        padding_char(static_cast<uint8_t>(UCHAR_MAX - static_count))
   {
     /* set number of instance and increase overall count
        padding_char 122 = 'z', so stop */
-    if (padding_char <= 123)
+    if (padding_char <= uint8_t(122))
     {
       throw std::string("non letter padding character exhausted");
     }
@@ -129,7 +129,7 @@ class GttlMultiseq
                       sizeof_mem_for_seqs);
         throw msg.str();
       }
-      sequence_ptr[0][0] = padding_char;
+      sequence_ptr[0][0] = static_cast<char>(padding_char);
       sequence_ptr[0]++;
       header_ptr[0] = static_cast<char *>(
           malloc(headers_total_length * sizeof *header_ptr));
@@ -150,7 +150,8 @@ class GttlMultiseq
         std::string sequence = std::get<1>(si);
 
         memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
-        *(sequence_ptr[seqnum] + sequence.size()) = padding_char;
+        *(sequence_ptr[seqnum] + sequence.size())
+          = static_cast<char>(padding_char);
         sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
         memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
         header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
@@ -224,7 +225,7 @@ class GttlMultiseq
     return sequences_number_bits_get() + sequences_length_bits_get();
   }
 
-  unsigned char padding_char_get(void) const noexcept
+  uint8_t padding_char_get(void) const noexcept
   {
     assert(store);
     return padding_char;
