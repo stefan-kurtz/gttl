@@ -45,16 +45,18 @@ class BytesUnit
     uint64_t decode_at(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
                        const noexcept
     {
-      static_assert(idx < bit_groups);
+      static_assert(idx >= 0 && idx < bit_groups);
       const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
 
       if constexpr (sizeof_unit == 8 || idx < bit_groups - 1)
       {
         return (integer >> bitpacker.shift_tab[idx]) &
-               bitpacker.mask_tab[idx];
+                bitpacker.mask_tab[idx];
+      } else /* sizeof_unit == 9 && idx == bit_groups - 1 */
+      {
+        return ((integer << bitpacker.overflow_left_shift) |
+                static_cast<uint64_t>(bytes[8])) & bitpacker.max_overflow;
       }
-      return ((integer << bitpacker.overflow_left_shift) |
-              static_cast<uint64_t>(bytes[8])) & bitpacker.max_overflow;
     }
 
     uint64_t decode_at0(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
@@ -81,11 +83,15 @@ class BytesUnit
       return decode_at<3>(bitpacker);
     }
 
-    BytesUnit& operator=(BytesUnit& other)
+#ifdef OWNCOPY_CONSTRUCTOR
+    //It seems that this copy constructor is implicit and leaving it
+    //leads to a compiler error or clang++. So we better exclude it here.
+    BytesUnit& operator=(BytesUnit& other) noexcept
     {
       memcpy(&bytes[0],&other.bytes[0],sizeof_unit);
       return *this;
     }
+#endif
 
     bool operator != (const BytesUnit& other) const noexcept
     {
