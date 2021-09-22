@@ -110,13 +110,16 @@ class BytesUnit
     }
 
     size_t sum(void) const noexcept
-    {
-      size_t this_sum = 0;
-      for (size_t j = 0; j < sizeof_unit; j++)
+    {  
+      const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
+
+      if constexpr (sizeof_unit == 8)
       {
-        this_sum += static_cast<size_t>(bytes[j]);
+        return static_cast<size_t>(integer);
+      } else
+      {
+        return static_cast<size_t>(integer) + bytes[8];
       }
-      return this_sum;
     }
 
     void show(void) const noexcept
