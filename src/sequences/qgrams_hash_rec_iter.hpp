@@ -153,7 +153,7 @@ class QgramRecHashValueIterator
                                  qgram_length);
       } else
       {
-        /* the next two values will not be used as there is not qgram */
+        /* the next two values will not be used as there is no qgram */
         this_hash_value = 0;
         wc = 1;
       }

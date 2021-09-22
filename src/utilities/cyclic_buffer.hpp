@@ -35,7 +35,7 @@ class CyclicBuffer
     first(0)
   {
   }
-  void initialize(size_t _max_num_elems)
+  void initialize(size_t _max_num_elems) noexcept
   {
     max_num_elems = _max_num_elems;
     assert(max_num_elems > 1 && max_num_elems <= max_size);
@@ -44,18 +44,18 @@ class CyclicBuffer
       next[idx] = idx < max_num_elems - 1 ? idx + 1 : 0;
     }
   }
-  void prepend(Basetype new_elem)
+  void prepend(Basetype new_elem) noexcept
   {
     assert(num_elems < max_num_elems);
     num_elems++;
     space[max_num_elems - num_elems] = new_elem;
   }
-  void append(Basetype new_elem)
+  void append(Basetype new_elem) noexcept
   {
     assert(num_elems < max_num_elems);
     space[num_elems++] = new_elem;
   }
-  Basetype shift(Basetype new_elem)
+  Basetype shift(Basetype new_elem) noexcept
   {
     assert(max_num_elems == num_elems);
     Basetype ret = space[first];
@@ -63,7 +63,7 @@ class CyclicBuffer
     first = next[first];
     return ret;
   }
-  const Basetype *consecutive_memory_buffer_content(void)
+  const Basetype *consecutive_memory_buffer_content(void) noexcept
   {
     if (first > 0)
     {
