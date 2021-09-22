@@ -109,6 +109,16 @@ class BytesUnit
       return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) < 0;
     }
 
+    size_t sum(void) const noexcept
+    {
+      size_t this_sum = 0;
+      for (size_t j = 0; j < sizeof_unit; j++)
+      {
+        this_sum += static_cast<size_t>(bytes[j]);
+      }
+      return this_sum;
+    }
+
     void show(void) const noexcept
     {
       for (size_t j = 0; j < sizeof_unit; j++)

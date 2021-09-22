@@ -21,12 +21,14 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include <tuple>
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
+#include "utilities/bytes_unit.hpp"
 
 #ifndef NDEBUG
 static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
@@ -45,32 +47,45 @@ static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
 }
 #endif
 
-static std::pair<uint64_t,size_t> apply_qgram_iterator(size_t qgram_length,
-                                     const char *sequence,
-                                     size_t this_length)
+template<int sizeof_unit_hashed_qgrams>
+static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
+                      size_t qgram_length,
+                      const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
+                        &hashed_qgram_packer,
+                      size_t seqnum,
+                      const char *sequence,
+                      size_t this_length)
 {
   uint8_t *qgram_buffer = new uint8_t [qgram_length];
 #ifndef NDEBUG
   alphabet::GttlAlphabet_UL_4 dna_alphabet;
 #endif
   uint64_t sum_hash_values = 0;
-  size_t pos = 0;
+  size_t seqpos = 0;
   QgramNtHashFwdIterator4 qgiter(qgram_length,sequence,this_length);
+  size_t bytes_unit_sum = 0;
   for (auto const &&code_pair : qgiter)
   {
     if (std::get<1>(code_pair) == 0)
     {
-      sum_hash_values += std::get<0>(code_pair);
+      uint64_t this_hash = std::get<0>(code_pair);
+      sum_hash_values += this_hash;
 #ifndef NDEBUG
       qgrams_nt_fwd_compare(dna_alphabet,qgram_buffer,
-                            sequence + pos,qgram_length,
+                            sequence + seqpos,qgram_length,
                             std::get<0>(code_pair));
 #endif
+      BytesUnit<sizeof_unit_hashed_qgrams,3>
+            current_hashed_qgram(hashed_qgram_packer,
+                                 {this_hash,
+                                  static_cast<uint64_t>(seqnum),
+                                  static_cast<uint64_t>(seqpos)});
+      bytes_unit_sum += current_hashed_qgram.sum();
     }
-    pos++;
+    seqpos++;
   }
   delete [] qgram_buffer;
-  return {sum_hash_values,pos};
+  return {sum_hash_values,seqpos,bytes_unit_sum};
 }
 
 static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
@@ -91,10 +106,19 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
-  size_t num_of_sequences = 0;
+  size_t seqnum = 0;
   size_t max_sequence_length = 0;
   uint64_t sum_hash_values = 0;
   size_t count_all_qgrams = 0;
+  size_t bytes_unit_sum = 0;
+  const int hashbits = 39;
+  const int sequences_number_bits = 5;
+  const int sequences_length_bits = 28;
+  constexpr const int sizeof_unit_hashed_qgrams = 9;
+  GttlBitPacker<sizeof_unit_hashed_qgrams,3>
+                hashed_qgram_packer({hashbits,
+                                     sequences_number_bits,
+                                     sequences_length_bits});
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
@@ -108,15 +132,17 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
       sequence_ranges = nwcr_it.enumerate();
       for (auto &&nwr_it : sequence_ranges)
       {
-        std::pair<uint64_t,size_t> result;
         const size_t this_length = std::get<1>(nwr_it) -
                                    std::get<0>(nwr_it) + 1;
         const char *seqptr = sequence.data() + std::get<0>(nwr_it);
-        result = apply_qgram_iterator(qgram_length,seqptr,this_length);
+        auto result = apply_qgram_iterator<sizeof_unit_hashed_qgrams>
+                                          (qgram_length,hashed_qgram_packer,
+                                           seqnum,seqptr,this_length);
         sum_hash_values += std::get<0>(result);
         count_all_qgrams += std::get<1>(result);
+        bytes_unit_sum += std::get<2>(result);
       }
-      num_of_sequences++;
+      seqnum++;
     }
   }
   catch (std::string &msg)
@@ -124,14 +150,15 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
     gttl_fp_type_close(in_fp);
     throw msg;
   }
-  printf("# num_of_sequences\t%lu\n",num_of_sequences);
+  printf("# num_of_sequences\t%lu\n",seqnum);
   printf("# total_length\t%lu\n",total_length);
   printf("# max_sequence_length\t%lu\n",max_sequence_length);
-  printf("# num_of_sequences.bits\t%d\n",gt_required_bits(num_of_sequences));
+  printf("# num_of_sequences.bits\t%d\n",gt_required_bits(seqnum));
   printf("# max_sequence_length.bits\t%d\n",
           gt_required_bits<size_t>(max_sequence_length));
   printf("# count_all_qgrams\t%lu\n",count_all_qgrams);
   printf("# sum_hash_values\t%lu\n",(unsigned long) sum_hash_values);
+  printf("# bytes_unit_sum\t%lu\n",(unsigned long) bytes_unit_sum);
   gttl_fp_type_close(in_fp);
 }
 
