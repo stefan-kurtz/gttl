@@ -354,6 +354,15 @@ class GttlMultiseq
   {
     return Iterator(nullptr,sequences_number);
   }
+
+  template<class T,void (*transformation)(T &,char *,size_t)>
+  void transformer(T &t)
+  {
+    for (size_t snum = 0; snum < sequences_number_get(); snum++)
+    {
+      transformation(t,sequence_ptr_get(snum),sequence_length_get(snum));
+    }
+  }
 };
 uint8_t GttlMultiseq::static_count = 0;
 #endif  // MULTISEQ_HPP
