@@ -278,6 +278,21 @@ class GttlMultiseq
     return header_ptr[seqnum];
   }
 
+  void statistics(void)
+  {
+    std::cout << "# sequences_number\t" << sequences_number_get()
+              << std::endl;
+    std::cout << "# sequences_number_bits\t" << sequences_number_bits_get()
+              << std::endl;
+    std::cout << "# sequences_maximum_length\t"
+              << sequences_maximum_length_get()
+              << std::endl;
+    std::cout << "# sequences_length_bits\t" << sequences_length_bits_get()
+              << std::endl;
+    std::cout << "# sequences_total_length\t" << sequences_total_length_get()
+              << std::endl;
+  }
+
   /* Prints out the header and sequence infos to stdout
    - width gives the maximum line size, width 0
      prints prints out sequences in just one line

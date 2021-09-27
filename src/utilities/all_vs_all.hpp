@@ -35,10 +35,8 @@ template<typename T,typename R,typename Data,size_t (*first_index)(size_t),
          R (*process_pair)(const T &,size_t,const T &,size_t),
          void (*process_result)(size_t,size_t,size_t,R,Data &)>
 static void gttl_thread_runner(size_t thread_id,size_t task_num,
-                               void *v_thread_data)
+                               GttlThreadData<T,Data> *thread_data)
 {
-  GttlThreadData<T,Data> *thread_data
-    = static_cast<GttlThreadData<T,Data> *>(v_thread_data);
   gttl_one_vs_all<T,R,Data,first_index,process_pair,process_result>
                       (thread_data->data,thread_id,
                        thread_data->tasks0,task_num,thread_data->tasks1);
@@ -66,7 +64,7 @@ void gttl_all_vs_all(const T &tasks0,const T &tasks1,Data &data,
                                gttl_thread_runner<T,R,Data,first_index,
                                                   process_pair,
                                                   process_result>,
-                               (void *) &thread_data);
+                               &thread_data);
   }
 }
 #endif

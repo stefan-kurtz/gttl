@@ -110,7 +110,7 @@ class BytesUnit
     }
 
     size_t sum(void) const noexcept
-    {  
+    {
       const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
 
       if constexpr (sizeof_unit == 8)
