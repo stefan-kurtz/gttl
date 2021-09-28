@@ -34,19 +34,29 @@ class GttlThreadPool
                    GttlThreadFunc<ThreadData> thread_func,
                    ThreadData *thread_data)
     {
-      assert(number_of_threads > 1 && number_of_tasks > 0);
-      std::vector<std::thread> threads{};
-      VirtualQueue vq(number_of_tasks);
-      for (size_t thd = 0; thd < number_of_threads; thd++)
+      assert(number_of_threads >= 1 && number_of_tasks > 0);
+      if (number_of_threads == 1)
       {
-        threads.push_back(std::thread(gttl_thread_apply_thread_func<ThreadData>,
-                                      thread_func,
-                                      thread_data,
-                                      &vq, thd));
-      }
-      for (auto &th : threads)
+        for (size_t task_num = 0; task_num < number_of_tasks; task_num++)
+        {
+          thread_func(0, task_num, thread_data);
+        }
+      } else
       {
-        th.join();
+        std::vector<std::thread> threads{};
+        VirtualQueue vq(number_of_tasks);
+        for (size_t thd = 0; thd < number_of_threads; thd++)
+        {
+          threads.push_back(std::thread(gttl_thread_apply_thread_func
+                                        <ThreadData>,
+                                        thread_func,
+                                        thread_data,
+                                        &vq, thd));
+        }
+        for (auto &th : threads)
+        {
+          th.join();
+        }
       }
     }
 };
