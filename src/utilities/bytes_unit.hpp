@@ -84,6 +84,12 @@ class BytesUnit
       return decode_at<3>(bitpacker);
     }
 
+    uint64_t decode_at4(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
+                        const noexcept
+    {
+      return decode_at<4>(bitpacker);
+    }
+
 #ifdef OWNCOPY_CONSTRUCTOR
     //It seems that this copy constructor is implicit and leaving it
     //leads to a compiler error or clang++. So we better exclude it here.

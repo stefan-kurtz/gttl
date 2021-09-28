@@ -1,6 +1,7 @@
 #ifndef RUN_TIME_CLASS_HPP
 #define RUN_TIME_CLASS_HPP
 #include <iostream>
+#include <mutex>
 #include <chrono>
 
 class RunTimeClass
@@ -30,6 +31,13 @@ class RunTimeClass
   size_t show(const std::string &msg)
   {
    return this->show(msg.c_str());
+  }
+  size_t locked_show(std::mutex &cout_mutex,const char *msg)
+  {
+    cout_mutex.lock();
+    const size_t elapsed_micro = this->show(msg);
+    cout_mutex.unlock();
+    return elapsed_micro;
   }
   size_t elapsed(void)
   {

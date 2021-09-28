@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
   RunTimeClass rt = RunTimeClass();
   try
   {
-    multiseq = new GttlMultiseq(argv[optind]);
+    constexpr const bool store_sequences = true;
+    multiseq = new GttlMultiseq(argv[optind],store_sequences,UINT8_MAX);
   }
   catch (std::string &msg)
   {

@@ -52,28 +52,27 @@ class GttlMultiseq
   int sequences_number_bits,
       sequences_length_bits;
 
-  // static counter for all instances of the class
-  static uint8_t static_count;
   uint8_t padding_char;
 
  public:
   /* Constructor
-   Inputfile should be in Fasta format, throws std::string */
-  GttlMultiseq(const char *inputfile, bool _store = true)
+   Inputfile should be in Fasta format, throws std::string,
+   if multiple GttlMultseq-instance are used and there are pairwise
+   comparisons of the sequences, use a different padding_char, so
+   that one does not have to have a special case for handling sequence
+   boundaries when for example computing maximal matches. */
+  GttlMultiseq(const char *inputfile, bool _store, uint8_t _padding_char)
       : store(_store),
         sequences_number(0),
         sequences_total_length(0),
         sequences_maximum_length(0),
         headers_total_length(0),
-        padding_char(static_cast<uint8_t>(UCHAR_MAX - static_count))
+        padding_char(_padding_char)
   {
-    /* set number of instance and increase overall count
-       padding_char 122 = 'z', so stop */
     if (padding_char <= uint8_t(122))
     {
       throw std::string("non letter padding character exhausted");
     }
-    static_count++;
     GttlFpType in_fp = gttl_fp_type_open(inputfile, "rb");
     if (in_fp == nullptr)
     {
@@ -379,5 +378,4 @@ class GttlMultiseq
     }
   }
 };
-uint8_t GttlMultiseq::static_count = 0;
 #endif  // MULTISEQ_HPP
