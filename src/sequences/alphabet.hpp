@@ -329,7 +329,7 @@ class GttlAlphabet
     /* 254 */ _undefined_rank,
     /* 255 */ _undefined_rank
   };
-  static constexpr size_t _size = find_size<char_spec>();
+  static constexpr const size_t _size = find_size<char_spec>();
   static constexpr std::array<char,_size> characters
     = fill_characters<_size,char_spec>();
   public:
@@ -376,6 +376,7 @@ class GttlAlphabet
         byte_seq[idx] = char_to_rank(char_seq[idx]);
       }
     }
+
 };
 
 namespace alphabet
