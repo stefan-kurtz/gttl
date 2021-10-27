@@ -42,9 +42,9 @@ all:${EXECS}
 
 test:${EXECS}
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
-	@./check_err.py --fail_for_protein_sequence enum_nthash.x
-	@./check_err.py --fail_for_protein_sequence count_non_wc_ranges.x
-	@./check_err.py multiseq_mn.x
+	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
+	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
+	@./check_err.py ./multiseq_mn.x
 	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
 	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
 	@./multiseq_mn.x -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
