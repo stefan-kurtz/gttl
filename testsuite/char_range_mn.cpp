@@ -53,11 +53,11 @@ static void display_char_ranges(const char *inputfilename)
       auto sequence = std::get<1>(si);
       static constexpr const char nucleotides[] = "ACGTacgt";
       GttlCharRange<nucleotides> ranger(sequence.data(),sequence.size());
-      for (auto it = ranger.begin(); it != ranger.end(); ++it)
+      for (auto &&it : ranger)
       {
-        std::cout << seqnum << "\t" << std::get<0>(*it)
-                  << "\t" << std::get<1>(*it) << std::endl;
-        non_wildcard_ranges_total_length += std::get<1>(*it);
+        std::cout << seqnum << "\t" << std::get<0>(it)
+                  << "\t" << std::get<1>(it) << std::endl;
+        non_wildcard_ranges_total_length += std::get<1>(it);
       }
       seqnum++;
     }
