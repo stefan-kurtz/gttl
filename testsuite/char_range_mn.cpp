@@ -47,6 +47,7 @@ static void display_char_ranges(const char *inputfilename)
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
+    size_t seqnum = 0;
     for (auto &&si : gttl_si)
     {
       auto sequence = std::get<1>(si);
@@ -54,9 +55,11 @@ static void display_char_ranges(const char *inputfilename)
       GttlCharRange<nucleotides> ranger(sequence.data(),sequence.size());
       for (auto it = ranger.begin(); it != ranger.end(); ++it)
       {
-        std::cout << std::get<0>(*it) << "\t" << std::get<1>(*it) << std::endl;
+        std::cout << seqnum << "\t" << std::get<0>(*it)
+                  << "\t" << std::get<1>(*it) << std::endl;
         non_wildcard_ranges_total_length += std::get<1>(*it);
       }
+      seqnum++;
     }
   }
   catch (std::string &msg)

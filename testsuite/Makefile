@@ -54,6 +54,9 @@ test:${EXECS}
 	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv 
 	@./bitpacker_main.x 100
 	@./endian.x
+	@./char_range_compare.sh ../testdata/small.fna
+	@./char_range_compare.sh ../testdata/simple.fna
+	@./char_range_compare.sh ../testdata/at1MB.fna
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp

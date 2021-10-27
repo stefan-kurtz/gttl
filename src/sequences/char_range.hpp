@@ -190,22 +190,23 @@ class GttlCharRange
   {
     private:
     static constexpr const CharFinder<charset> char_finder{};
-    const char *sequence, *curr_start, *curr_end, *end_ptr;
+    const char *sequence, *curr_end, *end_ptr;
     size_t range_start, range_length;
+    bool exhausted;
     public:
-      Iterator(const char *_sequence,size_t seqlen) :
+      Iterator(const char *_sequence,size_t seqlen,bool _exhausted) :
         sequence(_sequence),
-        curr_start(_sequence),
         curr_end(nullptr),
-        end_ptr(sequence == nullptr ? nullptr : (sequence + seqlen))
+        end_ptr(sequence == nullptr ? nullptr : (sequence + seqlen)),
+        exhausted(_exhausted)
       {
         if (sequence != nullptr)
         {
-          curr_start = char_finder.find(sequence,end_ptr);
+          const char *curr_start = char_finder.find(sequence,end_ptr);
           if (curr_start != nullptr)
           {
             range_start = static_cast<size_t>(curr_start - sequence);
-            const char *curr_end = char_finder.find_not(curr_start+1,end_ptr);
+            curr_end = char_finder.find_not(curr_start+1,end_ptr);
             if (curr_end == nullptr)
             {
               range_length = static_cast<size_t>(end_ptr - curr_start);
@@ -214,19 +215,27 @@ class GttlCharRange
             {
               range_length = static_cast<size_t>(curr_end - curr_start);
             }
+          } else
+          {
+            exhausted = true;
           }
         }
       }
       Iterator& operator++() /* prefix increment*/
       {
+        if (curr_end == nullptr)
+        {
+          exhausted = true;
+          return *this;
+        }
         while (true)
         {
-          assert(curr_start != nullptr && curr_end != nullptr);
-          curr_start = char_finder.find(curr_end+1,end_ptr);
+          assert(curr_end != nullptr);
+          const char *curr_start = char_finder.find(curr_end+1,end_ptr);
           if (curr_start != nullptr)
           {
             range_start = static_cast<size_t>(curr_start - sequence);
-            const char *curr_end = char_finder.find_not(curr_start+1,end_ptr);
+            curr_end = char_finder.find_not(curr_start+1,end_ptr);
             if (curr_end == nullptr)
             {
               range_length = static_cast<size_t>(end_ptr - curr_start);
@@ -234,8 +243,10 @@ class GttlCharRange
               break;
             }
             range_length = static_cast<size_t>(curr_end - curr_start);
+            break;
           } else
           {
+            exhausted = true;
             break;
           }
         }
@@ -247,7 +258,7 @@ class GttlCharRange
       }
       bool operator != (const Iterator& other) const noexcept
       {
-        return curr_start != other.curr_start;
+        return exhausted != other.exhausted;
       }
       void show(void)
       {
@@ -268,13 +279,12 @@ class GttlCharRange
           seqlen(seqlen) {}
   Iterator begin()
   {
-    auto it = Iterator(sequence,seqlen);
-    it.show();
+    auto it = Iterator(sequence,seqlen,false);
     return it;
   }
   Iterator end()
   {
-    return Iterator(nullptr,0);
+    return Iterator(nullptr,0,true);
   }
 };
 #endif
