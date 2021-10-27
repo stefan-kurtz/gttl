@@ -68,6 +68,6 @@ code_check:
 
 .PHONY:clean
 clean:
-	${RM} -r *.[odx] *.x.dSYM/
+	${RM} -r *.[odx] *.x.dSYM/ __pycache__
 
 -include ${wildcard *.d}
