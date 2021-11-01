@@ -26,6 +26,7 @@
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/char_range.hpp"
 
+template<bool invert>
 static void display_char_ranges(const char *inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
@@ -52,7 +53,7 @@ static void display_char_ranges(const char *inputfilename)
     {
       auto sequence = std::get<1>(si);
       static constexpr const char nucleotides[] = "ACGTacgt";
-      GttlCharRange<nucleotides> ranger(sequence.data(),sequence.size());
+      GttlCharRange<invert,nucleotides> ranger(sequence.data(),sequence.size());
       for (auto &&it : ranger)
       {
         std::cout << seqnum << "\t" << std::get<0>(it)
@@ -76,18 +77,38 @@ int main(int argc,char *argv[])
 {
   const char *progname = argv[0];
   bool haserr = false;
-  for (int idx = 1; idx < argc; idx++)
+  if (argc > 1 &&
+      (strcmp(argv[1],"-i") == 0 || strcmp(argv[1],"--invert") == 0))
   {
-    try
+    for (int idx = 2; idx < argc; idx++)
     {
-      display_char_ranges(argv[idx]);
+      try
+      {
+        display_char_ranges<true>(argv[idx]);
+      }
+      catch (std::string &msg)
+      {
+        std::cerr << progname << ": file \"" << argv[idx] << "\""
+                  << msg << std::endl;
+        haserr = true;
+        break;
+      }
     }
-    catch (std::string &msg)
+  } else
+  {
+    for (int idx = 1; idx < argc; idx++)
     {
-      std::cerr << progname << ": file \"" << argv[idx] << "\""
-                << msg << std::endl;
-      haserr = true;
-      break;
+      try
+      {
+        display_char_ranges<false>(argv[idx]);
+      }
+      catch (std::string &msg)
+      {
+        std::cerr << progname << ": file \"" << argv[idx] << "\""
+                  << msg << std::endl;
+        haserr = true;
+        break;
+      }
     }
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;

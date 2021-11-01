@@ -12,4 +12,6 @@ inputfile=$1
 TMPFILE=`mktemp TMP.XXXXXX` || exit 1
 ./char_range.py ${inputfile} > ${TMPFILE}
 ./char_range_mn.x ${inputfile} | diff - ${TMPFILE}
+./char_range.py --invert ${inputfile} > ${TMPFILE}
+./char_range_mn.x --invert ${inputfile} | diff - ${TMPFILE}
 rm -f ${TMPFILE}

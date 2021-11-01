@@ -182,7 +182,16 @@ class CharFinder
   }
 };
 
-template<const char *charset>
+#define CHAR_FINDER(VAR,INVERT,PTR)\
+        if constexpr (INVERT)\
+        {\
+          VAR = char_finder.find_not(PTR,end_ptr);\
+        } else\
+        {\
+          VAR = char_finder.find(PTR,end_ptr);\
+        }
+
+template<bool invert,const char *charset>
 class GttlCharRange
 {
   private:
@@ -202,11 +211,12 @@ class GttlCharRange
       {
         if (sequence != nullptr)
         {
-          const char *curr_start = char_finder.find(sequence,end_ptr);
+          const char *curr_start;
+          CHAR_FINDER(curr_start,invert,sequence);
           if (curr_start != nullptr)
           {
             range_start = static_cast<size_t>(curr_start - sequence);
-            curr_end = char_finder.find_not(curr_start+1,end_ptr);
+            CHAR_FINDER(curr_end,!invert,curr_start+1);
             if (curr_end == nullptr)
             {
               range_length = static_cast<size_t>(end_ptr - curr_start);
@@ -231,11 +241,12 @@ class GttlCharRange
         while (true)
         {
           assert(curr_end != nullptr);
-          const char *curr_start = char_finder.find(curr_end+1,end_ptr);
+          const char *curr_start;
+          CHAR_FINDER(curr_start,invert,curr_end+1);
           if (curr_start != nullptr)
           {
             range_start = static_cast<size_t>(curr_start - sequence);
-            curr_end = char_finder.find_not(curr_start+1,end_ptr);
+            CHAR_FINDER(curr_end,!invert,curr_start+1);
             if (curr_end == nullptr)
             {
               range_length = static_cast<size_t>(end_ptr - curr_start);
