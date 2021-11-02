@@ -21,12 +21,75 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include "utilities/cxxopts.hpp"
 #include "utilities/mathsupport.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/char_range.hpp"
 
-template<bool invert>
+static void usage(const cxxopts::Options &options)
+{
+  std::cerr << options.help() << std::endl;
+}
+
+class CharRangeOptions
+{
+ private:
+  std::vector<std::string> input_files{};
+  bool invert_option = false, reverse_option = false, help_option = false;
+
+ public:
+  CharRangeOptions() {};
+
+  void parse(int argc, char **argv)
+  {
+    cxxopts::Options options(argv[0],"compute ranges of characters of the same "
+                                     "kind (like nucleotides or wildcard)");
+    options.set_width(80);
+    options.custom_help(std::string("[options] filename1 [filename1 ..]"));
+    options.set_tab_expansion();
+    options.add_options()
+       ("i,invert", "show ranges of chararacters not in the given set",
+        cxxopts::value<bool>(invert_option)->default_value("false"))
+       ("r,reverse", "enumerate ranges in reverse order",
+        cxxopts::value<bool>(reverse_option)->default_value("false"))
+       ("h,help", "print usage");
+    try
+    {
+      auto result = options.parse(argc, argv);
+      if (result.count("help") > 0)
+      {
+        help_option = true;
+        usage(options);
+      }
+      const std::vector<std::string>& unmatched_args = result.unmatched();
+      for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+      {
+        this->input_files.push_back(unmatched_args[idx]);
+      }
+    }
+    catch (const cxxopts::OptionException &e)
+    {
+      usage(options);
+      throw std::invalid_argument(e.what());
+    }
+  }
+
+  bool help_option_is_set(void) const noexcept
+  {
+    return help_option;
+  }
+  bool invert_option_is_set(void) const noexcept
+  {
+    return invert_option;
+  }
+  bool reverse_option_is_set(void) const noexcept
+  {
+    return reverse_option;
+  }
+};
+
+template<bool forward,bool invert>
 static void display_char_ranges(const char *inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
@@ -53,7 +116,8 @@ static void display_char_ranges(const char *inputfilename)
     {
       auto sequence = std::get<1>(si);
       static constexpr const char nucleotides[] = "ACGTacgt";
-      GttlCharRange<invert,nucleotides> ranger(sequence.data(),sequence.size());
+      GttlCharRange<forward,invert,nucleotides> ranger(sequence.data(),
+                                                    sequence.size());
       for (auto &&it : ranger)
       {
         std::cout << seqnum << "\t" << std::get<0>(it)
@@ -75,16 +139,30 @@ static void display_char_ranges(const char *inputfilename)
 
 int main(int argc,char *argv[])
 {
+  CharRangeOptions options;
+
+  try
+  {
+    options.parse(argc, argv);
+  }
+  catch (std::invalid_argument &e) /* check_err.py */
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (options.help_option_is_set())
+  {
+    return EXIT_SUCCESS;
+  }
   const char *progname = argv[0];
   bool haserr = false;
-  if (argc > 1 &&
-      (strcmp(argv[1],"-i") == 0 || strcmp(argv[1],"--invert") == 0))
+  if (options.invert_option_is_set())
   {
     for (int idx = 2; idx < argc; idx++)
     {
       try
       {
-        display_char_ranges<true>(argv[idx]);
+        display_char_ranges<true,true>(argv[idx]);
       }
       catch (std::string &msg)
       {
@@ -100,7 +178,7 @@ int main(int argc,char *argv[])
     {
       try
       {
-        display_char_ranges<false>(argv[idx]);
+        display_char_ranges<true,false>(argv[idx]);
       }
       catch (std::string &msg)
       {
