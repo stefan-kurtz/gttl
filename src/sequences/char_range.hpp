@@ -88,7 +88,7 @@ class GttlCharRange
             }
             if constexpr (!forward)
             {
-              range_start = _seqlen - 1 - range_start - range_length + 1;
+              range_start = _seqlen - range_start - range_length;
             }
           } else
           {
@@ -118,7 +118,7 @@ class GttlCharRange
               range_length = ptr2difference(end_ptr,curr_start);
               if constexpr (!forward)
               {
-                range_start = seqlen - 1 - range_start - range_length + 1;
+                range_start = seqlen - range_start - range_length;
               }
               curr_start = nullptr;
               break;
@@ -126,7 +126,7 @@ class GttlCharRange
             range_length = ptr2difference(curr_end,curr_start);
             if constexpr (!forward)
             {
-              range_start = seqlen - 1 - range_start - range_length + 1;
+              range_start = seqlen - range_start - range_length;
             }
             break;
           } else
@@ -145,16 +145,6 @@ class GttlCharRange
       {
         return exhausted != other.exhausted;
       }
-      void show(void)
-      {
-        for (size_t idx = 0; idx <= 127; idx++)
-        {
-          if (char_finder.is_member(static_cast<char>(idx)))
-          {
-            std::cout << idx << "\t" << static_cast<char>(idx) << std::endl;
-          }
-        }
-      }
   };
   const char *sequence;
   size_t seqlen;
@@ -172,4 +162,14 @@ class GttlCharRange
     return Iterator(nullptr,0,true);
   }
 };
+
+namespace char_range
+{
+  template<class CharFinder,const CharFinder &char_finder>
+  using GttlForwardWildcardFinder
+    = GttlCharRange<CharFinder,char_finder,true,true>;
+  template<class CharFinder,const CharFinder &char_finder>
+  using GttlBackwardWildcardFinder
+    = GttlCharRange<CharFinder,char_finder,false,true>;
+}
 #endif

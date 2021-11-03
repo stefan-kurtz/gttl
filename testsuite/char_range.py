@@ -7,10 +7,12 @@ def parse_arguments(argv):
   p = argparse.ArgumentParser(description=('enumerate maximum ranges of '
                                            'characters which are/are not '
                                            'from some given alphabet'))
+  p.add_argument('--alphabet',type=str,default='ACGTacgt',
+                 help='specify alphabet characters')
   p.add_argument('-i','--invert',action='store_true',default=False,
-                  help='inversion, i.e. are not from alphabet')
+                 help='inversion, i.e. are not from alphabet')
   p.add_argument('-r','--reverse',action='store_true',default=False,
-                  help='enumerate ranges in reverse order')
+                 help='enumerate ranges in reverse order')
   p.add_argument('inputfiles',nargs='+',help='specify input files')
   return p.parse_args(argv)
 
@@ -42,9 +44,10 @@ args = parse_arguments(sys.argv[1:])
 for inputfile in args.inputfiles:
   print(inputfile)
   non_wildcard_ranges_total_length = 0
+  alpha_set = set(args.alphabet)
   for seqnum, (header, sequence) in enumerate(fasta_next(inputfile)):
     r_list = list()
-    for start, length in enum_char_ranges(args.invert,sequence,set('ACGTacgt')):
+    for start, length in enum_char_ranges(args.invert,sequence,alpha_set):
       non_wildcard_ranges_total_length += length
       if args.reverse:
         r_list.append((start,length))

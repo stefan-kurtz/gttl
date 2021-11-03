@@ -18,4 +18,6 @@ TMPFILE=`mktemp TMP.XXXXXX` || exit 1
 ./char_range_mn.x --reverse ${inputfile} | diff - ${TMPFILE}
 ./char_range.py --reverse --invert ${inputfile} > ${TMPFILE}
 ./char_range_mn.x --reverse --invert ${inputfile} | diff - ${TMPFILE}
+./char_range.py --alphabet 'N' ${inputfile} > ${TMPFILE}
+./char_range_mn.x --singlechar ${inputfile} | diff - ${TMPFILE}
 rm -f ${TMPFILE}

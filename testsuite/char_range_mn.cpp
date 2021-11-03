@@ -48,7 +48,7 @@ class CharRangeOptions
     cxxopts::Options options(argv[0],"compute ranges of characters of the same "
                                      "kind (like nucleotides or wildcard)");
     options.set_width(80);
-    options.custom_help(std::string("[options] filename1 [filename1 ..]"));
+    options.custom_help(std::string("[options] filename1 [filename2 ...]"));
     options.set_tab_expansion();
     options.add_options()
        ("s,singlechar", "use single character finder for N",
@@ -213,16 +213,14 @@ int main(int argc,char *argv[])
   bool haserr;
   if (options.singlechar_option_is_set())
   {
-    using NFinder = SingleCharFinder<'N'>;
-    static constexpr const NFinder single_N_finder{};
-    haserr = display_char_ranges_cases<NFinder,single_N_finder>
+    static constexpr const char_finder::NFinder single_N_finder{};
+    haserr = display_char_ranges_cases<char_finder::NFinder,single_N_finder>
                                       (argv[0],options);
   } else
   {
-    static constexpr const char nucleotides[] = "ACGTacgt";
-    using NucleotideFinder = MultiCharFinder<nucleotides>;
-    static constexpr const NucleotideFinder nucleotide_finder{};
-    haserr = display_char_ranges_cases<NucleotideFinder,nucleotide_finder>
+    static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
+    haserr = display_char_ranges_cases<char_finder::NucleotideFinder,
+                                       nucleotide_finder>
                                       (argv[0],options);
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;

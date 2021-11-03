@@ -169,6 +169,10 @@ class MultiCharFinder
   {
     return in_charset[static_cast<int>(cc)];
   }
+  constexpr size_t max_char_idx(void) const noexcept
+  {
+    return sizeof in_charset/sizeof in_charset[0];
+  }
   const char *find_forward(const char *s,const char *endptr) const noexcept
   {
     return find_generic<1,true>(s,endptr);
@@ -184,6 +188,16 @@ class MultiCharFinder
   const char *find_backward_not(const char *s,const char *endptr) const noexcept
   {
     return find_generic<-1,false>(s,endptr);
+  }
+  void show(void)
+  {
+    for (size_t idx = 0; idx <= max_char_idx(); idx++)
+    {
+      if (is_member(static_cast<char>(idx)))
+      {
+        std::cout << idx << "\t" << static_cast<char>(idx) << std::endl;
+      }
+    }
   }
 };
 
@@ -213,6 +227,10 @@ class SingleCharFinder
     return nullptr;
   }
   public:
+  bool is_member(char cc) const noexcept
+  {
+    return cc == singlechar;
+  }
   const char *find_forward(const char *s,const char *endptr) const noexcept
   {
     return find_generic<1,true>(s,endptr);
@@ -230,4 +248,15 @@ class SingleCharFinder
     return find_generic<-1,false>(s,endptr);
   }
 };
+
+namespace char_finder
+{
+  static constexpr const char nucleotides[] = "ACGTUacgtu";
+  using NucleotideFinder = MultiCharFinder<nucleotides>;
+  static constexpr const char aminoacids[] = "ACDEFGHIKLMNPQRSTVWY";
+  using AminoacidFinder = MultiCharFinder<aminoacids>;
+  using NFinder = SingleCharFinder<'N'>;
+  using NucleotideWildcardIs4Finder = SingleCharFinder<static_cast<char>(4)>;
+  using AminoacidWildcardIs20Finder = SingleCharFinder<static_cast<char>(20)>;
+}
 #endif
