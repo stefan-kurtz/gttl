@@ -9,8 +9,9 @@ def parse_arguments(argv):
                                            'from some given alphabet'))
   p.add_argument('-i','--invert',action='store_true',default=False,
                   help='inversion, i.e. are not from alphabet')
-  p.add_argument('inputfile',type=str,
-                  help='specify input file')
+  p.add_argument('-r','--reverse',action='store_true',default=False,
+                  help='enumerate ranges in reverse order')
+  p.add_argument('inputfiles',nargs='+',help='specify input files')
   return p.parse_args(argv)
 
 def enum_char_ranges(invert,seq,alphabet):
@@ -38,10 +39,19 @@ def enum_char_ranges(invert,seq,alphabet):
 
 args = parse_arguments(sys.argv[1:])
 
-non_wildcard_ranges_total_length = 0
-for seqnum, (header, sequence) in enumerate(fasta_next(args.inputfile)):
-  for start, length in enum_char_ranges(args.invert,sequence,set('ACGTacgt')):
-    print('{}\t{}\t{}'.format(seqnum,start,length))
-    non_wildcard_ranges_total_length += length
-print('# non_wildcard_ranges_total_length\t{}'
-       .format(non_wildcard_ranges_total_length))
+for inputfile in args.inputfiles:
+  print(inputfile)
+  non_wildcard_ranges_total_length = 0
+  for seqnum, (header, sequence) in enumerate(fasta_next(inputfile)):
+    r_list = list()
+    for start, length in enum_char_ranges(args.invert,sequence,set('ACGTacgt')):
+      non_wildcard_ranges_total_length += length
+      if args.reverse:
+        r_list.append((start,length))
+      else:
+        print('{}\t{}\t{}'.format(seqnum,start,length))
+    if args.reverse:
+      for start, length in reversed(r_list):
+        print('{}\t{}\t{}'.format(seqnum,start,length))
+  print('# non_wildcard_ranges_total_length\t{}'
+         .format(non_wildcard_ranges_total_length))

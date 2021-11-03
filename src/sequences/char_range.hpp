@@ -212,8 +212,6 @@ class CharFinder
           }\
         }
 
-
-
 template<bool forward,bool invert,const char *charset>
 class GttlCharRange
 {
@@ -223,7 +221,7 @@ class GttlCharRange
     private:
     static constexpr const CharFinder<charset> char_finder{};
     const char *sequence, *curr_end, *end_ptr;
-    size_t range_start, range_length;
+    size_t seqlen, range_start, range_length;
     bool exhausted;
     size_t ptr2difference(const char *a,const char *b)
     {
@@ -238,8 +236,9 @@ class GttlCharRange
       }
     }
     public:
-      Iterator(const char *_sequence,size_t seqlen,bool _exhausted) :
+      Iterator(const char *_sequence,size_t _seqlen,bool _exhausted) :
         curr_end(nullptr),
+        seqlen(_seqlen),
         exhausted(_exhausted)
       {
         if (_sequence == nullptr)
@@ -250,21 +249,22 @@ class GttlCharRange
           if constexpr (forward)
           {
             sequence = _sequence;
-            end_ptr = _sequence + seqlen;
+            end_ptr = _sequence + _seqlen;
           } else
           {
-            sequence = _sequence + seqlen - 1;
+            sequence = _sequence + _seqlen - 1;
             end_ptr = _sequence - 1;
           }
         }
         if (sequence != nullptr)
         {
+          static constexpr const int step = forward ? 1 : -1;
           const char *curr_start;
           GTTL_CHAR_FINDER(curr_start,invert,sequence);
           if (curr_start != nullptr)
           {
             range_start = ptr2difference(curr_start,sequence);
-            GTTL_CHAR_FINDER(curr_end,!invert,curr_start+1);
+            GTTL_CHAR_FINDER(curr_end,!invert,curr_start+step);
             if (curr_end == nullptr)
             {
               range_length = ptr2difference(end_ptr,curr_start);
@@ -272,6 +272,10 @@ class GttlCharRange
             } else
             {
               range_length = ptr2difference(curr_end,curr_start);
+            }
+            if constexpr (!forward)
+            {
+              range_start = _seqlen - 1 - range_start - range_length + 1;
             }
           } else
           {
@@ -288,20 +292,29 @@ class GttlCharRange
         }
         while (true)
         {
+          static constexpr const int step = forward ? 1 : -1;
           assert(curr_end != nullptr);
           const char *curr_start;
-          GTTL_CHAR_FINDER(curr_start,invert,curr_end+1);
+          GTTL_CHAR_FINDER(curr_start,invert,curr_end+step);
           if (curr_start != nullptr)
           {
             range_start = ptr2difference(curr_start,sequence);
-            GTTL_CHAR_FINDER(curr_end,!invert,curr_start+1);
+            GTTL_CHAR_FINDER(curr_end,!invert,curr_start+step);
             if (curr_end == nullptr)
             {
               range_length = ptr2difference(end_ptr,curr_start);
+              if constexpr (!forward)
+              {
+                range_start = seqlen - 1 - range_start - range_length + 1;
+              }
               curr_start = nullptr;
               break;
             }
             range_length = ptr2difference(curr_end,curr_start);
+            if constexpr (!forward)
+            {
+              range_start = seqlen - 1 - range_start - range_length + 1;
+            }
             break;
           } else
           {
@@ -333,9 +346,9 @@ class GttlCharRange
   const char *sequence;
   size_t seqlen;
   public:
-    GttlCharRange(const char *_sequence,size_t seqlen) :
+    GttlCharRange(const char *_sequence,size_t _seqlen) :
           sequence(_sequence),
-          seqlen(seqlen) {}
+          seqlen(_seqlen) {}
   Iterator begin()
   {
     auto it = Iterator(sequence,seqlen,false);

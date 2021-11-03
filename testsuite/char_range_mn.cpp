@@ -35,7 +35,7 @@ static void usage(const cxxopts::Options &options)
 class CharRangeOptions
 {
  private:
-  std::vector<std::string> input_files{};
+  std::vector<std::string> inputfiles{};
   bool invert_option = false, reverse_option = false, help_option = false;
 
  public:
@@ -65,7 +65,7 @@ class CharRangeOptions
       const std::vector<std::string>& unmatched_args = result.unmatched();
       for (size_t idx = 0; idx < unmatched_args.size(); idx++)
       {
-        this->input_files.push_back(unmatched_args[idx]);
+        this->inputfiles.push_back(unmatched_args[idx]);
       }
     }
     catch (const cxxopts::OptionException &e)
@@ -86,6 +86,10 @@ class CharRangeOptions
   bool reverse_option_is_set(void) const noexcept
   {
     return reverse_option;
+  }
+  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  {
+    return this->inputfiles;
   }
 };
 
@@ -154,39 +158,38 @@ int main(int argc,char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  const char *progname = argv[0];
   bool haserr = false;
-  if (options.invert_option_is_set())
+  for (auto && inputfile : options.inputfiles_get())
   {
-    for (int idx = 2; idx < argc; idx++)
+    std::cout << inputfile << std::endl;
+    try
     {
-      try
+      if (options.invert_option_is_set())
       {
-        display_char_ranges<true,true>(argv[idx]);
-      }
-      catch (std::string &msg)
+        if (options.reverse_option_is_set())
+        {
+          display_char_ranges<false,true>(inputfile.c_str());
+        } else
+        {
+          display_char_ranges<true,true>(inputfile.c_str());
+        }
+      } else
       {
-        std::cerr << progname << ": file \"" << argv[idx] << "\""
-                  << msg << std::endl;
-        haserr = true;
-        break;
+        if (options.reverse_option_is_set())
+        {
+          display_char_ranges<false,false>(inputfile.c_str());
+        } else
+        {
+          display_char_ranges<true,false>(inputfile.c_str());
+        }
       }
     }
-  } else
-  {
-    for (int idx = 1; idx < argc; idx++)
+    catch (std::string &msg)
     {
-      try
-      {
-        display_char_ranges<true,false>(argv[idx]);
-      }
-      catch (std::string &msg)
-      {
-        std::cerr << progname << ": file \"" << argv[idx] << "\""
-                  << msg << std::endl;
-        haserr = true;
-        break;
-      }
+      std::cerr << argv[0] << ": file \"" << inputfile << "\""
+                << msg << std::endl;
+      haserr = true;
+      break;
     }
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
