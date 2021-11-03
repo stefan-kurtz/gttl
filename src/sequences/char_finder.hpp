@@ -181,8 +181,51 @@ class MultiCharFinder
   {
     return find_generic<1,false>(s,endptr);
   }
-  const char *find_backward_not(const char *s,const char *endptr)
-               const noexcept
+  const char *find_backward_not(const char *s,const char *endptr) const noexcept
+  {
+    return find_generic<-1,false>(s,endptr);
+  }
+};
+
+template<char singlechar>
+class SingleCharFinder
+{
+  private:
+  template<int step,bool ref_value>
+  const char *find_generic(const char *s,const char *endptr) const noexcept
+  {
+    for (const char *sptr = s; sptr != endptr; sptr += step)
+    {
+      if constexpr (ref_value)
+      {
+        if (*sptr == singlechar)
+        {
+          return sptr;
+        }
+      } else
+      {
+        if (*sptr != singlechar)
+        {
+          return sptr;
+        }
+      }
+    }
+    return nullptr;
+  }
+  public:
+  const char *find_forward(const char *s,const char *endptr) const noexcept
+  {
+    return find_generic<1,true>(s,endptr);
+  }
+  const char *find_backward(const char *s,const char *endptr) const noexcept
+  {
+    return find_generic<-1,true>(s,endptr);
+  }
+  const char *find_forward_not(const char *s,const char *endptr) const noexcept
+  {
+    return find_generic<1,false>(s,endptr);
+  }
+  const char *find_backward_not(const char *s,const char *endptr) const noexcept
   {
     return find_generic<-1,false>(s,endptr);
   }

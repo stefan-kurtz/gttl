@@ -23,8 +23,8 @@
 #include <iostream>
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
+#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 
@@ -37,7 +37,8 @@ class CharRangeOptions
 {
  private:
   std::vector<std::string> inputfiles{};
-  bool invert_option = false, reverse_option = false, help_option = false;
+  bool help_option = false, singlechar_option = false,
+       invert_option = false, reverse_option = false;
 
  public:
   CharRangeOptions() {};
@@ -50,6 +51,8 @@ class CharRangeOptions
     options.custom_help(std::string("[options] filename1 [filename1 ..]"));
     options.set_tab_expansion();
     options.add_options()
+       ("s,singlechar", "use single character finder for N",
+        cxxopts::value<bool>(singlechar_option)->default_value("false"))
        ("i,invert", "show ranges of chararacters not in the given set",
         cxxopts::value<bool>(invert_option)->default_value("false"))
        ("r,reverse", "enumerate ranges in reverse order",
@@ -75,7 +78,6 @@ class CharRangeOptions
       throw std::invalid_argument(e.what());
     }
   }
-
   bool help_option_is_set(void) const noexcept
   {
     return help_option;
@@ -87,6 +89,10 @@ class CharRangeOptions
   bool reverse_option_is_set(void) const noexcept
   {
     return reverse_option;
+  }
+  bool singlechar_option_is_set(void) const noexcept
+  {
+    return singlechar_option;
   }
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
@@ -114,6 +120,7 @@ static void display_char_ranges(const char *inputfilename)
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t non_wildcard_ranges_total_length = 0;
+  using ThisCharRange = GttlCharRange<CharFinder,char_finder,forward,invert>;
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
@@ -121,13 +128,12 @@ static void display_char_ranges(const char *inputfilename)
     for (auto &&si : gttl_si)
     {
       auto sequence = std::get<1>(si);
-      GttlCharRange<CharFinder,char_finder,forward,invert>
-                    ranger(sequence.data(),sequence.size());
-      for (auto &&it : ranger)
+      ThisCharRange ranger(sequence.data(),sequence.size());
+      for (auto &&range : ranger)
       {
-        std::cout << seqnum << "\t" << std::get<0>(it)
-                  << "\t" << std::get<1>(it) << std::endl;
-        non_wildcard_ranges_total_length += std::get<1>(it);
+        std::cout << seqnum << "\t" << std::get<0>(range)
+                  << "\t" << std::get<1>(range) << std::endl;
+        non_wildcard_ranges_total_length += std::get<1>(range);
       }
       seqnum++;
     }
@@ -140,6 +146,51 @@ static void display_char_ranges(const char *inputfilename)
   gttl_fp_type_close(in_fp);
   std::cout << "# non_wildcard_ranges_total_length\t" <<
                 non_wildcard_ranges_total_length << std::endl;
+}
+
+template<class CharFinder,const CharFinder &char_finder>
+static bool display_char_ranges_cases(const char *progname,
+                                      const CharRangeOptions &options)
+{
+  bool haserr = false;
+  for (auto && inputfile : options.inputfiles_get())
+  {
+    std::cout << inputfile << std::endl;
+    try
+    {
+      if (options.invert_option_is_set())
+      {
+        if (options.reverse_option_is_set())
+        {
+          display_char_ranges<CharFinder,char_finder,false,true>
+                             (inputfile.c_str());
+        } else
+        {
+          display_char_ranges<CharFinder,char_finder,true,true>
+                             (inputfile.c_str());
+        }
+      } else
+      {
+        if (options.reverse_option_is_set())
+        {
+          display_char_ranges<CharFinder,char_finder,false,false>
+                             (inputfile.c_str());
+        } else
+        {
+          display_char_ranges<CharFinder,char_finder,true,false>
+                             (inputfile.c_str());
+        }
+      }
+    }
+    catch (std::string &msg)
+    {
+      std::cerr << progname << ": file \"" << inputfile << "\""
+                << msg << std::endl;
+      haserr = true;
+      break;
+    }
+  }
+  return haserr;
 }
 
 int main(int argc,char *argv[])
@@ -159,46 +210,20 @@ int main(int argc,char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  static constexpr const char char_set[] = "ACGTacgt";
-  using ThisCharFinder = MultiCharFinder<char_set>;
-  static constexpr const ThisCharFinder this_charfinder{};
-  bool haserr = false;
-  for (auto && inputfile : options.inputfiles_get())
+  bool haserr;
+  if (options.singlechar_option_is_set())
   {
-    std::cout << inputfile << std::endl;
-    try
-    {
-      if (options.invert_option_is_set())
-      {
-        if (options.reverse_option_is_set())
-        {
-          display_char_ranges<ThisCharFinder,this_charfinder,false,true>
-                             (inputfile.c_str());
-        } else
-        {
-          display_char_ranges<ThisCharFinder,this_charfinder,true,true>
-                             (inputfile.c_str());
-        }
-      } else
-      {
-        if (options.reverse_option_is_set())
-        {
-          display_char_ranges<ThisCharFinder,this_charfinder,false,false>
-                             (inputfile.c_str());
-        } else
-        {
-          display_char_ranges<ThisCharFinder,this_charfinder,true,false>
-                             (inputfile.c_str());
-        }
-      }
-    }
-    catch (std::string &msg)
-    {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << msg << std::endl;
-      haserr = true;
-      break;
-    }
+    using NFinder = SingleCharFinder<'N'>;
+    static constexpr const NFinder single_N_finder{};
+    haserr = display_char_ranges_cases<NFinder,single_N_finder>
+                                      (argv[0],options);
+  } else
+  {
+    static constexpr const char nucleotides[] = "ACGTacgt";
+    using NucleotideFinder = MultiCharFinder<nucleotides>;
+    static constexpr const NucleotideFinder nucleotide_finder{};
+    haserr = display_char_ranges_cases<NucleotideFinder,nucleotide_finder>
+                                      (argv[0],options);
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
 }

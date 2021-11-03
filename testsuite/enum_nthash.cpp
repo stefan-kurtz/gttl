@@ -50,6 +50,7 @@ static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
 template<int sizeof_unit_hashed_qgrams>
 static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
+                      uint64_t hashmask,
                       const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
                         &hashed_qgram_packer,
                       size_t seqnum,
@@ -77,7 +78,7 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
 #endif
       BytesUnit<sizeof_unit_hashed_qgrams,3>
             current_hashed_qgram(hashed_qgram_packer,
-                                 {this_hash,
+                                 {this_hash & hashmask,
                                   static_cast<uint64_t>(seqnum),
                                   static_cast<uint64_t>(seqpos)});
       bytes_unit_sum += current_hashed_qgram.sum();
@@ -112,13 +113,14 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   size_t count_all_qgrams = 0;
   size_t bytes_unit_sum = 0;
   const int hashbits = 39;
-  const int sequences_number_bits = 5;
-  const int sequences_length_bits = 28;
+  const int sequences_number_bits = 11;
+  const int sequences_length_bits = 20;
   constexpr const int sizeof_unit_hashed_qgrams = 9;
   GttlBitPacker<sizeof_unit_hashed_qgrams,3>
                 hashed_qgram_packer({hashbits,
                                      sequences_number_bits,
                                      sequences_length_bits});
+  const uint64_t hashmask = GTTL_BITS2MAXVALUE(hashbits);
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
@@ -136,7 +138,8 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
                                    std::get<0>(nwr_it) + 1;
         const char *seqptr = sequence.data() + std::get<0>(nwr_it);
         auto result = apply_qgram_iterator<sizeof_unit_hashed_qgrams>
-                                          (qgram_length,hashed_qgram_packer,
+                                          (qgram_length,hashmask,
+                                           hashed_qgram_packer,
                                            seqnum,seqptr,this_length);
         sum_hash_values += std::get<0>(result);
         count_all_qgrams += std::get<1>(result);
