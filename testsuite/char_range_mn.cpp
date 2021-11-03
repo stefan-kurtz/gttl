@@ -21,11 +21,12 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include "utilities/cxxopts.hpp"
 #include "utilities/mathsupport.hpp"
+#include "utilities/cxxopts.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/char_range.hpp"
+#include "sequences/char_finder.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -93,7 +94,8 @@ class CharRangeOptions
   }
 };
 
-template<bool forward,bool invert>
+template<class CharFinder,const CharFinder &char_finder,bool forward,
+         bool invert>
 static void display_char_ranges(const char *inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
@@ -119,9 +121,8 @@ static void display_char_ranges(const char *inputfilename)
     for (auto &&si : gttl_si)
     {
       auto sequence = std::get<1>(si);
-      static constexpr const char nucleotides[] = "ACGTacgt";
-      GttlCharRange<forward,invert,nucleotides> ranger(sequence.data(),
-                                                    sequence.size());
+      GttlCharRange<CharFinder,char_finder,forward,invert>
+                    ranger(sequence.data(),sequence.size());
       for (auto &&it : ranger)
       {
         std::cout << seqnum << "\t" << std::get<0>(it)
@@ -158,6 +159,9 @@ int main(int argc,char *argv[])
   {
     return EXIT_SUCCESS;
   }
+  static constexpr const char char_set[] = "ACGTacgt";
+  using ThisCharFinder = MultiCharFinder<char_set>;
+  static constexpr const ThisCharFinder this_charfinder{};
   bool haserr = false;
   for (auto && inputfile : options.inputfiles_get())
   {
@@ -168,19 +172,23 @@ int main(int argc,char *argv[])
       {
         if (options.reverse_option_is_set())
         {
-          display_char_ranges<false,true>(inputfile.c_str());
+          display_char_ranges<ThisCharFinder,this_charfinder,false,true>
+                             (inputfile.c_str());
         } else
         {
-          display_char_ranges<true,true>(inputfile.c_str());
+          display_char_ranges<ThisCharFinder,this_charfinder,true,true>
+                             (inputfile.c_str());
         }
       } else
       {
         if (options.reverse_option_is_set())
         {
-          display_char_ranges<false,false>(inputfile.c_str());
+          display_char_ranges<ThisCharFinder,this_charfinder,false,false>
+                             (inputfile.c_str());
         } else
         {
-          display_char_ranges<true,false>(inputfile.c_str());
+          display_char_ranges<ThisCharFinder,this_charfinder,true,false>
+                             (inputfile.c_str());
         }
       }
     }
