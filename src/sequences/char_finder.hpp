@@ -277,6 +277,6 @@ namespace char_finder
   using NucleotideWildcardIs4Finder = SingleCharFinder<static_cast<char>(4)>;
   using AminoacidWildcardIs20Finder = SingleCharFinder<static_cast<char>(20)>;
   using EncodedNucleotideFinder = EncodedCharFinder<size_t(4)>;
-  using EncodeAminoAcidFinder = EncodedCharFinder<size_t(20)>;
+  using EncodeAdminoAcidFinder = EncodedCharFinder<size_t(20)>;
 }
 #endif

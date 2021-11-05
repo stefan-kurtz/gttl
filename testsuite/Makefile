@@ -12,7 +12,7 @@ ifeq ($(debug),yes)
   LDFLAGS += -g
   ifneq (${sanitize},no)
     ifneq (${MACHINE},arm64)
-      ifneq ($(findstring clang++,$(CXX)),clang++)
+      ifneq (,$(findstring clang++,$(CXX)),clang++)
         CFLAGS += -fsanitize=address -fno-omit-frame-pointer
         LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
       endif
@@ -26,9 +26,7 @@ else
   endif
 endif
 
-ifeq ($(findstring clang++,$(CXX)),clang++)
-  CFLAGS += -Wno-psabi
-else
+ifeq (,$(findstring g++,$(CXX)))
   CFLAGS += -time -Wno-psabi
 endif
 

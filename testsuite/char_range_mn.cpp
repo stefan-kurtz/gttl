@@ -251,6 +251,15 @@ static void display_char_ranges_multiseq_cases(const CharRangeOptions &options,
   }
 }
 
+/* These objects are only used in certain blocks, but some
+   compilers, like g++ (SUSE Linux) 7.5.0 require that they
+   are in the global scope */
+
+static constexpr const
+  char_finder::EncodedNucleotideFinder encoded_nucleotide_finder;
+static constexpr const char_finder::NFinder single_N_finder{};
+static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
+
 int main(int argc,char *argv[])
 {
   CharRangeOptions options;
@@ -293,8 +302,6 @@ int main(int argc,char *argv[])
           lit_multiseq(*multiseq);
         lit_multiseq.perform_sequence_encoding();
 
-        static constexpr const
-          char_finder::EncodedNucleotideFinder encoded_nucleotide_finder{};
         display_char_ranges_multiseq_cases<char_finder::EncodedNucleotideFinder,
                                            encoded_nucleotide_finder>
                                           (options,multiseq);
@@ -305,12 +312,10 @@ int main(int argc,char *argv[])
   {
     if (options.singlechar_option_is_set())
     {
-      static constexpr const char_finder::NFinder single_N_finder{};
       haserr = display_char_ranges_cases<char_finder::NFinder,single_N_finder>
                                         (argv[0],options);
     } else
     {
-      static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
       haserr = display_char_ranges_cases<char_finder::NucleotideFinder,
                                          nucleotide_finder>
                                         (argv[0],options);
