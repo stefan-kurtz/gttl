@@ -12,8 +12,10 @@ ifeq ($(debug),yes)
   LDFLAGS += -g
   ifneq (${sanitize},no)
     ifneq (${MACHINE},arm64)
-      CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-      LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
+      ifneq ($(findstring clang++,$(CXX)),clang++)
+        CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+        LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
+      endif
     endif
   endif
 else
@@ -24,21 +26,17 @@ else
   endif
 endif
 
-ifeq ($(CXX),clang++)
-  TIME_OPTION=
+ifeq ($(findstring clang++,$(CXX)),clang++)
+  CFLAGS += -Wno-psabi
 else
-  ifeq ($(CXX),/usr/bin/clang++)
-    TIME_OPTION=
-  else
-    TIME_OPTION=-time
-    CFLAGS+=-Wno-psabi
-  endif
+  CFLAGS += -time -Wno-psabi
 endif
 
 SRC=${wildcard  *.cpp}
 EXECS=${subst .cpp,.x,${SRC}}
 
 all:${EXECS}
+	echo ${compiler_type}
 
 test:${EXECS}
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
@@ -51,7 +49,7 @@ test:${EXECS}
 	@./multiseq_mn.x -w 70 ../testdata/at1MB.fna | diff -I '^#' - ../testdata/at1MB.fna
 	@./multiseq_mn.x ../testdata/at1MB.fna | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./enum_nthash.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_nthash.tsv
-	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv 
+	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv
 	@./bitpacker_main.x 100
 	@./endian.x
 	@./char_range_compare.sh ../testdata/small.fna
