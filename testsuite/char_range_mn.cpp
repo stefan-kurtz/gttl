@@ -27,6 +27,8 @@
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
+#include "sequences/gttl_multiseq.hpp"
+#include "sequences/literate_multiseq.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -37,7 +39,7 @@ class CharRangeOptions
 {
  private:
   std::vector<std::string> inputfiles{};
-  bool help_option = false, singlechar_option = false,
+  bool help_option = false, multiseq_option = false, singlechar_option = false,
        invert_option = false, reverse_option = false;
 
  public:
@@ -57,6 +59,9 @@ class CharRangeOptions
         cxxopts::value<bool>(invert_option)->default_value("false"))
        ("r,reverse", "enumerate ranges in reverse order",
         cxxopts::value<bool>(reverse_option)->default_value("false"))
+       ("m,multiseq", "create Multiseq from each file and process the entire "
+                      "concatenated sequence as a single unit",
+        cxxopts::value<bool>(multiseq_option)->default_value("false"))
        ("h,help", "print usage");
     try
     {
@@ -94,6 +99,10 @@ class CharRangeOptions
   {
     return singlechar_option;
   }
+  bool multiseq_option_is_set(void) const noexcept
+  {
+    return multiseq_option;
+  }
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
     return this->inputfiles;
@@ -119,7 +128,7 @@ static void display_char_ranges(const char *inputfilename)
     /* check_err.py checked */
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
-  size_t non_wildcard_ranges_total_length = 0;
+  size_t ranges_total_length = 0;
   using ThisCharRange = GttlCharRange<CharFinder,char_finder,forward,invert>;
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
@@ -133,7 +142,7 @@ static void display_char_ranges(const char *inputfilename)
       {
         std::cout << seqnum << "\t" << std::get<0>(range)
                   << "\t" << std::get<1>(range) << std::endl;
-        non_wildcard_ranges_total_length += std::get<1>(range);
+        ranges_total_length += std::get<1>(range);
       }
       seqnum++;
     }
@@ -144,8 +153,7 @@ static void display_char_ranges(const char *inputfilename)
     throw msg;
   }
   gttl_fp_type_close(in_fp);
-  std::cout << "# non_wildcard_ranges_total_length\t" <<
-                non_wildcard_ranges_total_length << std::endl;
+  std::cout << "# ranges_total_length\t" << ranges_total_length << std::endl;
 }
 
 template<class CharFinder,const CharFinder &char_finder>
@@ -193,6 +201,56 @@ static bool display_char_ranges_cases(const char *progname,
   return haserr;
 }
 
+template<class CharFinder,const CharFinder &char_finder,
+         bool forward,bool invert>
+static void display_char_ranges_multiseq(const GttlMultiseq *encoded_multiseq)
+{
+  const char *sequence_ptr = encoded_multiseq->sequence_ptr_get();
+  assert(encoded_multiseq->sequences_number_get() > 0);
+  const size_t sequence_length_concatenation
+    = encoded_multiseq->sequences_total_length_get() +
+      encoded_multiseq->sequences_number_get() - 1;
+  using ThisCharRange
+    = GttlCharRange<CharFinder,char_finder,forward,invert>;
+  ThisCharRange ranger(sequence_ptr,sequence_length_concatenation);
+  size_t ranges_total_length = 0;
+  for (auto &&range : ranger)
+  {
+    std::cout << std::get<0>(range)
+              << "\t" << std::get<1>(range) << std::endl;
+    ranges_total_length += std::get<1>(range);
+  }
+  std::cout << "# ranges_total_length\t" << ranges_total_length
+            << std::endl;
+}
+
+template<class CharFinder,const CharFinder &char_finder>
+static void display_char_ranges_multiseq_cases(const CharRangeOptions &options,
+                                               const GttlMultiseq *multiseq)
+{
+  if (options.invert_option_is_set())
+  {
+    if (options.reverse_option_is_set())
+    {
+      display_char_ranges_multiseq<CharFinder,char_finder,false,true>(multiseq);
+    } else
+    {
+      display_char_ranges_multiseq<CharFinder,char_finder,true,true>(multiseq);
+    }
+  } else
+  {
+    if (options.reverse_option_is_set())
+    {
+      display_char_ranges_multiseq<CharFinder,char_finder,false,false>
+                                  (multiseq);
+    } else
+    {
+      display_char_ranges_multiseq<CharFinder,char_finder,true,false>
+                                  (multiseq);
+    }
+  }
+}
+
 int main(int argc,char *argv[])
 {
   CharRangeOptions options;
@@ -210,18 +268,53 @@ int main(int argc,char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  bool haserr;
-  if (options.singlechar_option_is_set())
+  bool haserr = false;
+  if (options.multiseq_option_is_set())
   {
-    static constexpr const char_finder::NFinder single_N_finder{};
-    haserr = display_char_ranges_cases<char_finder::NFinder,single_N_finder>
-                                      (argv[0],options);
+    for (auto && inputfile : options.inputfiles_get())
+    {
+      std::cout << inputfile << std::endl;
+      GttlMultiseq *multiseq = nullptr;
+      try
+      {
+        constexpr const bool store_sequences = true;
+        multiseq = new GttlMultiseq(inputfile.c_str(),store_sequences,
+                                    UINT8_MAX);
+      }
+      catch (std::string &msg)
+      {
+        std::cerr << argv[0] << ": file \"" << argv[optind] << "\""
+                    << msg << std::endl;
+        haserr = true;
+      }
+      if (!haserr)
+      {
+        LiterateMultiseq<alphabet::nucleotides_upper_lower,4>
+          lit_multiseq(*multiseq);
+        lit_multiseq.perform_sequence_encoding();
+
+        static constexpr const
+          char_finder::EncodedNucleotideFinder encoded_nucleotide_finder{};
+        display_char_ranges_multiseq_cases<char_finder::EncodedNucleotideFinder,
+                                           encoded_nucleotide_finder>
+                                          (options,multiseq);
+      }
+      delete multiseq;
+    }
   } else
   {
-    static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
-    haserr = display_char_ranges_cases<char_finder::NucleotideFinder,
-                                       nucleotide_finder>
-                                      (argv[0],options);
+    if (options.singlechar_option_is_set())
+    {
+      static constexpr const char_finder::NFinder single_N_finder{};
+      haserr = display_char_ranges_cases<char_finder::NFinder,single_N_finder>
+                                        (argv[0],options);
+    } else
+    {
+      static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
+      haserr = display_char_ranges_cases<char_finder::NucleotideFinder,
+                                         nucleotide_finder>
+                                        (argv[0],options);
+    }
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
 }

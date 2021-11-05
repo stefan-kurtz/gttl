@@ -114,11 +114,12 @@ class GttlMultiseq
       /* sequence_ptr[0] is malloced to area of size for all symbols
          (sequences_total_length) and padding sumbols, one per sequence,
       therefore sequences_number, plus one for the padding symbol at the start*/
-      const size_t sizeof_mem_for_seqs =
-          (sequences_total_length + sequences_number + 1) *
+      const size_t sizeof_mem_for_seqs
+        = (sequences_total_length + sequences_number + 1) *
           sizeof *sequence_ptr;
-      const int return_value = posix_memalign(
-          reinterpret_cast<void **>(&sequence_ptr[0]), 32, sizeof_mem_for_seqs);
+      const int return_value
+        = posix_memalign(reinterpret_cast<void **>(&sequence_ptr[0]), 32,
+                                                   sizeof_mem_for_seqs);
       if (return_value == ENOMEM)
       {
         free(header_ptr);
@@ -130,8 +131,8 @@ class GttlMultiseq
       }
       sequence_ptr[0][0] = static_cast<char>(padding_char);
       sequence_ptr[0]++;
-      header_ptr[0] = static_cast<char *>(
-          malloc(headers_total_length * sizeof *header_ptr));
+      header_ptr[0] = static_cast<char *>(malloc(headers_total_length *
+                                                 sizeof *header_ptr));
       if (header_ptr[0] == NULL)
       {
         free(sequence_ptr[0]);
@@ -247,6 +248,11 @@ class GttlMultiseq
   {
     assert(store && seqnum < sequences_number_get());
     return sequence_ptr[seqnum];
+  }
+
+  char *sequence_ptr_get() const noexcept
+  {
+    return sequence_ptr[0];
   }
 
   /* Returns length of header. */

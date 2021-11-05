@@ -17,6 +17,25 @@ static constexpr bool is_member_in_charset(void)
   return is_member_in_charset_rec<charset>(0,static_cast<char>(cc));
 }
 
+#define DECLARE_FIND_FUNCTIONS\
+  const char *find_forward(const char *s,const char *endptr) const noexcept\
+  {\
+    return find_generic<1,true>(s,endptr);\
+  }\
+  const char *find_backward(const char *s,const char *endptr) const noexcept\
+  {\
+    return find_generic<-1,true>(s,endptr);\
+  }\
+  const char *find_forward_not(const char *s,const char *endptr) const noexcept\
+  {\
+    return find_generic<1,false>(s,endptr);\
+  }\
+  const char *find_backward_not(const char *s,const char *endptr) \
+                                const noexcept\
+  {\
+    return find_generic<-1,false>(s,endptr);\
+  }
+
 template<const char *charset>
 class MultiCharFinder
 {
@@ -173,22 +192,7 @@ class MultiCharFinder
   {
     return sizeof in_charset/sizeof in_charset[0];
   }
-  const char *find_forward(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<1,true>(s,endptr);
-  }
-  const char *find_backward(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<-1,true>(s,endptr);
-  }
-  const char *find_forward_not(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<1,false>(s,endptr);
-  }
-  const char *find_backward_not(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<-1,false>(s,endptr);
-  }
+  DECLARE_FIND_FUNCTIONS
   void show(void)
   {
     for (size_t idx = 0; idx <= max_char_idx(); idx++)
@@ -231,22 +235,36 @@ class SingleCharFinder
   {
     return cc == singlechar;
   }
-  const char *find_forward(const char *s,const char *endptr) const noexcept
+  DECLARE_FIND_FUNCTIONS
+};
+
+template<size_t alphasize>
+class EncodedCharFinder
+{
+  private:
+  template<int step,bool ref_value>
+  const char *find_generic(const char *s,const char *endptr) const noexcept
   {
-    return find_generic<1,true>(s,endptr);
+    for (const char *sptr = s; sptr != endptr; sptr += step)
+    {
+      if constexpr (ref_value)
+      {
+        if (static_cast<size_t>(*sptr) < alphasize)
+        {
+          return sptr;
+        }
+      } else
+      {
+        if (static_cast<size_t>(*sptr) >= alphasize)
+        {
+          return sptr;
+        }
+      }
+    }
+    return nullptr;
   }
-  const char *find_backward(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<-1,true>(s,endptr);
-  }
-  const char *find_forward_not(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<1,false>(s,endptr);
-  }
-  const char *find_backward_not(const char *s,const char *endptr) const noexcept
-  {
-    return find_generic<-1,false>(s,endptr);
-  }
+  public:
+  DECLARE_FIND_FUNCTIONS
 };
 
 namespace char_finder
@@ -258,5 +276,7 @@ namespace char_finder
   using NFinder = SingleCharFinder<'N'>;
   using NucleotideWildcardIs4Finder = SingleCharFinder<static_cast<char>(4)>;
   using AminoacidWildcardIs20Finder = SingleCharFinder<static_cast<char>(20)>;
+  using EncodedNucleotideFinder = EncodedCharFinder<size_t(4)>;
+  using EncodeAminoAcidFinder = EncodedCharFinder<size_t(20)>;
 }
 #endif
