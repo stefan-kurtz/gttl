@@ -132,6 +132,7 @@ class GttlMultiseq
                       headers_total_length);
         throw msg.str();
       }
+      size_t seqnum = 0;
       for (auto && inputfile : inputfiles)
       {
         GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
@@ -140,7 +141,6 @@ class GttlMultiseq
           throw std::string(": cannot open file");
         }
         GttlSeqIterator<buf_size> gttl_si_second_pass(in_fp);
-        size_t seqnum = 0;
         for (auto &&si : gttl_si_second_pass)
         {
           std::string header = std::get<0>(si);
@@ -208,7 +208,7 @@ class GttlMultiseq
     inputfiles.push_back(std::string(inputfile));
     multiseq_reader(inputfiles);
   }
-  GttlMultiseq(const std::vector<std::string> &inputfiles,bool _store, 
+  GttlMultiseq(const std::vector<std::string> &inputfiles,bool _store,
                uint8_t _padding_char)
       : store(_store),
         sequences_number(0),

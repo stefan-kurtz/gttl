@@ -10,6 +10,7 @@ static void usage_output(bool error_case,const char *progname)
 {
   StrFormat msg("Usage: %s [options] <filename1> [filename2 ..]\n"
                 "  -h --help            Show this help\n"
+                "  -p --protein         handle protein sequences\n"
                 "  -w --width <width>   output headers and sequences; \n"
                 "                       width specifies the line width of the\n"
                 "                       sequence output; 0 means to output\n"
@@ -39,13 +40,14 @@ int main(int argc, char *argv[])
     {"help", no_argument, 0, 'h'},
     {"width", required_argument, 0, 'w'},
     {"protein", no_argument, 0, 'p'},
+    {"rankdist", no_argument, 0, 'r'},
     {0, 0, 0, 0}
   };
 
   int width = -1;
-  bool protein = false;
+  bool protein = false, rankdist = false;
   int opt;
-  while ((opt = getopt_long(argc, argv, ":hpw:", longopts, NULL)) != -1)
+  while ((opt = getopt_long(argc, argv, ":hprw:", longopts, NULL)) != -1)
   {
     switch (opt)
     {
@@ -55,6 +57,9 @@ int main(int argc, char *argv[])
         break;
       case 'p':
         protein = true;
+        break;
+      case 'r':
+        rankdist = true;
         break;
       case 'w':
         if (sscanf(optarg,"%d",&width) != 1 || width < 0)
@@ -86,11 +91,11 @@ int main(int argc, char *argv[])
   std::vector<std::string> inputfiles{};
   try
   {
-    constexpr const bool store_sequences = true;
     for (int idx = optind; idx < argc; idx++)
     {
       inputfiles.push_back(std::string(argv[idx]));
     }
+    const bool store_sequences = (width >= 0 || rankdist) ? true : false;
     multiseq = new GttlMultiseq(inputfiles,store_sequences,UINT8_MAX);
   }
   catch (std::string &msg)
@@ -118,17 +123,20 @@ int main(int argc, char *argv[])
   std::cout << "# total length\t"
             << multiseq->sequences_total_length_get()
             << std::endl;
-  if (protein)
+  if (rankdist)
   {
-    static constexpr const char amino_acids[]
-      = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
-    LiterateMultiseq<amino_acids,20> literate_multiseq(*multiseq);
-    literate_multiseq.show_rank_dist();
-  } else
-  {
-    static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
-    LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(*multiseq);
-    literate_multiseq.show_rank_dist();
+    if (protein)
+    {
+      static constexpr const char amino_acids[]
+        = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
+      LiterateMultiseq<amino_acids,20> literate_multiseq(*multiseq);
+      literate_multiseq.show_rank_dist();
+    } else
+    {
+      static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
+      LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(*multiseq);
+      literate_multiseq.show_rank_dist();
+    }
   }
   delete multiseq;
 }
