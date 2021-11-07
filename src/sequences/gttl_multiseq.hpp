@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include <climits>
 
 #include "utilities/mathsupport.hpp"
@@ -335,6 +337,31 @@ class GttlMultiseq
               << std::endl;
   }
 
+  std::vector<std::pair<size_t,size_t>> length_distribution(void)
+     const noexcept
+  {
+    std::map<size_t,size_t> length_dist_map{};
+
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      size_t this_length = sequence_length_get(seqnum);
+      if (length_dist_map.count(this_length) == 0)
+      {
+        length_dist_map[this_length] = 1;
+      } else
+      {
+        length_dist_map[this_length]++;
+      }
+    }
+    std::vector<std::pair<size_t,size_t>> length_dist_table{};
+    length_dist_table.reserve(length_dist_map.size());
+    for (auto &&element : length_dist_map)
+    {
+      length_dist_table.push_back({std::get<0>(element),std::get<1>(element)});
+    }
+    std::sort(length_dist_table.begin(),length_dist_table.end());
+    return length_dist_table;
+  }
   /* Prints out the header and sequence infos to stdout
    - width gives the maximum line size, width 0
      prints prints out sequences in just one line
