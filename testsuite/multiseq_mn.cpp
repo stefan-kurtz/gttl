@@ -8,7 +8,7 @@
 
 static void usage_output(bool error_case,const char *progname)
 {
-  StrFormat msg("Usage: %s [options] <filename>\n"
+  StrFormat msg("Usage: %s [options] <filename1> [filename2 ..]\n"
                 "  -h --help            Show this help\n"
                 "  -w --width <width>   output headers and sequences; \n"
                 "                       width specifies the line width of the\n"
@@ -83,15 +83,23 @@ int main(int argc, char *argv[])
   }
   GttlMultiseq *multiseq = nullptr;
   RunTimeClass rt = RunTimeClass();
+  std::vector<std::string> inputfiles{};
   try
   {
     constexpr const bool store_sequences = true;
-    multiseq = new GttlMultiseq(argv[optind],store_sequences,UINT8_MAX);
+    for (int idx = optind; idx < argc; idx++)
+    {
+      inputfiles.push_back(std::string(argv[idx]));
+    }
+    multiseq = new GttlMultiseq(inputfiles,store_sequences,UINT8_MAX);
   }
   catch (std::string &msg)
   {
-    std::cerr << argv[0] << ": file \"" << argv[optind] << "\""
+    for (auto &&inputfile : inputfiles)
+    {
+      std::cerr << argv[0] << ": file \"" << inputfile << "\""
                 << msg << std::endl;
+    }
     delete multiseq;
     return EXIT_FAILURE;
   }
@@ -100,7 +108,10 @@ int main(int argc, char *argv[])
   {
     multiseq->show(static_cast<size_t>(width), false);
   }
-  std::cout << "# filename\t" << argv[optind] << std::endl;
+  for (auto &&inputfile : inputfiles)
+  {
+    std::cout << "# filename\t" << inputfile << std::endl;
+  }
   std::cout << "# number of sequences\t"
             << multiseq->sequences_number_get()
             << std::endl;

@@ -42,7 +42,7 @@ class GttlMultiseq
         return seqnum != other.seqnum;
       }
   };
- private:
+  private:
   bool store;
   size_t sequences_number,
          sequences_total_length,
@@ -54,56 +54,46 @@ class GttlMultiseq
 
   uint8_t padding_char;
 
- public:
-  /* Constructor
-   Inputfile should be in Fasta format, throws std::string,
-   if multiple GttlMultseq-instance are used and there are pairwise
-   comparisons of the sequences, use a different padding_char, so
-   that one does not have to have a special case for handling sequence
-   boundaries when for example computing maximal matches. */
-  GttlMultiseq(const char *inputfile, bool _store, uint8_t _padding_char)
-      : store(_store),
-        sequences_number(0),
-        sequences_total_length(0),
-        sequences_maximum_length(0),
-        headers_total_length(0),
-        padding_char(_padding_char)
+  void multiseq_reader(const std::vector<std::string> &inputfiles)
   {
     if (padding_char <= uint8_t(122))
     {
       throw std::string("non letter padding character exhausted");
     }
-    GttlFpType in_fp = gttl_fp_type_open(inputfile, "rb");
-    if (in_fp == nullptr)
-    {
-      throw std::string(": cannot open file");
-    }
-    const int buf_size = (((size_t) 1) << 14);
-    GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
+    static constexpr const int buf_size = (((size_t) 1) << 14);
     if (store)
     {
-      try
+      for (auto && inputfile : inputfiles)
       {
-        for (auto &&si : gttl_si_first_pass)
+        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
+        if (in_fp == nullptr)
         {
-          std::string header = std::get<0>(si);
-          std::string sequence = std::get<1>(si);
-
-          sequences_total_length += sequence.size();
-          sequences_maximum_length = std::max(sequences_maximum_length,
-                                              sequence.size());
-          sequences_number++;
-          assert(header.size() >= 2 && header[0] == '>' &&
-                 header[header.size() - 1] == '\n');
-          headers_total_length += (header.size() - 2);
+          throw std::string(": cannot open file");
         }
-      }
-      catch (std::string &msg)
-      {
+        GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
+        try
+        {
+          for (auto &&si : gttl_si_first_pass)
+          {
+            std::string header = std::get<0>(si);
+            std::string sequence = std::get<1>(si);
+
+            sequences_total_length += sequence.size();
+            sequences_maximum_length = std::max(sequences_maximum_length,
+                                                sequence.size());
+            sequences_number++;
+            assert(header.size() >= 2 && header[0] == '>' &&
+                   header[header.size() - 1] == '\n');
+            headers_total_length += (header.size() - 2);
+          }
+        }
+        catch (std::string &msg)
+        {
+          gttl_fp_type_close(in_fp);
+          throw msg;
+        }
         gttl_fp_type_close(in_fp);
-        throw msg;
       }
-      gttl_fp_type_reset(in_fp);
       sequence_ptr
         = static_cast<char **>(malloc((sequences_number + 1) *
                                       sizeof *sequence_ptr));
@@ -113,7 +103,8 @@ class GttlMultiseq
 
       /* sequence_ptr[0] is malloced to area of size for all symbols
          (sequences_total_length) and padding sumbols, one per sequence,
-      therefore sequences_number, plus one for the padding symbol at the start*/
+         therefore sequences_number, plus one for the padding symbol at
+         the start*/
       const size_t sizeof_mem_for_seqs
         = (sequences_total_length + sequences_number + 1) *
           sizeof *sequence_ptr;
@@ -124,7 +115,6 @@ class GttlMultiseq
       {
         free(header_ptr);
         free(sequence_ptr);
-        gttl_fp_type_close(in_fp);
         StrFormat msg("cannot allocate %lu bytes for all sequences",
                       sizeof_mem_for_seqs);
         throw msg.str();
@@ -142,47 +132,93 @@ class GttlMultiseq
                       headers_total_length);
         throw msg.str();
       }
-      GttlSeqIterator<buf_size> gttl_si_second_pass(in_fp);
-      size_t seqnum = 0;
-      for (auto &&si : gttl_si_second_pass)
+      for (auto && inputfile : inputfiles)
       {
-        std::string header = std::get<0>(si);
-        std::string sequence = std::get<1>(si);
+        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
+        if (in_fp == nullptr)
+        {
+          throw std::string(": cannot open file");
+        }
+        GttlSeqIterator<buf_size> gttl_si_second_pass(in_fp);
+        size_t seqnum = 0;
+        for (auto &&si : gttl_si_second_pass)
+        {
+          std::string header = std::get<0>(si);
+          std::string sequence = std::get<1>(si);
 
-        memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
-        *(sequence_ptr[seqnum] + sequence.size())
-          = static_cast<char>(padding_char);
-        sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
-        memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
-        header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
-        seqnum++;
+          memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
+          *(sequence_ptr[seqnum] + sequence.size())
+            = static_cast<char>(padding_char);
+          sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
+          memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
+          header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
+          seqnum++;
+        }
+        gttl_fp_type_close(in_fp);
       }
     } else
     {
-      GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
-      try /* need this, as the catch needs to close the file pointer
-             to prevent a memory leak */
+      for (auto && inputfile : inputfiles)
       {
-        for (auto &&si : gttl_si_first_pass)
+        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
+        if (in_fp == nullptr)
         {
-          auto sequence = std::get<1>(si);
-          sequences_total_length += sequence.size();
-          sequences_maximum_length = std::max(sequences_maximum_length,
-                                              sequence.size());
-          sequences_number++;
+          throw std::string(": cannot open file");
         }
-      }
-      catch (std::string &msg)
-      {
+        GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
+        try /* need this, as the catch needs to close the file pointer
+               to prevent a memory leak */
+        {
+          for (auto &&si : gttl_si_first_pass)
+          {
+            auto sequence = std::get<1>(si);
+            sequences_total_length += sequence.size();
+            sequences_maximum_length = std::max(sequences_maximum_length,
+                                                sequence.size());
+            sequences_number++;
+          }
+        }
+        catch (std::string &msg)
+        {
+          gttl_fp_type_close(in_fp);
+          throw msg;
+        }
         gttl_fp_type_close(in_fp);
-        throw msg;
       }
+      sequences_number_bits = gt_required_bits(sequences_number - 1);
+      sequences_length_bits = gt_required_bits(sequences_maximum_length);
     }
-    gttl_fp_type_close(in_fp);
-    sequences_number_bits = gt_required_bits(sequences_number - 1);
-    sequences_length_bits = gt_required_bits(sequences_maximum_length);
   }
-
+  public:
+  /* Constructor
+   Inputfile should be in Fasta format, throws std::string,
+   if multiple GttlMultseq-instance are used and there are pairwise
+   comparisons of the sequences, use a different padding_char, so
+   that one does not have to have a special case for handling sequence
+   boundaries when for example computing maximal matches. */
+  GttlMultiseq(const char *inputfile, bool _store, uint8_t _padding_char)
+      : store(_store),
+        sequences_number(0),
+        sequences_total_length(0),
+        sequences_maximum_length(0),
+        headers_total_length(0),
+        padding_char(_padding_char)
+  {
+    std::vector<std::string> inputfiles{};
+    inputfiles.push_back(std::string(inputfile));
+    multiseq_reader(inputfiles);
+  }
+  GttlMultiseq(const std::vector<std::string> &inputfiles,bool _store, 
+               uint8_t _padding_char)
+      : store(_store),
+        sequences_number(0),
+        sequences_total_length(0),
+        sequences_maximum_length(0),
+        headers_total_length(0),
+        padding_char(_padding_char)
+  {
+    multiseq_reader(inputfiles);
+  }
   ~GttlMultiseq(void)
   {
     if (store)
