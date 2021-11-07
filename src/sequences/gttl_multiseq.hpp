@@ -4,6 +4,7 @@
 #include <tuple>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <climits>
 
 #include "utilities/mathsupport.hpp"
@@ -185,9 +186,9 @@ class GttlMultiseq
         }
         gttl_fp_type_close(in_fp);
       }
-      sequences_number_bits = gt_required_bits(sequences_number - 1);
-      sequences_length_bits = gt_required_bits(sequences_maximum_length);
     }
+    sequences_number_bits = gt_required_bits(sequences_number - 1);
+    sequences_length_bits = gt_required_bits(sequences_maximum_length);
   }
   public:
   /* Constructor
