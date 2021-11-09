@@ -36,7 +36,7 @@ EXECS=${subst .cpp,.x,${SRC}}
 all:${EXECS}
 	echo ${compiler_type}
 
-test:${EXECS}
+test:${EXECS} test_matrix_partition
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -53,6 +53,17 @@ test:${EXECS}
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
 	@./char_range_compare.sh ../testdata/at1MB.fna
+	@echo "Congratulations. $@ passed."
+
+test_matrix_partition:matrix_partition.py matrix_partition.x
+	./matrix_partition_cmp.sh 10 100 99	
+	./matrix_partition_cmp.sh 17 511 137
+	./matrix_partition_cmp.sh 97 10000 16000
+	./matrix_partition_cmp.sh 250 50000 43001
+	./matrix_partition_cmp.sh 10 100 0
+	./matrix_partition_cmp.sh 17 400 0
+	./matrix_partition_cmp.sh 19 998 0
+	./matrix_partition_cmp.sh 500 13000 0
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
