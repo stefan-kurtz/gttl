@@ -49,8 +49,10 @@ class GttlMultiseq
   bool store;
   size_t sequences_number,
          sequences_total_length,
+         sequences_minimum_length,
          sequences_maximum_length,
          headers_total_length;
+  std::map<size_t,size_t> length_dist_map{};
   char **sequence_ptr, **header_ptr;
   int sequences_number_bits,
       sequences_length_bits;
@@ -82,8 +84,17 @@ class GttlMultiseq
             std::string sequence = std::get<1>(si);
 
             sequences_total_length += sequence.size();
+            sequences_minimum_length = std::min(sequences_minimum_length,
+                                                sequence.size());
             sequences_maximum_length = std::max(sequences_maximum_length,
                                                 sequence.size());
+            if (length_dist_map.count(sequence.size()) == 0)
+            {
+              length_dist_map[sequence.size()] = 1;
+            } else
+            {
+              length_dist_map[sequence.size()]++;
+            }
             sequences_number++;
             assert(header.size() >= 2 && header[0] == '>' &&
                    header[header.size() - 1] == '\n');
@@ -176,8 +187,17 @@ class GttlMultiseq
           {
             auto sequence = std::get<1>(si);
             sequences_total_length += sequence.size();
+            sequences_minimum_length = std::min(sequences_minimum_length,
+                                                sequence.size());
             sequences_maximum_length = std::max(sequences_maximum_length,
                                                 sequence.size());
+            if (length_dist_map.count(sequence.size()) == 0)
+            {
+              length_dist_map[sequence.size()] = 1;
+            } else
+            {
+              length_dist_map[sequence.size()]++;
+            }
             sequences_number++;
           }
         }
@@ -203,6 +223,7 @@ class GttlMultiseq
       : store(_store),
         sequences_number(0),
         sequences_total_length(0),
+        sequences_minimum_length(ULONG_MAX),
         sequences_maximum_length(0),
         headers_total_length(0),
         padding_char(_padding_char)
@@ -216,6 +237,7 @@ class GttlMultiseq
       : store(_store),
         sequences_number(0),
         sequences_total_length(0),
+        sequences_minimum_length(ULONG_MAX),
         sequences_maximum_length(0),
         headers_total_length(0),
         padding_char(_padding_char)
@@ -244,7 +266,12 @@ class GttlMultiseq
     return sequences_total_length;
   }
 
-  size_t sequences_maximum_length_get(void) const
+  size_t sequences_minimum_length_get(void) const noexcept
+  {
+    return sequences_minimum_length;
+  }
+
+  size_t sequences_maximum_length_get(void) const noexcept
   {
     return sequences_maximum_length;
   }
@@ -328,6 +355,9 @@ class GttlMultiseq
               << std::endl;
     std::cout << "# sequences_number_bits\t" << sequences_number_bits_get()
               << std::endl;
+    std::cout << "# sequences_minimum_length\t"
+              << sequences_minimum_length_get()
+              << std::endl;
     std::cout << "# sequences_maximum_length\t"
               << sequences_maximum_length_get()
               << std::endl;
@@ -340,19 +370,6 @@ class GttlMultiseq
   std::vector<std::pair<size_t,size_t>> length_distribution(void)
      const noexcept
   {
-    std::map<size_t,size_t> length_dist_map{};
-
-    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
-    {
-      size_t this_length = sequence_length_get(seqnum);
-      if (length_dist_map.count(this_length) == 0)
-      {
-        length_dist_map[this_length] = 1;
-      } else
-      {
-        length_dist_map[this_length]++;
-      }
-    }
     std::vector<std::pair<size_t,size_t>> length_dist_table{};
     length_dist_table.reserve(length_dist_map.size());
     for (auto &&element : length_dist_map)
@@ -375,6 +392,7 @@ class GttlMultiseq
     size_t seqnum;
 #ifndef NDEBUG
     bool found_maximum_seq_length = false;
+    bool found_minimum_seq_length = false;
 #endif
     for (seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
@@ -407,6 +425,11 @@ class GttlMultiseq
         std::cout << std::endl;
       }
 #ifndef NDEBUG
+      assert(currentlength >= sequences_minimum_length);
+      if (currentlength == sequences_minimum_length)
+      {
+        found_minimum_seq_length = true;
+      }
       assert(currentlength <= sequences_maximum_length);
       if (currentlength == sequences_maximum_length)
       {
@@ -414,6 +437,7 @@ class GttlMultiseq
       }
 #endif
     }
+    assert(found_minimum_seq_length);
     assert(found_maximum_seq_length);
   }
 
