@@ -379,6 +379,19 @@ class GttlMultiseq
     std::sort(length_dist_table.begin(),length_dist_table.end());
     return length_dist_table;
   }
+  size_t total_number_of_suffixes(size_t prefix_length) const noexcept
+  {
+    size_t total = 0;
+    for (auto &&element : length_dist_map)
+    {
+      if (std::get<0>(element) >= prefix_length)
+      {
+        total += (std::get<0>(element) - prefix_length + 1) *
+                 std::get<1>(element);
+      }
+    }
+    return total;
+  }
   /* Prints out the header and sequence infos to stdout
    - width gives the maximum line size, width 0
      prints prints out sequences in just one line

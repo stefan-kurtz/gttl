@@ -40,6 +40,7 @@ SOFTWARE.
 #ifndef NTHASH_FWD_HPP
 #define NTHASH_FWD_HPP
 #include <cstdint>
+#include <cassert>
 
 // rotate "v" to the left 1 position
 static uint64_t rotate_left1(const uint64_t v) {

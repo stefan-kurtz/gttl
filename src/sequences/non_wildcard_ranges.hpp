@@ -17,6 +17,9 @@
 
 #ifndef NON_WILDCARD_RANGES_HPP
 #define NON_WILDCARD_RANGES_HPP
+#include <cassert>
+#include <cstring>
+#include <cstddef>
 #include <vector>
 #define GTTL_UNALIGNED(X) (size_t(X) & (sizeof (long) - 1))
 #define GTTL_ULONG_BYTES  sizeof(unsigned long)

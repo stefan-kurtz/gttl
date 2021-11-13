@@ -18,6 +18,7 @@
 #define CYCLIC_BUFFER_HPP
 #include <cstddef>
 #include <cstring>
+#include <cassert>
 template<typename Basetype,size_t max_size>
 class CyclicBuffer
 {
