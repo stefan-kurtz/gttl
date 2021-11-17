@@ -34,7 +34,6 @@ SRC=${wildcard  *.cpp}
 EXECS=${subst .cpp,.x,${SRC}}
 
 all:${EXECS}
-	echo ${compiler_type}
 
 test:${EXECS} test_matrix_partition
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv

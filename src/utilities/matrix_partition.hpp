@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <array>
+#include <vector>
 
 using MatrixPartitionIntervalPair = std::array<size_t,4>;
 

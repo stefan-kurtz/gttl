@@ -51,7 +51,7 @@ template<int sizeof_unit_hashed_qgrams>
 static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
                       uint64_t hashmask,
-                      const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
+                      const GttlBitPacker<uint64_t,sizeof_unit_hashed_qgrams,3>
                         &hashed_qgram_packer,
                       size_t seqnum,
                       const char *sequence,
@@ -76,11 +76,11 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                             sequence + seqpos,qgram_length,
                             std::get<0>(code_pair));
 #endif
-      BytesUnit<sizeof_unit_hashed_qgrams,3>
-            current_hashed_qgram(hashed_qgram_packer,
-                                 {this_hash & hashmask,
-                                  static_cast<uint64_t>(seqnum),
-                                  static_cast<uint64_t>(seqpos)});
+      BytesUnit<uint64_t,sizeof_unit_hashed_qgrams,3>
+               current_hashed_qgram(hashed_qgram_packer,
+                                    {this_hash & hashmask,
+                                     static_cast<uint64_t>(seqnum),
+                                     static_cast<uint64_t>(seqpos)});
       bytes_unit_sum += current_hashed_qgram.sum();
     }
     seqpos++;
@@ -116,11 +116,11 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   const int sequences_number_bits = 11;
   const int sequences_length_bits = 20;
   constexpr const int sizeof_unit_hashed_qgrams = 9;
-  GttlBitPacker<sizeof_unit_hashed_qgrams,3>
+  GttlBitPacker<uint64_t,sizeof_unit_hashed_qgrams,3>
                 hashed_qgram_packer({hashbits,
                                      sequences_number_bits,
                                      sequences_length_bits});
-  const uint64_t hashmask = GTTL_BITS2MAXVALUE(hashbits);
+  const uint64_t hashmask = gttl_bits2maxvalue<uint64_t>(hashbits);
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {

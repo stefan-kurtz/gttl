@@ -14,8 +14,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef BITPACKER2_HPP
-#define BITPACKER2_HPP
+#ifndef BITPACKER_HPP
+#define BITPACKER_HPP
 
 #include <cassert>
 #include <climits>
@@ -24,18 +24,22 @@
 #include <iostream>
 #include "utilities/mathsupport.hpp"
 
-static constexpr const bool  show_bit_groups = false;
-
-template <int sizeof_unit,int bit_groups>
+template <typename basetype,int sizeof_unit,int bit_groups>
 struct GttlBitPacker
 {
   private:
+    static_assert(sizeof_unit == sizeof(basetype) ||
+                  sizeof_unit == sizeof(basetype) + 1);
+    static constexpr const bool show_bit_groups = false;
     std::array<int, bit_groups> bit_group_sizes;
+    static constexpr const int bits_basetype = CHAR_BIT * sizeof(basetype);
   public:
     std::array<int, bit_groups> shift_tab;
-    std::array<uint64_t, bit_groups> mask_tab;
-    int overflow_left_shift; /* only needed for sizeof_unit > 8 */
-    uint64_t max_overflow; /* only needed for sizeof_unit > 8 */
+    std::array<basetype, bit_groups> mask_tab;
+    /* the following two are only needed for
+       sizeof_unit = sizeof(basetype) + 1 */
+    int overflow_left_shift;
+    uint64_t max_overflow;
     GttlBitPacker(void) {}
     GttlBitPacker(const std::array<int, bit_groups> _bit_group_sizes) :
       overflow_left_shift(0),
@@ -51,33 +55,32 @@ struct GttlBitPacker
                     << std::endl;
         }
         bit_group_sizes[idx] = _bit_group_sizes[idx];
-        assert(_bit_group_sizes[idx] <= 64);
-        if (count + _bit_group_sizes[idx] > 64)
+        assert(_bit_group_sizes[idx] <= bits_basetype);
+        if (count + _bit_group_sizes[idx] > bits_basetype)
         {
           break;
         }
         count += _bit_group_sizes[idx];
-        shift_tab[idx] = 64 - count;
-        mask_tab[idx] = GTTL_BITS2MAXVALUE(_bit_group_sizes[idx]);
+        shift_tab[idx] = bits_basetype - count;
+        mask_tab[idx] = gttl_bits2maxvalue<basetype>(_bit_group_sizes[idx]);
       }
       int overflow_bits = 0;
       if (idx < bit_groups)
       {
-        assert(sizeof_unit > 8);
+        assert(sizeof_unit == sizeof(basetype)+1);
         assert(idx+1 == bit_groups);
         overflow_bits = _bit_group_sizes[idx];
       }
-      assert(count <= 64);
-      const int remaining_bits = 64 - count;
-      static_assert(sizeof_unit >= 8 && sizeof_unit <= 9);
-      if constexpr (sizeof_unit > 8)
+      assert(count <= bits_basetype);
+      const int remaining_bits = bits_basetype - count;
+      if constexpr (sizeof_unit == sizeof(basetype)+1)
       {
       /* if remaining_bits >= overflow_bits, then overflow value would fit
-         into uint64_t and this not require an overflow value */
+         into basetype and this does not require an overflow value */
         assert(remaining_bits < overflow_bits);
-        assert(overflow_bits <= remaining_bits + (sizeof_unit - 8) * CHAR_BIT);
-        assert(overflow_bits <= 64);
-        max_overflow = GTTL_BITS2MAXVALUE(overflow_bits);
+        assert(overflow_bits <= remaining_bits + CHAR_BIT);
+        assert(overflow_bits <= bits_basetype);
+        max_overflow = gttl_bits2maxvalue<uint64_t>(overflow_bits);
         overflow_left_shift = overflow_bits - remaining_bits;
       }
     }

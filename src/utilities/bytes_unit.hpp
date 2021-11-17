@@ -6,88 +6,52 @@
 #include <iomanip>
 #include "utilities/bitpacker.hpp"
 
-template<int sizeof_unit,int bit_groups>
+template<typename basetype,int sizeof_unit,int bit_groups>
 class BytesUnit
 {
   private:
     uint8_t bytes[sizeof_unit];
   public:
     BytesUnit() {};
-    BytesUnit(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker,
+    BytesUnit(const GttlBitPacker<basetype,sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
     {
-      static_assert(sizeof_unit >= sizeof(uint64_t));
       static_assert(sizeof *this == sizeof_unit);
-      uint64_t integer = 0;
-      if constexpr (sizeof_unit == 8)
+      basetype integer = 0;
+      static constexpr const int last_idx
+        = sizeof_unit == sizeof(basetype) ? (bit_groups-1) : (bit_groups-2);
+      for (int idx = 0; idx <= last_idx; idx++)
       {
-        for (int idx = 0; idx < bit_groups; idx++)
-        {
-          assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
-          integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
-        }
-      } else
+        assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
+        integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
+      }
+      if constexpr (sizeof_unit == sizeof(basetype) + 1)
       {
-        static_assert (sizeof_unit > 8);
-        for (int idx = 0; idx < bit_groups - 1; idx++)
-        {
-          assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
-          integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
-        }
-        const uint64_t overflow_value = to_be_encoded[bit_groups-1];
+        const basetype overflow_value = to_be_encoded[bit_groups-1];
         assert(overflow_value <= bitpacker.max_overflow);
         integer |= (overflow_value >> bitpacker.overflow_left_shift);
-        bytes[8] = static_cast<uint8_t>(overflow_value);
+        bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value);
       }
-      memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),8);
+      memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),sizeof integer);
     }
 
     template<int idx>
-    uint64_t decode_at(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                       const noexcept
+    uint64_t decode_at(const GttlBitPacker<basetype,sizeof_unit,bit_groups>
+                             &bitpacker) const noexcept
     {
       static_assert(idx >= 0 && idx < bit_groups);
-      const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
+      const basetype integer = *(reinterpret_cast<const basetype *>(bytes));
 
-      if constexpr (sizeof_unit == 8 || idx < bit_groups - 1)
+      if constexpr (sizeof_unit == sizeof(basetype) || idx < bit_groups - 1)
       {
         return (integer >> bitpacker.shift_tab[idx]) &
                 bitpacker.mask_tab[idx];
-      } else /* sizeof_unit == 9 && idx == bit_groups - 1 */
+      } else /* sizeof_unit == sizeof(basetype) + 1 && idx == bit_groups - 1 */
       {
         return ((integer << bitpacker.overflow_left_shift) |
-                static_cast<uint64_t>(bytes[8])) & bitpacker.max_overflow;
+                static_cast<uint64_t>(bytes[sizeof(basetype)]))
+                & bitpacker.max_overflow;
       }
-    }
-
-    uint64_t decode_at0(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                        const noexcept
-    {
-      return decode_at<0>(bitpacker);
-    }
-
-    uint64_t decode_at1(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                        const noexcept
-    {
-      return decode_at<1>(bitpacker);
-    }
-
-    uint64_t decode_at2(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                        const noexcept
-    {
-      return decode_at<2>(bitpacker);
-    }
-
-    uint64_t decode_at3(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                        const noexcept
-    {
-      return decode_at<3>(bitpacker);
-    }
-
-    uint64_t decode_at4(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker)
-                        const noexcept
-    {
-      return decode_at<4>(bitpacker);
     }
 
 #ifdef OWNCOPY_CONSTRUCTOR
@@ -117,14 +81,14 @@ class BytesUnit
 
     size_t sum(void) const noexcept
     {
-      const uint64_t integer = *(reinterpret_cast<const uint64_t *>(bytes));
+      const basetype integer = *(reinterpret_cast<const basetype *>(bytes));
 
-      if constexpr (sizeof_unit == 8)
+      if constexpr (sizeof_unit == sizeof(basetype))
       {
         return static_cast<size_t>(integer);
       } else
       {
-        return static_cast<size_t>(integer) + bytes[8];
+        return static_cast<size_t>(integer) + bytes[sizeof(basetype)];
       }
     }
 

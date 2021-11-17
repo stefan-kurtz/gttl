@@ -40,36 +40,40 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
           {\
             show_uint64_t_bytes(first_value);\
             show_uint64_t_bytes(second_value);\
-            BytesUnit<sizeof_unit,2> bu(bp,{first_value,second_value});\
-            const uint64_t first_value_dec = bu.decode_at<0>(bp);\
-            const uint64_t second_value_dec = bu.decode_at<1>(bp);\
+            BytesUnit<basetype,sizeof_unit,2> \
+                     bu(bp,{first_value,second_value});\
+            const uint64_t first_value_dec = bu.template decode_at<0>(bp);\
+            const uint64_t second_value_dec = bu.template decode_at<1>(bp);\
             COMPARE(first_value,first_value_dec)\
             COMPARE(second_value,second_value_dec)\
             (COUNTER)++;\
           }\
         }
 
+template<typename basetype>
 static void runner(bool direct,bool large,size_t num_values)
 {
-  size_t successes8 = 0, direct_successes8 = 0, successes9 = 0;
+  size_t successes_even = 0, direct_successes_even = 0, successes_odd = 0;
   std::mt19937_64 rgen_first;
-  for (int second_bits = 1; second_bits <= 16; second_bits++)
+  int bits_basetype = sizeof(basetype) * CHAR_BIT;
+  int start_bits = static_cast<int>(bits_basetype/size_t(4));
+  for (int second_bits = 1; second_bits <= start_bits; second_bits++)
   {
-    const uint64_t second_max = GTTL_BITS2MAXVALUE(second_bits);
+    const uint64_t second_max = gttl_bits2maxvalue<uint64_t>(second_bits);
 
-    for (int first_bits = 1; first_bits <= 64 &&
-                             first_bits + second_bits <= 9 * CHAR_BIT;
+    for (int first_bits = 1; first_bits <= bits_basetype &&
+                             first_bits + second_bits <= bits_basetype+CHAR_BIT;
          first_bits++)
     {
-      const uint64_t first_max = GTTL_BITS2MAXVALUE(first_bits);
+      const uint64_t first_max = gttl_bits2maxvalue<uint64_t>(first_bits);
       std::uniform_int_distribution<uint64_t> dis_first(0, first_max);
-      if (first_bits + second_bits > 64)
+      if (first_bits + second_bits > bits_basetype)
       {
         if (large)
         {
-          constexpr const int sizeof_unit = 9;
-          GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
-          RUN_TEST_CASES(successes9)
+          constexpr const int sizeof_unit = sizeof(basetype) + 1;
+          GttlBitPacker<basetype,sizeof_unit,2> bp({first_bits,second_bits});
+          RUN_TEST_CASES(successes_odd)
         }
       } else
       {
@@ -77,26 +81,31 @@ static void runner(bool direct,bool large,size_t num_values)
         {
           if (direct)
           {
-            Uint64Encoding<2> bp({first_bits,second_bits});
-            for (size_t idx = 0; idx < num_values; idx++)
+            if constexpr (sizeof(basetype) == sizeof(uint64_t))
             {
-              const uint64_t first_value = dis_first(rgen_first);
-              for (uint64_t second_value = 0; second_value <= second_max;
-                   second_value++)
+              Uint64Encoding<2> bp({first_bits,second_bits});
+              for (size_t idx = 0; idx < num_values; idx++)
               {
-                const uint64_t code = bp.encode({first_value,second_value});
-                const uint64_t first_value_dec = bp.decode_at<0>(code);
-                const uint64_t second_value_dec = bp.decode_at<1>(code);
-                COMPARE(first_value,first_value_dec)
-                COMPARE(second_value,second_value_dec)
-                direct_successes8++;
+                const uint64_t first_value = dis_first(rgen_first);
+                for (uint64_t second_value = 0; second_value <= second_max;
+                     second_value++)
+                {
+                  const uint64_t code = bp.encode({first_value,second_value});
+                  const uint64_t first_value_dec
+                    = bp.template decode_at<0>(code);
+                  const uint64_t second_value_dec
+                    = bp.template decode_at<1>(code);
+                  COMPARE(first_value,first_value_dec)
+                  COMPARE(second_value,second_value_dec)
+                  direct_successes_even++;
+                }
               }
             }
           } else
           {
-            constexpr const int sizeof_unit = 8;
-            GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
-            RUN_TEST_CASES(successes8)
+            constexpr const int sizeof_unit = sizeof(basetype);
+            GttlBitPacker<basetype,sizeof_unit,2> bp({first_bits,second_bits});
+            RUN_TEST_CASES(successes_even)
           }
         }
       }
@@ -104,16 +113,20 @@ static void runner(bool direct,bool large,size_t num_values)
   }
   if (large)
   {
-    std::cout << "# bitpacker.successes9\t" << successes9 << std::endl;
+    std::cout << "# bitpacker.successes_odd\t" << successes_odd << std::endl;
   } else
   {
     if (direct)
     {
-      std::cout << "# bitpacker.direct_successes8\t" << direct_successes8
-                << std::endl;
+      if constexpr (sizeof(basetype) == sizeof(uint64_t))
+      {
+        std::cout << "# bitpacker.direct_successes_even\t"
+                  << direct_successes_even << std::endl;
+      }
     } else
     {
-      std::cout << "# bitpacker.successes8\t" << successes8 << std::endl;
+      std::cout << "# bitpacker.successes_even\t"
+                << successes_even << std::endl;
     }
   }
 }
@@ -128,16 +141,33 @@ int main(int argc,char *argv[])
   }
   const size_t num_values = static_cast<size_t>(read_long);
 
-  RunTimeClass rt_small_direct;
-  runner(true,false,num_values);
-  rt_small_direct.show("8 bytes direct");
+  RunTimeClass rt_8small_direct;
+  runner<uint64_t>(true,false,num_values);
+  rt_8small_direct.show("8 bytes direct");
 
-  RunTimeClass rt_small;
-  runner(false,false,num_values);
-  rt_small.show("8 bytes");
+  RunTimeClass rt_8small;
+  runner<uint64_t>(false,false,num_values);
+  rt_8small.show("8 bytes");
 
-  RunTimeClass rt_large;
-  runner(false,true,num_values);
-  rt_large.show("9 bytes");
+  RunTimeClass rt_9large;
+  runner<uint64_t>(false,true,num_values);
+  rt_9large.show("9 bytes");
+
+  RunTimeClass rt_4small;
+  runner<uint32_t>(false,false,num_values);
+  rt_4small.show("4 bytes");
+
+  RunTimeClass rt_5large;
+  runner<uint32_t>(false,true,num_values);
+  rt_5large.show("5 bytes");
+
+  RunTimeClass rt_2small;
+  runner<uint16_t>(false,false,num_values);
+  rt_4small.show("2 bytes");
+
+  RunTimeClass rt_3large;
+  runner<uint16_t>(false,true,num_values);
+  rt_5large.show("3 bytes");
+
   return EXIT_SUCCESS;
 }

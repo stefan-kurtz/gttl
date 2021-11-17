@@ -18,13 +18,36 @@
 #define MATHSUPPORT_HPP
 #include <cstdint>
 #include <cstddef>
+#include <climits>
+#include <cassert>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
 #endif
 
-#define GTTL_BITS2MAXVALUE(BITS) ((BITS) == 64 ? UINT64_MAX \
-                                               : ((uint64_t(1) << (BITS)) - 1))
+template<typename T,int bits>
+inline constexpr T gttl_bits2maxvalue(void)
+{
+  static_assert(static_cast<T>(-1) >= 0);
+  if constexpr (bits == CHAR_BIT * sizeof(T))
+  {
+    return ~static_cast<T>(0);
+  }
+  static_assert(static_cast<size_t>(bits) < CHAR_BIT * sizeof(T));
+  return (static_cast<T>(1) << bits) - 1;
+}
+
+template<typename T>
+inline T gttl_bits2maxvalue(int bits)
+{
+  static_assert(static_cast<T>(-1) >= 0);
+  if (bits == CHAR_BIT * sizeof(T))
+  {
+    return ~static_cast<T>(0);
+  }
+  assert(static_cast<size_t>(bits) < CHAR_BIT * sizeof(T));
+  return (static_cast<T>(1) << bits) - 1;
+}
 
 template<typename Numtype>
 inline int gt_required_bits(Numtype value)
