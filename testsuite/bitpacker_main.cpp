@@ -40,7 +40,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
           {\
             show_uint64_t_bytes(first_value);\
             show_uint64_t_bytes(second_value);\
-            BytesUnit<basetype,sizeof_unit,2> \
+            BytesUnit<sizeof_unit,2> \
                      bu(bp,{first_value,second_value});\
             const uint64_t first_value_dec = bu.template decode_at<0>(bp);\
             const uint64_t second_value_dec = bu.template decode_at<1>(bp);\
@@ -72,7 +72,7 @@ static void runner(bool direct,bool large,size_t num_values)
         if (large)
         {
           constexpr const int sizeof_unit = sizeof(basetype) + 1;
-          GttlBitPacker<basetype,sizeof_unit,2> bp({first_bits,second_bits});
+          GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
           RUN_TEST_CASES(successes_odd)
         }
       } else
@@ -104,7 +104,7 @@ static void runner(bool direct,bool large,size_t num_values)
           } else
           {
             constexpr const int sizeof_unit = sizeof(basetype);
-            GttlBitPacker<basetype,sizeof_unit,2> bp({first_bits,second_bits});
+            GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
             RUN_TEST_CASES(successes_even)
           }
         }

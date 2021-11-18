@@ -5,13 +5,12 @@
 #include <iostream>
 #include <iomanip>
 #include <type_traits>
-#include <typeinfo>
 #include "utilities/bitpacker.hpp"
 
-template<typename basetype,int sizeof_unit,int bit_groups>
+template<int sizeof_unit,int bit_groups>
 class BytesUnit
 {
-  using basetype2
+  using basetype
     = typename std::conditional<sizeof_unit >= 8,
                                 uint64_t,
                                 typename std::conditional<sizeof_unit >= 4,
@@ -22,10 +21,9 @@ class BytesUnit
     uint8_t bytes[sizeof_unit];
   public:
     BytesUnit() {};
-    BytesUnit(const GttlBitPacker<basetype,sizeof_unit,bit_groups> &bitpacker,
+    BytesUnit(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
     {
-      static_assert(sizeof(basetype2) == sizeof(basetype));
       static_assert(sizeof *this == sizeof_unit);
       static constexpr const int last_idx
         = sizeof_unit == sizeof(basetype) ? (bit_groups-1) : (bit_groups-2);
@@ -47,7 +45,7 @@ class BytesUnit
     }
 
     template<int idx>
-    uint64_t decode_at(const GttlBitPacker<basetype,sizeof_unit,bit_groups>
+    uint64_t decode_at(const GttlBitPacker<sizeof_unit,bit_groups>
                              &bitpacker) const noexcept
     {
       static_assert(idx >= 0 && idx < bit_groups);

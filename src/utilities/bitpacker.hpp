@@ -22,11 +22,19 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include <type_traits>
 #include "utilities/mathsupport.hpp"
 
-template <typename basetype,int sizeof_unit,int bit_groups>
+template <int sizeof_unit,int bit_groups>
 struct GttlBitPacker
 {
+  using basetype
+    = typename std::conditional<sizeof_unit >= 8,
+                                uint64_t,
+                                typename std::conditional<sizeof_unit >= 4,
+                                                          uint32_t,
+                                                          uint16_t>::type>
+                                ::type;
   private:
     static_assert(sizeof_unit == sizeof(basetype) ||
                   sizeof_unit == sizeof(basetype) + 1);
