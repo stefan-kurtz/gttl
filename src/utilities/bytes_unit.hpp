@@ -4,11 +4,20 @@
 #include <cstring>
 #include <iostream>
 #include <iomanip>
+#include <type_traits>
+#include <typeinfo>
 #include "utilities/bitpacker.hpp"
 
 template<typename basetype,int sizeof_unit,int bit_groups>
 class BytesUnit
 {
+  using basetype2
+    = typename std::conditional<sizeof_unit >= 8,
+                                uint64_t,
+                                typename std::conditional<sizeof_unit >= 4,
+                                                          uint32_t,
+                                                          uint16_t>::type>
+                                ::type;
   private:
     uint8_t bytes[sizeof_unit];
   public:
@@ -16,11 +25,13 @@ class BytesUnit
     BytesUnit(const GttlBitPacker<basetype,sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
     {
+      static_assert(sizeof(basetype2) == sizeof(basetype));
       static_assert(sizeof *this == sizeof_unit);
-      basetype integer = 0;
       static constexpr const int last_idx
         = sizeof_unit == sizeof(basetype) ? (bit_groups-1) : (bit_groups-2);
-      for (int idx = 0; idx <= last_idx; idx++)
+      assert(to_be_encoded[0] <= bitpacker.mask_tab[0]);
+      basetype integer = to_be_encoded[0] << bitpacker.shift_tab[0];
+      for (int idx = 1; idx <= last_idx; idx++)
       {
         assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
         integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
