@@ -7,6 +7,8 @@
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/bytes_unit.hpp"
+#include "utilities/constexpr_for.hpp"
+#include "utilities/str_format.hpp"
 #include "uint64_encoding.hpp"
 
 static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
@@ -31,7 +33,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
                          exit(EXIT_FAILURE);\
                        }
 
-#define RUN_TEST_CASES(COUNTER)\
+#define RUN_TEST_CASES\
         for (size_t idx = 0; idx < num_values; idx++)\
         {\
           const uint64_t first_value = dis_first(rgen_first);\
@@ -46,38 +48,42 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
             const uint64_t second_value_dec = bu.template decode_at<1>(bp);\
             COMPARE(first_value,first_value_dec)\
             COMPARE(second_value,second_value_dec)\
-            (COUNTER)++;\
+            successes++;\
           }\
         }
 
-template<typename basetype>
-static void runner(bool direct,bool large,size_t num_values)
+template<typename basetype,int overflow>
+static void runner(bool direct,size_t num_values)
 {
-  size_t successes_even = 0, direct_successes_even = 0, successes_odd = 0;
+  size_t successes = 0;
   std::mt19937_64 rgen_first;
   int bits_basetype = sizeof(basetype) * CHAR_BIT;
-  int start_bits = static_cast<int>(bits_basetype/size_t(4));
+  int start_bits = std::max(9,static_cast<int>(bits_basetype/size_t(4)));
   for (int second_bits = 1; second_bits <= start_bits; second_bits++)
   {
     const uint64_t second_max = gttl_bits2maxvalue<uint64_t>(second_bits);
 
     for (int first_bits = 1; first_bits <= bits_basetype &&
-                             first_bits + second_bits <= bits_basetype+CHAR_BIT;
+                             first_bits + second_bits <= bits_basetype +
+                                                         overflow * CHAR_BIT;
          first_bits++)
     {
+      //std::cout << "first_bits\t" << first_bits
+                //<< "\tsecond_bits\t" << second_bits << std::endl;
       const uint64_t first_max = gttl_bits2maxvalue<uint64_t>(first_bits);
       std::uniform_int_distribution<uint64_t> dis_first(0, first_max);
       if (first_bits + second_bits > bits_basetype)
       {
-        if (large)
+        if constexpr (overflow > 0)
         {
-          constexpr const int sizeof_unit = sizeof(basetype) + 1;
+          static_assert(overflow == 1 || overflow == 2);
+          constexpr const int sizeof_unit = sizeof(basetype) + overflow;
           GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
-          RUN_TEST_CASES(successes_odd)
+          RUN_TEST_CASES
         }
       } else
       {
-        if (!large)
+        if constexpr (overflow == 0)
         {
           if (direct)
           {
@@ -97,7 +103,7 @@ static void runner(bool direct,bool large,size_t num_values)
                     = bp.template decode_at<1>(code);
                   COMPARE(first_value,first_value_dec)
                   COMPARE(second_value,second_value_dec)
-                  direct_successes_even++;
+                  successes++;
                 }
               }
             }
@@ -105,30 +111,14 @@ static void runner(bool direct,bool large,size_t num_values)
           {
             constexpr const int sizeof_unit = sizeof(basetype);
             GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
-            RUN_TEST_CASES(successes_even)
+            RUN_TEST_CASES
           }
         }
       }
     }
   }
-  if (large)
-  {
-    std::cout << "# bitpacker.successes_odd\t" << successes_odd << std::endl;
-  } else
-  {
-    if (direct)
-    {
-      if constexpr (sizeof(basetype) == sizeof(uint64_t))
-      {
-        std::cout << "# bitpacker.direct_successes_even\t"
-                  << direct_successes_even << std::endl;
-      }
-    } else
-    {
-      std::cout << "# bitpacker.successes_even\t"
-                << successes_even << std::endl;
-    }
-  }
+  std::cout << "# bitpacker.successes\t" << (sizeof(basetype) + overflow)
+            << successes << std::endl;
 }
 
 int main(int argc,char *argv[])
@@ -141,33 +131,34 @@ int main(int argc,char *argv[])
   }
   const size_t num_values = static_cast<size_t>(read_long);
 
-  RunTimeClass rt_8small_direct;
-  runner<uint64_t>(true,false,num_values);
-  rt_8small_direct.show("8 bytes direct");
+  for (int direct = 0; direct < 2; direct++)
+  {
+    RunTimeClass rt;
+    runner<uint64_t,0>(direct ? true : false,num_values);
+    rt.show(direct ? "8 bytes direct" : "8 bytes");
+  }
 
-  RunTimeClass rt_8small;
-  runner<uint64_t>(false,false,num_values);
-  rt_8small.show("8 bytes");
+  RunTimeClass rt_9overflow1;
+  runner<uint64_t,1>(false,num_values);
+  rt_9overflow1.show("9 bytes");
 
-  RunTimeClass rt_9large;
-  runner<uint64_t>(false,true,num_values);
-  rt_9large.show("9 bytes");
-
-  RunTimeClass rt_4small;
-  runner<uint32_t>(false,false,num_values);
-  rt_4small.show("4 bytes");
-
-  RunTimeClass rt_5large;
-  runner<uint32_t>(false,true,num_values);
-  rt_5large.show("5 bytes");
-
-  RunTimeClass rt_2small;
-  runner<uint16_t>(false,false,num_values);
-  rt_4small.show("2 bytes");
-
-  RunTimeClass rt_3large;
-  runner<uint16_t>(false,true,num_values);
-  rt_5large.show("3 bytes");
-
+  constexpr_for<0,2+1,1>([&](auto overflow)
+  {
+    RunTimeClass rt32;
+    runner<uint32_t,overflow>(false,num_values);
+    StrFormat msg32("%lu bytes",sizeof(uint32_t) + overflow);
+    rt32.show(msg32.str());
+    RunTimeClass rt64;
+    runner<uint64_t,overflow>(false,num_values);
+    StrFormat msg64("%lu bytes",sizeof(uint64_t) + overflow);
+    rt64.show(msg64.str());
+    if constexpr (overflow <= 1)
+    {
+      RunTimeClass rt16;
+      runner<uint16_t,overflow>(false,num_values);
+      StrFormat msg16("%lu bytes",sizeof(uint16_t) + overflow);
+      rt16.show(msg16.str());
+    }
+  });
   return EXIT_SUCCESS;
 }

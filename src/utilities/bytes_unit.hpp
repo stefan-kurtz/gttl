@@ -34,12 +34,19 @@ class BytesUnit
         assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
         integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
       }
-      if constexpr (sizeof_unit == sizeof(basetype) + 1)
+      if constexpr (sizeof_unit > sizeof(basetype))
       {
         const basetype overflow_value = to_be_encoded[bit_groups-1];
         assert(overflow_value <= bitpacker.max_overflow);
         integer |= (overflow_value >> bitpacker.overflow_left_shift);
-        bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value);
+        if constexpr (sizeof_unit == sizeof(basetype) + 1)
+        {
+          bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value);
+        } else
+        {
+          bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value >> 8);
+          bytes[sizeof(basetype)+1] = static_cast<uint8_t>(overflow_value);
+        }
       }
       memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),sizeof integer);
     }
@@ -53,13 +60,22 @@ class BytesUnit
 
       if constexpr (sizeof_unit == sizeof(basetype) || idx < bit_groups - 1)
       {
-        return (integer >> bitpacker.shift_tab[idx]) &
-                bitpacker.mask_tab[idx];
-      } else /* sizeof_unit == sizeof(basetype) + 1 && idx == bit_groups - 1 */
+        return static_cast<uint64_t>(integer >> bitpacker.shift_tab[idx]) &
+               bitpacker.mask_tab[idx];
+      } else /* sizeof_unit > sizeof(basetype) && idx == bit_groups - 1 */
       {
-        return ((integer << bitpacker.overflow_left_shift) |
-                static_cast<uint64_t>(bytes[sizeof(basetype)]))
-                & bitpacker.max_overflow;
+        if constexpr (sizeof_unit == sizeof(basetype) + 1)
+        {
+          return ((integer << bitpacker.overflow_left_shift) |
+                  static_cast<uint64_t>(bytes[sizeof(basetype)]))
+                  & bitpacker.max_overflow;
+        } else
+        {
+          return ((integer << bitpacker.overflow_left_shift) |
+                  (static_cast<uint64_t>(bytes[sizeof(basetype)]) << 8) |
+                  (static_cast<uint64_t>(bytes[sizeof(basetype)+1])))
+                  & bitpacker.max_overflow;
+        }
       }
     }
 
