@@ -76,7 +76,7 @@ static void runner(bool direct,size_t num_values)
       {
         if constexpr (overflow > 0)
         {
-          static_assert(overflow == 1 || overflow == 2);
+          static_assert(overflow <= 7);
           constexpr const int sizeof_unit = sizeof(basetype) + overflow;
           GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
           RUN_TEST_CASES
@@ -138,20 +138,19 @@ int main(int argc,char *argv[])
     rt.show(direct ? "8 bytes direct" : "8 bytes");
   }
 
-  RunTimeClass rt_9overflow1;
-  runner<uint64_t,1>(false,num_values);
-  rt_9overflow1.show("9 bytes");
-
-  constexpr_for<0,2+1,1>([&](auto overflow)
+  constexpr_for<0,7+1,1>([&](auto overflow)
   {
-    RunTimeClass rt32;
-    runner<uint32_t,overflow>(false,num_values);
-    StrFormat msg32("%lu bytes",sizeof(uint32_t) + overflow);
-    rt32.show(msg32.str());
     RunTimeClass rt64;
     runner<uint64_t,overflow>(false,num_values);
     StrFormat msg64("%lu bytes",sizeof(uint64_t) + overflow);
     rt64.show(msg64.str());
+    if constexpr (overflow <= 3)
+    {
+      RunTimeClass rt32;
+      runner<uint32_t,overflow>(false,num_values);
+      StrFormat msg32("%lu bytes",sizeof(uint32_t) + overflow);
+      rt32.show(msg32.str());
+    }
     if constexpr (overflow <= 1)
     {
       RunTimeClass rt16;

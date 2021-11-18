@@ -32,13 +32,6 @@
 template <int sizeof_unit,int bit_groups>
 struct GttlBitPacker
 {
-  using basetype
-    = typename std::conditional<sizeof_unit >= 8,
-                                uint64_t,
-                                typename std::conditional<sizeof_unit >= 4,
-                                                          uint32_t,
-                                                          uint16_t>::type>
-                                ::type;
   private:
     static constexpr const bool show_bit_groups = false;
     std::array<int, bit_groups> bit_group_sizes;
@@ -55,10 +48,16 @@ struct GttlBitPacker
       overflow_left_shift(0),
       max_overflow(0)
     {
+      using basetype
+        = typename std::conditional<sizeof_unit >= 8,
+                                    uint64_t,
+                                    typename std::conditional<sizeof_unit >= 4,
+                                                              uint32_t,
+                                                              uint16_t>::type>
+                                    ::type;
       static_assert(bit_groups >= 2 &&
                     sizeof_unit >= sizeof(basetype) &&
-                    sizeof_unit <= sizeof(basetype) + 2 &&
-                    (sizeof(basetype) >= 4 || sizeof_unit <= 3));
+                    sizeof_unit <= sizeof(basetype) + 7);
       static constexpr const int bits_basetype = CHAR_BIT * sizeof(basetype);
       int count = 0, idx;
       for (idx = 0; idx < bit_groups; idx++)
@@ -93,7 +92,9 @@ struct GttlBitPacker
          into basetype and this does not require an overflow value */
         assert(remaining_bits < overflow_bits);
         assert(static_cast<size_t>(overflow_bits) <= remaining_bits +
-                                (sizeof_unit - sizeof(basetype)) * CHAR_BIT);
+                                                     (sizeof_unit -
+                                                      sizeof(basetype)) *
+                                                      CHAR_BIT);
         assert(overflow_bits <= bits_basetype);
         max_overflow = gttl_bits2maxvalue<uint64_t>(overflow_bits);
         overflow_left_shift = overflow_bits - remaining_bits;

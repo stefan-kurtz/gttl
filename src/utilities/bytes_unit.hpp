@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <type_traits>
+#include "utilities/constexpr_for.hpp"
 #include "utilities/bitpacker.hpp"
 
 template<int sizeof_unit,int bit_groups>
@@ -39,14 +40,49 @@ class BytesUnit
         const basetype overflow_value = to_be_encoded[bit_groups-1];
         assert(overflow_value <= bitpacker.max_overflow);
         integer |= (overflow_value >> bitpacker.overflow_left_shift);
+        constexpr const int overflow = sizeof_unit -
+                                       static_cast<int>(sizeof(basetype));
+        constexpr_for<0,overflow,1>([&](auto this_idx)
+        {
+          constexpr const int shift = 8 * (overflow - 1 - this_idx);
+          bytes[sizeof(basetype)+this_idx]
+            = static_cast<uint8_t>(overflow_value >> shift);
+        });
+#ifdef WITH_CASES
         if constexpr (sizeof_unit == sizeof(basetype) + 1)
         {
           bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value);
         } else
         {
-          bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value >> 8);
-          bytes[sizeof(basetype)+1] = static_cast<uint8_t>(overflow_value);
+          if constexpr (sizeof_unit == sizeof(basetype) + 2)
+          {
+            bytes[sizeof(basetype)] = static_cast<uint8_t>(overflow_value >> 8);
+            bytes[sizeof(basetype)+1] = static_cast<uint8_t>(overflow_value);
+          } else
+          {
+            if constexpr (sizeof_unit == sizeof(basetype) + 3)
+            {
+              bytes[sizeof(basetype)]
+                = static_cast<uint8_t>(overflow_value >> 16);
+              bytes[sizeof(basetype)+1]
+                = static_cast<uint8_t>(overflow_value >> 8);
+              bytes[sizeof(basetype)+2]
+                = static_cast<uint8_t>(overflow_value);
+            } else
+            {
+              static_assert(sizeof_unit == sizeof(basetype) + 4);
+              bytes[sizeof(basetype)]
+                = static_cast<uint8_t>(overflow_value >> 24);
+              bytes[sizeof(basetype)+1]
+                = static_cast<uint8_t>(overflow_value >> 16);
+              bytes[sizeof(basetype)+2]
+                = static_cast<uint8_t>(overflow_value >> 8);
+              bytes[sizeof(basetype)+3]
+                = static_cast<uint8_t>(overflow_value);
+            }
+          }
         }
+#endif
       }
       memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),sizeof integer);
     }
@@ -64,6 +100,17 @@ class BytesUnit
                bitpacker.mask_tab[idx];
       } else /* sizeof_unit > sizeof(basetype) && idx == bit_groups - 1 */
       {
+        constexpr const int overflow = sizeof_unit -
+                                       static_cast<int>(sizeof(basetype));
+        uint64_t this_value = integer << bitpacker.overflow_left_shift;
+        constexpr_for<0,overflow,1>([&](auto this_idx)
+        {
+          constexpr const int shift = 8 * (overflow - 1 - this_idx);
+          this_value |= (static_cast<uint64_t>(bytes[sizeof(basetype)+this_idx])
+                                               << shift);
+        });
+        return this_value & bitpacker.max_overflow;
+#ifdef WITH_CASES
         if constexpr (sizeof_unit == sizeof(basetype) + 1)
         {
           return ((integer << bitpacker.overflow_left_shift) |
@@ -71,11 +118,34 @@ class BytesUnit
                   & bitpacker.max_overflow;
         } else
         {
-          return ((integer << bitpacker.overflow_left_shift) |
-                  (static_cast<uint64_t>(bytes[sizeof(basetype)]) << 8) |
-                  (static_cast<uint64_t>(bytes[sizeof(basetype)+1])))
-                  & bitpacker.max_overflow;
+          if constexpr (sizeof_unit == sizeof(basetype) + 2)
+          {
+            return ((integer << bitpacker.overflow_left_shift) |
+                    (static_cast<uint64_t>(bytes[sizeof(basetype)]) << 8) |
+                    (static_cast<uint64_t>(bytes[sizeof(basetype)+1])))
+                    & bitpacker.max_overflow;
+          } else
+          {
+            if constexpr (sizeof_unit == sizeof(basetype) + 3)
+            {
+              return ((integer << bitpacker.overflow_left_shift) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)]) << 16) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)+1]) << 8) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)+2])))
+                      & bitpacker.max_overflow;
+            } else
+            {
+              static_assert(sizeof_unit == sizeof(basetype) + 4);
+              return ((integer << bitpacker.overflow_left_shift) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)]) << 24) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)+1]) << 16) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)+2]) << 8) |
+                      (static_cast<uint64_t>(bytes[sizeof(basetype)+3])))
+                      & bitpacker.max_overflow;
+            }
+          }
         }
+#endif
       }
     }
 
