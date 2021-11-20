@@ -14,8 +14,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef GTTL_LINE_ITERATOR_HPP_
-#define GTTL_LINE_ITERATOR_HPP_
+#ifndef GTTL_LINE_ITERATOR_HPP
+#define GTTL_LINE_ITERATOR_HPP
 #include <cstdbool>
 #include <cstdlib>
 #include <cassert>
@@ -30,41 +30,72 @@ template<int buf_size>
 class GttlLineIterator
 {
   private:
-    char buffer[buf_size+1], *bufptr = buffer, *bufend = buffer;
+    char buffer[buf_size+1], *bufptr, *bufend;
     GttlFpType in_fp;
     char separator;
-    bool exhausted,
-         endofunit;
+    bool file_exhausted,
+         endofunit,
+         own_in_fp;
     size_t line_number;
     bool fill_buffer(void)
     {
 #ifndef QLI_WITHOUT_ZLIB
       const int fill = gzread(in_fp, buffer, static_cast<size_t>(buf_size));
-      assert(fill >= 0);
+      assert(fill >= 0 && fill <= buf_size);
 #else
       size_t fill = fread(buffer, 1, static_cast<size_t>(buf_size), in_fp);
+      assert(fill <= static_cast<size_t>(buf_size));
 #endif
 
       if (fill > 0)
       {
         bufptr = buffer;
         bufend = buffer + fill;
-        assert(fill <= buf_size);
         *bufend = '\0';
-        exhausted = static_cast<bool>(fill < buf_size);
+#ifndef QLI_WITHOUT_ZLIB
+        file_exhausted = static_cast<bool>(fill < buf_size);
+#else
+        file_exhausted = static_cast<bool>(fill <
+                                           static_cast<size_t>(buf_size));
+#endif
         return true;
       }
-      exhausted = true;
+      file_exhausted = true;
       return false;
     }
  public:
     GttlLineIterator(GttlFpType _in_fp) :
+        bufptr(buffer),
+        bufend(buffer),
         in_fp(_in_fp),
         separator(EOF),
-        exhausted(false),
+        file_exhausted(false),
         endofunit(false),
+        own_in_fp(false),
         line_number(0)
     {
+    }
+    GttlLineIterator(const char *inputfile) :
+        bufptr(buffer),
+        bufend(buffer),
+        separator(EOF),
+        file_exhausted(false),
+        endofunit(false),
+        own_in_fp(true),
+        line_number(0)
+    {
+      in_fp = gttl_fp_type_open(inputfile,"rb");
+      if (in_fp == nullptr)
+      {
+        throw std::string(": cannot open file");
+      }
+    }
+    ~GttlLineIterator(void)
+    {
+      if (own_in_fp)
+      {
+        gttl_fp_type_close(in_fp);
+      }
     }
     void separator_set(char _separator)
     {
@@ -76,7 +107,8 @@ class GttlLineIterator
     }
     bool more_lines(void)
     {
-      return !(bufptr == bufend && (exhausted || !fill_buffer()));
+      //return !(bufptr == bufend && (file_exhausted || !fill_buffer()));
+      return bufptr != bufend || (!file_exhausted && fill_buffer());
     }
     bool next(std::string *current_line)
     {
@@ -86,7 +118,7 @@ class GttlLineIterator
         char *nextnewline, *endptr;
         size_t copy_length;
 
-        if (bufptr == bufend && (exhausted || !fill_buffer()))
+        if (bufptr == bufend && (file_exhausted || !fill_buffer()))
         {
           return false;
         }
@@ -115,7 +147,7 @@ class GttlLineIterator
           line_number++;
           return true;
         }
-        if (exhausted)
+        if (file_exhausted)
         {
           if (*(bufptr - 1) != '\n')
           {

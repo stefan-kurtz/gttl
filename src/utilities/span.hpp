@@ -1,3 +1,5 @@
+#ifndef SPAN_HPP
+#define SPAN_HPP
 #include <cstddef>
 #include <cassert>
 
@@ -40,3 +42,4 @@ public:
       return ptr + num_elements;
     }
 };
+#endif

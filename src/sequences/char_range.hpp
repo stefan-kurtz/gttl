@@ -137,7 +137,7 @@ class GttlCharRange
         }
         return *this;
       }
-      std::pair<size_t,size_t> operator*(void) const
+      const std::pair<size_t,size_t> operator*(void) const
       {
         return {range_start,range_length};
       }
@@ -152,12 +152,12 @@ class GttlCharRange
     GttlCharRange(const char *_sequence,size_t _seqlen) :
           sequence(_sequence),
           seqlen(_seqlen) {}
-  Iterator begin()
+  Iterator begin() const
   {
     auto it = Iterator(sequence,seqlen,false);
     return it;
   }
-  Iterator end()
+  Iterator end() const
   {
     return Iterator(nullptr,0,true);
   }

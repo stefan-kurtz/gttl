@@ -15,17 +15,17 @@ class GttlSeqIterator
       std::string *current_string = &header;
       GttlLineIterator<buf_size> &gttl_li;
       bool last_seq_was_processed,
-           exhausted;
+           input_exhausted;
     public:
       Iterator(std::string &_header,
                std::string &_sequence,
                GttlLineIterator<buf_size> &_gttl_li,
-               bool _exhausted) :
+               bool _input_exhausted) :
         header(_header),
         sequence(_sequence),
         gttl_li(_gttl_li),
         last_seq_was_processed(false),
-        exhausted(_exhausted)
+        input_exhausted(_input_exhausted)
       {
       }
       std::pair<const std::string &,const std::string &> operator*()
@@ -60,7 +60,7 @@ class GttlSeqIterator
           }
           if (!found_end)
           {
-            exhausted = true;
+            input_exhausted = true;
           }
           last_seq_was_processed = true;
         }
@@ -76,14 +76,14 @@ class GttlSeqIterator
       {
         if (!gttl_li.more_lines())
         {
-          exhausted = true;
+          input_exhausted = true;
         }
         last_seq_was_processed = false;
         return *this;
       }
       bool operator != (const Iterator& other) const
       {
-        return exhausted != other.exhausted;
+        return input_exhausted != other.input_exhausted;
       }
   };
   private:

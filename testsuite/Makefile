@@ -35,7 +35,7 @@ EXECS=${subst .cpp,.x,${SRC}}
 
 all:${EXECS}
 
-test:${EXECS} test_matrix_partition
+test:${EXECS} test_matrix_partition test_line_iterator
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -52,6 +52,12 @@ test:${EXECS} test_matrix_partition
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
 	@./char_range_compare.sh ../testdata/at1MB.fna
+	@echo "Congratulations. $@ passed."
+
+test_line_iterator:line_iterator.x
+	@./line_iterator.x ../testdata/at1MB.fna | diff - ../testdata/at1MB.fna
+	@$(eval TMPFILE := $(shell mktemp))
+	@cat ../testdata/at1MB.fna | tr -d '\n' > ${TMPFILE} && echo "" >> ${TMPFILE} && ./line_iterator.x ${TMPFILE} | diff - ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 test_matrix_partition:matrix_partition.py matrix_partition.x

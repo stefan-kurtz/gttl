@@ -138,7 +138,7 @@ static void display_char_ranges(const char *inputfilename)
     {
       auto sequence = std::get<1>(si);
       ThisCharRange ranger(sequence.data(),sequence.size());
-      for (auto &&range : ranger)
+      for (auto const &&range : ranger)
       {
         std::cout << seqnum << "\t" << std::get<0>(range)
                   << "\t" << std::get<1>(range) << std::endl;
