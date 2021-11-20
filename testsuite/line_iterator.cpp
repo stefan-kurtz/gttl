@@ -5,6 +5,8 @@
 int main(int argc,char *argv[])
 {
   constexpr const int buf_size = 1 << 14;
+  std::string buffer{};
+  bool haserr = false;
 
   if (argc > 2 && strcmp(argv[1],"--all") == 0)
   {
@@ -13,25 +15,59 @@ int main(int argc,char *argv[])
     {
       inputfiles.push_back(std::string(argv[idx]));
     }
-    GttlLineIterator<buf_size> gttl_li(&inputfiles);
-    std::string buffer{};
-    while (gttl_li.next(&buffer))
+    bool all_empty_files = true;
+    try
     {
-      std::cout << buffer;
-      buffer.clear();
+      GttlLineIterator<buf_size> gttl_li(&inputfiles);
+      while (gttl_li.next(&buffer))
+      {
+        all_empty_files = false;
+        std::cout << buffer;
+        buffer.clear();
+      }
+    }
+    catch (std::string &msg)
+    {
+      std::cerr << argv[0] << ": file \"" << argv[2] << "\""
+                << msg << std::endl;
+      haserr = true;
+    }
+    if (all_empty_files)
+    {
+      std::cerr << argv[0] << ": file \"" << argv[2]
+                << "\", line 1: corrupted sequence" << std::endl;
+      haserr = false;
     }
   } else
   {
     for (int idx = 1; idx < argc; idx++)
     {
-      GttlLineIterator<buf_size> gttl_li(argv[idx]);
-      std::string buffer{};
-      while (gttl_li.next(&buffer))
+      bool this_file_is_empty = true;
+      try
       {
-        std::cout << buffer;
-        buffer.clear();
+        GttlLineIterator<buf_size> gttl_li(argv[idx]);
+        while (gttl_li.next(&buffer))
+        {
+          std::cout << buffer;
+          this_file_is_empty = false;
+          buffer.clear();
+        }
+      }
+      catch (std::string &msg)
+      {
+        std::cerr << argv[0] << ": file \"" << argv[1] << "\""
+                  << msg << std::endl;
+        haserr = true;
+        break;
+      }
+      if (this_file_is_empty)
+      {
+        std::cerr << argv[0] << ": file \"" << argv[1]
+                  << "\", line 1: corrupted sequence" << std::endl;
+        haserr = true;
+        break;
       }
     }
   }
-  return EXIT_SUCCESS;
+  return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
 }

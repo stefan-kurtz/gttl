@@ -67,6 +67,7 @@ test_line_iterator:line_iterator.x
 	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
 	@./line_iterator.x --all ${AT1MB} ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
 	@./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 test_matrix_partition:matrix_partition.py matrix_partition.x

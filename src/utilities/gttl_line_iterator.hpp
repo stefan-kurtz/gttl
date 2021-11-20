@@ -39,8 +39,8 @@ class GttlLineIterator
          endofunit,
          own_in_fp,
          more_files;
-    uint32_t file_index;
-    size_t line_number;
+    size_t file_index,
+           line_number;
     bool fill_buffer(void)
     {
 #ifndef QLI_WITHOUT_ZLIB
@@ -78,7 +78,7 @@ class GttlLineIterator
         endofunit(false),
         own_in_fp(false),
         more_files(false),
-        file_index(UINT32_MAX),
+        file_index(0),
         line_number(0)
     {
     }
@@ -91,7 +91,7 @@ class GttlLineIterator
         endofunit(false),
         own_in_fp(true),
         more_files(false),
-        file_index(UINT32_MAX),
+        file_index(0),
         line_number(0)
     {
       in_fp = gttl_fp_type_open(inputfile,"rb");
@@ -210,9 +210,13 @@ class GttlLineIterator
         }
       }
     }
-    bool endofunit_get() const
+    bool endofunit_get(void) const noexcept
     {
       return endofunit;
+    }
+    size_t file_index_get(void) const noexcept
+    {
+      return file_index;
     }
 };
 #endif

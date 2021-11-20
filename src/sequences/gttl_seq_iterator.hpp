@@ -96,6 +96,16 @@ class GttlSeqIterator
     {
       gttl_li.separator_set('>');
     }
+    GttlSeqIterator(const char *inputfile) :
+        gttl_li(GttlLineIterator<buf_size>(inputfile))
+    {
+      gttl_li.separator_set('>');
+    }
+    GttlSeqIterator(const std::vector<std::string> *inputfiles) :
+        gttl_li(GttlLineIterator<buf_size>(inputfiles))
+    {
+      gttl_li.separator_set('>');
+    }
     size_t line_number(void) const noexcept
     {
       return gttl_li.line_number_get();
