@@ -22,6 +22,8 @@
 #include <climits>
 #include <algorithm>
 #include <iostream>
+#include <vector>
+#include <string>
 #include "utilities/str_format.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 
@@ -30,7 +32,7 @@
 
 #define GUESS_SIZE_TO_DECIDE 1000
 
-bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
+inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 {
   const char *protein_only_characters = "LIFEQPXZ";
   bool for_protein_only_lookup[UCHAR_MAX+1] = {false};
@@ -51,7 +53,7 @@ bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
   return false;
 }
 
-bool guess_if_protein_file(const char *filename)
+inline bool guess_if_protein_file(const char *filename)
 {
   const int buf_size = 1 << 14;
   GttlFpType in_fp = gttl_fp_type_open(filename,"rb");
@@ -91,6 +93,18 @@ bool guess_if_protein_file(const char *filename)
                              GUESS_SIZE_TO_DECIDE first characters */
   {
     return true; /* it is a protein */
+  }
+  return false;
+}
+
+inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
+{
+  for (auto && inputfile : inputfiles)
+  {
+    if(guess_if_protein_file(inputfile.c_str()))
+    {
+      return true;
+    }
   }
   return false;
 }
