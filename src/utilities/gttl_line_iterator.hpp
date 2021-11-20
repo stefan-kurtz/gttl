@@ -23,6 +23,7 @@
 
 #include <string>
 #include <algorithm>
+#include <vector>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"
 
@@ -30,12 +31,15 @@ template<int buf_size>
 class GttlLineIterator
 {
   private:
+    const std::vector<std::string> *inputfiles;
     char buffer[buf_size+1], *bufptr, *bufend;
     GttlFpType in_fp;
     char separator;
     bool file_exhausted,
          endofunit,
-         own_in_fp;
+         own_in_fp,
+         more_files;
+    uint32_t file_index;
     size_t line_number;
     bool fill_buffer(void)
     {
@@ -65,6 +69,7 @@ class GttlLineIterator
     }
  public:
     GttlLineIterator(GttlFpType _in_fp) :
+        inputfiles(nullptr),
         bufptr(buffer),
         bufend(buffer),
         in_fp(_in_fp),
@@ -72,19 +77,43 @@ class GttlLineIterator
         file_exhausted(false),
         endofunit(false),
         own_in_fp(false),
+        more_files(false),
+        file_index(UINT32_MAX),
         line_number(0)
     {
     }
     GttlLineIterator(const char *inputfile) :
+        inputfiles(nullptr),
         bufptr(buffer),
         bufend(buffer),
         separator(EOF),
         file_exhausted(false),
         endofunit(false),
         own_in_fp(true),
+        more_files(false),
+        file_index(UINT32_MAX),
         line_number(0)
     {
       in_fp = gttl_fp_type_open(inputfile,"rb");
+      if (in_fp == nullptr)
+      {
+        throw std::string(": cannot open file");
+      }
+    }
+    GttlLineIterator(const std::vector<std::string> *_inputfiles) :
+        inputfiles(_inputfiles),
+        bufptr(buffer),
+        bufend(buffer),
+        separator(EOF),
+        file_exhausted(false),
+        endofunit(false),
+        own_in_fp(true),
+        file_index(0),
+        line_number(0)
+    {
+      assert(_inputfiles->size() > 0);
+      more_files = inputfiles->size() > 1;
+      in_fp = gttl_fp_type_open(inputfiles->at(0).c_str(),"rb");
       if (in_fp == nullptr)
       {
         throw std::string(": cannot open file");
@@ -107,8 +136,28 @@ class GttlLineIterator
     }
     bool more_lines(void)
     {
-      //return !(bufptr == bufend && (file_exhausted || !fill_buffer()));
-      return bufptr != bufend || (!file_exhausted && fill_buffer());
+      if (bufptr != bufend || (!file_exhausted && fill_buffer()))
+      {
+        return true;
+      }
+      if (more_files)
+      {
+        bufptr = bufend = buffer;
+        file_exhausted = false;
+        endofunit = false;
+        gttl_fp_type_close(in_fp);
+        line_number = 0;
+        file_index++;
+        assert(file_index < inputfiles->size());
+        more_files = file_index + 1 < inputfiles->size();
+        in_fp = gttl_fp_type_open(inputfiles->at(file_index).c_str(),"rb");
+        if (in_fp == nullptr)
+        {
+          throw std::string(": cannot open file");
+        }
+        return true;
+      }
+      return false;
     }
     bool next(std::string *current_line)
     {
@@ -118,7 +167,7 @@ class GttlLineIterator
         char *nextnewline, *endptr;
         size_t copy_length;
 
-        if (bufptr == bufend && (file_exhausted || !fill_buffer()))
+        if (!more_lines())
         {
           return false;
         }

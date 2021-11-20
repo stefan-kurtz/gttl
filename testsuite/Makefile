@@ -4,6 +4,7 @@ CPPFLAGS=-I ../src
 LD=${CXX}
 LDLIBS=-lm -lz -lpthread
 CXXFLAGS=-std=c++17
+AT1MB=../testdata/at1MB.fna
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 
@@ -43,21 +44,29 @@ test:${EXECS} test_matrix_partition test_line_iterator
 	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
 	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
 	@./multiseq_mn.x -r -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
-	@./multiseq_mn.x -w 70 ../testdata/at1MB.fna | diff -I '^#' - ../testdata/at1MB.fna
-	@./multiseq_mn.x -r ../testdata/at1MB.fna | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
-	@./enum_nthash.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_nthash.tsv
-	@./count_non_wc_ranges.x ../testdata/at1MB.fna | diff - ../testdata/at1MB_non_wc.tsv
+	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
+	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
+	@./enum_nthash.x ${AT1MB} | diff - ../testdata/at1MB_nthash.tsv
+	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
 	@./bitpacker_main.x 100
 	@./endian.x
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
-	@./char_range_compare.sh ../testdata/at1MB.fna
+	@./char_range_compare.sh ${AT1MB}
 	@echo "Congratulations. $@ passed."
 
 test_line_iterator:line_iterator.x
-	@./line_iterator.x ../testdata/at1MB.fna | diff - ../testdata/at1MB.fna
+	@./line_iterator.x ${AT1MB} | diff - ${AT1MB}
 	@$(eval TMPFILE := $(shell mktemp))
-	@cat ../testdata/at1MB.fna | tr -d '\n' > ${TMPFILE} && echo "" >> ${TMPFILE} && ./line_iterator.x ${TMPFILE} | diff - ${TMPFILE}
+	@cat ${AT1MB} | tr -d '\n' > ${TMPFILE}
+	@echo "" >> ${TMPFILE}
+	@./line_iterator.x ${TMPFILE} | diff - ${TMPFILE}
+	@cat ${AT1MB} ${AT1MB} > ${TMPFILE}
+	@./line_iterator.x --all ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
+	@./line_iterator.x ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
+	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
+	@./line_iterator.x --all ${AT1MB} ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
+	@./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff - ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 test_matrix_partition:matrix_partition.py matrix_partition.x
