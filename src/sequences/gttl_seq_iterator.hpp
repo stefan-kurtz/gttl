@@ -102,7 +102,7 @@ class GttlSeqIterator
       gttl_li.separator_set('>');
     }
     GttlSeqIterator(const std::vector<std::string> *inputfiles) :
-        gttl_li(GttlLineIterator<buf_size>(inputfiles))
+      gttl_li(GttlLineIterator<buf_size>(inputfiles))
     {
       gttl_li.separator_set('>');
     }

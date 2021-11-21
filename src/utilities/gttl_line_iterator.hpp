@@ -162,24 +162,18 @@ class GttlLineIterator
     bool next(std::string *current_line)
     {
       endofunit = false;
-      while (true)
+      while (more_lines())
       {
-        char *nextnewline, *endptr;
-        size_t copy_length;
-
-        if (!more_lines())
-        {
-          return false;
-        }
-        nextnewline = reinterpret_cast<char *>
-                      (memchr(bufptr, '\n',(size_t) (bufend - bufptr + 1)));
-        endptr = nextnewline != nullptr ? nextnewline : (bufend-1);
-        copy_length = (size_t) (endptr - bufptr + 1);
-        assert(copy_length > 0);
-        current_line->append(bufptr, copy_length);
-        bufptr = endptr + 1;
+        char *nextnewline = reinterpret_cast<char *>
+                            (memchr(bufptr,'\n',
+                                    static_cast<size_t>(bufend - bufptr + 1)));
         if (nextnewline != nullptr)
         {
+          const size_t copy_length = static_cast<size_t>(nextnewline + 1
+                                                         - bufptr);
+          assert(copy_length > 0);
+          current_line->append(bufptr, copy_length);
+          bufptr = nextnewline + 1;
           if (bufptr < bufend)
           {
             if (*bufptr == separator)
@@ -196,6 +190,12 @@ class GttlLineIterator
           line_number++;
           return true;
         }
+        const size_t copy_length = static_cast<size_t>(bufend - bufptr);
+        if (copy_length > 0)
+        {
+          current_line->append(bufptr, copy_length);
+        }
+        bufptr = bufend;
         if (file_exhausted)
         {
           if (*(bufptr - 1) != '\n')
@@ -209,6 +209,7 @@ class GttlLineIterator
           return true;
         }
       }
+      return false;
     }
     bool endofunit_get(void) const noexcept
     {

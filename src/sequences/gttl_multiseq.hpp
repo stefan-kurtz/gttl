@@ -68,52 +68,33 @@ class GttlMultiseq
     static constexpr const int buf_size = (((size_t) 1) << 14);
     if (store)
     {
-      for (auto && inputfile : inputfiles)
+      GttlSeqIterator<buf_size> gttl_si_first_pass(&inputfiles);
+      for (auto &&si : gttl_si_first_pass)
       {
-        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
-        if (in_fp == nullptr)
-        {
-          throw std::string(": cannot open file");
-        }
-        GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
-        try
-        {
-          for (auto &&si : gttl_si_first_pass)
-          {
-            std::string header = std::get<0>(si);
-            std::string sequence = std::get<1>(si);
+        std::string header = std::get<0>(si);
+        std::string sequence = std::get<1>(si);
 
-            sequences_total_length += sequence.size();
-            sequences_minimum_length = std::min(sequences_minimum_length,
-                                                sequence.size());
-            sequences_maximum_length = std::max(sequences_maximum_length,
-                                                sequence.size());
-            if (length_dist_map.count(sequence.size()) == 0)
-            {
-              length_dist_map[sequence.size()] = 1;
-            } else
-            {
-              length_dist_map[sequence.size()]++;
-            }
-            sequences_number++;
-            assert(header.size() >= 2 && header[0] == '>' &&
-                   header[header.size() - 1] == '\n');
-            headers_total_length += (header.size() - 2);
-          }
-        }
-        catch (std::string &msg)
+        sequences_total_length += sequence.size();
+        sequences_minimum_length = std::min(sequences_minimum_length,
+                                            sequence.size());
+        sequences_maximum_length = std::max(sequences_maximum_length,
+                                            sequence.size());
+        if (length_dist_map.count(sequence.size()) == 0)
         {
-          gttl_fp_type_close(in_fp);
-          throw msg;
+          length_dist_map[sequence.size()] = 1;
+        } else
+        {
+          length_dist_map[sequence.size()]++;
         }
-        gttl_fp_type_close(in_fp);
+        sequences_number++;
+        assert(header.size() >= 2 && header[0] == '>' &&
+               header[header.size() - 1] == '\n');
+        headers_total_length += (header.size() - 2);
       }
-      sequence_ptr
-        = static_cast<char **>(malloc((sequences_number + 1) *
-                                      sizeof *sequence_ptr));
-      header_ptr
-        = static_cast<char **>(malloc((sequences_number + 1) *
-                                      sizeof *header_ptr));
+      sequence_ptr = static_cast<char **>(malloc((sequences_number + 1) *
+                                          sizeof *sequence_ptr));
+      header_ptr = static_cast<char **>(malloc((sequences_number + 1) *
+                                        sizeof *header_ptr));
 
       /* sequence_ptr[0] is malloced to area of size for all symbols
          (sequences_total_length) and padding sumbols, one per sequence,
@@ -147,66 +128,39 @@ class GttlMultiseq
         throw msg.str();
       }
       size_t seqnum = 0;
-      for (auto && inputfile : inputfiles)
+      GttlSeqIterator<buf_size> gttl_si_second_pass(&inputfiles);
+      for (auto &&si : gttl_si_second_pass)
       {
-        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
-        if (in_fp == nullptr)
-        {
-          throw std::string(": cannot open file");
-        }
-        GttlSeqIterator<buf_size> gttl_si_second_pass(in_fp);
-        for (auto &&si : gttl_si_second_pass)
-        {
-          std::string header = std::get<0>(si);
-          std::string sequence = std::get<1>(si);
+        std::string header = std::get<0>(si);
+        std::string sequence = std::get<1>(si);
 
-          memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
-          *(sequence_ptr[seqnum] + sequence.size())
-            = static_cast<char>(padding_char);
-          sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
-          memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
-          header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
-          seqnum++;
-        }
-        gttl_fp_type_close(in_fp);
+        memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
+        *(sequence_ptr[seqnum] + sequence.size())
+          = static_cast<char>(padding_char);
+        sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
+        memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
+        header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
+        seqnum++;
       }
     } else
     {
-      for (auto && inputfile : inputfiles)
+      GttlSeqIterator<buf_size> gttl_si_first_pass(&inputfiles);
+      for (auto &&si : gttl_si_first_pass)
       {
-        GttlFpType in_fp = gttl_fp_type_open(inputfile.c_str(), "rb");
-        if (in_fp == nullptr)
+        auto sequence = std::get<1>(si);
+        sequences_total_length += sequence.size();
+        sequences_minimum_length = std::min(sequences_minimum_length,
+                                            sequence.size());
+        sequences_maximum_length = std::max(sequences_maximum_length,
+                                            sequence.size());
+        if (length_dist_map.count(sequence.size()) == 0)
         {
-          throw std::string(": cannot open file");
-        }
-        GttlSeqIterator<buf_size> gttl_si_first_pass(in_fp);
-        try /* need this, as the catch needs to close the file pointer
-               to prevent a memory leak */
+          length_dist_map[sequence.size()] = 1;
+        } else
         {
-          for (auto &&si : gttl_si_first_pass)
-          {
-            auto sequence = std::get<1>(si);
-            sequences_total_length += sequence.size();
-            sequences_minimum_length = std::min(sequences_minimum_length,
-                                                sequence.size());
-            sequences_maximum_length = std::max(sequences_maximum_length,
-                                                sequence.size());
-            if (length_dist_map.count(sequence.size()) == 0)
-            {
-              length_dist_map[sequence.size()] = 1;
-            } else
-            {
-              length_dist_map[sequence.size()]++;
-            }
-            sequences_number++;
-          }
+          length_dist_map[sequence.size()]++;
         }
-        catch (std::string &msg)
-        {
-          gttl_fp_type_close(in_fp);
-          throw msg;
-        }
-        gttl_fp_type_close(in_fp);
+        sequences_number++;
       }
     }
     sequences_number_bits = gt_required_bits(sequences_number - 1);

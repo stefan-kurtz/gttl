@@ -32,7 +32,7 @@ int main(int argc,char *argv[])
                 << msg << std::endl;
       haserr = true;
     }
-    if (all_empty_files)
+    if (!haserr && all_empty_files)
     {
       std::cerr << argv[0] << ": file \"" << argv[2]
                 << "\", line 1: corrupted sequence" << std::endl;

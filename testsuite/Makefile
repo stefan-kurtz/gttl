@@ -56,6 +56,7 @@ test:${EXECS} test_matrix_partition test_line_iterator
 	@echo "Congratulations. $@ passed."
 
 test_line_iterator:line_iterator.x
+	@./line_iterator.py `find .. -name '*.[ch]pp'` | sh -s
 	@./line_iterator.x ${AT1MB} | diff - ${AT1MB}
 	@$(eval TMPFILE := $(shell mktemp))
 	@cat ${AT1MB} | tr -d '\n' > ${TMPFILE}
