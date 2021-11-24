@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdbool>
 
-static inline bool is_big_endian(void)
+constexpr bool is_big_endian(void)
 {
   union
   {
