@@ -7,11 +7,14 @@
 class OptionChoices
 {
   private:
-  const std::vector<std::string> &choices{};
+  std::vector<std::string> choices{};
   public:
-  OptionChoices(const std::vector<std::string> _choices) :
-     choices(_choices)
+  OptionChoices(const std::vector<std::string> _choices)
   {
+    for (auto &&c : _choices)
+    {
+      choices.push_back(c);
+    }
   }
   std::string help_line(void) const
   {
