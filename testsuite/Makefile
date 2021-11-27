@@ -47,6 +47,8 @@ test:${EXECS} test_matrix_partition test_line_iterator
 	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
 	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./enum_nthash.x ${AT1MB} | diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x ../testdata/vaccg.fna | diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_nthash.tsv
 	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
 	@./bitpacker_main.x 100
 	@./endian.x
