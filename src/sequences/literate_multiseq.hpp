@@ -10,7 +10,7 @@ template<const char *char_spec,uint8_t undefined_rank>
 class LiterateMultiseq
 {
   public:
-  GttlMultiseq &multiseq;
+  const GttlMultiseq &multiseq;
   static constexpr const GttlAlphabet<char_spec,undefined_rank> alpha{};
   std::array<size_t,alpha.size()+1> rank_dist{};
   private:
@@ -30,7 +30,7 @@ class LiterateMultiseq
     }
   }
   public:
-  LiterateMultiseq(GttlMultiseq &_multiseq) :
+  LiterateMultiseq(const GttlMultiseq &_multiseq) :
     multiseq(_multiseq)
   {
     rank_dist.fill(0);

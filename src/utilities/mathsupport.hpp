@@ -50,7 +50,7 @@ inline T gttl_bits2maxvalue(int bits)
 }
 
 template<typename Numtype>
-inline int gt_required_bits(Numtype value)
+inline int gttl_required_bits(Numtype value)
 {
   if (value == 0)
   {

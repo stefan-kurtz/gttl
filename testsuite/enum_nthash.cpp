@@ -156,9 +156,9 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   printf("# num_of_sequences\t%lu\n",seqnum);
   printf("# total_length\t%lu\n",total_length);
   printf("# max_sequence_length\t%lu\n",max_sequence_length);
-  printf("# num_of_sequences.bits\t%d\n",gt_required_bits(seqnum));
+  printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(seqnum));
   printf("# max_sequence_length.bits\t%d\n",
-          gt_required_bits<size_t>(max_sequence_length));
+          gttl_required_bits<size_t>(max_sequence_length));
   printf("# count_all_qgrams\t%lu\n",count_all_qgrams);
   printf("# sum_hash_values\t%lu\n",(unsigned long) sum_hash_values);
   printf("# bytes_unit_sum\t%lu\n",(unsigned long) bytes_unit_sum);
