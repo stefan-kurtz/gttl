@@ -44,7 +44,7 @@ class BytesUnit
                                        static_cast<int>(sizeof(basetype));
         constexpr_for<0,overflow,1>([&](auto this_idx)
         {
-          constexpr const int shift = 8 * (overflow - 1 - this_idx);
+          constexpr const int shift = 8 * (overflow - this_idx - 1);
           bytes[sizeof(basetype)+this_idx]
             = static_cast<uint8_t>(overflow_value >> shift);
         });
@@ -105,7 +105,7 @@ class BytesUnit
         uint64_t this_value = integer << bitpacker.overflow_left_shift;
         constexpr_for<0,overflow,1>([&](auto this_idx)
         {
-          constexpr const int shift = 8 * (overflow - 1 - this_idx);
+          constexpr const int shift = 8 * (overflow - this_idx - 1);
           this_value |= (static_cast<uint64_t>(bytes[sizeof(basetype)+this_idx])
                                                << shift);
         });
