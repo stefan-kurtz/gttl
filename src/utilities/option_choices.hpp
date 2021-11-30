@@ -33,6 +33,7 @@ class OptionChoices
       {
         return idx;
       }
+      idx++;
     }
     return -1;
   }
