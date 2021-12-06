@@ -3,7 +3,8 @@
 #include <cstddef>
 #include <cstdbool>
 
-constexpr bool is_big_endian(void)
+/* clang++ does not allow this function to be a constexpr. So we omit it.  */
+bool is_big_endian(void)
 {
   union
   {
