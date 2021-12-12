@@ -36,7 +36,7 @@ EXECS=${subst .cpp,.x,${SRC}}
 
 all:${EXECS}
 
-test:${EXECS} test_matrix_partition test_line_iterator
+test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -82,6 +82,15 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 	./matrix_partition_cmp.sh 17 400 0
 	./matrix_partition_cmp.sh 19 998 0
 	./matrix_partition_cmp.sh 500 13000 0
+	@echo "Congratulations. $@ passed."
+
+test_fastq_iterator:./fastq_mn.x
+	@for fastqfile in `ls ../testdata/*.fastq`; do \
+                ./fastq_mn.x E $$fastqfile | diff - $$fastqfile;\
+        done
+	@./fastq_mn.x S ../testdata/varlen_paired_1.fastq | diff - ../testdata/varlen_paired_stat.tsv
+	@./fastq_mn.x S ../testdata/varlen_paired_2.fastq | diff - ../testdata/varlen_paired_stat.tsv
+	@./fastq_mn.x S ../testdata/70x_161nt_phred64.fastq | diff - ../testdata/70x_161nt_phred64_stat.tsv
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
