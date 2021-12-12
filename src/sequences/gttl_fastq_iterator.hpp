@@ -106,6 +106,11 @@ class GttlFastQIterator
     {
       gttl_li.separator_set('\n');
     }
+    GttlFastQIterator(const std::string &inputfile) :
+        gttl_li(GttlLineIterator<buf_size>(inputfile.c_str()))
+    {
+      gttl_li.separator_set('\n');
+    }
     GttlFastQIterator(const std::vector<std::string> *inputfiles) :
       gttl_li(GttlLineIterator<buf_size>(inputfiles))
     {

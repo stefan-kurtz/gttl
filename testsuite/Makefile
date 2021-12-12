@@ -86,11 +86,13 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 
 test_fastq_iterator:./fastq_mn.x
 	@for fastqfile in `ls ../testdata/*.fastq`; do \
-                ./fastq_mn.x E $$fastqfile | diff - $$fastqfile;\
+                ./fastq_mn.x --echo $$fastqfile | diff - $$fastqfile;\
         done
-	@./fastq_mn.x S ../testdata/varlen_paired_1.fastq | diff - ../testdata/varlen_paired_stat.tsv
-	@./fastq_mn.x S ../testdata/varlen_paired_2.fastq | diff - ../testdata/varlen_paired_stat.tsv
-	@./fastq_mn.x S ../testdata/70x_161nt_phred64.fastq | diff - ../testdata/70x_161nt_phred64_stat.tsv
+	@./fastq_mn.x --statistics ../testdata/varlen_paired_1.fastq | diff - ../testdata/varlen_paired_stat.tsv
+	@./fastq_mn.x --statistics ../testdata/varlen_paired_2.fastq | diff - ../testdata/varlen_paired_stat.tsv
+	@./fastq_mn.x --statistics ../testdata/70x_161nt_phred64.fastq | diff - ../testdata/70x_161nt_phred64_stat.tsv
+	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_1.fastq | diff -  ../testdata/varlen_paired_1.fasta
+	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_[12].fastq | diff - ../testdata/varlen_paired_both.fasta
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
