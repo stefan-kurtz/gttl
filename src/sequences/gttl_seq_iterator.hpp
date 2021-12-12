@@ -10,19 +10,15 @@ class GttlSeqIterator
   struct Iterator
   {
     private:
-      std::string &header,
-                  &sequence;
+      std::string header{},
+                  sequence{};
       std::string *current_string = &header;
       GttlLineIterator<buf_size> &gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
     public:
-      Iterator(std::string &_header,
-               std::string &_sequence,
-               GttlLineIterator<buf_size> &_gttl_li,
+      Iterator(GttlLineIterator<buf_size> &_gttl_li,
                bool _input_exhausted) :
-        header(_header),
-        sequence(_sequence),
         gttl_li(_gttl_li),
         last_seq_was_processed(false),
         input_exhausted(_input_exhausted)
@@ -87,8 +83,6 @@ class GttlSeqIterator
       }
   };
   private:
-    std::string header{},
-                sequence{};
     GttlLineIterator<buf_size> gttl_li;
   public:
     GttlSeqIterator(GttlFpType _in_fp) :
@@ -112,11 +106,11 @@ class GttlSeqIterator
     }
     Iterator begin()
     {
-      return Iterator(header,sequence,gttl_li,false);
+      return Iterator(gttl_li,false);
     }
     Iterator end()
     {
-      return Iterator(header,sequence,gttl_li,true);
+      return Iterator(gttl_li,true);
     }
 };
 #endif

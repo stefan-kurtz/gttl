@@ -34,15 +34,6 @@ struct SeqPairCount
          total_length[2] = {0};
 };
 
-static void call_back_seq_pair_count(SeqPairCount *spc,
-                                     const std::string &seq1,
-                                     const std::string &seq2)
-{
-  spc->num_sequences++;
-  spc->total_length[0] += seq1.size();
-  spc->total_length[1] += seq2.size();
-}
-
 static std::pair<size_t,size_t> process_single_file(OutputMode output_mode,
                                                     const char *filename)
 {
@@ -75,20 +66,24 @@ static std::pair<size_t,size_t> process_single_file(OutputMode output_mode,
 }
 
 static void process_paired_files(SeqPairCount *seq_pair_count,
-                                 const char *filename1,
-                                 const char *filename2)
+                                 const char *filename0,
+                                 const char *filename1)
 {
   constexpr const int buf_size = 1 << 14;
-  std::cout << "process_paired_files\t" << filename1 << "\t"
-                                        << filename2 << std::endl;
-  GttlFastQPairIterator<buf_size> fastq_it(filename1,filename2);
+  GttlFastQIterator<buf_size> fastq_it0(filename0), 
+                              fastq_it1(filename1);
 
-  for (auto &&fastq_entries : fastq_it)
+  auto it0 = fastq_it0.begin(); 
+  auto it1 = fastq_it1.begin(); 
+  while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
   {
-    auto fq0 = std::get<0>(fastq_entries);
-    auto fq1 = std::get<1>(fastq_entries);
-    call_back_seq_pair_count(seq_pair_count,fastq_sequence(fq0),
-                                            fastq_sequence(fq1));
+    const std::string &seq0 = fastq_sequence(*it0);
+    const std::string &seq1 = fastq_sequence(*it1);
+    seq_pair_count->num_sequences++;
+    seq_pair_count->total_length[0] += seq0.size();
+    seq_pair_count->total_length[1] += seq1.size();
+    ++it0;
+    ++it1;
   }
 }
 
@@ -126,19 +121,19 @@ int main(int argc,char *argv[])
     }
   }
   const char *progname = argv[0];
-  const char *filename1 = argv[2];
+  const char *filename0 = argv[2];
   std::pair<size_t,size_t> result;
   SeqPairCount seq_pair_count{};
   try
   {
     if (argc == 3)
     {
-      result = process_single_file(output_mode,filename1);
+      result = process_single_file(output_mode,filename0);
     } else
     {
       assert(argc == 4);
-      const char *filename2 = argv[3];
-      process_paired_files(&seq_pair_count,filename1,filename2);
+      const char *filename1 = argv[3];
+      process_paired_files(&seq_pair_count,filename0,filename1);
     }
   }
   catch (std::string &msg)

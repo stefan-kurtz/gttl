@@ -43,7 +43,6 @@ class GttlLineIterator
            line_number;
     bool fill_buffer(void)
     {
-      std::cout << "call fill_buffer" << std::endl;
 #ifndef QLI_WITHOUT_ZLIB
       const int fill = gzread(in_fp, buffer, static_cast<size_t>(buf_size));
       assert(fill >= 0);
@@ -96,7 +95,6 @@ class GttlLineIterator
         file_index(0),
         line_number(0)
     {
-      std::cout << "GttlLineIterator\t" << inputfile << std::endl;
       in_fp = gttl_fp_type_open(inputfile,"rb");
       if (in_fp == nullptr)
       {
