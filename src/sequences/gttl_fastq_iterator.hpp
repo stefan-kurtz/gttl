@@ -2,6 +2,7 @@
 #define GTTL_FASTQ_ITERATOR_HPP
 #include <array>
 #include <string>
+#include <typeinfo>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 
@@ -62,8 +63,8 @@ class GttlFastQIterator
           }
           if (state != 3)
           {
-            StrFormat msg(", line %lu: corrupted sequence",
-                           gttl_li.line_number_get()+1);
+            StrFormat msg(", line %lu: state=%d,YYcorrupted sequence",
+                           gttl_li.line_number_get()+1,state);
             throw msg.str(); /* check_err.py checked */
           }
           if (!found_end)
@@ -74,7 +75,7 @@ class GttlFastQIterator
         }
         if (seqbufs[0].size() == 0)
         {
-          StrFormat msg(", line %lu: corrupted sequence",
+          StrFormat msg(", line %lu: XXcorrupted sequence",
                            gttl_li.line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }
@@ -126,4 +127,85 @@ class GttlFastQIterator
       return Iterator(seqbufs,gttl_li,true);
     }
 };
+
+template<int buf_size>
+class GttlFastQPairIterator
+{
+  struct Iterator
+  {
+    private:
+      GttlFastQIterator<buf_size> &fq_it0, &fq_it1;
+      decltype(fq_it0.begin()) it0;
+      decltype(fq_it1.begin()) it1;
+      bool input_exhausted;
+    public:
+      Iterator(GttlFastQIterator<buf_size> _fq_it0,
+               GttlFastQIterator<buf_size> _fq_it1,
+               bool _input_exhausted) :
+         fq_it0(_fq_it0),
+         fq_it1(_fq_it1),
+         it0(_fq_it0.begin()),
+         it1(_fq_it1.begin()),
+         input_exhausted(_input_exhausted)
+      {
+        std::cout << "call GttlFastQPairIterator()" << std::endl;
+      }
+      std::pair<FastQEntry &,FastQEntry &> operator*()
+      {
+        std::cout << "call GttlFastQPairIterator*" << std::endl;
+        assert(it0 != fq_it0.end());
+        assert(it1 != fq_it1.end());
+        return {*it0,*it1};
+      }
+      Iterator& operator++() /* prefix increment*/
+      {
+        std::cout << "call GttlFastQPairIterator++" << std::endl;
+        if (it0 != fq_it0.end())
+        {
+          if (it1 != fq_it1.end())
+          {
+            ++it0;
+            ++it1;
+          } else
+          {
+            throw std::string(", first file contains more sequences than "
+                              "second file");
+          }
+        } else
+        {
+          if (it1 != fq_it1.end())
+          {
+            throw std::string(", second file contains more sequences than "
+                              "first file");
+
+          } else
+          {
+            input_exhausted = true;
+          }
+        }
+        return *this;
+      }
+      bool operator != (const Iterator& other) const
+      {
+        return input_exhausted != other.input_exhausted;
+      }
+  };
+  private:
+    GttlFastQIterator<buf_size> fq_it0, fq_it1;
+  public:
+  GttlFastQPairIterator(const char *filename0, const char *filename1) :
+    fq_it0(GttlFastQIterator<buf_size>(filename0)),
+    fq_it1(GttlFastQIterator<buf_size>(filename1)) {}
+  Iterator begin()
+  {
+    std::cout << fq_it0.line_number() << std::endl;
+    std::cout << fq_it1.line_number() << std::endl;
+    return Iterator(fq_it0,fq_it1,false);
+  }
+  Iterator end()
+  {
+    return Iterator(fq_it0,fq_it1,true);
+  }
+};
+
 #endif
