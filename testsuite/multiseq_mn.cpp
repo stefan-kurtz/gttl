@@ -1,102 +1,143 @@
-#include <getopt.h>
 #include <iostream>
 #include <algorithm>
-#include <array>
+#include <stdexcept>
+#include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/literate_multiseq.hpp"
 
-static void usage_output(bool error_case,const char *progname)
+static void usage(const cxxopts::Options &options)
 {
-  StrFormat msg("Usage: %s [options] <filename1> [filename2 ..]\n"
-                "  -h --help            Show this help\n"
-                "  -p --protein         handle protein sequences\n"
-                "  -w --width <width>   output headers and sequences; \n"
-                "                       width specifies the line width of the\n"
-                "                       sequence output; 0 means to output\n"
-                "                       sequence in a single line",progname);
-  if (error_case)
-  {
-    std::cerr << msg.str() << std::endl;
-  } else
-  {
-    std::cout << msg.str() << std::endl;
-  }
+  std::cerr << options.help() << std::endl;
 }
+
+class MultiseqOptions
+{
+ private:
+  std::vector<std::string> inputfiles{};
+  bool help_option = false,
+       protein_option = false,
+       zipped_option = false,
+       rankdist_option = false;
+  int width_arg = -1;
+
+ public:
+  MultiseqOptions() {};
+
+  void parse(int argc, char **argv)
+  {
+    cxxopts::Options options(argv[0],"tests for GttlMultiseq");
+    options.set_width(80);
+    options.custom_help(std::string("[options] filename1 [filename2 ...]"));
+    options.set_tab_expansion();
+    options.add_options()
+       ("p,protein", "handle protein sequences",
+        cxxopts::value<bool>(protein_option)->default_value("false"))
+       ("z,zipped", "expect two fastq  files with the same "
+                    "number of sequences; show them "
+                    "in zipped order, i.e. the "
+                    "sequences at even indexes (when "
+                    "counting from 0) are from the first "
+                    "file and sequences at odd indexes are "
+                    "from the second file",
+        cxxopts::value<bool>(zipped_option)->default_value("false"))
+       ("r,rankdist", "output distribution of ranks of "
+                      "transformed sequences",
+        cxxopts::value<bool>(rankdist_option)->default_value("false"))
+       ("w,width", "output headers and sequences; "
+                   "width specifies the linewidth of the"
+                   "sequence output; 0 means to output\n"
+                   "a sequence in a single line",
+        cxxopts::value<int>(width_arg)->default_value("-1"))
+       ("h,help", "print usage");
+    try
+    {
+      auto result = options.parse(argc, argv);
+      if (result.count("help") > 0)
+      {
+        help_option = true;
+        usage(options);
+      } else
+      {
+        const std::vector<std::string>& unmatched_args = result.unmatched();
+        for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+        {
+          inputfiles.push_back(unmatched_args[idx]);
+        }
+      }
+      if (zipped_option && inputfiles.size() != 2)
+      {
+        throw std::invalid_argument("option -z/--zipped requires exactly "
+                                    "two files");
+      }
+    }
+    catch (const cxxopts::OptionException &e)
+    {
+      usage(options);
+      throw std::invalid_argument(e.what());
+    }
+  }
+  bool help_option_is_set(void) const noexcept
+  {
+    return help_option;
+  }
+  bool protein_option_is_set(void) const noexcept
+  {
+    return protein_option;
+  }
+  bool zipped_option_is_set(void) const noexcept
+  {
+    return zipped_option;
+  }
+  bool rankdist_option_is_set(void) const noexcept
+  {
+    return rankdist_option;
+  }
+  int width_option_get(void) const noexcept
+  {
+    return width_arg;
+  }
+  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  {
+    return inputfiles;
+  }
+};
 
 int main(int argc, char *argv[])
 {
   /* Different variables used for the optionparser as well as multiseq variable
      multiseq */
-  /* Give help when no arguments were given */
-  if (argc == 1)
+  MultiseqOptions options;
+
+  try
   {
-    usage_output(true,argv[0]);
+    options.parse(argc, argv);
+  }
+  catch (std::invalid_argument &e) /* check_err.py */
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-
-  /* getopt commandline parser */
-  const struct option longopts[] = {
-    {"help", no_argument, 0, 'h'},
-    {"width", required_argument, 0, 'w'},
-    {"protein", no_argument, 0, 'p'},
-    {"rankdist", no_argument, 0, 'r'},
-    {0, 0, 0, 0}
-  };
-
-  int width = -1;
-  bool protein = false, rankdist = false;
-  int opt;
-  while ((opt = getopt_long(argc, argv, ":hprw:", longopts, NULL)) != -1)
+  if (options.help_option_is_set())
   {
-    switch (opt)
-    {
-      case 'h':
-        usage_output(false,argv[0]);
-        return EXIT_SUCCESS;
-        break;
-      case 'p':
-        protein = true;
-        break;
-      case 'r':
-        rankdist = true;
-        break;
-      case 'w':
-        if (sscanf(optarg,"%d",&width) != 1 || width < 0)
-        {
-          std::cerr << argv[0] << ": argument to option -"
-                    << static_cast<char>(opt)
-                    << " must be non-negative integer"
-                    << std::endl;
-          return EXIT_FAILURE;
-        }
-        break;
-      case 0:
-        break;
-      case ':':
-        std::cerr << argv[0] << ": Option -" << optopt
-                             << " requires an argument" << std::endl;
-        usage_output(true,argv[0]);
-        return EXIT_FAILURE;
-    }
-  }
-  if (optind > argc-1)
-  {
-    std::cerr << argv[0] << ": missing filename argument" << std::endl;
-    usage_output(true,argv[0]);
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
   }
   GttlMultiseq *multiseq = nullptr;
   RunTimeClass rt = RunTimeClass();
-  std::vector<std::string> inputfiles{};
+  const std::vector<std::string> &inputfiles = options.inputfiles_get();
   try
   {
-    for (int idx = optind; idx < argc; idx++)
+    const bool store_sequences = (options.width_option_get() >= 0 ||
+                                  options.rankdist_option_is_set())
+                                  ? true : false;
+    if (options.zipped_option_is_set() && store_sequences)
     {
-      inputfiles.push_back(std::string(argv[idx]));
+      multiseq = new GttlMultiseq(inputfiles[0],inputfiles[1],
+                                  store_sequences,UINT8_MAX);
+    } else
+    {
+      multiseq = new GttlMultiseq(inputfiles,store_sequences,UINT8_MAX);
     }
-    const bool store_sequences = (width >= 0 || rankdist) ? true : false;
-    multiseq = new GttlMultiseq(inputfiles,store_sequences,UINT8_MAX);
   }
   catch (std::string &msg)
   {
@@ -109,9 +150,9 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
   rt.show("create GttlMultiseq");
-  if (width >= 0)
+  if (options.width_option_get() >= 0)
   {
-    multiseq->show(static_cast<size_t>(width), false);
+    multiseq->show(static_cast<size_t>(options.width_option_get()), false);
   }
   for (auto &&inputfile : inputfiles)
   {
@@ -123,9 +164,9 @@ int main(int argc, char *argv[])
   std::cout << "# total length\t"
             << multiseq->sequences_total_length_get()
             << std::endl;
-  if (rankdist)
+  if (options.rankdist_option_is_set())
   {
-    if (protein)
+    if (options.protein_option_is_set())
     {
       static constexpr const char amino_acids[]
         = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";

@@ -161,9 +161,11 @@ static void process_paired_files(bool statistics,
     const std::string &sequence1 = fastq_sequence(*it1);
     if (fasta_output)
     {
-      std::cout << ">" << seqnum << ".0" << std::endl;
+      const std::string &header0 = fastq_header(*it0);
+      const std::string &header1 = fastq_header(*it1);
+      std::cout << ">" << (header0.c_str() + 1) << std::endl;
       std::cout << sequence0 << std::endl;
-      std::cout << ">" << seqnum << ".1" << std::endl;
+      std::cout << ">" << (header1.c_str() + 1) << std::endl;
       std::cout << sequence1 << std::endl;
     }
     total_length[0] += sequence0.size();

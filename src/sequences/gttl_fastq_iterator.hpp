@@ -92,6 +92,10 @@ class GttlFastQIterator
       {
         return input_exhausted != other.input_exhausted;
       }
+      bool operator == (const Iterator& other) const
+      {
+        return input_exhausted == other.input_exhausted;
+      }
   };
   private:
     GttlLineIterator<buf_size> gttl_li;

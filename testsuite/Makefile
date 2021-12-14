@@ -36,16 +36,11 @@ EXECS=${subst .cpp,.x,${SRC}}
 
 all:${EXECS}
 
-test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator
+test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
+              test_multiseq
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
-	@./check_err.py ./multiseq_mn.x
-	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
-	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
-	@./multiseq_mn.x -r -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
-	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
-	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./enum_nthash.x ${AT1MB} | diff - ../testdata/at1MB_nthash.tsv
 	@./enum_nthash.x ../testdata/vaccg.fna | diff - ../testdata/vaccg_nthash.tsv
 	@./enum_nthash.x ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_nthash.tsv
@@ -55,6 +50,17 @@ test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
 	@./char_range_compare.sh ${AT1MB}
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_multiseq
+test_multiseq:./multiseq_mn.x
+	@./check_err.py ./multiseq_mn.x
+	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
+	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
+	@./multiseq_mn.x -r -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
+	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
+	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
+	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta 
 	@echo "Congratulations. $@ passed."
 
 test_line_iterator:line_iterator.x

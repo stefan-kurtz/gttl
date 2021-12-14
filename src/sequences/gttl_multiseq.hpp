@@ -10,8 +10,10 @@
 #include <climits>
 
 #include "utilities/mathsupport.hpp"
+#include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
+#include "sequences/gttl_fastq_iterator.hpp"
 
 /* A class to store various sequences and their header information.
  the inputfile is read in using fasta_reader.
@@ -46,20 +48,31 @@ class GttlMultiseq
       }
   };
   private:
-  bool store;
   size_t sequences_number,
          sequences_total_length,
          sequences_minimum_length,
          sequences_maximum_length,
          headers_total_length;
-  std::map<size_t,size_t> length_dist_map{};
-  char **sequence_ptr, **header_ptr;
   int sequences_number_bits,
       sequences_length_bits;
-
+  char **sequence_ptr,
+       **header_ptr;
   uint8_t padding_char;
+  std::map<size_t,size_t> length_dist_map{};
+#define GTTL_MULTISEQ_INIT\
+        sequences_number(0),\
+        sequences_total_length(0),\
+        sequences_minimum_length(ULONG_MAX),\
+        sequences_maximum_length(0),\
+        headers_total_length(0),\
+        sequences_number_bits(0),\
+        sequences_length_bits(0),\
+        sequence_ptr(nullptr),\
+        header_ptr(nullptr),\
+        padding_char(_padding_char)
 
-  void multiseq_reader(const std::vector<std::string> &inputfiles)
+  void multiseq_reader(const std::vector<std::string> &inputfiles,
+                       bool store, bool zip_readpair_files)
   {
     if (padding_char <= uint8_t(122))
     {
@@ -68,28 +81,72 @@ class GttlMultiseq
     static constexpr const int buf_size = (((size_t) 1) << 14);
     if (store)
     {
-      GttlSeqIterator<buf_size> gttl_si_first_pass(&inputfiles);
-      for (auto &&si : gttl_si_first_pass)
+      if (zip_readpair_files)
       {
-        std::string header = std::get<0>(si);
-        std::string sequence = std::get<1>(si);
+        assert(inputfiles.size() == 2);
+        size_t sequence_count[2] = {0};
+        for (int pair_idx = 0; pair_idx < 2; pair_idx++)
+        {
+          GttlFastQIterator<buf_size> fastq_it_first_pass(inputfiles[pair_idx]);
 
-        sequences_total_length += sequence.size();
-        sequences_minimum_length = std::min(sequences_minimum_length,
-                                            sequence.size());
-        sequences_maximum_length = std::max(sequences_maximum_length,
-                                            sequence.size());
-        if (length_dist_map.count(sequence.size()) == 0)
-        {
-          length_dist_map[sequence.size()] = 1;
-        } else
-        {
-          length_dist_map[sequence.size()]++;
+          for (auto &&fqit : fastq_it_first_pass)
+          {
+            const std::string &header = fastq_header(fqit);
+            const std::string &sequence = fastq_sequence(fqit);
+
+            sequences_total_length += sequence.size();
+            sequences_minimum_length = std::min(sequences_minimum_length,
+                                                sequence.size());
+            sequences_maximum_length = std::max(sequences_maximum_length,
+                                                sequence.size());
+            if (length_dist_map.count(sequence.size()) == 0)
+            {
+              length_dist_map[sequence.size()] = 1;
+            } else
+            {
+              length_dist_map[sequence.size()]++;
+            }
+            sequences_number++;
+            sequence_count[pair_idx]++;
+            assert(header.size() >= 2 && header[0] == '@');
+            headers_total_length += (header.size() - 1);
+          }
         }
-        sequences_number++;
-        assert(header.size() >= 2 && header[0] == '>' &&
-               header[header.size() - 1] == '\n');
-        headers_total_length += (header.size() - 2);
+        if (sequence_count[0] != sequence_count[1])
+        {
+          const bool fst_more = sequence_count[0] > sequence_count[1];
+          StrFormat msg("processing readpair files %s and %s: %s file contains "
+                        "more sequences than %s file",
+                        inputfiles[0].c_str(),inputfiles[1].c_str(),
+                        fst_more ? "first" : "second",
+                        fst_more ? "second" : "fist");
+          throw msg.str();
+        }
+      } else
+      {
+        GttlSeqIterator<buf_size> gttl_si_first_pass(&inputfiles);
+        for (auto &&si : gttl_si_first_pass)
+        {
+          std::string header = std::get<0>(si);
+          std::string sequence = std::get<1>(si);
+  
+          sequences_total_length += sequence.size();
+          sequences_minimum_length = std::min(sequences_minimum_length,
+                                              sequence.size());
+          sequences_maximum_length = std::max(sequences_maximum_length,
+                                              sequence.size());
+          if (length_dist_map.count(sequence.size()) == 0)
+          {
+            length_dist_map[sequence.size()] = 1;
+          } else
+          {
+            length_dist_map[sequence.size()]++;
+          }
+          sequences_number++;
+          assert(header.size() >= 2 && header[0] == '>' &&
+                 header[header.size() - 1] == '\n');
+          headers_total_length += (header.size() - 2);
+        }
       }
       sequence_ptr = static_cast<char **>(malloc((sequences_number + 1) *
                                           sizeof *sequence_ptr));
@@ -128,19 +185,53 @@ class GttlMultiseq
         throw msg.str();
       }
       size_t seqnum = 0;
-      GttlSeqIterator<buf_size> gttl_si_second_pass(&inputfiles);
-      for (auto &&si : gttl_si_second_pass)
+      if (zip_readpair_files)
       {
-        std::string header = std::get<0>(si);
-        std::string sequence = std::get<1>(si);
+        assert(inputfiles.size() == 2);
+        GttlFastQIterator<buf_size> fastq_it0(inputfiles[0]),
+                                    fastq_it1(inputfiles[1]);
 
-        memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
-        *(sequence_ptr[seqnum] + sequence.size())
-          = static_cast<char>(padding_char);
-        sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
-        memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
-        header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
-        seqnum++;
+        auto it0 = fastq_it0.begin();
+        auto it1 = fastq_it1.begin();
+        while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
+        {
+          std::vector<std::string> rp_seqs{fastq_sequence(*it0),
+                                           fastq_sequence(*it1)},
+                                   rp_hds{fastq_header(*it0),
+                                          fastq_header(*it1)};
+          for (int pair_idx = 0; pair_idx < 2; pair_idx++)
+          {
+            memcpy(sequence_ptr[seqnum],
+                   rp_seqs[pair_idx].data(), rp_seqs[pair_idx].size());
+            *(sequence_ptr[seqnum] + rp_seqs[pair_idx].size())
+              = static_cast<char>(padding_char);
+            sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] +
+                                       rp_seqs[pair_idx].size() + 1;
+            memcpy(header_ptr[seqnum], rp_hds[pair_idx].data() + 1,
+                                       rp_hds[pair_idx].size() - 1);
+            header_ptr[seqnum + 1] = header_ptr[seqnum] +
+                                     rp_hds[pair_idx].size() - 1;
+            seqnum++;
+          }
+          ++it0;
+          ++it1;
+        }
+      } else
+      {
+        GttlSeqIterator<buf_size> gttl_si_second_pass(&inputfiles);
+        for (auto &&si : gttl_si_second_pass)
+        {
+          std::string header = std::get<0>(si);
+          std::string sequence = std::get<1>(si);
+
+          memcpy(sequence_ptr[seqnum], sequence.data(), sequence.size());
+          *(sequence_ptr[seqnum] + sequence.size())
+            = static_cast<char>(padding_char);
+          sequence_ptr[seqnum + 1] = sequence_ptr[seqnum] + sequence.size() + 1;
+          memcpy(header_ptr[seqnum], header.data() + 1, header.size() - 2);
+          header_ptr[seqnum + 1] = header_ptr[seqnum] + header.size() - 2;
+          seqnum++;
+        }
       }
     } else
     {
@@ -173,34 +264,29 @@ class GttlMultiseq
    comparisons of the sequences, use a different padding_char, so
    that one does not have to have a special case for handling sequence
    boundaries when for example computing maximal matches. */
-  GttlMultiseq(const char *inputfile, bool _store, uint8_t _padding_char)
-      : store(_store),
-        sequences_number(0),
-        sequences_total_length(0),
-        sequences_minimum_length(ULONG_MAX),
-        sequences_maximum_length(0),
-        headers_total_length(0),
-        padding_char(_padding_char)
+  GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
+      : GTTL_MULTISEQ_INIT
   {
-    std::vector<std::string> inputfiles{};
-    inputfiles.push_back(std::string(inputfile));
-    multiseq_reader(inputfiles);
+    std::vector<std::string> inputfiles{std::string(inputfile)};
+    multiseq_reader(inputfiles,store,false);
   }
-  GttlMultiseq(const std::vector<std::string> &inputfiles,bool _store,
+  GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
                uint8_t _padding_char)
-      : store(_store),
-        sequences_number(0),
-        sequences_total_length(0),
-        sequences_minimum_length(ULONG_MAX),
-        sequences_maximum_length(0),
-        headers_total_length(0),
-        padding_char(_padding_char)
+      : GTTL_MULTISEQ_INIT
   {
-    multiseq_reader(inputfiles);
+    multiseq_reader(inputfiles,store,false);
+  }
+  GttlMultiseq(const std::string &readpair_file1,
+               const std::string &readpair_file2,
+               bool store, uint8_t _padding_char)
+      : GTTL_MULTISEQ_INIT
+  {
+    std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
+    multiseq_reader(inputfiles,store,true);
   }
   ~GttlMultiseq(void)
   {
-    if (store)
+    if (sequence_ptr != nullptr)
     {
       sequence_ptr[0]--;
       free(sequence_ptr[0]);
@@ -247,14 +333,14 @@ class GttlMultiseq
 
   uint8_t padding_char_get(void) const noexcept
   {
-    assert(store);
+    assert(sequence_ptr != nullptr);
     return padding_char;
   }
 
   /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */
   size_t sequence_length_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get() &&
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get() &&
            sequence_ptr[seqnum + 1] > sequence_ptr[seqnum]);
     /* To Check whether there are any problems considering the pointer at
     sequences_number goes out of bound and is used for the length of the last
@@ -266,7 +352,7 @@ class GttlMultiseq
   /* Returns a pointer to the sequence with number seqnum */
   char *sequence_ptr_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get());
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get());
     return sequence_ptr[seqnum];
   }
 
@@ -278,7 +364,7 @@ class GttlMultiseq
   /* Returns length of header. */
   size_t header_length_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get() &&
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get() &&
            header_ptr[seqnum] < header_ptr[seqnum + 1]);
     return static_cast<size_t>(header_ptr[seqnum + 1] - header_ptr[seqnum]);
   }
@@ -287,7 +373,7 @@ class GttlMultiseq
    * short version from start to first space(excluded). */
   size_t short_header_length_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get() &&
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get() &&
            header_ptr[seqnum] < header_ptr[seqnum + 1]);
     const char *itr;
     for (itr = header_ptr[seqnum];
@@ -299,7 +385,7 @@ class GttlMultiseq
   /* Returns a pointer to the header of sequence number seqnum */
   const char *header_ptr_get(size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get());
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get());
     return header_ptr[seqnum];
   }
 
@@ -355,7 +441,7 @@ class GttlMultiseq
      normal symbols for readability*/
   void show(size_t width, bool small_header) const noexcept
   {
-    assert(store);
+    assert(sequence_ptr != nullptr);
     size_t seqnum;
 #ifndef NDEBUG
     bool found_maximum_seq_length = false;
@@ -413,7 +499,7 @@ class GttlMultiseq
   std::tuple<const char *, size_t, const char *, size_t> operator[](
       size_t seqnum) const noexcept
   {
-    assert(store && seqnum < sequences_number_get());
+    assert(sequence_ptr != nullptr && seqnum < sequences_number_get());
     const char *head_ptr = static_cast<const char *>(header_ptr[seqnum]);
     const char *seq_ptr = static_cast<const char *>(sequence_ptr[seqnum]);
     const size_t header_len = header_length_get(seqnum);
