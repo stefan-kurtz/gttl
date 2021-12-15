@@ -270,6 +270,12 @@ class GttlMultiseq
     std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store,false);
   }
+  GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
+      : GTTL_MULTISEQ_INIT
+  {
+    std::vector<std::string> inputfiles{inputfile};
+    multiseq_reader(inputfiles,store,false);
+  }
   GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
                uint8_t _padding_char)
       : GTTL_MULTISEQ_INIT
@@ -389,7 +395,7 @@ class GttlMultiseq
     return header_ptr[seqnum];
   }
 
-  void statistics(void)
+  void statistics(void) const noexcept
   {
     std::cout << "# sequences_number\t" << sequences_number_get()
               << std::endl;
