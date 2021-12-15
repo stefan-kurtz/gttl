@@ -99,6 +99,7 @@ test_fastq_iterator:./fastq_mn.x
 	@./fastq_mn.x --statistics ../testdata/70x_161nt_phred64.fastq | diff - ../testdata/70x_161nt_phred64_stat.tsv
 	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_1.fastq | diff -  ../testdata/varlen_paired_1.fasta
 	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_[12].fastq | diff - ../testdata/varlen_paired_both.fasta
+	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
