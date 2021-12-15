@@ -53,22 +53,22 @@ inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
   return false;
 }
 
-inline bool guess_if_protein_file(const char *filename)
+template<class ReaderClass>
+bool guess_if_protein_file_generic(const char *filename)
 {
-  const int buf_size = 1 << 14;
   GttlFpType in_fp = gttl_fp_type_open(filename,"rb");
 
   if (in_fp == nullptr)
   {
     throw std::string(": cannot open file");
   }
-  GttlSeqIterator<buf_size> gttl_si(in_fp);
+  ReaderClass reader(in_fp);
   size_t total_length = 0;
   bool decided_if_protein = false;
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
-    for (auto &&si : gttl_si)
+    for (auto &&si : reader)
     {
       auto sequence = std::get<1>(si);
       if (guess_if_protein_sequence(sequence.data(),sequence.size()))
@@ -95,6 +95,12 @@ inline bool guess_if_protein_file(const char *filename)
     return true; /* it is a protein */
   }
   return false;
+}
+
+inline bool guess_if_protein_file(const char *filename)
+{
+  constexpr const int buf_size = 1 << 14;
+  return guess_if_protein_file_generic<GttlSeqIterator<buf_size>>(filename);
 }
 
 inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
