@@ -3,8 +3,7 @@
 #include <stdexcept>
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
-#include "sequences/gttl_multiseq.hpp"
-#include "sequences/literate_multiseq.hpp"
+#include "sequences/literate_multiseq2.hpp"
 
 static void usage(const cxxopts::Options &options)
 {

@@ -27,8 +27,7 @@
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
-#include "sequences/gttl_multiseq.hpp"
-#include "sequences/literate_multiseq.hpp"
+#include "sequences/literate_multiseq2.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -136,7 +135,7 @@ static void display_char_ranges(const char *inputfilename)
     size_t seqnum = 0;
     for (auto &&si : gttl_si)
     {
-      auto sequence = std::get<1>(si);
+      auto sequence = si.sequence_get();
       ThisCharRange ranger(sequence.data(),sequence.size());
       for (auto const &&range : ranger)
       {
@@ -226,7 +225,7 @@ static void display_char_ranges_multiseq(const GttlMultiseq *encoded_multiseq)
 
 template<class CharFinder,const CharFinder &char_finder>
 static void display_char_ranges_multiseq_cases(const CharRangeOptions &options,
-                                               const GttlMultiseq *multiseq)
+                                               GttlMultiseq *multiseq)
 {
   if (options.invert_option_is_set())
   {

@@ -28,7 +28,7 @@
 
 #ifndef NDEBUG
 template<char wildcard>
-static void verify_non_wildcard_ranges(const std::string &sequence,
+static void verify_non_wildcard_ranges(const std::string_view &sequence,
             NonWildCardRangeVector &non_wildcard_ranges)
 {
   size_t wildcard_start = 0;
@@ -79,7 +79,7 @@ static void count_non_wildcard_ranges(const char *inputfilename)
   {
     for (auto &&si : gttl_si)
     {
-      auto sequence = std::get<1>(si);
+      auto sequence = si.sequence_get();
       total_length += sequence.size();
       max_sequence_length = std::max(max_sequence_length,sequence.size());
       NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());

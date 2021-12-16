@@ -3,25 +3,17 @@
 #include <array>
 #include <string>
 #include <typeinfo>
+#include <string_view>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 
-using FastQEntry = std::array<std::string,4>;
-
-const std::string &fastq_header(const FastQEntry & fastq_entry)
+struct FastQEntry
 {
-  return std::get<0>(fastq_entry);
-}
-
-const std::string &fastq_sequence(const FastQEntry & fastq_entry)
-{
-  return std::get<1>(fastq_entry);
-}
-
-const std::string &fastq_quality(const FastQEntry & fastq_entry)
-{
-  return std::get<3>(fastq_entry);
-}
+  std::array<std::string,4> seqbufs{};
+  const std::string_view header_get(void) { return std::get<0>(seqbufs);}
+  const std::string_view sequence_get(void) { return std::get<1>(seqbufs);}
+  const std::string_view quality_get(void) { return std::get<3>(seqbufs);}
+};
 
 template<int buf_size>
 class GttlFastQIterator
@@ -29,7 +21,7 @@ class GttlFastQIterator
   struct Iterator
   {
     private:
-      FastQEntry seqbufs{};
+      FastQEntry fastq_entry{};
       GttlLineIterator<buf_size> *gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
@@ -43,15 +35,15 @@ class GttlFastQIterator
       {
         if (!last_seq_was_processed)
         {
-          for (size_t idx = 0; idx < seqbufs.size(); idx++)
+          for (size_t idx = 0; idx < fastq_entry.seqbufs.size(); idx++)
           {
-            seqbufs[idx].clear();
+            fastq_entry.seqbufs[idx].clear();
           }
           int state = 0;
           bool found_end = false;
-          while (gttl_li->next(&seqbufs[state]))
+          while (gttl_li->next(&fastq_entry.seqbufs[state]))
           {
-            seqbufs[state].pop_back();
+            fastq_entry.seqbufs[state].pop_back(); /* remove \n */
             if (state == 3)
             {
               found_end = true;
@@ -71,13 +63,13 @@ class GttlFastQIterator
           }
           last_seq_was_processed = true;
         }
-        if (seqbufs[0].size() == 0)
+        if (fastq_entry.seqbufs[0].size() == 0)
         {
           StrFormat msg(", line %lu: XXcorrupted sequence",
                            gttl_li->line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }
-        return seqbufs;
+        return fastq_entry;
       }
       Iterator& operator++() /* prefix increment*/
       {

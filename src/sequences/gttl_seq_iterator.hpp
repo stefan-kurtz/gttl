@@ -2,7 +2,16 @@
 #define GTTL_SEQ_ITERATOR_HPP
 #include <iostream>
 #include <string>
+#include <tuple>
 #include "utilities/gttl_line_iterator.hpp"
+
+struct SequenceEntry
+{
+  std::string header{},
+              sequence{};
+  const std::string_view header_get(void) { return header;}
+  const std::string_view sequence_get(void) {return sequence;}
+};
 
 template<int buf_size>
 class GttlSeqIterator
@@ -10,9 +19,8 @@ class GttlSeqIterator
   struct Iterator
   {
     private:
-      std::string header{},
-                  sequence{};
-      std::string *current_string = &header;
+      SequenceEntry sequence_entry{};
+      std::string *current_string = &sequence_entry.header;
       GttlLineIterator<buf_size> &gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
@@ -24,31 +32,31 @@ class GttlSeqIterator
         input_exhausted(_input_exhausted)
       {
       }
-      std::pair<const std::string &,const std::string &> operator*()
+      SequenceEntry &operator*()
       {
         if (!last_seq_was_processed)
         {
-          header.clear();
-          sequence.clear();
-          current_string = &header;
+          sequence_entry.header.clear();
+          sequence_entry.sequence.clear();
+          current_string = &sequence_entry.header;
           bool found_end = false;
           while (gttl_li.next(current_string))
           {
-            if (current_string == &header)
+            current_string->pop_back(); /* remove \n */
+            if (current_string == &sequence_entry.header)
             {
-              current_string = &sequence;
+              current_string = &sequence_entry.sequence;
             } else
             {
-              sequence.pop_back();
               if (gttl_li.endofunit_get())
               {
-                current_string = &header;
+                current_string = &sequence_entry.header;
                 found_end = true;
                 break;
               }
             }
           }
-          if (current_string == &sequence)
+          if (current_string == &sequence_entry.sequence)
           {
             StrFormat msg(", line %lu: corrupted sequence",
                            gttl_li.line_number_get()+1);
@@ -60,13 +68,14 @@ class GttlSeqIterator
           }
           last_seq_was_processed = true;
         }
-        if (sequence.size() == 0 || sequence[0] == '>')
+        if (sequence_entry.sequence.size() == 0 ||
+            sequence_entry.sequence[0] == '>')
         {
           StrFormat msg(", line %lu: corrupted sequence",
                            gttl_li.line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }
-        return {header,sequence};
+        return sequence_entry;
       }
       Iterator& operator++() /* prefix increment*/
       {

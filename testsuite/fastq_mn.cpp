@@ -149,9 +149,9 @@ static void fastq_split_writer(size_t split_size,
         exhausted = true;
         break;
       }
-      const std::string &sequence = fastq_sequence(*it);
-      const std::string &header = fastq_header(*it);
-      const std::string &quality = fastq_quality(*it);
+      const std::string_view &sequence = (*it).sequence_get();
+      const std::string_view &header = (*it).header_get();
+      const std::string_view &quality = (*it).quality_get();
       out_stream << header << std::endl
                  << sequence << std::endl
                  << "+" << std::endl
@@ -173,11 +173,11 @@ static void process_single_file(bool statistics,
 
   for (auto &&fastq_entry : fastq_it)
   {
-    const std::string &sequence = fastq_sequence(fastq_entry);
+    const std::string_view &sequence = fastq_entry.sequence_get();
     if (echo)
     {
-      const std::string &header = fastq_header(fastq_entry);
-      const std::string &quality = fastq_quality(fastq_entry);
+      const std::string_view &header = fastq_entry.header_get();
+      const std::string_view &quality = fastq_entry.quality_get();
       std::cout << header << std::endl
                 << sequence << std::endl
                 << "+" << std::endl
@@ -186,8 +186,8 @@ static void process_single_file(bool statistics,
     {
       if (fasta_output)
       {
-        const std::string &header = fastq_header(fastq_entry);
-        std::cout << ">" << header.substr(1,header.size()-1) << std::endl
+        const std::string_view &header = fastq_entry.header_get();
+        std::cout << ">" << header.substr(1) << std::endl
                   << sequence << std::endl;
       }
     }
@@ -216,15 +216,15 @@ static void process_paired_files(bool statistics,
   auto it1 = fastq_it1.begin();
   while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
   {
-    const std::string &sequence0 = fastq_sequence(*it0);
-    const std::string &sequence1 = fastq_sequence(*it1);
+    const std::string_view &sequence0 = (*it0).sequence_get();
+    const std::string_view &sequence1 = (*it1).sequence_get();
     if (fasta_output)
     {
-      const std::string &header0 = fastq_header(*it0);
-      const std::string &header1 = fastq_header(*it1);
-      std::cout << ">" << (header0.c_str() + 1) << std::endl;
+      const std::string_view &header0 = (*it0).header_get();
+      const std::string_view &header1 = (*it1).header_get();
+      std::cout << ">" << header0.substr(1) << std::endl;
       std::cout << sequence0 << std::endl;
-      std::cout << ">" << (header1.c_str() + 1) << std::endl;
+      std::cout << ">" << header1.substr(1) << std::endl;
       std::cout << sequence1 << std::endl;
     }
     total_length[0] += sequence0.size();

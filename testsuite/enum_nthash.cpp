@@ -126,7 +126,7 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   {
     for (auto &&si : gttl_si)
     {
-      auto sequence = std::get<1>(si);
+      auto sequence = si.sequence_get();
       total_length += sequence.size();
       max_sequence_length = std::max(max_sequence_length,sequence.size());
       std::vector<std::pair<size_t,size_t>> sequence_ranges;

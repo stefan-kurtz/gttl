@@ -78,7 +78,7 @@ class GttlMultiseq
     {
       throw std::string("non letter padding character exhausted");
     }
-    static constexpr const int buf_size = (((size_t) 1) << 14);
+    static constexpr const int buf_size = 1 << 14;
     if (store)
     {
       if (zip_readpair_files)

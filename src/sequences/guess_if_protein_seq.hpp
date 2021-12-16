@@ -70,7 +70,7 @@ bool guess_if_protein_file_generic(const char *filename)
   {
     for (auto &&si : reader)
     {
-      auto sequence = std::get<1>(si);
+      auto sequence = si.sequence_get();
       if (guess_if_protein_sequence(sequence.data(),sequence.size()))
       {
         decided_if_protein = true;
