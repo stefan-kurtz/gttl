@@ -180,6 +180,33 @@ class SplitFileWriter
     }
 };
 
+void fastq_split_writer(size_t split_size,
+                                const std::string &inputfilename)
+{
+  constexpr const int buf_size = 1 << 14;
+
+  GttlLineIterator<buf_size> gttl_li(inputfilename.c_str());
+  GttlFastQIterator<buf_size> fastq_it(&gttl_li);
+
+  auto it = fastq_it.begin();
+  bool exhausted = false;
+  std::vector<std::string> chunk{};
+  chunk.reserve(split_size);
+  while (!exhausted)
+  {
+    chunk.clear();
+    for (size_t idx = 0; idx < split_size; idx++)
+    {
+      if (it == fastq_it.end())
+      {
+        exhausted = true;
+        break;
+      }
+      chunk.push_back(fastq_sequence(*it));
+    }
+  }
+}
+
 static void process_single_file(bool statistics,
                                 bool echo,
                                 bool fasta_output,

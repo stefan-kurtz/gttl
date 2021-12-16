@@ -73,11 +73,11 @@ class GttlLineIterator
         inputfiles(nullptr),
         bufptr(buffer),
         bufend(buffer),
-        in_fp(_in_fp),
+        in_fp(_in_fp),     /* additional to const char * constructor */
         separator(EOF),
         file_exhausted(false),
         endofunit(false),
-        own_in_fp(false),
+        own_in_fp(false),  /* different from const char * constructor */
         more_files(false),
         file_index(0),
         line_number(0)
@@ -90,7 +90,7 @@ class GttlLineIterator
         separator(EOF),
         file_exhausted(false),
         endofunit(false),
-        own_in_fp(true),
+        own_in_fp(true),  /* different from GttlFpType _in_fp */
         more_files(false),
         file_index(0),
         line_number(0)
@@ -102,7 +102,7 @@ class GttlLineIterator
       }
     }
     GttlLineIterator(const std::vector<std::string> *_inputfiles) :
-        inputfiles(_inputfiles),
+        inputfiles(_inputfiles), /* different from other constructors */
         bufptr(buffer),
         bufend(buffer),
         separator(EOF),
@@ -113,7 +113,7 @@ class GttlLineIterator
         line_number(0)
     {
       assert(_inputfiles->size() > 0);
-      more_files = inputfiles->size() > 1;
+      more_files = inputfiles->size() > 1; /* different from other construct.*/
       in_fp = gttl_fp_type_open(inputfiles->at(0).c_str(),"rb");
       if (in_fp == nullptr)
       {
