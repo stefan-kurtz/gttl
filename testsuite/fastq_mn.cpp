@@ -124,77 +124,24 @@ class FastQReaderOptions
   }
 };
 
-class SplitFileWriter
-{
-  private:
-    size_t split_size, current_seqnum, next_goal;
-    const char *outfileprefix_ptr;
-    int file_number;
-  public:
-    FILE *out_fp = nullptr;
-    void next()
-    {
-      if (split_size == 0)
-      {
-        return;
-      }
-      current_seqnum++;
-      if (current_seqnum <= next_goal)
-      {
-        return;
-      }
-      if (file_number > 0)
-      {
-        assert(out_fp != nullptr);
-        fclose(out_fp);
-      }
-      StrFormat outfilename("%s_%02d",outfileprefix_ptr,file_number);
-      out_fp = fopen(outfilename.str().c_str(),"wb");
-      assert(out_fp != nullptr);
-      file_number++;
-      next_goal += split_size;
-    }
-    SplitFileWriter(size_t _split_size,const char *_outfileprefix_ptr):
-      split_size(_split_size),
-      current_seqnum(0),
-      next_goal(_split_size),
-      outfileprefix_ptr(_split_size > 0 ? _outfileprefix_ptr : nullptr),
-      file_number(0),
-      out_fp(stdout)
-    {
-      if (split_size > 0)
-      {
-        StrFormat outfilename("%s_%02d",outfileprefix_ptr,file_number);
-        out_fp = fopen(outfilename.str().c_str(),"wb");
-        assert(out_fp != nullptr);
-        file_number++;
-      }
-    }
-    ~SplitFileWriter(void)
-    {
-      if (split_size > 0)
-      {
-        assert(out_fp != nullptr);
-        fclose(out_fp);
-      }
-    }
-};
-
-void fastq_split_writer(size_t split_size,
-                                const std::string &inputfilename)
+static void fastq_split_writer(size_t split_size,
+                               const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-
-  GttlLineIterator<buf_size> gttl_li(inputfilename.c_str());
-  GttlFastQIterator<buf_size> fastq_it(&gttl_li);
-
+  GttlFastQIterator<buf_size> fastq_it(inputfilename);
+  int file_number = 0;
   auto it = fastq_it.begin();
   bool exhausted = false;
-  std::vector<std::string> chunk{};
-  chunk.reserve(split_size);
+  GttlBasename inputfile_base(inputfilename.c_str());
   while (!exhausted)
   {
-    chunk.clear();
+    if (it == fastq_it.end())
+    {
+      break;
+    }
+    StrFormat outfilename("%s_%02d",inputfile_base.str(),file_number++);
+    std::ofstream out_stream;
+    out_stream.open(outfilename.str());
     for (size_t idx = 0; idx < split_size; idx++)
     {
       if (it == fastq_it.end())
@@ -202,48 +149,56 @@ void fastq_split_writer(size_t split_size,
         exhausted = true;
         break;
       }
-      chunk.push_back(fastq_sequence(*it));
+      const std::string &sequence = fastq_sequence(*it);
+      const std::string &header = fastq_header(*it);
+      const std::string &quality = fastq_quality(*it);
+      out_stream << header << std::endl
+                 << sequence << std::endl
+                 << "+" << std::endl
+                 << quality << std::endl;
+      ++it;
     }
+    out_stream.close();
   }
 }
 
 static void process_single_file(bool statistics,
                                 bool echo,
                                 bool fasta_output,
-                                size_t split_size,
                                 const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
   GttlFastQIterator<buf_size> fastq_it(inputfilename);
   size_t seqnum = 0, total_length = 0;
-  GttlBasename inputfile_base(inputfilename.c_str());
-  SplitFileWriter file_writer(split_size,inputfile_base.str());
 
   for (auto &&fastq_entry : fastq_it)
   {
-    file_writer.next();
     const std::string &sequence = fastq_sequence(fastq_entry);
     if (echo)
     {
       const std::string &header = fastq_header(fastq_entry);
       const std::string &quality = fastq_quality(fastq_entry);
-      fprintf(file_writer.out_fp,"%s\n%s\n+\n%s\n",
-              header.c_str(),
-              sequence.c_str(),
-              quality.c_str());
-    }
-    if (fasta_output)
+      std::cout << header << std::endl
+                << sequence << std::endl
+                << "+" << std::endl
+                << quality << std::endl;
+    } else
     {
-      fprintf(file_writer.out_fp,">%lu\n%s\n",seqnum,sequence.c_str());
+      if (fasta_output)
+      {
+        const std::string &header = fastq_header(fastq_entry);
+        std::cout << ">" << header.substr(1,header.size()-1) << std::endl
+                  << sequence << std::endl;
+      }
     }
     total_length += sequence.size();
     seqnum++;
   }
   if (statistics)
   {
-    fprintf(file_writer.out_fp,"# number of sequences\t%lu\n",seqnum);
-    fprintf(file_writer.out_fp,"# total length\t%lu\n",total_length);
-    fprintf(file_writer.out_fp,"# mean length\t%lu\n",total_length/seqnum);
+    std::cout << "# number of sequences\t" << seqnum << std::endl;
+    std::cout << "# total length\t" << total_length << std::endl;
+    std::cout << "# mean length\t" << total_length/seqnum << std::endl;
   }
 }
 
@@ -312,8 +267,13 @@ int main(int argc,char *argv[])
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
     if (inputfiles.size() == 1)
     {
-      process_single_file(statistics,echo,fasta_output,split_size,
-                          inputfiles[0]);
+      if (split_size > 0)
+      {
+        fastq_split_writer(split_size,inputfiles[0]);
+      } else
+      {
+        process_single_file(statistics,echo,fasta_output,inputfiles[0]);
+      }
     } else
     {
       process_paired_files(statistics,fasta_output,inputfiles[0],inputfiles[1]);
