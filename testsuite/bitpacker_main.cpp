@@ -53,7 +53,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
         }
 
 template<typename basetype,int overflow>
-static void runner(bool direct,size_t num_values)
+static void runner(GTTL_UNUSED bool direct,size_t num_values)
 {
   size_t successes = 0;
   std::mt19937_64 rgen_first;
