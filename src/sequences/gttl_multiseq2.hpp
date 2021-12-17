@@ -98,6 +98,17 @@ class GttlMultiseq
           ++it1;
         }
       }
+      const bool fst_more = (it0 != fastq_it0.end() && it1 == fastq_it1.end());
+      const bool snd_more = (it0 == fastq_it0.end() && it1 != fastq_it1.end());
+      if (fst_more || snd_more)
+      {
+        StrFormat msg("processing readpair files %s and %s: %s file contains "
+                      "more sequences than %s file",
+                      inputfiles[0].c_str(),inputfiles[1].c_str(),
+                      fst_more ? "first" : "second",
+                      fst_more ? "second" : "fist");
+        throw msg.str();
+      }
     } else
     {
       GttlSeqIterator<buf_size> gttl_si(&inputfiles);
@@ -147,6 +158,20 @@ class GttlMultiseq
   {
     std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
     multiseq_reader(inputfiles,store,true);
+  }
+
+  GttlMultiseq(bool store, uint8_t _padding_char)
+    : padding_char(_padding_char)
+  {
+    if (padding_char <= uint8_t(122))
+    {
+      throw std::string("non letter padding character exhausted");
+    }
+    if (store)
+    {
+      concatenated_sequences.push_back(static_cast<char>(padding_char));
+      sequence_offsets.push_back(size_t(1));
+    }
   }
 
   size_t sequences_number_get(void) const noexcept
@@ -344,7 +369,7 @@ class GttlMultiseq
   }
 
   /* Overload access operator[] */
-  std::pair<const std::string_view,const std::string_view> 
+  std::pair<const std::string_view,const std::string_view>
               operator[](size_t seqnum)
       const noexcept
   {
@@ -366,4 +391,39 @@ class GttlMultiseq
     }
   }
 };
+
+std::vector<GttlMultiseq *> multiseq_factory(const std::string &filename1,
+                                             const std::string &filename2,
+                                             size_t split_size)
+{
+  constexpr const int buf_size = 1 << 14;
+  GttlFastQIterator<buf_size> fastq_it0(filename1),
+                              fastq_it1(filename2);
+  auto it0 = fastq_it0.begin();
+  auto it1 = fastq_it1.begin();
+  bool exhausted = false;
+  std::vector<GttlMultiseq *> multiseq_vector{};
+
+  while (!exhausted)
+  {
+    if (it0 == fastq_it0.end() || it1 == fastq_it1.end())
+    {
+      break;
+    }
+    const uint8_t padding_char = UINT8_MAX;
+    GttlMultiseq *multiseq = new GttlMultiseq(true,padding_char);
+    for (size_t idx = 0; idx < split_size; idx++)
+    {
+      if (it0 == fastq_it0.end() || it1 == fastq_it1.end())
+      {
+        exhausted = true;
+        break;
+      }
+      multiseq->append<true>((*it0).header_get(),(*it0).sequence_get());
+      multiseq->append<true>((*it1).header_get(),(*it1).sequence_get());
+    }
+    multiseq_vector.push_back(multiseq);
+  }
+  return multiseq_vector;
+}
 #endif  // MULTISEQ_HPP
