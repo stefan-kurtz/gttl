@@ -41,9 +41,9 @@ test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
-	@./enum_nthash.x ${AT1MB} | diff - ../testdata/at1MB_nthash.tsv
-	@./enum_nthash.x ../testdata/vaccg.fna | diff - ../testdata/vaccg_nthash.tsv
-	@./enum_nthash.x ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_nthash.tsv
+	@./enum_nthash.x --bytes_unit ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
 	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
 	@./bitpacker_main.x 100
 	@./endian.x

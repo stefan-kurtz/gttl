@@ -25,6 +25,8 @@
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
+#include "utilities/unused.hpp"
+#include "utilities/runtime_class.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
@@ -41,7 +43,7 @@ class NtHashOptions
 {
  private:
   std::vector<std::string> inputfiles{};
-  bool help_option = false;
+  bool help_option = false, bytes_unit_option = false;
   int hashbits = 0;
   size_t kmer_length = 0;
 
@@ -56,10 +58,13 @@ class NtHashOptions
     options.custom_help(std::string("[options] filename0 [filename1]"));
     options.set_tab_expansion();
     options.add_options()
-     ("k,kmer_length", "k-mer length",
-      cxxopts::value<size_t>(kmer_length)->default_value("18"))
-     ("b,hashbits", "number of bits used for hashing",
-      cxxopts::value<int>(hashbits)->default_value("39"))
+      ("k,kmer_length", "k-mer length",
+       cxxopts::value<size_t>(kmer_length)->default_value("18"))
+      ("b,hashbits", "number of bits used for hashing",
+       cxxopts::value<int>(hashbits)->default_value("39"))
+      ("u,bytes_unit", "create BytesUnit object for each kmer and "
+                        "corresponding positional information",
+        cxxopts::value<bool>(bytes_unit_option)->default_value("false"))
      ("h,help", "print usage");
     try
     {
@@ -99,6 +104,10 @@ class NtHashOptions
   {
     return kmer_length;
   }
+  bool bytes_unit_option_is_set(void) const noexcept
+  {
+    return bytes_unit_option;
+  }
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
     return inputfiles;
@@ -123,12 +132,12 @@ static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
 }
 #endif
 
-template<int sizeof_unit_hashed_qgrams>
+template<int sizeof_unit_hashed_qgrams,bool create_bytes_unit>
 static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
                       uint64_t hashmask,
                       const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
-                        &hashed_qgram_packer,
+                        *hashed_qgram_packer,
                       size_t seqnum,
                       const char *sequence,
                       size_t this_length)
@@ -140,7 +149,7 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
   uint64_t sum_hash_values = 0;
   size_t seqpos = 0;
   QgramNtHashFwdIterator4 qgiter(qgram_length,sequence,this_length);
-  size_t bytes_unit_sum = 0;
+  GTTL_UNUSED size_t bytes_unit_sum = 0;
   for (auto const &&code_pair : qgiter)
   {
     if (std::get<1>(code_pair) == 0)
@@ -152,12 +161,15 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                             sequence + seqpos,qgram_length,
                             std::get<0>(code_pair));
 #endif
-      BytesUnit<sizeof_unit_hashed_qgrams,3>
-               current_hashed_qgram(hashed_qgram_packer,
-                                    {this_hash & hashmask,
-                                     static_cast<uint64_t>(seqnum),
-                                     static_cast<uint64_t>(seqpos)});
-      bytes_unit_sum += current_hashed_qgram.sum();
+      if constexpr (create_bytes_unit)
+      {
+        BytesUnit<sizeof_unit_hashed_qgrams,3>
+                 current_hashed_qgram(*hashed_qgram_packer,
+                                      {this_hash & hashmask,
+                                       static_cast<uint64_t>(seqnum),
+                                       static_cast<uint64_t>(seqpos)});
+        bytes_unit_sum += current_hashed_qgram.sum();
+      }
     }
     seqpos++;
   }
@@ -165,7 +177,7 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
   return {sum_hash_values,seqpos,bytes_unit_sum};
 }
 
-template<int sizeof_unit_hashed_qgrams>
+template<int sizeof_unit_hashed_qgrams,bool create_bytes_unit>
 static void enumerate_nt_hash_fwd_template(const char *inputfilename,
                                            size_t qgram_length,
                                            int hashbits,
@@ -185,10 +197,13 @@ static void enumerate_nt_hash_fwd_template(const char *inputfilename,
   size_t count_all_qgrams = 0;
   size_t bytes_unit_sum = 0;
 
-  GttlBitPacker<sizeof_unit_hashed_qgrams,3>
-                hashed_qgram_packer({hashbits,
-                                     sequences_number_bits,
-                                     sequences_length_bits});
+  GttlBitPacker<sizeof_unit_hashed_qgrams,3> *hashed_qgram_packer = nullptr;
+  if constexpr (create_bytes_unit)
+  {
+    hashed_qgram_packer = new GttlBitPacker<sizeof_unit_hashed_qgrams,3>
+                                     ({hashbits,sequences_number_bits,
+                                       sequences_length_bits});
+  }
   const uint64_t hashmask = gttl_bits2maxvalue<uint64_t>(hashbits);
   constexpr const int buf_size = 1 << 14;
   GttlSeqIterator<buf_size> gttl_si(in_fp);
@@ -208,7 +223,8 @@ static void enumerate_nt_hash_fwd_template(const char *inputfilename,
         const size_t this_length = std::get<1>(nwr_it) -
                                    std::get<0>(nwr_it) + 1;
         const char *seqptr = sequence.data() + std::get<0>(nwr_it);
-        auto result = apply_qgram_iterator<sizeof_unit_hashed_qgrams>
+        auto result = apply_qgram_iterator<sizeof_unit_hashed_qgrams,
+                                           create_bytes_unit>
                                           (qgram_length,hashmask,
                                            hashed_qgram_packer,
                                            seqnum,seqptr,this_length);
@@ -224,6 +240,7 @@ static void enumerate_nt_hash_fwd_template(const char *inputfilename,
     gttl_fp_type_close(in_fp);
     throw msg;
   }
+  delete hashed_qgram_packer;
   printf("# num_of_sequences\t%lu\n",seqnum);
   printf("# total_length\t%lu\n",total_length);
   printf("# max_sequence_length\t%lu\n",max_sequence_length);
@@ -236,7 +253,16 @@ static void enumerate_nt_hash_fwd_template(const char *inputfilename,
   gttl_fp_type_close(in_fp);
 }
 
+#define CALL_enumerate_nt_hash_fwd_template(BYTE_UNITS,BYTE_UNITS_OPTION)\
+        enumerate_nt_hash_fwd_template<BYTE_UNITS,BYTE_UNITS_OPTION>\
+                                      (inputfilename,\
+                                       qgram_length,\
+                                       hashbits,\
+                                       sequences_number_bits,\
+                                       sequences_length_bits)
+
 static void enumerate_nt_hash_fwd(const char *inputfilename,
+                                  bool bytes_unit_option,
                                   size_t qgram_length,
                                   int hashbits)
 {
@@ -251,21 +277,31 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,
   GttlMultiseq multiseq(inputfilename,store_sequences,UINT8_MAX);
   const int sequences_number_bits = multiseq.sequences_number_bits_get();
   const int sequences_length_bits = multiseq.sequences_length_bits_get();
+  RunTimeClass rt_nthash{};
   if (sequences_number_bits + sequences_length_bits + hashbits <= 64)
   {
-    enumerate_nt_hash_fwd_template<8>(inputfilename,
-                                      qgram_length,
-                                      hashbits,
-                                      sequences_number_bits,
-                                      sequences_length_bits);
+    if (bytes_unit_option)
+    {
+      CALL_enumerate_nt_hash_fwd_template(8,true);
+    } else
+    {
+      CALL_enumerate_nt_hash_fwd_template(8,false);
+    }
   } else
   {
-    enumerate_nt_hash_fwd_template<9>(inputfilename,
-                                      qgram_length,
-                                      hashbits,
-                                      sequences_number_bits,
-                                      sequences_length_bits);
+    if (bytes_unit_option)
+    {
+      CALL_enumerate_nt_hash_fwd_template(9,true);
+    } else
+    {
+      CALL_enumerate_nt_hash_fwd_template(9,false);
+    }
   }
+  StrFormat msg("nthash\t%s\t%lu\t%d\t%d\t%d",
+                inputfilename,qgram_length,
+                hashbits,sequences_number_bits,
+                sequences_length_bits);
+  rt_nthash.show(msg.str());
 }
 
 int main(int argc,char *argv[])
@@ -291,8 +327,9 @@ int main(int argc,char *argv[])
   {
     try
     {
-      enumerate_nt_hash_fwd(inputfile.c_str(),options.kmer_length_get(),
-                            options.hashbits_get());
+      enumerate_nt_hash_fwd(inputfile.c_str(),
+                            options.bytes_unit_option_is_set(),
+                            options.kmer_length_get(),options.hashbits_get());
     }
     catch (std::string &msg)
     {
