@@ -24,11 +24,87 @@
 #include <tuple>
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
+#include "utilities/cxxopts.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
+#include "sequences/gttl_multiseq2.hpp"
 #include "utilities/bytes_unit.hpp"
+
+static void usage(const cxxopts::Options &options)
+{
+  std::cerr << options.help() << std::endl;
+}
+
+class NtHashOptions
+{
+ private:
+  std::vector<std::string> inputfiles{};
+  bool help_option = false;
+  int hashbits = 0;
+  size_t kmer_length = 0;
+
+ public:
+  NtHashOptions(void) {};
+
+  void parse(int argc, char **argv)
+  {
+    cxxopts::Options options(argv[0],"process DNA sequence files and "
+                                     "generate nthash codes");
+    options.set_width(80);
+    options.custom_help(std::string("[options] filename0 [filename1]"));
+    options.set_tab_expansion();
+    options.add_options()
+     ("k,kmer_length", "k-mer length",
+      cxxopts::value<size_t>(kmer_length)->default_value("18"))
+     ("b,hashbits", "number of bits used for hashing",
+      cxxopts::value<int>(hashbits)->default_value("39"))
+     ("h,help", "print usage");
+    try
+    {
+      auto result = options.parse(argc, argv);
+      if (result.count("help") > 0)
+      {
+        help_option = true;
+        usage(options);
+      } else
+      {
+        const std::vector<std::string>& unmatched_args = result.unmatched();
+        for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+        {
+          inputfiles.push_back(unmatched_args[idx]);
+        }
+        if (inputfiles.size() < 1)
+        {
+          throw cxxopts::OptionException("not enough input files");
+        }
+      }
+    }
+    catch (const cxxopts::OptionException &e)
+    {
+      usage(options);
+      throw std::invalid_argument(e.what());
+    }
+  }
+  bool help_option_is_set(void) const noexcept
+  {
+    return help_option;
+  }
+  int hashbits_get(void) const noexcept
+  {
+    return hashbits;
+  }
+  size_t kmer_length_get(void) const noexcept
+  {
+    return kmer_length;
+  }
+  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  {
+    return inputfiles;
+  }
+};
+
 
 #ifndef NDEBUG
 static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
@@ -89,38 +165,33 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
   return {sum_hash_values,seqpos,bytes_unit_sum};
 }
 
-static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
+template<int sizeof_unit_hashed_qgrams>
+static void enumerate_nt_hash_fwd_template(const char *inputfilename,
+                                           size_t qgram_length,
+                                           int hashbits,
+                                           int sequences_number_bits,
+                                           int sequences_length_bits)
 {
-  constexpr const int buf_size = 1 << 14;
-  const bool is_protein = guess_if_protein_file(inputfilename);
-
-  if (is_protein)
-  {
-    throw std::string(": can only handle DNA sequences");
-    /* check_err.py checked */
-  }
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
     throw std::string(": cannot open file");
     /* check_err.py checked */
   }
-  GttlSeqIterator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
   size_t seqnum = 0;
   size_t max_sequence_length = 0;
   uint64_t sum_hash_values = 0;
   size_t count_all_qgrams = 0;
   size_t bytes_unit_sum = 0;
-  const int hashbits = 39;
-  const int sequences_number_bits = 11;
-  const int sequences_length_bits = 20;
-  constexpr const int sizeof_unit_hashed_qgrams = 9;
+
   GttlBitPacker<sizeof_unit_hashed_qgrams,3>
                 hashed_qgram_packer({hashbits,
                                      sequences_number_bits,
                                      sequences_length_bits});
   const uint64_t hashmask = gttl_bits2maxvalue<uint64_t>(hashbits);
+  constexpr const int buf_size = 1 << 14;
+  GttlSeqIterator<buf_size> gttl_si(in_fp);
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
@@ -165,20 +236,67 @@ static void enumerate_nt_hash_fwd(const char *inputfilename,size_t qgram_length)
   gttl_fp_type_close(in_fp);
 }
 
+static void enumerate_nt_hash_fwd(const char *inputfilename,
+                                  size_t qgram_length,
+                                  int hashbits)
+{
+  const bool is_protein = guess_if_protein_file(inputfilename);
+
+  if (is_protein)
+  {
+    throw std::string(": can only handle DNA sequences");
+    /* check_err.py checked */
+  }
+  const bool store_sequences = false;
+  GttlMultiseq multiseq(inputfilename,store_sequences,UINT8_MAX);
+  const int sequences_number_bits = multiseq.sequences_number_bits_get();
+  const int sequences_length_bits = multiseq.sequences_length_bits_get();
+  if (sequences_number_bits + sequences_length_bits + hashbits <= 64)
+  {
+    enumerate_nt_hash_fwd_template<8>(inputfilename,
+                                      qgram_length,
+                                      hashbits,
+                                      sequences_number_bits,
+                                      sequences_length_bits);
+  } else
+  {
+    enumerate_nt_hash_fwd_template<9>(inputfilename,
+                                      qgram_length,
+                                      hashbits,
+                                      sequences_number_bits,
+                                      sequences_length_bits);
+  }
+}
+
 int main(int argc,char *argv[])
 {
-  const size_t qgram_length = 18;
+  NtHashOptions options{};
+
+  try
+  {
+    options.parse(argc, argv);
+  }
+  catch (std::invalid_argument &e) /* check_err.py */
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (options.help_option_is_set())
+  {
+    return EXIT_SUCCESS;
+  }
   const char *progname = argv[0];
   bool haserr = false;
-  for (int idx = 1; idx < argc; idx++)
+  for (auto &&inputfile : options.inputfiles_get())
   {
     try
     {
-      enumerate_nt_hash_fwd(argv[idx],qgram_length);
+      enumerate_nt_hash_fwd(inputfile.c_str(),options.kmer_length_get(),
+                            options.hashbits_get());
     }
     catch (std::string &msg)
     {
-      std::cerr << progname << ": file \"" << argv[idx] << "\""
+      std::cerr << progname << ": file \"" << inputfile << "\""
                 << msg << std::endl;
       haserr = true;
       break;

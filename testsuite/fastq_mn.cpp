@@ -45,7 +45,7 @@ class FastQReaderOptions
 
   void parse(int argc, char **argv)
   {
-    cxxopts::Options options(argv[0],"process fastaq files, optionally output "
+    cxxopts::Options options(argv[0],"process fastq files, optionally output "
                                      "statistics, echo in the input or show "
                                      "sequences in fasta file");
     options.set_width(80);
