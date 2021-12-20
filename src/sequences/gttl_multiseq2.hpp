@@ -239,6 +239,12 @@ class GttlMultiseq
     return sequence_ptr_get(0);
   }
 
+  uint8_t sequence_char_get(size_t position) const noexcept
+  {
+    return static_cast<uint8_t>(concatenated_sequences[position+1]);
+  }
+
+
   char *sequence_ptr_writable_get(size_t seqnum)
   {
     assert(seqnum < sequences_number_get() &&
