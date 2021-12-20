@@ -31,7 +31,7 @@
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
-#include "sequences/gttl_multiseq2.hpp"
+#include "sequences/gttl_multiseq.hpp"
 #include "utilities/bytes_unit.hpp"
 
 static void usage(const cxxopts::Options &options)

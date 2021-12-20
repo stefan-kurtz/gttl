@@ -10,7 +10,7 @@ template<const char *char_spec,uint8_t undefined_rank>
 class LiterateMultiseq
 {
   public:
-  const GttlMultiseq &multiseq;
+  GttlMultiseq *multiseq;
   static constexpr const GttlAlphabet<char_spec,undefined_rank> alpha{};
   std::array<size_t,alpha.size()+1> rank_dist{};
   private:
@@ -30,22 +30,22 @@ class LiterateMultiseq
     }
   }
   public:
-  LiterateMultiseq(const GttlMultiseq &_multiseq) :
+  LiterateMultiseq(GttlMultiseq *_multiseq) :
     multiseq(_multiseq)
   {
     rank_dist.fill(0);
-    for (size_t snum = 0; snum < multiseq.sequences_number_get(); snum++)
+    for (size_t snum = 0; snum < multiseq->sequences_number_get(); snum++)
     {
-      update_distribution(multiseq.sequence_ptr_get(snum),
-                          multiseq.sequence_length_get(snum));
+      update_distribution(multiseq->sequence_ptr_get(snum),
+                          multiseq->sequence_length_get(snum));
     }
   }
   void perform_sequence_encoding(void)
   {
-    for (size_t snum = 0; snum < multiseq.sequences_number_get(); snum++)
+    for (size_t snum = 0; snum < multiseq->sequences_number_get(); snum++)
     {
-      perform_sequence_encoding(multiseq.sequence_ptr_get(snum),
-                                multiseq.sequence_length_get(snum));
+      perform_sequence_encoding(multiseq->sequence_ptr_writable_get(snum),
+                                multiseq->sequence_length_get(snum));
     }
   }
   void show_rank_dist(void)

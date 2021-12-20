@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
-#include "sequences/literate_multiseq2.hpp"
+#include "sequences/literate_multiseq.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -169,12 +169,12 @@ int main(int argc, char *argv[])
     {
       static constexpr const char amino_acids[]
         = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
-      LiterateMultiseq<amino_acids,20> literate_multiseq(*multiseq);
+      LiterateMultiseq<amino_acids,20> literate_multiseq(multiseq);
       literate_multiseq.show_rank_dist();
     } else
     {
       static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
-      LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(*multiseq);
+      LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(multiseq);
       literate_multiseq.show_rank_dist();
     }
   }

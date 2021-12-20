@@ -27,7 +27,7 @@
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
-#include "sequences/literate_multiseq2.hpp"
+#include "sequences/literate_multiseq.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -298,7 +298,7 @@ int main(int argc,char *argv[])
       if (!haserr)
       {
         LiterateMultiseq<alphabet::nucleotides_upper_lower,4>
-          lit_multiseq(*multiseq);
+          lit_multiseq(multiseq);
         lit_multiseq.perform_sequence_encoding();
 
         display_char_ranges_multiseq_cases<char_finder::EncodedNucleotideFinder,
