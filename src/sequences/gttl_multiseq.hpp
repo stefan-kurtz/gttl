@@ -56,6 +56,11 @@ class GttlMultiseq
     length_dist_map[sequence.size()]++;
   }
 
+  void append_padding_char(void)
+  {
+    concatenated_sequences.push_back(static_cast<char>(padding_char));
+  }
+
   private:
 
   void multiseq_reader(const std::vector<std::string> &inputfiles,
