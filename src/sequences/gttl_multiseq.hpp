@@ -41,7 +41,7 @@ class GttlMultiseq
   template<bool store>
   void append(const std::string_view header,
               const std::string_view sequence,
-              uint8_t this_padding_char)
+              GTTL_UNUSED /* if !store */ uint8_t this_padding_char)
   {
     if constexpr (store)
     {
