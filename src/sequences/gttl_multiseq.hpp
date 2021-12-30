@@ -233,9 +233,15 @@ class GttlMultiseq
     return sequences_number_bits_get() + sequences_length_bits_get();
   }
 
-  char padding_char_get(void) const noexcept
+  char padding_char_get(void) const
   {
-    assert(constant_padding_char);
+    if (!constant_padding_char)
+    {
+      std::cerr << "programming error: " << __func__
+                << " only works if the padding character is constant"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
     return padding_char;
   }
 
