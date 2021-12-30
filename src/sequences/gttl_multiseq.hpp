@@ -33,18 +33,21 @@ class GttlMultiseq
          sequences_minimum_length{ULONG_MAX},
          sequences_maximum_length{0};
   uint8_t padding_char;
+  bool constant_padding_char;
   std::map<size_t,size_t> length_dist_map{};
 
   public:
 
   template<bool store>
-  void append(const std::string_view header,const std::string_view sequence)
+  void append(const std::string_view header,
+              const std::string_view sequence,
+              uint8_t this_padding_char)
   {
     if constexpr (store)
     {
       headers.push_back(std::string(header.substr(1,header.size()-1)));
       concatenated_sequences += sequence;
-      concatenated_sequences.push_back(static_cast<char>(padding_char));
+      concatenated_sequences.push_back(static_cast<char>(this_padding_char));
       sequence_offsets.push_back(concatenated_sequences.size());
     }
     sequences_number++;
@@ -56,12 +59,18 @@ class GttlMultiseq
     length_dist_map[sequence.size()]++;
   }
 
-  void append_padding_char(void)
+  void append_padding_char(uint8_t this_padding_char)
   {
-    concatenated_sequences.push_back(static_cast<char>(padding_char));
+    concatenated_sequences.push_back(static_cast<char>(this_padding_char));
   }
 
   private:
+
+  void init(uint8_t this_padding_char)
+  {
+    concatenated_sequences.push_back(static_cast<char>(this_padding_char));
+    sequence_offsets.push_back(size_t(1));
+  }
 
   void multiseq_reader(const std::vector<std::string> &inputfiles,
                        bool store, bool zip_readpair_files)
@@ -72,8 +81,7 @@ class GttlMultiseq
     }
     if (store)
     {
-      concatenated_sequences.push_back(static_cast<char>(padding_char));
-      sequence_offsets.push_back(size_t(1));
+      init(padding_char);
     }
     static constexpr const int buf_size = 1 << 14;
     if (zip_readpair_files)
@@ -88,8 +96,8 @@ class GttlMultiseq
       {
         while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
         {
-          append<true>((*it0).header_get(),(*it0).sequence_get());
-          append<true>((*it1).header_get(),(*it1).sequence_get());
+          append<true>((*it0).header_get(),(*it0).sequence_get(),padding_char);
+          append<true>((*it1).header_get(),(*it1).sequence_get(),padding_char);
           ++it0;
           ++it1;
         }
@@ -97,8 +105,8 @@ class GttlMultiseq
       {
         while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
         {
-          append<false>((*it0).header_get(),(*it0).sequence_get());
-          append<false>((*it1).header_get(),(*it1).sequence_get());
+          append<false>((*it0).header_get(),(*it0).sequence_get(),padding_char);
+          append<false>((*it1).header_get(),(*it1).sequence_get(),padding_char);
           ++it0;
           ++it1;
         }
@@ -121,13 +129,13 @@ class GttlMultiseq
       {
         for (auto &&si : gttl_si)
         {
-          append<true>(si.header_get(),si.sequence_get());
+          append<true>(si.header_get(),si.sequence_get(),padding_char);
         }
       } else
       {
         for (auto &&si : gttl_si)
         {
-          append<false>(si.header_get(),si.sequence_get());
+          append<false>(si.header_get(),si.sequence_get(),padding_char);
         }
       }
     }
@@ -136,14 +144,16 @@ class GttlMultiseq
   public:
 
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
+    : padding_char(_padding_char),
+      constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store,false);
   }
 
   GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
+    : padding_char(_padding_char),
+      constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{inputfile};
     multiseq_reader(inputfiles,store,false);
@@ -151,7 +161,8 @@ class GttlMultiseq
 
   GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
                uint8_t _padding_char)
-    : padding_char(_padding_char)
+    : padding_char(_padding_char),
+      constant_padding_char(true)
   {
     multiseq_reader(inputfiles,store,false);
   }
@@ -159,14 +170,16 @@ class GttlMultiseq
   GttlMultiseq(const std::string &readpair_file1,
                const std::string &readpair_file2,
                bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
+    : padding_char(_padding_char),
+      constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
     multiseq_reader(inputfiles,store,true);
   }
 
   GttlMultiseq(bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
+    : padding_char(_padding_char),
+      constant_padding_char(true)
   {
     if (padding_char <= uint8_t(122))
     {
@@ -174,9 +187,14 @@ class GttlMultiseq
     }
     if (store)
     {
-      concatenated_sequences.push_back(static_cast<char>(padding_char));
-      sequence_offsets.push_back(size_t(1));
+      init(padding_char);
     }
+  }
+
+  GttlMultiseq(uint8_t this_padding_char)
+    : constant_padding_char(false)
+  {
+    init(this_padding_char);
   }
 
   size_t sequences_number_get(void) const noexcept
@@ -217,6 +235,7 @@ class GttlMultiseq
 
   char padding_char_get(void) const noexcept
   {
+    assert(constant_padding_char);
     return padding_char;
   }
 
@@ -430,8 +449,10 @@ std::vector<GttlMultiseq *> multiseq_factory(const std::string &filename1,
         exhausted = true;
         break;
       }
-      multiseq->append<true>((*it0).header_get(),(*it0).sequence_get());
-      multiseq->append<true>((*it1).header_get(),(*it1).sequence_get());
+      multiseq->append<true>((*it0).header_get(),(*it0).sequence_get(),
+                             padding_char);
+      multiseq->append<true>((*it1).header_get(),(*it1).sequence_get(),
+                             padding_char);
     }
     multiseq_vector.push_back(multiseq);
   }
