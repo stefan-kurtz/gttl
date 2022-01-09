@@ -452,41 +452,4 @@ class GttlMultiseq
     }
   }
 };
-
-std::vector<GttlMultiseq *> multiseq_factory(const std::string &filename1,
-                                             const std::string &filename2,
-                                             size_t split_size)
-{
-  constexpr const int buf_size = 1 << 14;
-  GttlFastQIterator<buf_size> fastq_it0(filename1),
-                              fastq_it1(filename2);
-  auto it0 = fastq_it0.begin();
-  auto it1 = fastq_it1.begin();
-  bool exhausted = false;
-  std::vector<GttlMultiseq *> multiseq_vector{};
-
-  while (!exhausted)
-  {
-    if (it0 == fastq_it0.end() || it1 == fastq_it1.end())
-    {
-      break;
-    }
-    const uint8_t padding_char = UINT8_MAX;
-    GttlMultiseq *multiseq = new GttlMultiseq(true,padding_char);
-    for (size_t idx = 0; idx < split_size; idx++)
-    {
-      if (it0 == fastq_it0.end() || it1 == fastq_it1.end())
-      {
-        exhausted = true;
-        break;
-      }
-      multiseq->append<true>((*it0).header_get(),(*it0).sequence_get(),
-                             padding_char);
-      multiseq->append<true>((*it1).header_get(),(*it1).sequence_get(),
-                             padding_char);
-    }
-    multiseq_vector.push_back(multiseq);
-  }
-  return multiseq_vector;
-}
 #endif  // MULTISEQ_HPP
