@@ -154,8 +154,7 @@ class GttlCharRange
           seqlen(_seqlen) {}
   Iterator begin() const
   {
-    auto it = Iterator(sequence,seqlen,false);
-    return it;
+    return Iterator(sequence,seqlen,false);
   }
   Iterator end() const
   {
