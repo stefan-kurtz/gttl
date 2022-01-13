@@ -76,10 +76,6 @@ class GttlMultiseq
   void multiseq_reader(const std::vector<std::string> &inputfiles,
                        bool store, bool zip_readpair_files)
   {
-    if (padding_char <= uint8_t(122))
-    {
-      throw std::string("non letter padding character exhausted");
-    }
     if (store)
     {
       init(padding_char);
@@ -182,10 +178,6 @@ class GttlMultiseq
     : padding_char(_padding_char),
       constant_padding_char(true)
   {
-    if (padding_char <= uint8_t(122))
-    {
-      throw std::string("non letter padding character exhausted");
-    }
     if (store)
     {
       init(padding_char);
