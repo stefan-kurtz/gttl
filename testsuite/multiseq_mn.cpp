@@ -157,12 +157,7 @@ int main(int argc, char *argv[])
   {
     std::cout << "# filename\t" << inputfile << std::endl;
   }
-  std::cout << "# number of sequences\t"
-            << multiseq->sequences_number_get()
-            << std::endl;
-  std::cout << "# total length\t"
-            << multiseq->sequences_total_length_get()
-            << std::endl;
+  multiseq->statistics();
   if (options.rankdist_option_is_set())
   {
     if (options.protein_option_is_set())

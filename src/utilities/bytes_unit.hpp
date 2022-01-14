@@ -32,6 +32,11 @@ class BytesUnit
       basetype integer = to_be_encoded[0] << bitpacker.shift_tab[0];
       for (int idx = 1; idx <= last_idx; idx++)
       {
+        if (to_be_encoded[idx] > bitpacker.mask_tab[idx])
+        {
+          std::cerr << "idx=" << idx << "\t" << to_be_encoded[idx] << ">" 
+                    << bitpacker.mask_tab[idx] << std::endl;
+        }
         assert(to_be_encoded[idx] <= bitpacker.mask_tab[idx]);
         integer |= (to_be_encoded[idx] << bitpacker.shift_tab[idx]);
       }

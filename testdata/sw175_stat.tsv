@@ -1,6 +1,10 @@
 # filename	../testdata/sw175.fna
-# number of sequences	175
-# total length	55318
+# sequences_number	175
+# sequences_number_bits	8
+# sequences_minimum_length	23
+# sequences_maximum_length	2249
+# sequences_length_bits	12
+# sequences_total_length	55318
 # occurrence	0	5161
 # occurrence	1	674
 # occurrence	2	3311

@@ -1,6 +1,10 @@
 # filename	../testdata/at1MB.fna
-# number of sequences	1952
-# total length	770425
+# sequences_number	1952
+# sequences_number_bits	11
+# sequences_minimum_length	56
+# sequences_maximum_length	1102
+# sequences_length_bits	11
+# sequences_total_length	770425
 # occurrence	0	200061
 # occurrence	1	155192
 # occurrence	2	167557
