@@ -59,5 +59,9 @@ class LiterateMultiseq
       }
     }
   }
+  const std::array<size_t,alpha.size()+1> &rank_dist_get(void)
+  {
+    return rank_dist;
+  }
 };
 #endif
