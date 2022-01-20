@@ -62,11 +62,6 @@ struct GttlBitPacker
       int count = 0, idx;
       for (idx = 0; idx < bit_groups; idx++)
       {
-        if constexpr (show_bit_groups)
-        {
-          std::cout << "group " << idx << ", size="  << _bit_group_sizes[idx]
-                    << std::endl;
-        }
         bit_group_sizes[idx] = _bit_group_sizes[idx];
         assert(_bit_group_sizes[idx] <= bits_basetype);
         if (count + _bit_group_sizes[idx] > bits_basetype)
@@ -76,6 +71,11 @@ struct GttlBitPacker
         }
         count += _bit_group_sizes[idx];
         shift_tab[idx] = bits_basetype - count;
+        if constexpr (show_bit_groups)
+        {
+          std::cout << "# group " << idx << ", size="  << _bit_group_sizes[idx]
+                    << ", shift=" << shift_tab[idx] << std::endl;
+        }
         mask_tab[idx] = gttl_bits2maxvalue<uint64_t>(_bit_group_sizes[idx]);
       }
       int overflow_bits = 0;
