@@ -1,16 +1,16 @@
 all:
-	make -C testsuite test
+	@make -C testsuite test
 
 debug:
-	make -C testsuite debug=yes test
+	@make -C testsuite debug=yes test
 
 .PHONY:clean	
 clean:
-	make -C testsuite clean
+	@make -C testsuite clean
 
 .PHONY:tags
 tags:
-	./scripts/ctags.sh
+	@./scripts/ctags.sh
 
 .PHONY:code_check
 code_check:

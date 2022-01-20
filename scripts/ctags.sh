@@ -23,8 +23,8 @@ ctags --version > /dev/null
 if [ $? -eq 0 ]
 then
   exuberantopts="--c++-kinds=+p --fields=+iaSKlm --extra=+q"
+else
+  exuberantopts=""
 fi
 
-# make a new tags file
-ctags -w ${exuberantopts} src/*/*.[ch]pp \
-                          testsuite/*.cpp
+ctags -w ${exuberantopts} `find src -name '*.hpp'` `find testsuite -name '*.cpp'`
