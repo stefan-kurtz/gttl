@@ -28,8 +28,8 @@ class {classname}
   std::string string_values_joined(const char *sep) const noexcept
   {{
     static_assert(num_values > 0);
-    std::string out_string{{string_values[0]}};
-    for (size_t idx = 1; idx < num_values; idx++)
+    std::string out_string{{string_values[1]}};
+    for (size_t idx = 2; idx < num_values; idx++)
     {{
       out_string += std::string(sep) + std::string(string_values[idx]);
     }}
