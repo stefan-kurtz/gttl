@@ -10,10 +10,10 @@ template<class ThreadData>
 using GttlThreadFunc = void (*)(size_t thread_id,size_t task_num,
                                 ThreadData *thread_data);
 
-template<class ThreadData>
 class GttlThreadPool
 {
   public:
+    template<class ThreadData>
     GttlThreadPool(size_t number_of_threads,
                    size_t number_of_tasks,
                    GttlThreadFunc<ThreadData> thread_func,
@@ -32,7 +32,7 @@ class GttlThreadPool
         VirtualQueue vq(number_of_tasks);
         for (size_t thd = 0; thd < number_of_threads; thd++)
         {
-          threads.push_back(std::thread([thread_func,thread_data,&vq,thd]() {
+          threads.push_back(std::thread([&thread_func,&thread_data,&vq,thd]() {
              size_t task_num;
              while ((task_num = vq.next_element()) <= vq.last_element())
              {

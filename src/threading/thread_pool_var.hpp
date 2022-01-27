@@ -7,14 +7,14 @@
 #include <memory>
 #include "virtual_queue.hpp"
 
-class GttlThreadPool
+class GttlThreadPoolVar
 {
   public:
     template <class Fn, class... Args>
-    GttlThreadPool(size_t number_of_threads,
-                   size_t number_of_tasks,
-                   Fn && thread_func,
-                   Args&&... args)
+    GttlThreadPoolVar(size_t number_of_threads,
+                      size_t number_of_tasks,
+                      Fn && thread_func,
+                      Args&&... args)
     {
       assert(number_of_threads >= 1 && number_of_tasks > 0);
       if (number_of_threads == 1)
