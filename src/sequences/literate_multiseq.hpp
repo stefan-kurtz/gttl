@@ -2,6 +2,7 @@
 #define LITERATE_MULTISEQ_HPP
 #include <cstddef>
 #include <array>
+#include <mutex>
 #include <iostream>
 #include "sequences/alphabet.hpp"
 #include "sequences/gttl_multiseq.hpp"
@@ -48,8 +49,12 @@ class LiterateMultiseq
                                 multiseq->sequence_length_get(snum));
     }
   }
-  void show_rank_dist(void)
+  void show_rank_dist(std::mutex *cout_mutex) const noexcept
   {
+    if (cout_mutex != nullptr)
+    {
+      cout_mutex->lock();
+    }
     for (size_t idx = 0; idx < rank_dist.size(); idx++)
     {
       if (rank_dist[idx] > 0)
@@ -57,6 +62,10 @@ class LiterateMultiseq
         std::cout << "# occurrence\t" << idx << "\t" << rank_dist[idx]
                   << std::endl;
       }
+    }
+    if (cout_mutex != nullptr)
+    {
+      cout_mutex->unlock();
     }
   }
   const std::array<size_t,alpha.size()+1> &rank_dist_get(void)

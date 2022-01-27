@@ -193,7 +193,7 @@ class MultiCharFinder
     return sizeof in_charset/sizeof in_charset[0];
   }
   DECLARE_FIND_FUNCTIONS
-  void show(void)
+  void show(void) const noexcept
   {
     for (size_t idx = 0; idx <= max_char_idx(); idx++)
     {

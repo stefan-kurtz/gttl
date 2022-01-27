@@ -32,11 +32,11 @@ class RunTimeClass
   {
    return this->show(msg.c_str());
   }
-  size_t locked_show(std::mutex &cout_mutex,const char *msg)
+  size_t locked_show(std::mutex *cout_mutex,const char *msg)
   {
-    cout_mutex.lock();
+    cout_mutex->lock();
     const size_t elapsed_micro = this->show(msg);
-    cout_mutex.unlock();
+    cout_mutex->unlock();
     return elapsed_micro;
   }
   size_t elapsed(void)

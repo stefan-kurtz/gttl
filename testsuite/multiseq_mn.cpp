@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
   {
     std::cout << "# filename\t" << inputfile << std::endl;
   }
-  multiseq->statistics();
+  multiseq->statistics(nullptr); /* no mutex necessary */
   if (options.rankdist_option_is_set())
   {
     if (options.protein_option_is_set())
@@ -165,12 +165,12 @@ int main(int argc, char *argv[])
       static constexpr const char amino_acids[]
         = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
       LiterateMultiseq<amino_acids,20> literate_multiseq(multiseq);
-      literate_multiseq.show_rank_dist();
+      literate_multiseq.show_rank_dist(nullptr); /* no mutex necessary */
     } else
     {
       static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
       LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(multiseq);
-      literate_multiseq.show_rank_dist();
+      literate_multiseq.show_rank_dist(nullptr); /* no mutex necessary */
     }
   }
   delete multiseq;

@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <mutex>
 #include <map>
 #include <tuple>
 #include <algorithm>
@@ -317,8 +318,12 @@ class GttlMultiseq
     return headers[seqnum];
   }
 
-  void statistics(void) const noexcept
+  void statistics(std::mutex *cout_mutex) const noexcept
   {
+    if (cout_mutex != nullptr)
+    {
+      cout_mutex->lock();
+    }
     std::cout << "# sequences_number\t" << sequences_number_get()
               << std::endl;
     std::cout << "# sequences_number_bits\t" << sequences_number_bits_get()
@@ -333,6 +338,10 @@ class GttlMultiseq
               << std::endl;
     std::cout << "# sequences_total_length\t" << sequences_total_length_get()
               << std::endl;
+    if (cout_mutex != nullptr)
+    {
+      cout_mutex->unlock();
+    }
   }
 
   std::vector<std::pair<size_t,size_t>> length_distribution(void)

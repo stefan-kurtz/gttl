@@ -345,7 +345,7 @@ class GttlAlphabet
     constexpr char rank_to_char(uint8_t r) const noexcept {
       return characters[r];
     }
-    void pretty_print(void)
+    void pretty_print(void) const noexcept
     {
       std::cout << "# alphabet size\t" << _size << std::endl;
       std::cout << "# undefined_rank\t" << static_cast<int>(_undefined_rank)
