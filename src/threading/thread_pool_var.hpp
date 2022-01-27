@@ -30,7 +30,7 @@ class GttlThreadPool
         for (size_t thd = 0; thd < number_of_threads; thd++)
         {
           threads.push_back(std::make_shared<std::thread>(
-                             [thread_func,&vq,thd,args...]() {
+                             [&thread_func,&vq,thd,args...]() {
              size_t task_num;
              while ((task_num = vq.next_element()) <= vq.last_element())
              {

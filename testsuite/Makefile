@@ -37,7 +37,7 @@ EXECS=${subst .cpp,.x,${SRC}}
 all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq
+              test_multiseq test_thread_pool
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -100,6 +100,10 @@ test_fastq_iterator:./fastq_mn.x
 	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_1.fastq | diff -  ../testdata/varlen_paired_1.fasta
 	@./fastq_mn.x --fasta_output ../testdata/varlen_paired_[12].fastq | diff - ../testdata/varlen_paired_both.fasta
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
+	@echo "Congratulations. $@ passed."
+
+test_thread_pool:thread_pool_mn.x
+	@./thread_pool_mn.x 4 40
 	@echo "Congratulations. $@ passed."
 
 %.o:%.cpp
