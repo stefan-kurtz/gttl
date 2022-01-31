@@ -339,10 +339,16 @@ class GttlAlphabet
       return _undefined_rank;
     }
     constexpr size_t size(void) const noexcept { return _size; }
-    constexpr uint8_t char_to_rank(char cc) const noexcept {
+    constexpr uint8_t char_to_rank(char cc) const noexcept
+    {
       return _symbolmap[static_cast<int>(cc)];
     }
-    constexpr char rank_to_char(uint8_t r) const noexcept {
+    const uint8_t *symbolmap_reference(void) const noexcept
+    {
+      return _symbolmap;
+    }
+    constexpr char rank_to_char(uint8_t r) const noexcept
+    {
       return characters[r];
     }
     void pretty_print(void) const noexcept
