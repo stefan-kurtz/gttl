@@ -40,8 +40,8 @@ class Gttlmmap
       StrFormat msg("cannot open file %s",filename);
       throw msg.str();
     }
-    void *memorymap
-      = mmap(NULL, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED, filedesc, 0);
+    memorymap = mmap(NULL, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED,
+                     filedesc, 0);
     if (memorymap == MAP_FAILED)
     {
       StrFormat msg("cannot memory map %lu elements from file %s",
@@ -52,11 +52,14 @@ class Gttlmmap
   public:
   ~Gttlmmap(void)
   {
+    assert(memorymap != nullptr);
     munmap(memorymap,size_of_file);
+    assert(filedesc >= 0);
     close(filedesc);
   }
   const T *ptr(void) const noexcept
   {
+    assert(memorymap != nullptr);
     return reinterpret_cast<const T *>(memorymap);
   }
   size_t size(void) const noexcept
