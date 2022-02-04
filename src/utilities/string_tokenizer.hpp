@@ -18,8 +18,10 @@ class StringTokenizer
     for (auto it = instring.begin(); it != instring.end(); ++it)
     {
       const char cc = *it;
+      constexpr const int underscore = static_cast<int>('_');
+      constexpr const int dot = static_cast<int>('.');
 
-      if (isalpha(cc) || isdigit(cc) || cc == (int) '_')
+      if (isalpha(cc) || isdigit(cc) || cc == underscore || cc == dot)
       {
         buffer.push_back((char) cc);
         inword = true;
