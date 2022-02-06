@@ -53,8 +53,8 @@ class GttlFastQIterator
           }
           if (state != 3)
           {
-            StrFormat msg(", line %lu: state=%d,YYcorrupted sequence",
-                           gttl_li->line_number_get()+1,state);
+            StrFormat msg(", line %lu: state=%d, corrupted sequence",
+                          gttl_li->line_number_get()+1,state);
             throw msg.str(); /* check_err.py checked */
           }
           if (!found_end)
