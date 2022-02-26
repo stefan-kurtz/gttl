@@ -112,4 +112,9 @@ struct Pow_CT
 };
 template <size_t base> struct Pow_CT<base,1> { enum { VALUE = base }; };
 template <size_t base> struct Pow_CT<base,0> { enum { VALUE = 1 }; };
+
+inline double error_rate_get(size_t distance,size_t aligned_len)
+{
+  return static_cast<double>(distance)/(aligned_len/2.0);
+}
 #endif
