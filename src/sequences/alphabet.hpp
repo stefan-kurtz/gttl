@@ -341,9 +341,8 @@ class GttlAlphabet
     constexpr size_t size(void) const noexcept { return _size; }
     constexpr uint8_t char_to_rank(char cc) const noexcept
     {
-      assert(static_cast<unsigned int>(cc) <
-             sizeof _symbolmap/sizeof _symbolmap[0]);
-      return _symbolmap[static_cast<unsigned int>(cc)];
+      assert(static_cast<uint8_t>(cc) < sizeof _symbolmap/sizeof _symbolmap[0]);
+      return _symbolmap[static_cast<uint8_t>(cc)];
     }
     const uint8_t *symbolmap_reference(void) const noexcept
     {
