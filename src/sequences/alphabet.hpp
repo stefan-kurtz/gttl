@@ -341,7 +341,9 @@ class GttlAlphabet
     constexpr size_t size(void) const noexcept { return _size; }
     constexpr uint8_t char_to_rank(char cc) const noexcept
     {
-      return _symbolmap[static_cast<int>(cc)];
+      assert(static_cast<unsigned int>(cc) <
+             sizeof _symbolmap/sizeof _symbolmap[0]);
+      return _symbolmap[static_cast<unsigned int>(cc)];
     }
     const uint8_t *symbolmap_reference(void) const noexcept
     {
@@ -349,19 +351,21 @@ class GttlAlphabet
     }
     constexpr char rank_to_char(uint8_t r) const noexcept
     {
+      assert(r < _size);
       return characters[r];
     }
     void pretty_print(void) const noexcept
     {
       std::cout << "# alphabet size\t" << _size << std::endl;
-      std::cout << "# undefined_rank\t" << static_cast<int>(_undefined_rank)
+      std::cout << "# undefined_rank\t"
+                << static_cast<unsigned int>(_undefined_rank)
                 << std::endl;
       for (const char *s = char_spec; *s != '\0'; s++)
       {
         if (*s != '|')
         {
           uint8_t r = this->char_to_rank(*s);
-          std::cout << *s << "\t" << static_cast<int>(r) << std::endl;
+          std::cout << *s << "\t" << static_cast<unsigned int>(r) << std::endl;
         }
       }
       for (size_t idx = 0; idx < _size; idx++)
