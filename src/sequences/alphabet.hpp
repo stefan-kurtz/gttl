@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iostream>
 #include <array>
+#include <cassert>
 
 template <uint8_t undef,const char *str>
 static constexpr uint8_t find_index(char cc,std::size_t i,std::size_t j)
