@@ -37,6 +37,7 @@ class GttlMultiseq
   uint8_t padding_char;
   bool constant_padding_char;
   std::map<size_t,size_t> length_dist_map{};
+  char **short_header_cache{nullptr};
 
   public:
 
@@ -215,6 +216,15 @@ class GttlMultiseq
     append_padding_char(static_cast<uint8_t>(padding_char));
   }
 
+  ~GttlMultiseq(void)
+  {
+    if (short_header_cache != nullptr)
+    {
+      delete[] short_header_cache[0];
+      delete[] short_header_cache;
+    }
+  }
+
   size_t sequences_number_get(void) const noexcept
   {
     return sequences_number;
@@ -318,6 +328,13 @@ class GttlMultiseq
     return headers[seqnum];
   }
 
+  const char *short_header_get(size_t seqnum) const noexcept
+  {
+    assert(short_header_cache != nullptr &&
+           seqnum < headers.size());
+    return short_header_cache[seqnum];
+  }
+
   void statistics(std::mutex *cout_mutex) const noexcept
   {
     if (cout_mutex != nullptr)
@@ -373,10 +390,10 @@ class GttlMultiseq
    - width gives the maximum line size, width 0
      prints prints out sequences in just one line
    - padding prints out the padding symbol if set to true,
-   - small_header print out the header until the first space if set true
+   - short_header print out the header until the first space if set true
    - raw prints out sequences as saved in, raw=false converts ranks back to
      normal symbols for readability*/
-  void show(size_t width, bool small_header) const noexcept
+  void show(size_t width, bool short_header) const noexcept
   {
     assert(concatenated_sequences.size() > 0);
     size_t seqnum;
@@ -387,10 +404,10 @@ class GttlMultiseq
     for (seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       std::cout.put('>');
-      if (small_header)
+      if (short_header)
       {
-        size_t short_length = short_header_length_get(seqnum);
-        std::cout << header_get(seqnum).substr(0,short_length);
+        assert(short_header_cache != nullptr);
+        std::cout << short_header_get(seqnum);
       } else
       {
         std::cout << header_get(seqnum);
@@ -446,10 +463,33 @@ class GttlMultiseq
   template<class T,void (*transformation)(T &,char *,size_t)>
   void transformer(T &t)
   {
-    for (size_t snum = 0; snum < sequences_number_get(); snum++)
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      transformation(t,sequence_ptr_writable_get(snum),
-                       sequence_length_get(snum));
+      transformation(t,sequence_ptr_writable_get(seqnum),
+                       sequence_length_get(seqnum));
+    }
+  }
+
+  void short_header_cache_create(void)
+  {
+    assert(sequences_number_get() > 0);
+    short_header_cache = new char * [sequences_number_get()];
+    size_t total_short_length = 0;
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      total_short_length += short_header_length_get(seqnum);
+    }
+    short_header_cache[0] = new char [total_short_length +
+                                      sequences_number_get()];
+    char *next_header = short_header_cache[0];
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      short_header_cache[seqnum] = next_header;
+      const size_t shlen = short_header_length_get(seqnum);
+      auto short_header = header_get(seqnum).substr(0,shlen);
+      memcpy(short_header_cache[seqnum],short_header.data(),shlen);
+      short_header_cache[seqnum][shlen] = '\0';
+      next_header += (shlen + 1);
     }
   }
 };

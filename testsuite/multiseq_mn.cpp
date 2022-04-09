@@ -17,7 +17,8 @@ class MultiseqOptions
   bool help_option = false,
        protein_option = false,
        zipped_option = false,
-       rankdist_option = false;
+       rankdist_option = false,
+       short_header_option = false;
   int width_arg = -1;
 
  public:
@@ -43,6 +44,8 @@ class MultiseqOptions
        ("r,rankdist", "output distribution of ranks of "
                       "transformed sequences",
         cxxopts::value<bool>(rankdist_option)->default_value("false"))
+       ("s,short_header", "show header up to and excluding the first blank",
+        cxxopts::value<bool>(short_header_option)->default_value("false"))
        ("w,width", "output headers and sequences; "
                    "width specifies the linewidth of the"
                    "sequence output; 0 means to output\n"
@@ -92,6 +95,10 @@ class MultiseqOptions
   {
     return rankdist_option;
   }
+  bool short_header_option_is_set(void) const noexcept
+  {
+    return short_header_option;
+  }
   int width_option_get(void) const noexcept
   {
     return width_arg;
@@ -127,7 +134,8 @@ int main(int argc, char *argv[])
   try
   {
     const bool store_sequences = (options.width_option_get() >= 0 ||
-                                  options.rankdist_option_is_set())
+                                  options.rankdist_option_is_set() ||
+                                  options.short_header_option_is_set())
                                   ? true : false;
     if (options.zipped_option_is_set() && store_sequences)
     {
@@ -148,10 +156,15 @@ int main(int argc, char *argv[])
     delete multiseq;
     return EXIT_FAILURE;
   }
+  if (options.short_header_option_is_set())
+  {
+    multiseq->short_header_cache_create();
+  }
   rt.show("create GttlMultiseq");
   if (options.width_option_get() >= 0)
   {
-    multiseq->show(static_cast<size_t>(options.width_option_get()), false);
+    multiseq->show(static_cast<size_t>(options.width_option_get()),
+                                       options.short_header_option_is_set());
   }
   for (auto &&inputfile : inputfiles)
   {
