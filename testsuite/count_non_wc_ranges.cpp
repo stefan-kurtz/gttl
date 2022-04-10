@@ -105,6 +105,7 @@ static void count_non_wildcard_ranges(const char *inputfilename)
     gttl_fp_type_close(in_fp);
     throw msg;
   }
+  printf("# filename\t%s\n",inputfilename);
   printf("# num_of_sequences\t%lu\n",num_of_sequences);
   printf("# total_length\t%lu\n",total_length);
   printf("# max_sequence_length\t%lu\n",max_sequence_length);

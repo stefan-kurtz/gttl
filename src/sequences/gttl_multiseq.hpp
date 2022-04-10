@@ -472,7 +472,7 @@ class GttlMultiseq
 
   void short_header_cache_create(void)
   {
-    assert(sequences_number_get() > 0);
+    assert(short_header_cache == nullptr && sequences_number_get() > 0);
     short_header_cache = new char * [sequences_number_get()];
     size_t total_short_length = 0;
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
