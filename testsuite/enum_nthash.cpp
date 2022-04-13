@@ -136,9 +136,10 @@ template<int sizeof_unit_hashed_qgrams,bool create_bytes_unit>
 static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
                       uint64_t hashmask,
+                      GTTL_UNUSED
                       const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
                         *hashed_qgram_packer,
-                      size_t seqnum,
+                      GTTL_UNUSED size_t seqnum,
                       const char *sequence,
                       size_t this_length)
 {
@@ -178,11 +179,12 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
 }
 
 template<int sizeof_unit_hashed_qgrams,bool create_bytes_unit>
-static void enumerate_nt_hash_fwd_template(const char *inputfilename,
-                                           size_t qgram_length,
-                                           int hashbits,
-                                           int sequences_number_bits,
-                                           int sequences_length_bits)
+static void enumerate_nt_hash_fwd_template(
+                                    const char *inputfilename,
+                                    size_t qgram_length,
+                                    int hashbits,
+                                    GTTL_UNUSED int sequences_number_bits,
+                                    GTTL_UNUSED int sequences_length_bits)
 {
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
