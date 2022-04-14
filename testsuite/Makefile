@@ -31,8 +31,8 @@ ifeq (,$(findstring g++,$(CXX)))
   CFLAGS += -time -Wno-psabi
 endif
 
-SRC=${wildcard  *.cpp}
-EXECS=${subst .cpp,.x,${SRC}}
+MAIN_SRC=${shell grep -wl main *.cpp}
+EXECS=${subst .cpp,.x,${MAIN_SRC}}
 
 all:${EXECS}
 
@@ -106,6 +106,9 @@ test_fastq_iterator:./fastq_mn.x
 test_thread_pool:thread_pool_mn.x
 	@./thread_pool_mn.x 4 40
 	@echo "Congratulations. $@ passed."
+
+fastq_mn.x:fastq_mn.o fastq_opt.o
+	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@
