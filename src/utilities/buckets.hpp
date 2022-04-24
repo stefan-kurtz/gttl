@@ -1,6 +1,7 @@
 #ifndef BUCKETS_HPP
 #define BUCKETS_HPP
 #include <cstddef>
+#include <tuple>
 
 /* A class to represent disjoint intervals of super interval beginning
    with index 0 such that all positions of the superinterval are covered
