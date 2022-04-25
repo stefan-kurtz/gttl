@@ -526,11 +526,9 @@ static void ska_large_lsb_small_radix_sort(int num_sort_bits,
 
       } else
       {
-        static constexpr const bool show_buckets = false;
-        if constexpr (show_buckets)
-        {
-          show_non_empty_buckets(buckets,current.byte_index,current.num_units);
-        }
+#ifdef SHOW_BUCKETS
+        show_non_empty_buckets(buckets,current.byte_index,current.num_units);
+#endif
         for (auto &bck : *buckets)
         {
           const Counttype bucket_start = std::get<0>(bck);
