@@ -462,7 +462,7 @@ static Buckets<Counttype> *ska_lsb_radix_sort(int sizeof_unit,
 void show_non_empty_buckets(const Buckets<size_t> *buckets,
                                    int byte_index,size_t num_units)
 {
-  size_t idx = 0, buckets_total = 0;
+  size_t idx = 0;
   for (auto it = buckets->begin(); it != buckets->end(); ++it)
   {
     size_t bucket_width = std::get<1>(*it) - std::get<0>(*it);
@@ -473,7 +473,6 @@ void show_non_empty_buckets(const Buckets<size_t> *buckets,
         printf("%c",'\t');
       }
       printf("bucket\t%03lu\t%lu\n",idx,bucket_width);
-      buckets_total += bucket_width;
     }
     idx++;
   }
@@ -481,7 +480,6 @@ void show_non_empty_buckets(const Buckets<size_t> *buckets,
   {
     printf("%c",'\t');
   }
-  assert(num_units == buckets_total);
   printf("maximum width of buckets\t%lu\tnum_unit\t%lu\n",
          buckets->maximum_width_get(),num_units);
 }
@@ -528,7 +526,11 @@ static void ska_large_lsb_small_radix_sort(int num_sort_bits,
 
       } else
       {
-        //show_non_empty_buckets(buckets,current.byte_index,current.num_units);
+        static constexpr const bool show_buckets = false;
+        if constexpr (show_buckets)
+        {
+          show_non_empty_buckets(buckets,current.byte_index,current.num_units);
+        }
         for (auto &bck : *buckets)
         {
           const Counttype bucket_start = std::get<0>(bck);
