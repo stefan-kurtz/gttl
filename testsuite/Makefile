@@ -109,8 +109,8 @@ test_thread_pool:thread_pool_mn.x
 
 test_sort_kvp:sort_key_value_pairs.x
 	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
-	   echo $$num;\
-	   ./sort_key_value_pairs.x $$num;\
+	   ./sort_key_value_pairs.x rad $$num;\
+	   ./sort_key_value_pairs.x std $$num;\
 	done
 
 fastq_mn.x:fastq_mn.o fastq_opt.o

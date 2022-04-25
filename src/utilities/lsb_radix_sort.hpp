@@ -142,7 +142,6 @@ static void lsb_radix_sort(uint8_t *array,
 {
   const int last_byte_index = remaining_bits / CHAR_BIT +
                               ((remaining_bits % CHAR_BIT) != 0 ? 1 : 0);
-  assert(last_byte_index < sizeof_unit);
   SinglePassSorter<uint8_t> func
     = lsb_radix_sort_single_pass<uint8_t,first_pass_msb_bits,sizeof_unit,
                                  radix_key_uint8<sizeof_unit>>;

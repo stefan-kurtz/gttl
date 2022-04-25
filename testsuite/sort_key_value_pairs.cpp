@@ -4,8 +4,10 @@
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
+#include <algorithm>
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
+#include "utilities/str_format.hpp"
 #include "utilities/is_big_endian.hpp"
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
@@ -39,6 +41,10 @@ class KeyValuePair
       }
     }
   }
+  bool operator < (const KeyValuePair& other) const noexcept
+  {
+    return key.d < other.key.d;
+  }
 };
 
 void show_key_values_pairs(const std::vector<KeyValuePair> &key_value_pairs)
@@ -57,13 +63,17 @@ int main(int argc, char *argv[])
 {
   long readlong;
 
-  if (argc != 2 || sscanf(argv[1], "%ld", &readlong) != 1 || readlong <= 0)
+  if (argc != 3 || (strcmp(argv[1],"std") != 0 && strcmp(argv[1],"rad") != 0) ||
+      sscanf(argv[2], "%ld", &readlong) != 1 || readlong <= 0)
   {
     std::cerr << "Usage: " << argv[0]
-              << " <number of key/value (double/size_t) pairs>"
+              << "rad|std <number of key/value (double/size_t) pairs>"
+              << std::endl << "rad triggers the use of radix sort"
+              << std::endl << "std triggers the use of std::sort"
               << std::endl;
     return EXIT_FAILURE;
   }
+  const bool use_radix_sort = strcmp(argv[1],"rad") == 0 ? true : false;
   size_t number_of_key_value_pairs = static_cast<size_t>(readlong);
   static_assert(sizeof(KeyValuePair) == 2 * sizeof(void *));
   std::vector<KeyValuePair> key_value_pairs{};
@@ -80,18 +90,28 @@ int main(int argc, char *argv[])
             << (mega_bytes(key_value_pairs.size() * sizeof(KeyValuePair)))
             << std::endl;
   RunTimeClass rt_sorting{};
-  static constexpr const int sizeof_unit
-    = static_cast<int>(sizeof(KeyValuePair));
-  static constexpr const int num_sort_bits
-    = static_cast<int>(CHAR_BIT * sizeof(double));
-  const bool reversed_byte_order = is_big_endian() ? false : true;
-  ska_large_lsb_small_radix_sort(sizeof_unit,
-                                 num_sort_bits,
-                                 reinterpret_cast<uint8_t *>
-                                   (key_value_pairs.data()),
-                                 key_value_pairs.size(),
-                                 reversed_byte_order);
-  rt_sorting.show("sorting");
+  if (use_radix_sort)
+  {
+    static constexpr const int sizeof_unit
+      = static_cast<int>(sizeof(KeyValuePair));
+    static constexpr const int num_sort_bits
+      = static_cast<int>(CHAR_BIT * sizeof(double));
+    const bool reversed_byte_order = is_big_endian() ? false : true;
+    ska_large_lsb_small_radix_sort(sizeof_unit,
+                                   num_sort_bits,
+                                   reinterpret_cast<uint8_t *>
+                                     (key_value_pairs.data()),
+                                   key_value_pairs.size(),
+                                   reversed_byte_order);
+    StrFormat msg("sort %lu values with ska_large_lsb_small_radix_sort",
+                  key_value_pairs.size());
+    rt_sorting.show(msg.str());
+  } else
+  {
+    std::sort(key_value_pairs.begin(),key_value_pairs.end());
+    StrFormat msg("sort %lu values with std::sort",key_value_pairs.size());
+    rt_sorting.show(msg.str());
+  }
 #ifdef SHOW_VALUES
   show_key_values_pairs(key_value_pair);
 #endif
