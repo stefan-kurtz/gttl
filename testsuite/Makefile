@@ -37,7 +37,7 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool
+              test_multiseq test_thread_pool test_sort_kvp
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -106,6 +106,12 @@ test_fastq_iterator:./fastq_mn.x
 test_thread_pool:thread_pool_mn.x
 	@./thread_pool_mn.x 4 40
 	@echo "Congratulations. $@ passed."
+
+test_sort_kvp:sort_key_value_pairs.x
+	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
+	   echo $$num;\
+	   ./sort_key_value_pairs.x $$num;\
+	done
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}

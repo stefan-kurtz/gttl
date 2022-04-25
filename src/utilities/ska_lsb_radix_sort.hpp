@@ -217,6 +217,7 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
     }
   }
 #endif
+  assert(buckets != nullptr);
   return buckets;
 }
 
@@ -335,14 +336,14 @@ static Buckets<Counttype> *radixsort_ska_then_other_generic(
     return buckets;
   }
   const Counttype maximum_bucket_width = buckets->maximum_width_get();
-  sorter_instance.setup(maximum_bucket_width,bits_already_sorted);
+  sorter_instance.setup(maximum_bucket_width);
   for (auto &&bck : *buckets)
   {
     const Counttype bucket_start = std::get<0>(bck);
     const Counttype bucket_width = std::get<1>(bck) - bucket_start;
     if (bucket_width > 1)
     {
-      sorter_instance.sort(array,bucket_start,bucket_width);
+      sorter_instance.sort(array,bucket_start,bucket_width,bits_already_sorted);
     }
   }
   return buckets;
@@ -352,27 +353,25 @@ class LSBuint64Sorter
 {
   private:
     uint64_t *uint64_buffer;
-    int num_sort_bits, bits_already_sorted;
+    int num_sort_bits;
   public:
   LSBuint64Sorter(int _num_sort_bits) :
     uint64_buffer(nullptr),
-    num_sort_bits(_num_sort_bits),
-    bits_already_sorted(0) {}
+    num_sort_bits(_num_sort_bits) {}
   ~LSBuint64Sorter(void)
   {
     delete[] uint64_buffer;
   }
-  void setup(size_t maximum_bucket_width,
-             int _bits_already_sorted)
+  void setup(size_t maximum_bucket_width)
   {
-    bits_already_sorted = _bits_already_sorted;
     uint64_buffer = new uint64_t [maximum_bucket_width];
   }
   bool reversed_byte_order_get() const noexcept
   {
     return false; /* Not used */
   }
-  void sort(uint64_t *array,size_t bucket_start,size_t bucket_width)
+  void sort(uint64_t *array,size_t bucket_start,size_t bucket_width,
+            int bits_already_sorted)
   {
     lsb_radix_sort(array + bucket_start,
                    uint64_buffer,
@@ -387,29 +386,28 @@ class LSBbytesSorter
 {
   private:
     uint8_t *uint8_buffer;
-    int num_sort_bits, bits_already_sorted;
+    int num_sort_bits;
     bool reversed_byte_order;
   public:
   LSBbytesSorter(int _num_sort_bits,
                  bool _reversed_byte_order) :
     uint8_buffer(nullptr),
     num_sort_bits(_num_sort_bits),
-    bits_already_sorted(0),
     reversed_byte_order(_reversed_byte_order) {}
   ~LSBbytesSorter(void)
   {
     delete[] uint8_buffer;
   }
-  void setup(size_t maximum_bucket_width,int _bits_already_sorted)
+  void setup(size_t maximum_bucket_width)
   {
-    bits_already_sorted = _bits_already_sorted;
     uint8_buffer = new uint8_t [sizeof_unit * maximum_bucket_width];
   }
   bool reversed_byte_order_get() const noexcept
   {
     return reversed_byte_order;
   };
-  void sort(uint8_t *array,size_t bucket_start,size_t bucket_width)
+  void sort(uint8_t *array,size_t bucket_start,size_t bucket_width,
+            int bits_already_sorted)
   {
     lsb_radix_sort<sizeof_unit>(array + sizeof_unit * bucket_start,
                                 uint8_buffer,
@@ -459,5 +457,125 @@ static Buckets<Counttype> *ska_lsb_radix_sort(int sizeof_unit,
     }
   });
   return buckets;
+}
+
+void show_non_empty_buckets(const Buckets<size_t> *buckets,
+                                   int byte_index,size_t num_units)
+{
+  size_t idx = 0, buckets_total = 0;
+  for (auto it = buckets->begin(); it != buckets->end(); ++it)
+  {
+    size_t bucket_width = std::get<1>(*it) - std::get<0>(*it);
+    if (bucket_width > 0)
+    {
+      for (int i = 0; i < byte_index; i++)
+      {
+        printf("%c",'\t');
+      }
+      printf("bucket\t%03lu\t%lu\n",idx,bucket_width);
+      buckets_total += bucket_width;
+    }
+    idx++;
+  }
+  for (int i = 0; i < byte_index; i++)
+  {
+    printf("%c",'\t');
+  }
+  assert(num_units == buckets_total);
+  printf("maximum width of buckets\t%lu\tnum_unit\t%lu\n",
+         buckets->maximum_width_get(),num_units);
+}
+
+template<typename Counttype,int sizeof_unit>
+static void ska_large_lsb_small_radix_sort(int num_sort_bits,
+                                           uint8_t *array,
+                                           size_t num_units,
+                                           bool reversed_byte_order)
+{
+  const size_t skarupke_threshold = num_units/10;
+  const int num_sort_bytes = CHAR_BIT * num_sort_bits;
+  using StackStruct = struct { size_t offset;
+                               size_t num_units;
+                               int byte_index;
+                             };
+
+  std::vector<StackStruct> stack{};
+
+  stack.push_back({0, num_units, 0});
+  LSBbytesSorter<sizeof_unit> lsb_bytes_sorter(num_sort_bits,
+                                               reversed_byte_order);
+  lsb_bytes_sorter.setup(skarupke_threshold);
+  while (!stack.empty())
+  {
+    StackStruct current = stack.back();
+    stack.pop_back();
+
+    const int this_byte_index = real_byte_index(reversed_byte_order,
+                                                current.byte_index);
+    Buckets<Counttype> *buckets
+      = countingsort_skarupke_bytes<Counttype>(sizeof_unit,
+                                               this_byte_index,
+                                               array +
+                                               current.offset * sizeof_unit,
+                                               current.num_units);
+
+    if (current.byte_index + 1 < num_sort_bytes)
+    {
+      if (buckets == nullptr) /* all elements in one bucket */
+      {
+        stack.push_back({current.offset, current.num_units,
+                         current.byte_index + 1});
+
+      } else
+      {
+        //show_non_empty_buckets(buckets,current.byte_index,current.num_units);
+        for (auto &bck : *buckets)
+        {
+          const Counttype bucket_start = std::get<0>(bck);
+          const Counttype bucket_width = std::get<1>(bck) - bucket_start;
+          if (bucket_width > skarupke_threshold)
+          {
+            stack.push_back({current.offset + bucket_start,
+                             bucket_width,
+                             current.byte_index + 1});
+          } else
+          {
+            if (bucket_width > 1)
+            {
+              const int bits_already_sorted = CHAR_BIT * current.byte_index;
+              //printf("bucket(byte_index=%d,start=%lu,width=%lu\n",
+                       //current.byte_index,bucket_start,bucket_width);
+              lsb_bytes_sorter.sort(array,current.offset + bucket_start,
+                                    bucket_width,
+                                    bits_already_sorted);
+            }
+          }
+        }
+      }
+    }
+    delete buckets;
+  }
+}
+
+static void ska_large_lsb_small_radix_sort(int sizeof_unit,
+                                           int num_sort_bits,
+                                           uint8_t *array,
+                                           size_t num_units,
+                                           bool reversed_byte_order)
+{
+  using Counttype = size_t;
+  assert(sizeof_unit >= 2 && sizeof_unit <= RADIX_SORT8_MAX_SIZEOF_UNIT);
+  assert(sizeof_unit * CHAR_BIT >= num_sort_bits);
+  constexpr_for<2,RADIX_SORT8_MAX_SIZEOF_UNIT+1,1>([&](auto const_expr_idx)
+  {
+    if (sizeof_unit == const_expr_idx)
+    {
+      ska_large_lsb_small_radix_sort<Counttype,const_expr_idx>
+                                    (num_sort_bits,
+                                     array,
+                                     num_units,
+                                     reversed_byte_order);
+    }
+  });
 }
 #endif
