@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     rt_sorting.show(msg.str());
   }
 #ifdef SHOW_VALUES
-  show_key_values_pairs(key_value_pair);
+  show_key_values_pairs(key_value_pairs);
 #endif
   double previous = DBL_MIN;
   for (auto &&kv : key_value_pairs)
