@@ -6,7 +6,7 @@
 #include <climits>
 
 template<typename Basetype>
-inline std::string bit_sequence2string(Basetype bs)
+static inline std::string bit_sequence2string(Basetype bs)
 {
   const unsigned int bits = CHAR_BIT * sizeof(Basetype);
   Basetype mask;
@@ -21,7 +21,7 @@ inline std::string bit_sequence2string(Basetype bs)
 }
 
 template<typename Basetype>
-inline std::vector<std::string>
+static inline std::vector<std::string>
    bit_sequence2string_vector(const Basetype *encoding,size_t num_bytes)
 {
   std::vector<std::string> s_vec{};
