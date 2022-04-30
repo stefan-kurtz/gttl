@@ -491,80 +491,6 @@ static void show_non_empty_buckets(const Buckets<size_t> *buckets,
 }
 #endif
 
-#ifdef NEWCODE
-template<typename Counttype,int sizeof_unit>
-static void ska_large_lsb_small_radix_sort(int num_sort_bits,
-                                           uint8_t *array,
-                                           size_t num_units,
-                                           bool reversed_byte_order)
-{
-  const size_t skarupke_threshold = num_units/10;
-  const int num_sort_bytes = CHAR_BIT * num_sort_bits;
-  using StackStruct = struct { size_t offset;
-                               size_t num_units;
-                               int byte_index;
-                             };
-
-  std::vector<StackStruct> stack{};
-
-  stack.push_back({0, num_units, 0});
-  LSBbytesSorter<sizeof_unit> lsb_bytes_sorter(num_sort_bits,
-                                               reversed_byte_order);
-  lsb_bytes_sorter.setup(skarupke_threshold);
-  while (!stack.empty())
-  {
-    StackStruct current = stack.back();
-    stack.pop_back();
-
-    const int this_byte_index = real_byte_index(reversed_byte_order,
-                                                current.byte_index);
-    Buckets<Counttype> *buckets
-      = countingsort_skarupke_bytes<Counttype>(sizeof_unit,
-                                               this_byte_index,
-                                               array +
-                                               current.offset * sizeof_unit,
-                                               current.num_units);
-
-    if (current.byte_index + 1 < num_sort_bytes)
-    {
-      if (buckets == nullptr) /* all elements in one bucket */
-      {
-        stack.push_back({current.offset, current.num_units,
-                         current.byte_index + 1});
-
-      } else
-      {
-#ifdef SHOW_NON_EMPTY_BUCKETS
-        show_non_empty_buckets(buckets,current.byte_index,current.num_units);
-#endif
-        for (auto &bck : *buckets)
-        {
-          const Counttype bucket_start = std::get<0>(bck);
-          const Counttype bucket_width = std::get<1>(bck) - bucket_start;
-          if (bucket_width > skarupke_threshold)
-          {
-            stack.push_back({current.offset + bucket_start,
-                             bucket_width,
-                             current.byte_index + 1});
-          } else
-          {
-            if (bucket_width > 1)
-            {
-              const int bits_already_sorted = CHAR_BIT * current.byte_index;
-              lsb_bytes_sorter.sort(array,
-                                    current.offset + bucket_start,
-                                    bucket_width,
-                                    bits_already_sorted);
-            }
-          }
-        }
-      }
-    }
-    delete buckets;
-  }
-}
-#endif
-
 template<typename Counttype,typename basetype,int sizeof_unit,class SorterClass>
 static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
                                                    int num_sort_bits,
@@ -576,7 +502,7 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
     return;
   }
   const size_t skarupke_threshold = num_units/10;
-  const int num_sort_bytes = CHAR_BIT * num_sort_bits;
+  const int num_sort_bytes = (num_sort_bits+CHAR_BIT-1)/CHAR_BIT;
   using StackStruct = struct { size_t offset;
                                size_t num_units;
                                int byte_index;
@@ -621,7 +547,6 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
         stack.push_back({current.offset,
                          current.num_units,
                          current.byte_index + 1});
-
       } else
       {
 #ifdef SHOW_NON_EMPTY_BUCKETS
