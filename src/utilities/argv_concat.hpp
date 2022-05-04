@@ -14,6 +14,7 @@ class ArgvConcat
   char **my_argv;
   public:
   ArgvConcat(int argc,const char* const* argv,const char *separator,
+             bool replace_single_hyphen_options,
              const std::vector<std::string> &concat_options) :
     arg_vector({}),
     my_argv(nullptr)
@@ -55,6 +56,14 @@ class ArgvConcat
     my_argv = new char * [arg_vector.size()];
     for (size_t idx = 0; idx < arg_vector.size(); idx++)
     {
+      assert(arg_vector[idx].size() > 0);
+      if (replace_single_hyphen_options &&
+          arg_vector[idx].size() > 2 &&
+          arg_vector[idx][0] == '-' &&
+          arg_vector[idx][1] != '-')
+      {
+        arg_vector[idx].insert(0,"-");
+      }
       my_argv[idx] = strdup(arg_vector[idx].c_str());
     }
   }
