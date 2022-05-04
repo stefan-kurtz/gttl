@@ -115,6 +115,11 @@ template <size_t base> struct Pow_CT<base,0> { enum { VALUE = 1 }; };
 
 inline double error_percentage_get(size_t distance,size_t aligned_len)
 {
+  if (aligned_len == 0)
+  {
+    assert(distance == 0);
+    return 0;
+  }
   return 100.0 * static_cast<double>(distance)/(aligned_len/2.0);
 }
 #endif
