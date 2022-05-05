@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys, argparse, functools
-import numpy as np
 
 def split_itv(a,b):
   h = b//2 + (b % 2)
@@ -102,6 +101,7 @@ collect = set()
 num_pairs = 0
 covered = None
 if args.debug:
+  import numpy as np
   if args.cols == 0:
     covered = np.zeros((args.rows,args.rows),dtype=np.uint8)
   else:

@@ -28,7 +28,7 @@ else
 endif
 
 ifeq (,$(findstring g++,$(CXX)))
-  CFLAGS += -time -Wno-psabi
+  CFLAGS += -Wno-psabi
 endif
 
 MAIN_SRC=${shell grep -wl main *.cpp}
