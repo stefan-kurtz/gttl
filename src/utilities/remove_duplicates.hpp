@@ -2,7 +2,7 @@
 #define REMOVE_DUPLICATES_HPP
 
 /* a function to remove duplicates in a sorted array. Does not use branches
-   in inner loop. Returns number of pairwise distinct elements. 
+   in inner loop. Returns number of pairwise distinct elements.
    is_duplicate must return 1 if elements are identical, otherwise 0 */
 
 template<typename T>
