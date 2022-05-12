@@ -2,7 +2,7 @@ CXX?=g++
 CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -funroll-loops -O3
 CPPFLAGS=-I ../src
 LD=${CXX}
-LDLIBS=-lm -lz -lpthread
+LDLIBS=-lm -lz -lpthread -lstdc++
 CXXFLAGS=-std=c++17
 AT1MB=../testdata/at1MB.fna
 SYSTEM?=$(shell uname -s)
