@@ -7,7 +7,190 @@
 #include <cassert>
 #include "sequences/lcs_lcp_len_type.hpp"
 
-template<class FrontValue,LcsLcpLenType suffix_or_prefix_match_len>
+template<bool track_eop,class FrontValue,
+         LcsLcpLenType suffix_or_prefix_match_len>
+static inline void outsense_next_front_inplace_after_second(
+                                                FrontValue *front,
+                                                size_t d,
+                                                const char *useq,
+                                                size_t ulen,
+                                                const char *vseq,
+                                                size_t vlen,
+                                                size_t seqnum0,
+                                                size_t seqnum1)
+{
+  FrontValue insertion_value = front[0]; /* from previous diag -(d-1)
+                                            => -d => DELETION */
+  FrontValue bestfront = insertion_value;
+  bestfront += 1;
+  front[0] = bestfront;
+  if constexpr (track_eop)
+  {
+    front[0].deletion_set();
+  }
+  if (bestfront < ulen && bestfront < vlen + d)
+  {
+    assert(bestfront + 0 >= d);
+    const size_t l = suffix_or_prefix_match_len(useq,bestfront + 0,
+                                                vseq,(bestfront + 0) - d,
+                                                ulen,vlen,
+                                                seqnum0,seqnum1);
+    front[0] += l; /* add match of length l */
+  }
+  FrontValue replacement_value = front[1];
+  if (bestfront <= replacement_value)
+  {
+    bestfront = replacement_value;
+    if constexpr (track_eop)
+    {
+      bestfront.deletion_set();
+    }
+    bestfront += 1;
+  } else
+  {
+    if constexpr (track_eop)
+    {
+      bestfront.mismatch_set();
+      if (bestfront == replacement_value + 1)
+      {
+        bestfront.deletion_add();
+      }
+    }
+  }
+  front[1] = bestfront;
+  if (bestfront < ulen && bestfront + 1 < vlen + d)
+  {
+    assert(bestfront + 1 >= d);
+    const size_t l = suffix_or_prefix_match_len(useq,bestfront + 0,
+                                                vseq,(bestfront + 1) - d,
+                                                ulen,vlen,
+                                                seqnum0,seqnum1);
+    front[1] += l;
+  }
+  const size_t frontmaxidx = 2 * d;
+  for (size_t idx=size_t(2); idx <= frontmaxidx; idx++)
+  {
+    bestfront = insertion_value;
+    if constexpr (track_eop)
+    {
+      bestfront.insertion_set();
+    }
+    bestfront += 0; /* do not delete */
+    if (idx <= frontmaxidx - 1)
+    {
+      if (bestfront <= replacement_value)
+      {
+        bestfront = replacement_value;
+        if constexpr (track_eop)
+        {
+          bestfront.mismatch_set();
+        }
+        bestfront += 1;
+      } else
+      {
+        if constexpr (track_eop)
+        {
+          if (bestfront == replacement_value + 1)
+          {
+            bestfront.mismatch_add();
+          }
+        }
+      }
+    }
+    if (idx <= frontmaxidx - 2)
+    {
+      if (bestfront <= front[idx])
+      {
+        bestfront = front[idx];
+        if constexpr (track_eop)
+        {
+          bestfront.deletion_set();
+        }
+        bestfront += 1;
+      } else
+      {
+        if constexpr (track_eop)
+        {
+          if (bestfront == front[idx] + 1)
+          {
+            bestfront.deletion_add();
+          }
+        }
+      }
+    }
+    if (idx < frontmaxidx)
+    {
+      insertion_value = replacement_value;
+      replacement_value = front[idx];
+    }
+    front[idx] = bestfront;
+    if (bestfront < ulen && bestfront + idx < vlen + d)
+    {
+      assert(bestfront + idx >= d);
+      const size_t l = suffix_or_prefix_match_len(useq,bestfront + 0,
+                                                  vseq,(bestfront + idx) - d,
+                                                  ulen,vlen,
+                                                  seqnum0,seqnum1);
+      front[idx] += l;
+    }
+  }
+}
+
+template<bool track_eop,class FrontValue,
+         LcsLcpLenType suffix_or_prefix_match_len>
+static inline void outsense_second_front_inplace(FrontValue *front,
+                                                 const char *useq,
+                                                 size_t ulen,
+                                                 const char *vseq,
+                                                 size_t vlen,
+                                                 size_t seqnum0,
+                                                 size_t seqnum1)
+{
+  front[1] = front[2] = front[0];
+  if constexpr (track_eop)
+  {
+    front[0].deletion_set();
+  }
+  front[0] += 1;
+  if (front[0] < ulen && front[0] < vlen + 1)
+  {
+    assert((front[0] + 0) > 0);
+    const size_t l = suffix_or_prefix_match_len(useq,front[0] + 0,
+                                                vseq,(front[0] + 0) - 1,
+                                                ulen,vlen,
+                                                seqnum0,seqnum1);
+    front[0] += l;
+  }
+  if constexpr (track_eop)
+  {
+    front[1].mismatch_set();
+  }
+  front[1] += 1;
+  if (front[1] < ulen && front[1] < vlen)
+  {
+    const size_t l = suffix_or_prefix_match_len(useq,front[1] + 0,
+                                                vseq,front[1] + 0,
+                                                ulen,vlen,
+                                                seqnum0,seqnum1);
+    front[1] += l;
+  }
+  if constexpr (track_eop)
+  {
+    front[2].insertion_set();
+  }
+  front[2] += 0;
+  if (front[2] < ulen && front[2] + 1 < vlen)
+  {
+    const size_t l = suffix_or_prefix_match_len(useq,front[2] + 0,
+                                                vseq,front[2] + 1,
+                                                ulen,vlen,
+                                                seqnum0,seqnum1);
+    front[2] += l;
+  }
+}
+
+template<bool track_eop,class FrontValue,
+         LcsLcpLenType suffix_or_prefix_match_len>
 static inline void outsense_next_front_inplace(FrontValue *front,
                                                size_t d,
                                                const char *useq,
@@ -17,71 +200,18 @@ static inline void outsense_next_front_inplace(FrontValue *front,
                                                size_t seqnum0,
                                                size_t seqnum1)
 {
-  assert(d > 0 && front != nullptr);
-  FrontValue insertion_value = front[0]; /* copy constructor */
-  FrontValue lvalue = insertion_value; /* copy constructor */
-  lvalue += 1; /* add_error, do not replace by ++ */
-  /* front(-d,d) */
-  front[0] = lvalue;
-  if (lvalue < ulen && lvalue < vlen + d)
+  if (d == 1)
   {
-    assert(lvalue + 0 >= d);
-    const size_t l = suffix_or_prefix_match_len(useq,lvalue + 0,
-                                                vseq,(lvalue + 0) - d,
-                                                ulen,vlen,
-                                                seqnum0,seqnum1);
-    front[0] += l; /* add match of length l */
-  }
-  FrontValue replacement_value{};
-  if (d > size_t(1))
+    outsense_second_front_inplace<track_eop,FrontValue,
+                                  suffix_or_prefix_match_len>
+                                 (front,useq,ulen,vseq,vlen,seqnum0,seqnum1);
+  } else
   {
-    replacement_value = front[1];
-    if (lvalue <= replacement_value)
-    {
-      lvalue = replacement_value;
-      lvalue += 1; /* do not replace by ++ */
-    }
-  }
-  front[1] = lvalue;
-  if (lvalue < ulen && lvalue + 1 < vlen + d)
-  {
-    assert(lvalue + 1 >= d);
-    const size_t l = suffix_or_prefix_match_len(useq,lvalue + 0,
-                                                vseq,(lvalue + 1) - d,
-                                                ulen,vlen,
-                                                seqnum0,seqnum1);
-    front[1] += l;
-  }
-  const size_t frontmaxidx = 2 * d;
-  for (size_t idx=size_t(2); idx <= frontmaxidx; idx++)
-  {
-    lvalue = insertion_value; /* insertion */
-    lvalue += 0; /* do not delete */
-    if (idx <= frontmaxidx - 1 && lvalue <= replacement_value)
-    {
-      lvalue = replacement_value; /* replacement */
-      lvalue += 1;
-    }
-    if (idx <= frontmaxidx - 2 && lvalue <= front[idx])
-    {
-      lvalue = front[idx]; /* deletion */
-      lvalue += 1;
-    }
-    insertion_value = replacement_value;
-    if (idx < frontmaxidx)
-    {
-      replacement_value = front[idx];
-    }
-    front[idx] = lvalue;
-    if (lvalue < ulen && lvalue + idx < vlen + d)
-    {
-      assert(lvalue + idx >= d);
-      const size_t l = suffix_or_prefix_match_len(useq,lvalue + 0,
-                                                  vseq,(lvalue + idx) - d,
-                                                  ulen,vlen,
-                                                  seqnum0,seqnum1);
-      front[idx] += l;
-    }
+    assert(d > 1);
+    outsense_next_front_inplace_after_second<track_eop,FrontValue,
+                                             suffix_or_prefix_match_len>
+                                             (front,d,useq,ulen,vseq,vlen,
+                                              seqnum0,seqnum1);
   }
 }
 
@@ -125,7 +255,7 @@ static size_t fastedist_inplace_continue(const FrontValue *previousfront,
         assert(front != nullptr);
       }
     }
-    outsense_next_front_inplace<FrontValue,suffix_or_prefix_match_len>
+    outsense_next_front_inplace<false,FrontValue,suffix_or_prefix_match_len>
                                (front,
                                 d,
                                 useq,
