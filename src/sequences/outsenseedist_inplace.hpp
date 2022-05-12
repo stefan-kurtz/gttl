@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 #include "sequences/lcs_lcp_len_type.hpp"
 
 template<class FrontValue,LcsLcpLenType suffix_or_prefix_match_len>
