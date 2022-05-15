@@ -9,7 +9,8 @@
    edist distance, if the last row and last column was reached.
 */
 
-template<class Tracker,
+template<bool track_eop,
+         class Tracker,
          class FrontValue,
          LcsLcpLenType suffix_or_prefix_match_len>
 static void prefix_or_suffix_extension_generic(Tracker *tracker,
@@ -37,7 +38,7 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
     }
     front.push_back(FrontValue());
     front.push_back(FrontValue());
-    outsense_next_front_inplace<false,FrontValue,suffix_or_prefix_match_len>
+    outsense_next_front_inplace<track_eop,FrontValue,suffix_or_prefix_match_len>
                                (front.data(),
                                 d,
                                 useq,
