@@ -26,9 +26,15 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
     return;
   }
   std::vector<FrontValue> front{};
+  const size_t initial_lcp
+    = suffix_or_prefix_match_len(useq,0,vseq,0,ulen,vlen,seqnum0,seqnum1);
   size_t upper_bound_d = 32;
   front.reserve(2 * upper_bound_d + 1);
-  front.push_back(FrontValue());
+  front.push_back(FrontValue(initial_lcp));
+  if (tracker->evaluate(0, front.data()) == 0)
+  {
+    return;
+  }
   for (size_t d = 1; /* Nothing */; d++)
   {
     if (d > upper_bound_d)
