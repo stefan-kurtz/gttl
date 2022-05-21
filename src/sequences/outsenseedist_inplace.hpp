@@ -19,7 +19,6 @@ static inline void outsense_next_front_after_second_inplace(
                                                 size_t seqnum0,
                                                 size_t seqnum1)
 {
-  std::cout << __func__ << "d\t" << d << std::endl;
   FrontValue insertion_value = front[0]; /* from previous diag -(d-1)
                                             => -d => DELETION */
   FrontValue bestfront = insertion_value;
@@ -27,7 +26,7 @@ static inline void outsense_next_front_after_second_inplace(
   front[0] = bestfront;
   if constexpr (track_eop)
   {
-    front[0].deletion_set(__LINE__);
+    front[0].deletion_set();
   }
   if (bestfront < ulen && bestfront < vlen + d)
   {
@@ -36,9 +35,6 @@ static inline void outsense_next_front_after_second_inplace(
                                                 vseq,(bestfront + 0) - d,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    std::cout << "lcp(" << (bestfront + 0) << "," << ((bestfront + 0) - d)
-              << ")" << std::endl;
-    std::cout << "front[0] += " << l << std::endl;
     front[0] += l; /* add match of length l */
   }
   FrontValue replacement_value = front[1];
@@ -47,17 +43,17 @@ static inline void outsense_next_front_after_second_inplace(
     bestfront = replacement_value;
     if constexpr (track_eop)
     {
-      bestfront.deletion_set(__LINE__);
+      bestfront.deletion_set();
     }
     bestfront += 1;
   } else
   {
     if constexpr (track_eop)
     {
-      bestfront.mismatch_set(__LINE__);
+      bestfront.mismatch_set();
       if (bestfront == replacement_value + 1)
       {
-        bestfront.deletion_add(__LINE__);
+        bestfront.deletion_add();
       }
     }
   }
@@ -69,19 +65,15 @@ static inline void outsense_next_front_after_second_inplace(
                                                 vseq,(bestfront + 1) - d,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    std::cout << "lcp(" << (bestfront + 0) << "," << ((bestfront + 1) - d)
-              << ")" << std::endl;
-    std::cout << "front[1] += " << l << std::endl;
     front[1] += l;
   }
   const size_t frontmaxidx = 2 * d;
   for (size_t idx=size_t(2); idx <= frontmaxidx; idx++)
   {
-    std::cout << "idx=" << idx << std::endl;
     bestfront = insertion_value;
     if constexpr (track_eop)
     {
-      bestfront.mismatch_set(__LINE__);
+      bestfront.insertion_set();
     }
     bestfront += 0; /* do not delete */
     if (idx <= frontmaxidx - 1)
@@ -91,7 +83,7 @@ static inline void outsense_next_front_after_second_inplace(
         bestfront = replacement_value;
         if constexpr (track_eop)
         {
-          bestfront.mismatch_set(__LINE__);
+          bestfront.mismatch_set();
         }
         bestfront += 1;
       } else
@@ -100,7 +92,7 @@ static inline void outsense_next_front_after_second_inplace(
         {
           if (bestfront == replacement_value + 1)
           {
-            bestfront.mismatch_add(__LINE__);
+            bestfront.mismatch_add();
           }
         }
       }
@@ -112,7 +104,7 @@ static inline void outsense_next_front_after_second_inplace(
         bestfront = front[idx];
         if constexpr (track_eop)
         {
-          bestfront.deletion_set(__LINE__);
+          bestfront.deletion_set();
         }
         bestfront += 1;
       } else
@@ -121,7 +113,7 @@ static inline void outsense_next_front_after_second_inplace(
         {
           if (bestfront == front[idx] + 1)
           {
-            bestfront.deletion_add(__LINE__);
+            bestfront.deletion_add();
           }
         }
       }
@@ -139,9 +131,6 @@ static inline void outsense_next_front_after_second_inplace(
                                                   vseq,(bestfront + idx) - d,
                                                   ulen,vlen,
                                                   seqnum0,seqnum1);
-      std::cout << "lcp(" << (bestfront + 0) << "," << ((bestfront + idx) - d)
-                << ")" << std::endl;
-      std::cout << "front[" << idx << "] += " << l << std::endl;
       front[idx] += l;
     }
   }
@@ -160,7 +149,7 @@ static inline void outsense_second_front_inplace(FrontValue *front,
   front[1] = front[2] = front[0];
   if constexpr (track_eop)
   {
-    front[0].deletion_set(__LINE__);
+    front[0].deletion_set();
   }
   front[0] += 1;
   if (front[0] < ulen && front[0] < vlen + 1)
@@ -170,14 +159,11 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 vseq,(front[0] + 0) - 1,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    std::cout << "lcp(" << (front[0] + 0) << "," << ((front[0] + 0) - 1)
-              << ")" << std::endl;
-    std::cout << "front[0] += " << l << std::endl;
     front[0] += l;
   }
   if constexpr (track_eop)
   {
-    front[1].mismatch_set(__LINE__);
+    front[1].mismatch_set();
   }
   front[1] += 1;
   if (front[1] < ulen && front[1] < vlen)
@@ -186,14 +172,11 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 vseq,front[1] + 0,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    std::cout << "lcp(" << (front[1] + 0) << "," << (front[1] + 0)
-              << ")" << std::endl;
-    std::cout << "front[1] += " << l << std::endl;
     front[1] += l;
   }
   if constexpr (track_eop)
   {
-    front[2].insertion_set(__LINE__);
+    front[2].insertion_set();
   }
   front[2] += 0;
   if (front[2] < ulen && front[2] + 1 < vlen)
@@ -202,9 +185,6 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 vseq,front[2] + 1,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    std::cout << "lcp(" << (front[2] + 0) << "," << (front[2] + 1)
-              << ")" << std::endl;
-    std::cout << "front[2] += " << l << std::endl;
     front[2] += l;
   }
 }
