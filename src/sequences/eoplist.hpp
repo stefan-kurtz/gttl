@@ -1,0 +1,460 @@
+#ifndef EOPLIST_HPP
+#define EOPLIST_HPP
+#include <cstdbool>
+#include <cstdint>
+#include <cctype>
+#include <cassert>
+#include <vector>
+#include <algorithm>
+#include "utilities/str_format.hpp"
+
+enum EopType
+{
+  DeletionOp = 0,
+  InsertionOp,
+  MismatchOp,
+  MatchOp,
+  UndefinedOp
+};
+
+class CigarOperator
+{
+ public:
+  static constexpr const char deletion_char = 'D';
+  static constexpr const char insertion_char = 'I';
+  static constexpr const char match_char = '=';
+  static constexpr const char mismatch_char = 'X';
+  static constexpr const char replacement_char = 'M';
+  private:
+  static constexpr const char eoplist_pretty_print_dm[] = {deletion_char,
+                                                           insertion_char,
+                                                           mismatch_char,
+                                                           match_char};
+  static constexpr const char eoplist_pretty_print[] = {deletion_char,
+                                                        insertion_char,
+                                                        replacement_char,
+                                                        replacement_char};
+
+  public:
+  EopType edit_operation;
+  size_t iteration;
+  CigarOperator(void)
+    : edit_operation(UndefinedOp)
+    , iteration(0)
+  {}
+  char to_char(bool distinguish_mismatch_match) const noexcept
+  {
+    return distinguish_mismatch_match
+             ? eoplist_pretty_print_dm[static_cast<int>(edit_operation)]
+             : eoplist_pretty_print[static_cast<int>(edit_operation)];
+  }
+  std::string to_string(bool distinguish_mismatch_match) const noexcept
+  {
+    std::string s{};
+    assert(edit_operation < UndefinedOp);
+    s += std::to_string(iteration);
+    s += this->to_char(distinguish_mismatch_match);
+    return s;
+  }
+};
+
+class Eoplist
+{
+  static constexpr const uint8_t ft_eopcode_maxmatches = uint8_t(253);
+  static constexpr const uint8_t ft_eopcode_mismatch = uint8_t(253);
+  static constexpr const uint8_t ft_eopcode_deletion = uint8_t(254);
+  static constexpr const uint8_t ft_eopcode_insertion = uint8_t(255);
+
+  struct Iterator
+  {
+    private:
+    const std::vector<uint8_t> &eoplist_ref;
+    bool distinguish_mismatch_match,
+         exhausted;
+    size_t eop_idx;
+    CigarOperator cigar_operator;
+    void cigar_operator_next(void)
+    {
+      cigar_operator.edit_operation = UndefinedOp;
+      cigar_operator.iteration = 0;
+      bool stop = false;
+      while (!stop && eop_idx < eoplist_ref.size())
+      {
+        const uint8_t this_eop
+          = eoplist_ref[eop_idx];
+        if (cigar_operator.iteration > 0)
+        {
+          assert(cigar_operator.edit_operation != UndefinedOp);
+          switch(this_eop)
+          {
+#define EXTEND_CIGAR_OP_OF_SAME_TYPE(EOPTYPE)\
+            if (cigar_operator.edit_operation == EOPTYPE)\
+            {\
+              cigar_operator.iteration++;\
+              eop_idx++;\
+            } else\
+            {\
+              stop = true;\
+            }
+            case ft_eopcode_deletion:
+              EXTEND_CIGAR_OP_OF_SAME_TYPE(DeletionOp);
+              break;
+            case ft_eopcode_insertion:
+              EXTEND_CIGAR_OP_OF_SAME_TYPE(InsertionOp);
+              break;
+            case ft_eopcode_mismatch:
+              if (distinguish_mismatch_match)
+              {
+                EXTEND_CIGAR_OP_OF_SAME_TYPE(MismatchOp);
+              } else
+              {
+                EXTEND_CIGAR_OP_OF_SAME_TYPE(MatchOp);
+              }
+              break;
+            default:
+              if (cigar_operator.edit_operation == MatchOp)
+              {
+                assert(this_eop < ft_eopcode_maxmatches);
+                cigar_operator.iteration += (1 + this_eop);
+                eop_idx++;
+              } else
+              {
+                stop = true;
+              }
+          }
+        } else
+        {
+          switch (this_eop)
+          {
+            case ft_eopcode_deletion:
+              cigar_operator.edit_operation = DeletionOp;
+              cigar_operator.iteration = size_t(1);
+              break;
+            case ft_eopcode_insertion:
+              cigar_operator.edit_operation = InsertionOp;
+              cigar_operator.iteration = size_t(1);
+              break;
+            case ft_eopcode_mismatch:
+              cigar_operator.edit_operation
+                = distinguish_mismatch_match ? MismatchOp : MatchOp;
+              cigar_operator.iteration = size_t(1);
+              break;
+            default:
+              cigar_operator.edit_operation = MatchOp;
+              cigar_operator.iteration = 1 + this_eop;
+              break;
+          }
+          eop_idx++;
+        }
+      }
+    }
+    public:
+    Iterator(const std::vector<uint8_t> &_eoplist,
+             bool _distinguish_mismatch_match,bool _exhausted)
+      : eoplist_ref(_eoplist)
+      , distinguish_mismatch_match(_distinguish_mismatch_match)
+      , exhausted(_exhausted)
+      , eop_idx(0)
+      , cigar_operator({})
+    {
+      assert(eop_idx < eoplist_ref.size());
+      if (!exhausted)
+      {
+        cigar_operator_next();
+      }
+    }
+    const CigarOperator &operator*(void) const noexcept
+    {
+      return cigar_operator;
+    }
+    bool operator != (const Iterator& other) const noexcept
+    {
+      return exhausted != other.exhausted;
+    }
+    Iterator& operator++() /* prefix increment*/
+    {
+      assert(!exhausted);
+      if (eop_idx >= eoplist_ref.size())
+      {
+        exhausted = true;
+      } else
+      {
+        cigar_operator_next();
+      }
+      return *this;
+    }
+  };
+  std::vector<uint8_t> eoplist;
+  size_t count_matches,
+         count_mismatches,
+         count_deletions,
+         count_insertions,
+         count_gap_opens;
+  bool previous_was_gap,
+       distinguish_mismatch_match;
+  void indel_add(int code)
+  {
+    eoplist.push_back(static_cast<uint8_t>(code));
+    if (!previous_was_gap)
+    {
+      count_gap_opens++;
+      previous_was_gap = true;
+    }
+  }
+  public:
+  Eoplist(bool _distinguish_mismatch_match)
+    : eoplist({})
+    , count_matches(0)
+    , count_mismatches(0)
+    , count_deletions(0)
+    , count_insertions(0)
+    , count_gap_opens(0)
+    , previous_was_gap(false)
+    , distinguish_mismatch_match(_distinguish_mismatch_match)
+  {}
+  void match_add(size_t length)
+  {
+    assert(length > 0);
+    while (true)
+    {
+      if (length <= ft_eopcode_maxmatches)
+      {
+        assert(length > 0);
+        eoplist.push_back(static_cast<uint8_t>(length - 1)); /* R length */
+        count_matches += length;
+        break;
+      }
+      /* R max */
+      eoplist.push_back(static_cast<uint8_t>(ft_eopcode_maxmatches - 1));
+      count_matches += ft_eopcode_maxmatches;
+      length -= ft_eopcode_maxmatches;
+    }
+    previous_was_gap = false;
+  }
+  void mismatch_add(void)
+  {
+    eoplist.push_back(static_cast<uint8_t>(ft_eopcode_mismatch)); /* R 1 */
+    count_mismatches++;
+    previous_was_gap = false;
+  }
+  void deletion_add(void)
+  {
+    indel_add(ft_eopcode_deletion);
+    count_deletions++;
+  }
+  void insertion_add(void)
+  {
+    indel_add(ft_eopcode_insertion);
+    count_insertions++;
+  }
+  size_t size(void) const noexcept
+  {
+    return eoplist.size();
+  }
+  void reverse_end(size_t firstindex)
+  {
+    if (firstindex + 1 >= eoplist.size())
+    {
+      return;
+    }
+    std::reverse(eoplist.begin() + firstindex,eoplist.end());
+  }
+  size_t count_matches_get(void) const noexcept
+  {
+    return count_matches;
+  }
+  size_t count_mismatches_get(void) const noexcept
+  {
+    return count_mismatches;
+  }
+  size_t count_deletions_get(void) const noexcept
+  {
+    return count_deletions;
+  }
+  size_t count_insertions_get(void) const noexcept
+  {
+    return count_insertions;
+  }
+  size_t count_gap_opens_get(void) const noexcept
+  {
+    return count_gap_opens;
+  }
+  size_t aligned_len_get(void) const noexcept
+  {
+    return count_deletions_get() + count_insertions_get() +
+           2 * (count_mismatches_get() + count_matches_get());
+  }
+  size_t errors_get(void) const noexcept
+  {
+    return count_deletions_get() + count_insertions_get() +
+           count_mismatches_get();
+  }
+  double error_percentage_get(void) const noexcept
+  {
+    return 200.0 * static_cast<double>(errors_get())/aligned_len_get();
+  }
+  Iterator begin(void) const
+  {
+    return Iterator(eoplist,distinguish_mismatch_match,false);
+  }
+  Iterator end(void) const
+  {
+    return Iterator(eoplist,distinguish_mismatch_match,true);
+  }
+  std::string to_string(void) const noexcept
+  {
+    std::string s{};
+    for (size_t idx = 0; idx < eoplist.size(); idx++)
+    {
+      const uint8_t this_eop = eoplist[idx];
+      switch(this_eop)
+      {
+        case ft_eopcode_insertion:
+          s += CigarOperator::insertion_char;
+          break;
+        case ft_eopcode_deletion:
+          s += CigarOperator::deletion_char;
+          break;
+        case ft_eopcode_mismatch:
+          s += CigarOperator::mismatch_char;
+          break;
+        default:
+          s += std::to_string(1 + static_cast<int>(this_eop));
+          s += CigarOperator::match_char;
+          break;
+      }
+    }
+    return s;
+  }
+  bool operator ==(const Eoplist &other) const noexcept
+  {
+    return std::equal(eoplist.begin(),eoplist.end(),other.eoplist.begin());
+  }
+  bool operator !=(const Eoplist &other) const noexcept
+  {
+    return !(*this == other);
+  }
+  Eoplist(bool _distinguish_mismatch_match,const std::string &cigar_string)
+    : eoplist({})
+    , count_matches(0)
+    , count_mismatches(0)
+    , count_deletions(0)
+    , count_insertions(0)
+    , count_gap_opens(0)
+    , previous_was_gap(false)
+    , distinguish_mismatch_match(_distinguish_mismatch_match)
+  {
+    size_t iteration = 0;
+
+    for (auto &&cc : cigar_string)
+    {
+      if (std::isdigit(cc))
+      {
+        iteration = iteration * size_t(10) + (size_t) (cc - '0');
+      } else
+      {
+        if (cc == CigarOperator::deletion_char)
+        {
+          for (size_t iter = 0; iter < iteration; iter++)
+          {
+            deletion_add();
+          }
+        } else
+        {
+          if (cc == CigarOperator::insertion_char)
+          {
+            for (size_t iter = 0; iter < iteration; iter++)
+            {
+              insertion_add();
+            }
+          } else
+          {
+            if (cc == CigarOperator::mismatch_char)
+            {
+              for (size_t iter = 0; iter < iteration; iter++)
+              {
+                mismatch_add();
+              }
+            } else
+            {
+              if (cc == CigarOperator::match_char ||
+                  cc == CigarOperator::replacement_char)
+              {
+                match_add(iteration);
+              } else
+              {
+                StrFormat msg("illegal symbol '%c' in cigar string",cc);
+                throw msg.str();
+              }
+            }
+          }
+        }
+        iteration = 0;
+      }
+    }
+  }
+  /* A constructor to create an Eoplist from a cigar string encoding as
+     use in SAM */
+  Eoplist(bool _distinguish_mismatch_match,const char *useq,const char *vseq,
+          const std::vector<uint32_t> &cigar_string_encoding)
+    : eoplist({})
+    , count_matches(0)
+    , count_mismatches(0)
+    , count_deletions(0)
+    , count_insertions(0)
+    , count_gap_opens(0)
+    , previous_was_gap(false)
+    , distinguish_mismatch_match(_distinguish_mismatch_match)
+  {
+    size_t upos = 0, vpos = 0;
+
+    for (auto cigar_operation : cigar_string_encoding)
+    {
+      uint32_t iteration = cigar_operation >> 4,
+               edit_operation_number = cigar_operation & 0xf;
+      assert(edit_operation_number < 3);
+      if (edit_operation_number == 0) /* replacement */
+      {
+        for (uint32_t iter = 0; iter < iteration; iter++)
+        {
+          if (useq[upos] == vseq[vpos])
+          {
+            match_add(1);
+          } else
+          {
+            mismatch_add();
+          }
+          upos++;
+          vpos++;
+        }
+      } else
+      {
+        if (edit_operation_number == 1)
+        {
+          for (uint32_t iter = 0; iter < iteration; iter++)
+          {
+            insertion_add();
+          }
+          vpos += iteration;
+        } else
+        {
+          for (uint32_t iter = 0; iter < iteration; iter++)
+          {
+            deletion_add();
+          }
+          upos += iteration;
+        }
+      }
+    }
+  }
+  std::string cigar_string_get(bool distinguish_mismatch_match) const noexcept
+  {
+    std::string cigar_string{};
+    for (auto &&cigar_operator : *this)
+    {
+      cigar_string += cigar_operator.to_string(distinguish_mismatch_match);
+    }
+    return cigar_string;
+  }
+};
+#endif

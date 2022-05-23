@@ -37,7 +37,7 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool test_sort_kvp
+              test_multiseq test_thread_pool test_sort_kvp test_eoplist
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -112,6 +112,12 @@ test_sort_kvp:sort_key_value_pairs.x
 	   ./sort_key_value_pairs.x rad $$num;\
 	   ./sort_key_value_pairs.x std $$num;\
 	done
+	@echo "Congratulations. $@ passed."
+
+test_eoplist:eoplist_mn.x
+	@./eoplist_mn.x silent 100000
+	@./eoplist_mn.x display 1000
+	@echo "Congratulations. $@ passed."
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
