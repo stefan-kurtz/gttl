@@ -37,7 +37,8 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool test_sort_kvp test_eoplist
+              test_multiseq test_thread_pool test_sort_kvp test_eoplist \
+              test_invint
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -61,9 +62,10 @@ test_multiseq:./multiseq_mn.x
 	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
 	@./multiseq_mn.x -w 70 -s ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
 	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
-	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta 
+	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_line_iterator
 test_line_iterator:line_iterator.x
 	@./line_iterator.py `find .. -name '*.[ch]pp'` | sh -s
 	@./line_iterator.x ${AT1MB} | diff - ${AT1MB}
@@ -80,6 +82,7 @@ test_line_iterator:line_iterator.x
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_matrix_partition
 test_matrix_partition:matrix_partition.py matrix_partition.x
 	./matrix_partition_cmp.sh 10 100 99	
 	./matrix_partition_cmp.sh 17 511 137
@@ -91,6 +94,7 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 	./matrix_partition_cmp.sh 500 13000 0
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_fastq_iterator
 test_fastq_iterator:./fastq_mn.x
 	@for fastqfile in `ls ../testdata/*.fastq`; do \
                 ./fastq_mn.x --echo $$fastqfile | diff - $$fastqfile;\
@@ -103,10 +107,12 @@ test_fastq_iterator:./fastq_mn.x
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_thread_pool
 test_thread_pool:thread_pool_mn.x
 	@./thread_pool_mn.x 4 40
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_sort_kvp
 test_sort_kvp:sort_key_value_pairs.x
 	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
 	   ./sort_key_value_pairs.x rad $$num;\
@@ -114,9 +120,17 @@ test_sort_kvp:sort_key_value_pairs.x
 	done
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_eoplist
 test_eoplist:eoplist_mn.x
 	@./eoplist_mn.x silent 100000
 	@./eoplist_mn.x display 1000
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_invint
+test_invint:enum_invint.x
+	@./enum_invint.x 14 ../testdata/at1MB.fna
+	@./enum_invint.x 15 ../testdata/vaccg.fna
+	@./enum_invint.x 20 ../testdata/ychrIII.fna
 	@echo "Congratulations. $@ passed."
 
 fastq_mn.x:fastq_mn.o fastq_opt.o

@@ -93,7 +93,7 @@ class QgramRecHash2ValueIterator
                                            new_rank,
                                            aux_data);
           compl_hash_value = next_compl_hash_value_get(old_rank,
-                                                       hash_value,
+                                                       compl_hash_value,
                                                        new_rank,
                                                        aux_data);
         }
@@ -187,6 +187,10 @@ class QgramRecHash2ValueIterator
         mult *= alpha_size;
       }
       return code;
+    }
+    size_t qgram_length_get(void) const noexcept
+    {
+      return qgram_length;
     }
 #ifndef NDEBUG
     const uint8_t *qgram_decode(uint64_t code)

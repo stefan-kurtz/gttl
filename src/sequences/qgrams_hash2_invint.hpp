@@ -19,6 +19,9 @@
 #include "sequences/alphabet.hpp"
 #include "sequences/qgrams_rec_hash2_value_iter.hpp"
 
+static constexpr const uint64_t invint4_complement_table[]
+  = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
+
 static int aux_data_invint4(size_t qgram_length)
 {
   return static_cast<int>(2 * (qgram_length-1));
@@ -44,7 +47,7 @@ static uint64_t first_compl_qgram_invint4(const uint8_t *t_qgram,
   for (const uint8_t *t_qgram_ptr = t_qgram;
        t_qgram_ptr < t_qgram + qgram_length; t_qgram_ptr++)
   {
-    code += mult * static_cast<uint64_t>(*t_qgram_ptr);
+    code += mult * invint4_complement_table[*t_qgram_ptr];
     mult *= 4;
   }
   return code;
@@ -66,11 +69,9 @@ static uint64_t next_compl_qgram_invint4(uint8_t old_t_char,
                                          uint8_t new_t_char,
                                          int &shift)
 {
-  static constexpr const uint64_t complement[] = {uint64_t(2),uint64_t(3),
-                                                  uint64_t(0),uint64_t(1)};
-  integer_code -= complement[old_t_char];
+  integer_code -= invint4_complement_table[old_t_char];
   integer_code /= static_cast<uint64_t>(4);
-  integer_code += complement[new_t_char] << shift;
+  integer_code += (invint4_complement_table[new_t_char] << shift);
   return integer_code;
 }
 
