@@ -18,7 +18,7 @@
 #define QGRAMS_HASH_NTHASH_HPP
 #include "sequences/alphabet.hpp"
 #include "sequences/nthash_fwd.hpp"
-#include "sequences/qgrams_hash_rec_iter.hpp"
+#include "sequences/qgrams_rec_hash_value_iter.hpp"
 
 using QgramNtHashFwdIterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,

@@ -17,7 +17,7 @@
 #ifndef QGRAMS_HASH_INVINT_HPP
 #define QGRAMS_HASH_INVINT_HPP
 #include "sequences/alphabet.hpp"
-#include "sequences/qgrams_hash_rec_iter.hpp"
+#include "sequences/qgrams_rec_hash_value_iter.hpp"
 
 static uint64_t next_qgram_integer_code_asize4(uint8_t old_t_char,
                                                uint64_t integer_code,
