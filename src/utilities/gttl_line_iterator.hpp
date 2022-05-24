@@ -69,31 +69,31 @@ class GttlLineIterator
       return false;
     }
  public:
-    GttlLineIterator(GttlFpType _in_fp) :
-        inputfiles(nullptr),
-        bufptr(buffer),
-        bufend(buffer),
-        in_fp(_in_fp),     /* additional to const char * constructor */
-        separator(EOF),
-        file_exhausted(false),
-        endofunit(false),
-        own_in_fp(false),  /* different from const char * constructor */
-        more_files(false),
-        file_index(0),
-        line_number(0)
+    GttlLineIterator(GttlFpType _in_fp)
+        : inputfiles(nullptr)
+        , bufptr(buffer)
+        , bufend(buffer)
+        , in_fp(_in_fp)     /* additional to const char * constructor */
+        , separator(EOF)
+        , file_exhausted(false)
+        , endofunit(false)
+        , own_in_fp(false)  /* different from const char * constructor */
+        , more_files(false)
+        , file_index(0)
+        , line_number(0)
     {
     }
-    GttlLineIterator(const char *inputfile) :
-        inputfiles(nullptr),
-        bufptr(buffer),
-        bufend(buffer),
-        separator(EOF),
-        file_exhausted(false),
-        endofunit(false),
-        own_in_fp(true),  /* different from GttlFpType _in_fp */
-        more_files(false),
-        file_index(0),
-        line_number(0)
+    GttlLineIterator(const char *inputfile)
+        : inputfiles(nullptr)
+        , bufptr(buffer)
+        , bufend(buffer)
+        , separator(EOF)
+        , file_exhausted(false)
+        , endofunit(false)
+        , own_in_fp(true)  /* different from GttlFpType _in_fp */
+        , more_files(false)
+        , file_index(0)
+        , line_number(0)
     {
       in_fp = gttl_fp_type_open(inputfile,"rb");
       if (in_fp == nullptr)
@@ -101,16 +101,16 @@ class GttlLineIterator
         throw std::string(": cannot open file");
       }
     }
-    GttlLineIterator(const std::vector<std::string> *_inputfiles) :
-        inputfiles(_inputfiles), /* different from other constructors */
-        bufptr(buffer),
-        bufend(buffer),
-        separator(EOF),
-        file_exhausted(false),
-        endofunit(false),
-        own_in_fp(true),
-        file_index(0),
-        line_number(0)
+    GttlLineIterator(const std::vector<std::string> *_inputfiles)
+        : inputfiles(_inputfiles) /* different from other constructors */
+        , bufptr(buffer)
+        , bufend(buffer)
+        , separator(EOF)
+        , file_exhausted(false)
+        , endofunit(false)
+        , own_in_fp(true)
+        , file_index(0)
+        , line_number(0)
     {
       assert(_inputfiles->size() > 0);
       more_files = inputfiles->size() > 1; /* different from other construct.*/
@@ -221,4 +221,73 @@ class GttlLineIterator
       return file_index;
     }
 };
+
+#ifdef NEWCODE
+class GttlLineIterator
+{
+  private:
+    const char *bufptr, *bufend;
+    char separator;
+    bool endofunit;
+    size_t line_number;
+    GttlLineIterator(const char *input_string, size_t string_length)
+        : bufptr(input_string)
+        , bufend(input_string + string_length)
+        , separator('\n')
+        , endofunit(false)
+        , line_number(0)
+    {
+
+    }
+    bool next(std::string *current_line)
+    {
+      endofunit = false;
+      size_t remain = static_cast<size_t>(bufend - bufptr);
+      const char *next_separator = reinterpret_cast<const char *>
+                                (memchr(bufptr,separator,remain));
+      if (next_separator != nullptr)
+      {
+        const size_t copy_length = static_cast<size_t>(nextsep + 1
+                                                         - bufptr);
+          assert(copy_length > 0);
+          current_line->append(bufptr, copy_length);
+          bufptr = nextnewline + 1;
+          if (bufptr < bufend)
+          {
+            if (*bufptr == separator)
+            {
+              endofunit = true;
+            }
+          } else
+          {
+            if (!fill_buffer() || *bufptr == separator)
+            {
+              endofunit = true;
+            }
+          }
+          line_number++;
+          return true;
+        }
+        const size_t copy_length = static_cast<size_t>(bufend - bufptr);
+        if (copy_length > 0)
+        {
+          current_line->append(bufptr, copy_length);
+        }
+        bufptr = bufend;
+        if (file_exhausted)
+        {
+          if (*(bufptr - 1) != '\n')
+          {
+            StrFormat msg(", line %lu: missing newline character",
+                          line_number+1);
+            throw msg.str();
+          }
+          endofunit = true;
+          line_number++;
+          return true;
+        }
+      }
+    }
+};
+#endif
 #endif

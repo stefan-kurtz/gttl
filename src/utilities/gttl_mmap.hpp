@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <vector>
 #include <ios>
+#include <cassert>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

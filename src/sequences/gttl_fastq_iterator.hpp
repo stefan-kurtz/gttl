@@ -140,5 +140,4 @@ class GttlFastQIterator
       return Iterator(gttl_li,true);
     }
 };
-
 #endif
