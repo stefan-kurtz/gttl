@@ -222,72 +222,58 @@ class GttlLineIterator
     }
 };
 
-#ifdef NEWCODE
-class GttlLineIterator
+class GttlLineIteratorFromString
 {
   private:
-    const char *bufptr, *bufend;
-    char separator;
-    bool endofunit;
-    size_t line_number;
-    GttlLineIterator(const char *input_string, size_t string_length)
-        : bufptr(input_string)
-        , bufend(input_string + string_length)
-        , separator('\n')
-        , endofunit(false)
-        , line_number(0)
+  const char *bufptr, *bufend;
+  char separator;
+  bool endofunit;
+  size_t line_number;
+  public:
+  GttlLineIteratorFromString(const char *input_string, size_t string_length)
+      : bufptr(input_string)
+      , bufend(input_string + string_length)
+      , separator('\n')
+      , endofunit(false)
+      , line_number(0)
+  { }
+  bool next(std::string *current_line)
+  {
+    endofunit = false;
+    if (bufptr == bufend)
     {
-
+      return false;
     }
-    bool next(std::string *current_line)
+    const size_t remain = static_cast<size_t>(bufend - bufptr);
+    const char *next_separator = reinterpret_cast<const char *>
+                                 (memchr(bufptr,separator,remain));
+    if (next_separator != nullptr)
     {
-      endofunit = false;
-      size_t remain = static_cast<size_t>(bufend - bufptr);
-      const char *next_separator = reinterpret_cast<const char *>
-                                (memchr(bufptr,separator,remain));
-      if (next_separator != nullptr)
+      const size_t copy_length = static_cast<size_t>(next_separator - bufptr);
+      if (copy_length)
       {
-        const size_t copy_length = static_cast<size_t>(nextsep + 1
-                                                         - bufptr);
-          assert(copy_length > 0);
-          current_line->append(bufptr, copy_length);
-          bufptr = nextnewline + 1;
-          if (bufptr < bufend)
-          {
-            if (*bufptr == separator)
-            {
-              endofunit = true;
-            }
-          } else
-          {
-            if (!fill_buffer() || *bufptr == separator)
-            {
-              endofunit = true;
-            }
-          }
-          line_number++;
-          return true;
-        }
-        const size_t copy_length = static_cast<size_t>(bufend - bufptr);
-        if (copy_length > 0)
+        current_line->append(bufptr, copy_length);
+      }
+      bufptr = next_separator + 1;
+      if (bufptr < bufend)
+      {
+        if (*bufptr == separator)
         {
-          current_line->append(bufptr, copy_length);
-        }
-        bufptr = bufend;
-        if (file_exhausted)
-        {
-          if (*(bufptr - 1) != '\n')
-          {
-            StrFormat msg(", line %lu: missing newline character",
-                          line_number+1);
-            throw msg.str();
-          }
           endofunit = true;
-          line_number++;
-          return true;
         }
       }
+      line_number++;
+      return true;
     }
+    const size_t copy_length = static_cast<size_t>(bufend - bufptr);
+    if (copy_length > 0)
+    {
+      current_line->append(bufptr, copy_length);
+    }
+    bufptr = bufend;
+    endofunit = true;
+    line_number++;
+    return true;
+  }
 };
-#endif
 #endif

@@ -133,6 +133,12 @@ test_invint:enum_invint.x
 	@./enum_invint.x 20 ../testdata/ychrIII.fna
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_lineiterator_mapped
+test_lineiterator_mapped:line_iterator_mapped.x
+	@./line_iterator_mapped.x `ls ../testdata/*.fna | egrep -v 'empty.fna|\.gz'`
+	@./line_iterator_mapped.x *.[hc]pp
+	@echo "Congratulations. $@ passed."
+
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
 
