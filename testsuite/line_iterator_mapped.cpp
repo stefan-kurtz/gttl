@@ -1,16 +1,19 @@
 #include <cstdlib>
 #include <iostream>
+#include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 
 static size_t count_lines(const char *file_part, size_t len)
 {
-  GttlLineIteratorFromString liter(file_part, len);
-  std::string buf{};
+  static constexpr const int buf_size = 1;
+  GttlLineIterator<buf_size> liter(file_part, len);
+  ModifiableStringView line{};
   size_t line_num = 0;
-  while (liter.next(&buf))
+  while (liter.next(&line))
   {
     line_num++;
+    line.clear();
   }
   return line_num;
 }
@@ -33,7 +36,6 @@ static void process_file(const char *filename)
 {
   Gttlmmap<char> mapped_file(filename);
   assert(mapped_file.size() > 0);
-  //constexpr const int buf_size = 1 << 14;
   const size_t parts = 2;
   size_t mid = mapped_file.size()/parts;
   assert(mid < mapped_file.size());

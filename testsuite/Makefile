@@ -38,7 +38,7 @@ all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
               test_multiseq test_thread_pool test_sort_kvp test_eoplist \
-              test_invint
+              test_invint test_line_iterator_mapped
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
@@ -133,8 +133,8 @@ test_invint:enum_invint.x
 	@./enum_invint.x 20 ../testdata/ychrIII.fna
 	@echo "Congratulations. $@ passed."
 
-.PHONY:test_lineiterator_mapped
-test_lineiterator_mapped:line_iterator_mapped.x
+.PHONY:test_line_iterator_mapped
+test_line_iterator_mapped:line_iterator_mapped.x
 	@./line_iterator_mapped.x `ls ../testdata/*.fna | egrep -v 'empty.fna|\.gz'`
 	@./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."

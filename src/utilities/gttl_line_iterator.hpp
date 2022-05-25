@@ -20,17 +20,44 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-
 #include <string>
 #include <algorithm>
 #include <vector>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"
 
+class ModifiableStringView
+{
+  const char *ptr;
+  size_t len;
+  public:
+  ModifiableStringView(void)
+    : ptr(nullptr)
+    , len(0)
+   {}
+  void set(const char *_ptr,size_t _len)
+  {
+    ptr = _ptr;
+    len = _len;
+  }
+  size_t size(void) const noexcept {return len;}
+  void clear(void)
+  {
+    ptr = nullptr;
+    len = 0;
+  }
+  const char *data(void) const noexcept
+  {
+    return ptr;
+  }
+};
+
 template<int buf_size>
 class GttlLineIterator
 {
   private:
+    const char *suffix,
+               *end_input_string;
     const std::vector<std::string> *inputfiles;
     char buffer[buf_size+1], *bufptr, *bufend;
     GttlFpType in_fp;
@@ -220,44 +247,43 @@ class GttlLineIterator
     {
       return file_index;
     }
-};
-
-class GttlLineIteratorFromString
-{
-  private:
-  const char *bufptr, *bufend;
-  char separator;
-  bool endofunit;
-  size_t line_number;
-  public:
-  GttlLineIteratorFromString(const char *input_string, size_t string_length)
-      : bufptr(input_string)
-      , bufend(input_string + string_length)
+  GttlLineIterator(const char *input_string, size_t string_length)
+      : suffix(input_string)
+      , end_input_string(input_string + string_length)
+      , inputfiles(nullptr)
+      , bufptr(nullptr)
+      , bufend(nullptr)
+      , in_fp(nullptr)
       , separator('\n')
+      , file_exhausted(false)
       , endofunit(false)
+      , own_in_fp(false)
+      , more_files(false)
+      , file_index(0)
       , line_number(0)
   { }
-  bool next(std::string *current_line)
+  bool next(ModifiableStringView *current_line)
   {
     endofunit = false;
-    if (bufptr == bufend)
+    if (suffix == end_input_string)
     {
       return false;
     }
-    const size_t remain = static_cast<size_t>(bufend - bufptr);
+    const size_t remain = static_cast<size_t>(end_input_string - suffix);
     const char *next_separator = reinterpret_cast<const char *>
-                                 (memchr(bufptr,separator,remain));
+                                 (memchr(suffix,separator,remain));
     if (next_separator != nullptr)
     {
-      const size_t copy_length = static_cast<size_t>(next_separator - bufptr);
-      if (copy_length)
+      const size_t copy_length = static_cast<size_t>(next_separator - suffix);
+      if (copy_length > 0)
       {
-        current_line->append(bufptr, copy_length);
+        assert(current_line->size() == 0);
+        current_line->set(suffix, copy_length);
       }
-      bufptr = next_separator + 1;
-      if (bufptr < bufend)
+      suffix = next_separator + 1;
+      if (suffix < end_input_string)
       {
-        if (*bufptr == separator)
+        if (*suffix == separator)
         {
           endofunit = true;
         }
@@ -265,12 +291,13 @@ class GttlLineIteratorFromString
       line_number++;
       return true;
     }
-    const size_t copy_length = static_cast<size_t>(bufend - bufptr);
+    const size_t copy_length = static_cast<size_t>(end_input_string - suffix);
     if (copy_length > 0)
     {
-      current_line->append(bufptr, copy_length);
+      assert(current_line->size() == 0);
+      current_line->set(suffix, copy_length);
     }
-    bufptr = bufend;
+    suffix = end_input_string;
     endofunit = true;
     line_number++;
     return true;

@@ -21,23 +21,23 @@ public:
       return ptr[idx];
     }
 
-    T const& operator++() noexcept
+    T const& operator++(void) noexcept
     {
       ptr++;
       return *this;
     }
 
-    size_t size() const noexcept
+    size_t size(void) const noexcept
     {
       return num_elements;
     }
 
-    T* begin() noexcept
+    T* begin(void) noexcept
     {
       return ptr;
     }
 
-    T* end() noexcept
+    T* end(void) noexcept
     {
       return ptr + num_elements;
     }

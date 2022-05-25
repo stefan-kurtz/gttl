@@ -3,35 +3,53 @@
 #include <array>
 #include <string>
 #include <typeinfo>
+#include <type_traits>
 #include <string_view>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 
-struct FastQEntry
-{
-  std::array<std::string,4> seqbufs{};
-  const std::string_view header_get(void) { return std::get<0>(seqbufs);}
-  const std::string_view sequence_get(void) { return std::get<1>(seqbufs);}
-  const std::string_view quality_get(void) { return std::get<3>(seqbufs);}
-};
-
 template<int buf_size>
 class GttlFastQIterator
 {
+  using LineIterator = GttlLineIterator<buf_size>;
+  template<class StringStoreType>
   struct Iterator
   {
+    struct FastQEntry
+    {
+      std::array<StringStoreType,4> seqbufs{};
+      private:
+      template<int state>
+      auto access(void)
+      {
+        if constexpr (std::is_same_v<StringStoreType, std::string>)
+        {
+          return static_cast<const std::string_view>(std::get<state>(seqbufs));
+        } else
+        {
+          static_assert(std::is_same_v<StringStoreType,ModifiableStringView>);
+          return std::string_view(std::get<state>(seqbufs).data(),
+                                  std::get<state>(seqbufs).size());
+        }
+      }
+      public:
+      auto header_get(void) {return access<0>(); }
+      auto sequence_get(void) {return access<1>(); }
+      auto quality_get(void) {return access<3>(); }
+    };
     private:
       FastQEntry fastq_entry{};
-      GttlLineIterator<buf_size> *gttl_li;
+      LineIterator *gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
     public:
-      Iterator(GttlLineIterator<buf_size> *_gttl_li,
-               bool _input_exhausted) :
-        gttl_li(_gttl_li),
-        last_seq_was_processed(false),
-        input_exhausted(_input_exhausted) { }
-      FastQEntry & operator*()
+      Iterator(LineIterator *_gttl_li,
+               bool _input_exhausted)
+        : gttl_li(_gttl_li)
+        , last_seq_was_processed(false)
+        , input_exhausted(_input_exhausted)
+        {}
+      FastQEntry &operator*()
       {
         if (!last_seq_was_processed)
         {
@@ -65,13 +83,13 @@ class GttlFastQIterator
         }
         if (fastq_entry.seqbufs[0].size() == 0)
         {
-          StrFormat msg(", line %lu: XXcorrupted sequence",
+          StrFormat msg(", line %lu: corrupted sequence",
                            gttl_li->line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }
         return fastq_entry;
       }
-      Iterator& operator++() /* prefix increment*/
+      Iterator<StringStoreType>& operator++() /* prefix increment*/
       {
         if (!gttl_li->more_lines())
         {
@@ -80,49 +98,56 @@ class GttlFastQIterator
         last_seq_was_processed = false;
         return *this;
       }
-      bool operator != (const Iterator& other) const
+      bool operator != (const Iterator<StringStoreType>& other) const
       {
         return input_exhausted != other.input_exhausted;
       }
-      bool operator == (const Iterator& other) const
+      bool operator == (const Iterator<StringStoreType>& other) const
       {
         return input_exhausted == other.input_exhausted;
       }
   };
   private:
-    GttlLineIterator<buf_size> *gttl_li;
-    bool own_line_reader;
+    LineIterator *gttl_li;
+    bool own_line_iterator;
   public:
-    GttlFastQIterator(GttlFpType _in_fp) :
-      gttl_li(new GttlLineIterator<buf_size>(_in_fp)),
-      own_line_reader(true)
+    GttlFastQIterator(GttlFpType _in_fp)
+      : gttl_li(new LineIterator(_in_fp))
+      , own_line_iterator(true)
     {
       gttl_li->separator_set('\n');
     }
-    GttlFastQIterator(const char *inputfile) :
-      gttl_li(new GttlLineIterator<buf_size>(inputfile)),
-      own_line_reader(true)
+    GttlFastQIterator(const char *inputfile)
+      : gttl_li(new LineIterator(inputfile))
+      , own_line_iterator(true)
     {
       gttl_li->separator_set('\n');
     }
-    GttlFastQIterator(const std::string &inputfile) :
-      gttl_li(new GttlLineIterator<buf_size>(inputfile.c_str())),
-      own_line_reader(true)
+    GttlFastQIterator(const std::string &inputfile)
+      : gttl_li(new LineIterator(inputfile.c_str()))
+      , own_line_iterator(true)
     {
       gttl_li->separator_set('\n');
     }
-    GttlFastQIterator(const std::vector<std::string> *inputfiles) :
-      gttl_li(new GttlLineIterator<buf_size>(inputfiles)),
-      own_line_reader(true)
+    GttlFastQIterator(const std::vector<std::string> *inputfiles)
+      : gttl_li(new LineIterator(inputfiles))
+      , own_line_iterator(true)
     {
-       gttl_li->separator_set('\n');
+      gttl_li->separator_set('\n');
     }
-    GttlFastQIterator(GttlLineIterator<buf_size> *_gttl_li) :
-      gttl_li(_gttl_li),
-      own_line_reader(false) {}
+    GttlFastQIterator(LineIterator *_gttl_li)
+      : gttl_li(_gttl_li)
+      , own_line_iterator(false)
+      {}
+    GttlFastQIterator(const char *input_string,size_t len)
+      : gttl_li(new LineIterator(input_string,len))
+      , own_line_iterator(false)
+    {
+      gttl_li->separator_set('\n');
+    }
     ~GttlFastQIterator(void)
     {
-      if (own_line_reader)
+      if (own_line_iterator)
       {
         delete gttl_li;
       }
@@ -131,13 +156,25 @@ class GttlFastQIterator
     {
       return gttl_li->line_number_get();
     }
-    Iterator begin()
+    auto begin(void)
     {
-      return Iterator(gttl_li,false);
+      if constexpr (buf_size == 0)
+      {
+        return Iterator<ModifiableStringView>(gttl_li,false);
+      } else
+      {
+        return Iterator<std::string>(gttl_li,false);
+      }
     }
-    Iterator end()
+    auto end(void)
     {
-      return Iterator(gttl_li,true);
+      if constexpr (buf_size == 0)
+      {
+        return Iterator<ModifiableStringView>(gttl_li,true);
+      } else
+      {
+        return Iterator<std::string>(gttl_li,true);
+      }
     }
 };
 #endif

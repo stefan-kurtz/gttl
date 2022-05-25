@@ -65,10 +65,10 @@ static void fastq_split_writer(size_t split_size,
   }
 }
 
-static void process_single_file(bool statistics,
-                                bool echo,
-                                bool fasta_output,
-                                const std::string &inputfilename)
+static void process_single_file_streamed(bool statistics,
+                                         bool echo,
+                                         bool fasta_output,
+                                         const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
   GttlFastQIterator<buf_size> fastq_it(inputfilename);
@@ -105,14 +105,57 @@ static void process_single_file(bool statistics,
   }
 }
 
+#ifdef NEWCODE
+static void process_single_file_mapped(bool statistics,
+                                       bool echo,
+                                       bool fasta_output,
+                                       const std::string &inputfilename)
+{
+  Gttlmmap<char> mapped_file(filename);
+  assert(mapped_file.size() > 0);
+  const char *file_contents = mapped_file.ptr();
+  GttlFastQIterator<buf_size> fastq_it(file_contents,mapped_file.size());
+  size_t seqnum = 0, total_length = 0;
+
+  for (auto &&fastq_entry : fastq_it)
+  {
+    const ModifiableStringView &sequence = fastq_entry.sequence_get();
+    if (echo)
+    {
+      const std::string_view &header = fastq_entry.header_get();
+      const std::string_view &quality = fastq_entry.quality_get();
+      std::cout << header << std::endl
+                << sequence << std::endl
+                << "+" << std::endl
+                << quality << std::endl;
+    } else
+    {
+      if (fasta_output)
+      {
+        const std::string_view &header = fastq_entry.header_get();
+        std::cout << ">" << header.substr(1) << std::endl
+                  << sequence << std::endl;
+      }
+    }
+    total_length += sequence.size();
+    seqnum++;
+  }
+  if (statistics)
+  {
+    std::cout << "# number of sequences\t" << seqnum << std::endl;
+    std::cout << "# total length\t" << total_length << std::endl;
+    std::cout << "# mean length\t" << total_length/seqnum << std::endl;
+  }
+}
+#endif
+
 static void process_paired_files(bool statistics,
                                  bool fasta_output,
                                  const std::string &filename0,
                                  const std::string &filename1)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlFastQIterator<buf_size> fastq_it0(filename0),
-                              fastq_it1(filename1);
+  GttlFastQIterator<buf_size> fastq_it0(filename0),fastq_it1(filename1);
 
   size_t seqnum = 0, total_length[2] = {0};
   auto it0 = fastq_it0.begin();
@@ -175,7 +218,8 @@ int main(int argc,char *argv[])
         fastq_split_writer(split_size,inputfiles[0]);
       } else
       {
-        process_single_file(statistics,echo,fasta_output,inputfiles[0]);
+        process_single_file_streamed(statistics,echo,fasta_output,
+                                     inputfiles[0]);
       }
     } else
     {
