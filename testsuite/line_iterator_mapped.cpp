@@ -15,6 +15,20 @@ static size_t count_lines(const char *file_part, size_t len)
   return line_num;
 }
 
+static size_t out_fileinfo(const char *filename,const char *file_contents,
+                           size_t start,size_t len)
+{
+  if (len == 0)
+  {
+    return 0;
+  }
+  size_t lines = count_lines(file_contents + start,len);
+  std::cout << "# file\t" << filename << "\t"
+            << start << "\t" << (start + len - 1) << "\t"
+            << len << "\t" << lines << std::endl;
+  return lines;
+}
+
 static void process_file(const char *filename)
 {
   Gttlmmap<char> mapped_file(filename);
@@ -36,19 +50,18 @@ static void process_file(const char *filename)
   size_t start_part2
     = static_cast<size_t>(next_newline + 1 - file_contents);
   assert(start_part2 > 0);
-  std::cout << "# part [0," << (start_part2-1)
-            << "," << start_part2 << "]"
-            << std::endl;
-  size_t lines_part1 = count_lines(file_contents,start_part2);
-  std::cout << "# lines part 1\t" << lines_part1 << std::endl;
+  size_t lines1 = out_fileinfo(filename,file_contents,0,start_part2);
   size_t remain = mapped_file.size() - start_part2;
-  std::cout << "# part [" << start_part2 << ","
-            << mapped_file.size() << "," << remain << "]" << std::endl;
-  size_t lines_part2 = count_lines(file_contents + start_part2, remain);
-  std::cout << "# lines part 2\t" << lines_part2 << std::endl;
-  size_t lines_all = count_lines(file_contents, mapped_file.size());
+  size_t lines2 = out_fileinfo(filename,file_contents,start_part2,remain);
+  size_t lines_all = count_lines(file_contents,mapped_file.size());
   std::cout << "# lines all\t" << lines_all << std::endl;
-  assert(lines_all == lines_part1 + lines_part2);
+  if (lines_all != lines1 + lines2)
+  {
+    StrFormat msg(": inconsistent number of lines: lines_all = %lu != %lu = "
+                  "%lu + %lu = lines1 + lines2",lines_all,lines1+lines2,
+                                                lines1,lines2);
+    throw msg.str();
+  }
 }
 
 int main(int argc,char *argv[])
