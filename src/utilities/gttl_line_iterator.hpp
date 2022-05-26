@@ -60,6 +60,8 @@ class LineIteratorSubstring
 template<int buf_size>
 class GttlLineIterator
 {
+  public:
+  static constexpr const int this_buf_size = buf_size;
   private:
     const char *suffix,
                *end_input_string;

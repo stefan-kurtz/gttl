@@ -25,6 +25,7 @@
 #include <cstdio>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
+#include "utilities/gttl_mmap.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/fastq_parts.hpp"
 #include "fastq_opt.hpp"
@@ -33,7 +34,8 @@ static void fastq_split_writer(size_t split_size,
                                const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlFastQIterator<buf_size> fastq_it(inputfilename);
+  GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
+  GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
   int file_number = 0;
   auto it = fastq_it.begin();
   bool exhausted = false;
@@ -67,27 +69,14 @@ static void fastq_split_writer(size_t split_size,
   }
 }
 
-template<int buf_size>
-static void process_single_file(bool statistics,
-                                bool echo,
-                                bool fasta_output,
-                                const std::string &inputfilename)
+template<class FastQIterator>
+static void process_fastq_iter(bool statistics,
+                               bool echo,
+                               bool fasta_output,
+                               FastQIterator &fastq_it)
 {
-  GttlFastQIterator<buf_size> *fastq_it = nullptr;
-  Gttlmmap<char> *mapped_file = nullptr;
-  if constexpr (buf_size > 0)
-  {
-    fastq_it = new GttlFastQIterator<buf_size>(inputfilename);
-  } else
-  {
-    static_assert(buf_size == 0);
-    mapped_file = new Gttlmmap<char>(inputfilename.c_str());
-    assert(mapped_file->size() > 0);
-    const char *file_contents = mapped_file->ptr();
-    fastq_it = new GttlFastQIterator<0>(file_contents,mapped_file->size());
-  }
   size_t seqnum = 0, total_length = 0;
-  for (auto &&fastq_entry : *fastq_it)
+  for (auto &&fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry.sequence_get();
     if (echo)
@@ -116,11 +105,32 @@ static void process_single_file(bool statistics,
     std::cout << "# total length\t" << total_length << std::endl;
     std::cout << "# mean length\t" << total_length/seqnum << std::endl;
   }
-  delete fastq_it;
-  if constexpr (buf_size == 0)
-  {
-    delete mapped_file;
-  }
+}
+
+static void process_single_file_streamed(bool statistics,
+                                         bool echo,
+                                         bool fasta_output,
+                                         const std::string &inputfilename)
+{
+  constexpr const int buf_size = 1 << 14;
+  GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
+  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
+  FastQIterator fastq_it(line_iterator);
+  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,fastq_it);
+}
+
+static void process_single_file_mapped(bool statistics,
+                                       bool echo,
+                                       bool fasta_output,
+                                       const std::string &inputfilename)
+{
+  constexpr const int buf_size = 0;
+  Gttlmmap<char> mapped_file(inputfilename.c_str());
+  GttlLineIterator<buf_size> line_iterator(mapped_file.ptr(),
+                                           mapped_file.size());
+  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
+  FastQIterator fastq_it(line_iterator);
+  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,fastq_it);
 }
 
 static void process_paired_files(bool statistics,
@@ -129,7 +139,11 @@ static void process_paired_files(bool statistics,
                                  const std::string &filename1)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlFastQIterator<buf_size> fastq_it0(filename0),fastq_it1(filename1);
+  GttlLineIterator<buf_size> line_iterator0(filename0.c_str()),
+                             line_iterator1(filename1.c_str());
+  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
+  FastQIterator fastq_it0(line_iterator0),
+                fastq_it1(line_iterator1);
 
   size_t seqnum = 0, total_length[2] = {0};
   auto it0 = fastq_it0.begin();
@@ -178,7 +192,7 @@ static void parallel_char_distribution(
     {
       GttlLineIterator<0> line_iterator(file_contents + std::get<0>(itv),
                                         std::get<1>(itv));
-      GttlFastQIterator<0> fastq_it(&line_iterator);
+      GttlFastQIterator<GttlLineIterator<0>> fastq_it(line_iterator);
       size_t local_count_entries = 0;
       size_t *local_dist = dist + 4 * thd_num;
       for (auto &&fastq_entry : fastq_it)
@@ -258,14 +272,12 @@ int main(int argc,char *argv[])
         {
           if (options.mapped_option_is_set())
           {
-            constexpr const int buf_size = 0;
-            process_single_file<buf_size>(statistics,echo,fasta_output,
-                                          inputfiles[0]);
+            process_single_file_mapped(statistics,echo,fasta_output,
+                                       inputfiles[0]);
           } else
           {
-            constexpr const int buf_size = 1 << 14;
-            process_single_file<buf_size>(statistics,echo,fasta_output,
-                                          inputfiles[0]);
+            process_single_file_streamed(statistics,echo,fasta_output,
+                                         inputfiles[0]);
           }
         }
       }

@@ -86,8 +86,10 @@ class GttlMultiseq
     if (zip_readpair_files)
     {
       assert(inputfiles.size() == 2);
-      GttlFastQIterator<buf_size> fastq_it0(inputfiles[0]),
-                                  fastq_it1(inputfiles[1]);
+      GttlLineIterator<buf_size> line_iterator0(inputfiles[0].c_str()),
+                                 line_iterator1(inputfiles[1].c_str());
+      GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it0(line_iterator0),
+                                                    fastq_it1(line_iterator1);
 
       auto it0 = fastq_it0.begin();
       auto it1 = fastq_it1.begin();
