@@ -46,6 +46,8 @@ void FastQReaderOptions::parse(int argc, char **argv)
       cxxopts::value<bool>(mapped_option)->default_value("false"))
      ("split_size", "specify number of sequences for each split",
       cxxopts::value<size_t>(split_size)->default_value("0"))
+     ("t,threads", "specify number of threads for parallel reading",
+      cxxopts::value<size_t>(num_threads)->default_value("0"))
      ("f,fasta_output", "output sequences in fasta format; when two files "
                         "are specified, the sequences are zipped, i.e. "
                         "sequences at even indexes (when counting from 0) "
@@ -76,8 +78,26 @@ void FastQReaderOptions::parse(int argc, char **argv)
     }
     if (split_size != 0 && inputfiles.size() != 1)
     {
-      throw cxxopts::OptionException("option --splitsize_t is only available "
+      throw cxxopts::OptionException("option --splitsize is only available "
                                      "for a single file");
+    }
+    if (num_threads != 0)
+    {
+      if (split_size != 0)
+      {
+        throw cxxopts::OptionException("option -t/--threads and --splitsize "
+                                       "are not compatible");
+      }
+      if (echo_option)
+      {
+        throw cxxopts::OptionException("option -t/--threads and --echo "
+                                       "are not compatible");
+      }
+      if (fasta_output_option)
+      {
+        throw cxxopts::OptionException("option -t/--threads and "
+                                       "-f/--fasta_output are not compatible");
+      }
     }
   }
   catch (const cxxopts::OptionException &e)
@@ -115,6 +135,11 @@ bool FastQReaderOptions::mapped_option_is_set(void) const noexcept
 size_t FastQReaderOptions::split_size_get(void) const noexcept
 {
   return split_size;
+}
+
+size_t FastQReaderOptions::num_threads_get(void) const noexcept
+{
+  return num_threads;
 }
 
 const std::vector<std::string> &FastQReaderOptions::inputfiles_get(void)

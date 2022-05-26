@@ -14,7 +14,7 @@ class FastQReaderOptions
        echo_option = false,
        fasta_output_option = false,
        mapped_option = false;
-  size_t split_size = 0;
+  size_t num_threads = 0, split_size = 0;
 
  public:
   FastQReaderOptions(void);
@@ -26,6 +26,7 @@ class FastQReaderOptions
   bool fasta_output_option_is_set(void) const noexcept;
   bool mapped_option_is_set(void) const noexcept;
   size_t split_size_get(void) const noexcept;
+  size_t num_threads_get(void) const noexcept;
   const std::vector<std::string> &inputfiles_get(void) const noexcept;
 };
 #endif

@@ -160,6 +160,37 @@ static void process_paired_files(bool statistics,
   }
 }
 
+static void fastq_parallel_reader(size_t num_threads,
+                                  const std::string &inputfilename)
+{
+  assert(num_threads > 0);
+  Gttlmmap<char> mapped_file(inputfilename.c_str());
+  assert(mapped_file.size() > 0);
+  const size_t part_size = mapped_file.size()/num_threads;
+  const char *end_of_mapped_string = mapped_file.ptr() + mapped_file.size();
+  const char *guess = mapped_file.ptr() + part_size;
+  std::vector<std::pair<size_t,size_t>> intervals{};
+  size_t previous_start = 0;
+  while(true)
+  {
+    const char *read_start = fastq_next_read_start(guess, end_of_mapped_string);
+    if (read_start == nullptr)
+    {
+      intervals.push_back({previous_start,mapped_file.size() - previous_start});
+      break;
+    }
+    const size_t this_start
+      = static_cast<size_t>(read_start - mapped_file.ptr());
+    intervals.push_back({previous_start,this_start - previous_start});
+    previous_start = this_start;
+    guess = read_start + part_size;
+  }
+  for (auto &&itv : intervals)
+  {
+    std::cout << std::get<0>(itv) << "\t" << std::get<1>(itv) << std::endl;
+  }
+}
+
 int main(int argc,char *argv[])
 {
   FastQReaderOptions options{};
@@ -186,21 +217,27 @@ int main(int argc,char *argv[])
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
     if (inputfiles.size() == 1)
     {
-      if (split_size > 0)
+      if (options.num_threads_get() > 0)
       {
-        fastq_split_writer(split_size,inputfiles[0]);
+        fastq_parallel_reader(options.num_threads_get(),inputfiles[0]);
       } else
       {
-        if (options.mapped_option_is_set())
+        if (split_size > 0)
         {
-          constexpr const int buf_size = 0;
-          process_single_file<buf_size>(statistics,echo,fasta_output,
-                                        inputfiles[0]);
+          fastq_split_writer(split_size,inputfiles[0]);
         } else
         {
-          constexpr const int buf_size = 1 << 14;
-          process_single_file<buf_size>(statistics,echo,fasta_output,
-                                        inputfiles[0]);
+          if (options.mapped_option_is_set())
+          {
+            constexpr const int buf_size = 0;
+            process_single_file<buf_size>(statistics,echo,fasta_output,
+                                          inputfiles[0]);
+          } else
+          {
+            constexpr const int buf_size = 1 << 14;
+            process_single_file<buf_size>(statistics,echo,fasta_output,
+                                          inputfiles[0]);
+          }
         }
       }
     } else
