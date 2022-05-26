@@ -24,6 +24,7 @@
 #include <cstdio>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
+#include "utilities/gttl_mmap.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "fastq_opt.hpp"
 
@@ -65,16 +66,27 @@ static void fastq_split_writer(size_t split_size,
   }
 }
 
-static void process_single_file_streamed(bool statistics,
-                                         bool echo,
-                                         bool fasta_output,
-                                         const std::string &inputfilename)
+template<int buf_size>
+static void process_single_file(bool statistics,
+                                bool echo,
+                                bool fasta_output,
+                                const std::string &inputfilename)
 {
-  constexpr const int buf_size = 1 << 14;
-  GttlFastQIterator<buf_size> fastq_it(inputfilename);
+  GttlFastQIterator<buf_size> *fastq_it = nullptr;
+  Gttlmmap<char> *mapped_file = nullptr;
+  if constexpr (buf_size > 0)
+  {
+    fastq_it = new GttlFastQIterator<buf_size>(inputfilename);
+  } else
+  {
+    static_assert(buf_size == 0);
+    mapped_file = new Gttlmmap<char>(inputfilename.c_str());
+    assert(mapped_file->size() > 0);
+    const char *file_contents = mapped_file->ptr();
+    fastq_it = new GttlFastQIterator<0>(file_contents,mapped_file->size());
+  }
   size_t seqnum = 0, total_length = 0;
-
-  for (auto &&fastq_entry : fastq_it)
+  for (auto &&fastq_entry : *fastq_it)
   {
     const std::string_view &sequence = fastq_entry.sequence_get();
     if (echo)
@@ -103,51 +115,12 @@ static void process_single_file_streamed(bool statistics,
     std::cout << "# total length\t" << total_length << std::endl;
     std::cout << "# mean length\t" << total_length/seqnum << std::endl;
   }
-}
-
-#ifdef NEWCODE
-static void process_single_file_mapped(bool statistics,
-                                       bool echo,
-                                       bool fasta_output,
-                                       const std::string &inputfilename)
-{
-  Gttlmmap<char> mapped_file(filename);
-  assert(mapped_file.size() > 0);
-  const char *file_contents = mapped_file.ptr();
-  GttlFastQIterator<buf_size> fastq_it(file_contents,mapped_file.size());
-  size_t seqnum = 0, total_length = 0;
-
-  for (auto &&fastq_entry : fastq_it)
+  delete fastq_it;
+  if constexpr (buf_size == 0)
   {
-    const ModifiableStringView &sequence = fastq_entry.sequence_get();
-    if (echo)
-    {
-      const std::string_view &header = fastq_entry.header_get();
-      const std::string_view &quality = fastq_entry.quality_get();
-      std::cout << header << std::endl
-                << sequence << std::endl
-                << "+" << std::endl
-                << quality << std::endl;
-    } else
-    {
-      if (fasta_output)
-      {
-        const std::string_view &header = fastq_entry.header_get();
-        std::cout << ">" << header.substr(1) << std::endl
-                  << sequence << std::endl;
-      }
-    }
-    total_length += sequence.size();
-    seqnum++;
-  }
-  if (statistics)
-  {
-    std::cout << "# number of sequences\t" << seqnum << std::endl;
-    std::cout << "# total length\t" << total_length << std::endl;
-    std::cout << "# mean length\t" << total_length/seqnum << std::endl;
+    delete mapped_file;
   }
 }
-#endif
 
 static void process_paired_files(bool statistics,
                                  bool fasta_output,
@@ -218,8 +191,17 @@ int main(int argc,char *argv[])
         fastq_split_writer(split_size,inputfiles[0]);
       } else
       {
-        process_single_file_streamed(statistics,echo,fasta_output,
-                                     inputfiles[0]);
+        if (options.mapped_option_is_set())
+        {
+          constexpr const int buf_size = 0;
+          process_single_file<buf_size>(statistics,echo,fasta_output,
+                                        inputfiles[0]);
+        } else
+        {
+          constexpr const int buf_size = 1 << 14;
+          process_single_file<buf_size>(statistics,echo,fasta_output,
+                                        inputfiles[0]);
+        }
       }
     } else
     {

@@ -26,29 +26,34 @@
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"
 
-class ModifiableStringView
+class LineIteratorSubstring
 {
-  const char *ptr;
-  size_t len;
+  const char *view;
+  size_t view_len;
   public:
-  ModifiableStringView(void)
-    : ptr(nullptr)
-    , len(0)
+  LineIteratorSubstring(void)
+    : view(nullptr)
+    , view_len(0)
    {}
-  void set(const char *_ptr,size_t _len)
+  void set(const char *_view,size_t _view_len)
   {
-    ptr = _ptr;
-    len = _len;
+    view = _view;
+    view_len = _view_len;
   }
-  size_t size(void) const noexcept {return len;}
+  size_t size(void) const noexcept {return view_len;}
   void clear(void)
   {
-    ptr = nullptr;
-    len = 0;
+    view = nullptr;
+    view_len = 0;
   }
   const char *data(void) const noexcept
   {
-    return ptr;
+    return view;
+  }
+  void pop_back(void)
+  {
+    assert(view_len > 0);
+    view_len--;
   }
 };
 
@@ -164,28 +169,34 @@ class GttlLineIterator
     }
     bool more_lines(void)
     {
-      if (bufptr != bufend || (!file_exhausted && fill_buffer()))
+      if constexpr (buf_size == 0)
       {
-        return true;
-      }
-      if (more_files)
+        return suffix < end_input_string;
+      } else
       {
-        bufptr = bufend = buffer;
-        file_exhausted = false;
-        endofunit = false;
-        gttl_fp_type_close(in_fp);
-        line_number = 0;
-        file_index++;
-        assert(file_index < inputfiles->size());
-        more_files = file_index + 1 < inputfiles->size();
-        in_fp = gttl_fp_type_open(inputfiles->at(file_index).c_str(),"rb");
-        if (in_fp == nullptr)
+        if (bufptr != bufend || (!file_exhausted && fill_buffer()))
         {
-          throw std::string(": cannot open file");
+          return true;
         }
-        return true;
+        if (more_files)
+        {
+          bufptr = bufend = buffer;
+          file_exhausted = false;
+          endofunit = false;
+          gttl_fp_type_close(in_fp);
+          line_number = 0;
+          file_index++;
+          assert(file_index < inputfiles->size());
+          more_files = file_index + 1 < inputfiles->size();
+          in_fp = gttl_fp_type_open(inputfiles->at(file_index).c_str(),"rb");
+          if (in_fp == nullptr)
+          {
+            throw std::string(": cannot open file");
+          }
+          return true;
+        }
+        return false;
       }
-      return false;
     }
     bool next(std::string *current_line)
     {
@@ -262,7 +273,7 @@ class GttlLineIterator
       , file_index(0)
       , line_number(0)
   { }
-  bool next(ModifiableStringView *current_line)
+  bool next(LineIteratorSubstring *current_line)
   {
     endofunit = false;
     if (suffix == end_input_string)
@@ -274,12 +285,9 @@ class GttlLineIterator
                                  (memchr(suffix,separator,remain));
     if (next_separator != nullptr)
     {
-      const size_t copy_length = static_cast<size_t>(next_separator - suffix);
-      if (copy_length > 0)
-      {
-        assert(current_line->size() == 0);
-        current_line->set(suffix, copy_length);
-      }
+      const size_t view_len = static_cast<size_t>(next_separator - suffix + 1);
+      assert(view_len > 0);
+      current_line->set(suffix, view_len);
       suffix = next_separator + 1;
       if (suffix < end_input_string)
       {
@@ -291,12 +299,9 @@ class GttlLineIterator
       line_number++;
       return true;
     }
-    const size_t copy_length = static_cast<size_t>(end_input_string - suffix);
-    if (copy_length > 0)
-    {
-      assert(current_line->size() == 0);
-      current_line->set(suffix, copy_length);
-    }
+    const size_t view_len = static_cast<size_t>(end_input_string - suffix + 1);
+    assert(view_len > 0);
+    current_line->set(suffix, view_len);
     suffix = end_input_string;
     endofunit = true;
     line_number++;

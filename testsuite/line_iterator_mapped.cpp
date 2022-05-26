@@ -6,9 +6,9 @@
 
 static size_t count_lines(const char *file_part, size_t len)
 {
-  static constexpr const int buf_size = 1;
+  static constexpr const int buf_size = 0;
   GttlLineIterator<buf_size> liter(file_part, len);
-  ModifiableStringView line{};
+  LineIteratorSubstring line{};
   size_t line_num = 0;
   while (liter.next(&line))
   {

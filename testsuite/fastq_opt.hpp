@@ -9,8 +9,11 @@ class FastQReaderOptions
 {
  private:
   std::vector<std::string> inputfiles{};
-  bool help_option = false, statistics_option = false,
-       echo_option = false, fasta_output_option = false;
+  bool help_option = false,
+       statistics_option = false,
+       echo_option = false,
+       fasta_output_option = false,
+       mapped_option = false;
   size_t split_size = 0;
 
  public:
@@ -21,6 +24,7 @@ class FastQReaderOptions
   bool statistics_option_is_set(void) const noexcept;
   bool echo_option_is_set(void) const noexcept;
   bool fasta_output_option_is_set(void) const noexcept;
+  bool mapped_option_is_set(void) const noexcept;
   size_t split_size_get(void) const noexcept;
   const std::vector<std::string> &inputfiles_get(void) const noexcept;
 };

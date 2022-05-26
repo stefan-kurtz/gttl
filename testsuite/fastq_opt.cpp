@@ -42,6 +42,8 @@ void FastQReaderOptions::parse(int argc, char **argv)
       cxxopts::value<bool>(statistics_option)->default_value("false"))
      ("e,echo", "available only for single file",
       cxxopts::value<bool>(echo_option)->default_value("false"))
+     ("m,mapped", "use fastq reader which works on mapped file",
+      cxxopts::value<bool>(mapped_option)->default_value("false"))
      ("split_size", "specify number of sequences for each split",
       cxxopts::value<size_t>(split_size)->default_value("0"))
      ("f,fasta_output", "output sequences in fasta format; when two files "
@@ -103,6 +105,11 @@ bool FastQReaderOptions::echo_option_is_set(void) const noexcept
 bool FastQReaderOptions::fasta_output_option_is_set(void) const noexcept
 {
   return fasta_output_option;
+}
+
+bool FastQReaderOptions::mapped_option_is_set(void) const noexcept
+{
+  return mapped_option;
 }
 
 size_t FastQReaderOptions::split_size_get(void) const noexcept

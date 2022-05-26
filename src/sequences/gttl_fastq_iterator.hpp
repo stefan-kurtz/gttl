@@ -2,7 +2,6 @@
 #define GTTL_FASTQ_ITERATOR_HPP
 #include <array>
 #include <string>
-#include <typeinfo>
 #include <type_traits>
 #include <string_view>
 #include "utilities/str_format.hpp"
@@ -20,14 +19,15 @@ class GttlFastQIterator
       std::array<StringStoreType,4> seqbufs{};
       private:
       template<int state>
-      auto access(void)
+      auto access(void) const noexcept
       {
-        if constexpr (std::is_same_v<StringStoreType, std::string>)
+        if constexpr (buf_size > 0)
         {
+          static_assert(std::is_same_v<StringStoreType, std::string>);
           return static_cast<const std::string_view>(std::get<state>(seqbufs));
         } else
         {
-          static_assert(std::is_same_v<StringStoreType,ModifiableStringView>);
+          static_assert(std::is_same_v<StringStoreType,LineIteratorSubstring>);
           return std::string_view(std::get<state>(seqbufs).data(),
                                   std::get<state>(seqbufs).size());
         }
@@ -61,7 +61,7 @@ class GttlFastQIterator
           bool found_end = false;
           while (gttl_li->next(&fastq_entry.seqbufs[state]))
           {
-            fastq_entry.seqbufs[state].pop_back(); /* remove \n */
+            fastq_entry.seqbufs[state].pop_back(); /* remove trailing \n */
             if (state == 3)
             {
               found_end = true;
@@ -115,34 +115,41 @@ class GttlFastQIterator
       : gttl_li(new LineIterator(_in_fp))
       , own_line_iterator(true)
     {
+      static_assert(buf_size > 0);
       gttl_li->separator_set('\n');
     }
     GttlFastQIterator(const char *inputfile)
       : gttl_li(new LineIterator(inputfile))
       , own_line_iterator(true)
     {
+      static_assert(buf_size > 0);
       gttl_li->separator_set('\n');
     }
     GttlFastQIterator(const std::string &inputfile)
       : gttl_li(new LineIterator(inputfile.c_str()))
       , own_line_iterator(true)
     {
+      static_assert(buf_size > 0);
       gttl_li->separator_set('\n');
     }
     GttlFastQIterator(const std::vector<std::string> *inputfiles)
       : gttl_li(new LineIterator(inputfiles))
       , own_line_iterator(true)
     {
+      static_assert(buf_size > 0);
       gttl_li->separator_set('\n');
     }
     GttlFastQIterator(LineIterator *_gttl_li)
       : gttl_li(_gttl_li)
       , own_line_iterator(false)
-      {}
+    {
+      static_assert(buf_size > 0);
+    }
     GttlFastQIterator(const char *input_string,size_t len)
       : gttl_li(new LineIterator(input_string,len))
       , own_line_iterator(false)
     {
+      static_assert(buf_size == 0);
       gttl_li->separator_set('\n');
     }
     ~GttlFastQIterator(void)
@@ -160,7 +167,7 @@ class GttlFastQIterator
     {
       if constexpr (buf_size == 0)
       {
-        return Iterator<ModifiableStringView>(gttl_li,false);
+        return Iterator<LineIteratorSubstring>(gttl_li,false);
       } else
       {
         return Iterator<std::string>(gttl_li,false);
@@ -170,7 +177,7 @@ class GttlFastQIterator
     {
       if constexpr (buf_size == 0)
       {
-        return Iterator<ModifiableStringView>(gttl_li,true);
+        return Iterator<LineIteratorSubstring>(gttl_li,true);
       } else
       {
         return Iterator<std::string>(gttl_li,true);
