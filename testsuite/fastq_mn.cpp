@@ -22,7 +22,6 @@
 #include <cassert>
 #include <algorithm>
 #include <cstdio>
-#include <execution>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
@@ -161,6 +160,95 @@ static void process_paired_files(bool statistics,
   }
 }
 
+#ifdef EXEC_PAR
+#include <execution>
+static void parallel_process_fastq(
+      const char *file_contents,
+      const std::vector<std::pair<size_t,size_t>> &intervals)
+{
+  std::for_each(std::execution::par,
+                intervals.begin(),
+                intervals.end(),
+                [&file_contents](auto&& item)
+  {
+    GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(item),
+                                  std::get<1>(item));
+    size_t count_entries = 0;
+    size_t dist[4] = {0};
+    for (auto &&fastq_entry : fastq_it)
+    {
+      count_entries++;
+      const std::string_view &sequence = fastq_entry.sequence_get();
+      for (auto &&cc : sequence)
+      {
+        dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+      }
+    }
+    std::cout << "# count_entries\t" << count_entries << std::endl;
+    for (int char_idx = 0; char_idx<4; char_idx++)
+    {
+      std::cout << char_idx << "\t" << dist[char_idx] << std::endl;
+    }
+  });
+}
+#else
+#include <thread>
+static void parallel_process_fastq(
+      const char *file_contents,
+      const std::vector<std::pair<size_t,size_t>> &intervals)
+{
+  size_t *count_entries = static_cast<size_t *>(calloc(intervals.size(),
+                                                       sizeof *count_entries)),
+         *dist = static_cast<size_t *>(calloc(4 * intervals.size(),
+                                              sizeof *dist));
+  std::vector<std::thread> threads{};
+  size_t thd_num = 0;
+  for (auto &&itv : intervals)
+  {
+    threads.push_back(std::thread([&file_contents,&itv,count_entries,dist,
+                                   thd_num]()
+    {
+      GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(itv),
+                                    std::get<1>(itv));
+      size_t local_count_entries = 0;
+      size_t *local_dist = dist + 4 * thd_num;
+      for (auto &&fastq_entry : fastq_it)
+      {
+        local_count_entries++;
+        const std::string_view &sequence = fastq_entry.sequence_get();
+        for (auto &&cc : sequence)
+        {
+          local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+        }
+      }
+      count_entries[thd_num] = local_count_entries;
+    }));
+    thd_num++;
+  }
+  for (auto &th : threads)
+  {
+    th.join();
+  }
+  size_t total_count_entries = 0;
+  for (size_t thd_num = 0; thd_num < intervals.size(); thd_num++)
+  {
+    total_count_entries += count_entries[thd_num];
+  }
+  std::cout << "# total_count_entries\t" << total_count_entries << std::endl;
+  free(count_entries);
+  for (int char_idx = 0; char_idx < 4; char_idx++)
+  {
+    size_t total_cc_count = 0;
+    for (size_t thd_num = 0; thd_num < intervals.size(); thd_num++)
+    {
+      total_cc_count += dist[4 * thd_num + char_idx];
+    }
+    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << std::endl;
+  }
+  free(dist);
+}
+#endif
+
 static void fastq_parallel_reader(size_t num_threads,
                                   const std::string &inputfilename)
 {
@@ -187,34 +275,12 @@ static void fastq_parallel_reader(size_t num_threads,
     previous_start = this_start;
     guess = read_start + part_size;
   }
+  std::cout << "# fields: interval_start, interval_end" << std::endl;
   for (auto &&itv : intervals)
   {
     std::cout << std::get<0>(itv) << "\t" << std::get<1>(itv) << std::endl;
   }
-  std::for_each(std::execution::par,
-                intervals.begin(),
-                intervals.end(),
-                [&file_contents](auto&& item)
-  {
-    GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(item),
-                                  std::get<1>(item));
-    size_t count_entries = 0;
-    size_t dist[4] = {0};
-    for (auto &&fastq_entry : fastq_it)
-    {
-      count_entries++;
-      const std::string_view &sequence = fastq_entry.sequence_get();
-      for (auto &&cc : sequence)
-      {
-        dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
-      }
-    }
-    std::cout << "# count_entries\t" << count_entries << std::endl;
-    for (int char_idx = 0; char_idx<4; char_idx++)
-    {
-      std::cout << char_idx << "\t" << dist[char_idx] << std::endl;
-    }
-  });
+  parallel_process_fastq(file_contents,intervals);
 }
 
 int main(int argc,char *argv[])
