@@ -22,6 +22,7 @@
 #include <cassert>
 #include <algorithm>
 #include <cstdio>
+#include <execution>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
@@ -167,8 +168,9 @@ static void fastq_parallel_reader(size_t num_threads,
   Gttlmmap<char> mapped_file(inputfilename.c_str());
   assert(mapped_file.size() > 0);
   const size_t part_size = mapped_file.size()/num_threads;
-  const char *end_of_mapped_string = mapped_file.ptr() + mapped_file.size();
-  const char *guess = mapped_file.ptr() + part_size;
+  const char *file_contents = mapped_file.ptr();
+  const char *end_of_mapped_string = file_contents + mapped_file.size();
+  const char *guess = file_contents + part_size;
   std::vector<std::pair<size_t,size_t>> intervals{};
   size_t previous_start = 0;
   while(true)
@@ -180,7 +182,7 @@ static void fastq_parallel_reader(size_t num_threads,
       break;
     }
     const size_t this_start
-      = static_cast<size_t>(read_start - mapped_file.ptr());
+      = static_cast<size_t>(read_start - file_contents);
     intervals.push_back({previous_start,this_start - previous_start});
     previous_start = this_start;
     guess = read_start + part_size;
@@ -189,6 +191,30 @@ static void fastq_parallel_reader(size_t num_threads,
   {
     std::cout << std::get<0>(itv) << "\t" << std::get<1>(itv) << std::endl;
   }
+  std::for_each(std::execution::par,
+                intervals.begin(),
+                intervals.end(),
+                [&file_contents](auto&& item)
+  {
+    GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(item),
+                                  std::get<1>(item));
+    size_t count_entries = 0;
+    size_t dist[4] = {0};
+    for (auto &&fastq_entry : fastq_it)
+    {
+      count_entries++;
+      const std::string_view &sequence = fastq_entry.sequence_get();
+      for (auto &&cc : sequence)
+      {
+        dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+      }
+    }
+    std::cout << "# count_entries\t" << count_entries << std::endl;
+    for (int char_idx = 0; char_idx<4; char_idx++)
+    {
+      std::cout << char_idx << "\t" << dist[char_idx] << std::endl;
+    }
+  });
 }
 
 int main(int argc,char *argv[])
