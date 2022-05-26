@@ -21,11 +21,12 @@
 #include <typeinfo>
 #include <cassert>
 #include <algorithm>
+#include <thread>
 #include <cstdio>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
-#include "utilities/gttl_mmap.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
+#include "sequences/fastq_parts.hpp"
 #include "fastq_opt.hpp"
 
 static void fastq_split_writer(size_t split_size,
@@ -160,40 +161,7 @@ static void process_paired_files(bool statistics,
   }
 }
 
-#ifdef EXEC_PAR
-#include <execution>
-static void parallel_process_fastq(
-      const char *file_contents,
-      const std::vector<std::pair<size_t,size_t>> &intervals)
-{
-  std::for_each(std::execution::par,
-                intervals.begin(),
-                intervals.end(),
-                [&file_contents](auto&& item)
-  {
-    GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(item),
-                                  std::get<1>(item));
-    size_t count_entries = 0;
-    size_t dist[4] = {0};
-    for (auto &&fastq_entry : fastq_it)
-    {
-      count_entries++;
-      const std::string_view &sequence = fastq_entry.sequence_get();
-      for (auto &&cc : sequence)
-      {
-        dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
-      }
-    }
-    std::cout << "# count_entries\t" << count_entries << std::endl;
-    for (int char_idx = 0; char_idx<4; char_idx++)
-    {
-      std::cout << char_idx << "\t" << dist[char_idx] << std::endl;
-    }
-  });
-}
-#else
-#include <thread>
-static void parallel_process_fastq(
+static void parallel_char_distribution(
       const char *file_contents,
       const std::vector<std::pair<size_t,size_t>> &intervals)
 {
@@ -247,41 +215,6 @@ static void parallel_process_fastq(
   }
   free(dist);
 }
-#endif
-
-static void fastq_parallel_reader(size_t num_threads,
-                                  const std::string &inputfilename)
-{
-  assert(num_threads > 0);
-  Gttlmmap<char> mapped_file(inputfilename.c_str());
-  assert(mapped_file.size() > 0);
-  const size_t part_size = mapped_file.size()/num_threads;
-  const char *file_contents = mapped_file.ptr();
-  const char *end_of_mapped_string = file_contents + mapped_file.size();
-  const char *guess = file_contents + part_size;
-  std::vector<std::pair<size_t,size_t>> intervals{};
-  size_t previous_start = 0;
-  while(true)
-  {
-    const char *read_start = fastq_next_read_start(guess, end_of_mapped_string);
-    if (read_start == nullptr)
-    {
-      intervals.push_back({previous_start,mapped_file.size() - previous_start});
-      break;
-    }
-    const size_t this_start
-      = static_cast<size_t>(read_start - file_contents);
-    intervals.push_back({previous_start,this_start - previous_start});
-    previous_start = this_start;
-    guess = read_start + part_size;
-  }
-  std::cout << "# fields: interval_start, interval_end" << std::endl;
-  for (auto &&itv : intervals)
-  {
-    std::cout << std::get<0>(itv) << "\t" << std::get<1>(itv) << std::endl;
-  }
-  parallel_process_fastq(file_contents,intervals);
-}
 
 int main(int argc,char *argv[])
 {
@@ -311,7 +244,10 @@ int main(int argc,char *argv[])
     {
       if (options.num_threads_get() > 0)
       {
-        fastq_parallel_reader(options.num_threads_get(),inputfiles[0]);
+        FastQParts fastq_parts(options.num_threads_get(),inputfiles[0]);
+        fastq_parts.show();
+        parallel_char_distribution(fastq_parts.file_contents,
+                                   fastq_parts.intervals);
       } else
       {
         if (split_size > 0)

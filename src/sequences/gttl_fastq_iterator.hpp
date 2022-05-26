@@ -7,37 +7,6 @@
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 
-/* The follwing function was contributed by Florian Jochens and
-   slightly modified by Stefan Kurtz */
-
-static inline const char *fastq_next_read_start(const char *guess,
-                                                const char *end)
-{
-  for(const char *ptr = guess; ptr < end; ptr++)
-  {
-    if (*ptr == '@')
-    {
-      const char *find_plus = ptr;
-      /* now check that the current line is the header line. This is verified
-         by reading the next two occurrences of \n and checking that the
-         next char is +, that is the next but one line is the third line of
-         a fastq entry */
-      /* find first EOL */
-      for(/* Nothing */; find_plus < end && *find_plus != '\n'; find_plus++)
-          /* Nothing */ ;
-      /* find next EOL */
-      find_plus++;
-      for(/* Nothing */; find_plus < end && *find_plus != '\n'; find_plus++)
-          /* Nothing */ ;
-      if (find_plus + 1 < end && find_plus[1] == '+')
-      {
-        return ptr;
-      }
-    }
-  }
-  return nullptr;
-}
-
 template<int buf_size>
 class GttlFastQIterator
 {
