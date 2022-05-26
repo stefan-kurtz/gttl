@@ -143,11 +143,10 @@ class GttlFastQIterator
       : gttl_li(_gttl_li)
       , own_line_iterator(false)
     {
-      static_assert(buf_size > 0);
     }
     GttlFastQIterator(const char *input_string,size_t len)
       : gttl_li(new LineIterator(input_string,len))
-      , own_line_iterator(false)
+      , own_line_iterator(true)
     {
       static_assert(buf_size == 0);
       gttl_li->separator_set('\n');

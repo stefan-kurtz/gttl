@@ -174,10 +174,11 @@ static void parallel_char_distribution(
   for (auto &&itv : intervals)
   {
     threads.push_back(std::thread([file_contents,&itv,count_entries,dist,
-                                   thd_num]()
+                                   thd_num]
     {
-      GttlFastQIterator<0> fastq_it(file_contents + std::get<0>(itv),
-                                    std::get<1>(itv));
+      GttlLineIterator<0> line_iterator(file_contents + std::get<0>(itv),
+                                        std::get<1>(itv));
+      GttlFastQIterator<0> fastq_it(&line_iterator);
       size_t local_count_entries = 0;
       size_t *local_dist = dist + 4 * thd_num;
       for (auto &&fastq_entry : fastq_it)
