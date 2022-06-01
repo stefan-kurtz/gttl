@@ -495,4 +495,30 @@ class GttlMultiseq
     }
   }
 };
+
+template<char (*complement_base)(char)>
+static GttlMultiseq *multiseq_with_reverse_complement(const char *inputfile,
+                                                      uint8_t padding_char)
+{
+  static constexpr const int buf_size = 1 << 14;
+  static constexpr const bool store = true;
+  GttlSeqIterator<buf_size> gttl_si(inputfile);
+  GttlMultiseq *multiseq
+    = new GttlMultiseq(store,padding_char); /* CONSTRUCTOR */
+  for (auto &&si : gttl_si)
+  {
+    const std::string_view &seq = si.sequence_get();
+    multiseq->append<store>(si.header_get(),seq,padding_char);
+    std::string rc_seq{};
+    rc_seq.reserve(seq.size());
+    size_t bck = seq.size();
+    while (bck > 0)
+    {
+      bck--;
+      rc_seq.push_back(complement_base(seq[bck]));
+    }
+    multiseq->append<store>(si.header_get(),rc_seq,padding_char);
+  }
+  return multiseq;
+}
 #endif  // MULTISEQ_HPP
