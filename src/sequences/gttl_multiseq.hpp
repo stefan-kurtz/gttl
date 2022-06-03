@@ -496,13 +496,13 @@ class GttlMultiseq
   }
 };
 
-template<char (*complement_base)(char)>
-static GttlMultiseq *multiseq_with_reverse_complement(const char *inputfile,
-                                                      uint8_t padding_char)
+template<bool store,char (*complement_base)(char)>
+static GttlMultiseq *multiseq_with_reverse_complement(
+                           const std::vector<std::string> &inputfiles,
+                           uint8_t padding_char)
 {
   static constexpr const int buf_size = 1 << 14;
-  static constexpr const bool store = true;
-  GttlSeqIterator<buf_size> gttl_si(inputfile);
+  GttlSeqIterator<buf_size> gttl_si(&inputfiles);
   GttlMultiseq *multiseq
     = new GttlMultiseq(store,padding_char); /* CONSTRUCTOR */
   for (auto &&si : gttl_si)
