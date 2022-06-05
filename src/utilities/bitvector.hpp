@@ -14,10 +14,12 @@ class Bitvector
     return uint64_t(1) << (bits - 1 - idx);
   }
   public:
-  Bitvector(void) :
-    value(0) {}
-  Bitvector(uint64_t _value) :
-    value(_value) {}
+  Bitvector(void)
+    : value(0)
+    {}
+  Bitvector(uint64_t _value)
+    : value(_value)
+    {}
   void set(size_t idx)
   {
     value |= the_bit(idx);
