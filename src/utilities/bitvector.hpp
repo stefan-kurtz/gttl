@@ -3,6 +3,7 @@
 #include <cassert>
 #include <climits>
 #include <cstdint>
+#include <string>
 #include "utilities/mathsupport.hpp"
 
 class Bitvector
@@ -41,6 +42,7 @@ class Bitvector
   std::string to_string(void) const noexcept
   {
     std::string s{};
+    s.reserve(bits);
     for (size_t idx = 0; idx < bits; idx++)
     {
       s += (*this)[idx] ? '1' : '0';

@@ -2,6 +2,7 @@
 #define MULTIBITVECTOR_HPP
 #include "utilities/bitvector.hpp"
 
+template<bool track_count>
 class Multibitvector
 {
   static constexpr const size_t bitvector_mask = size_t(63);
@@ -50,7 +51,10 @@ class Multibitvector
   void set(size_t idx)
   {
     DivResult divresult = quot_rem_get(idx);
-    set_bits += !(multibitvector[divresult.quot][divresult.rem]);
+    if constexpr (track_count)
+    {
+      set_bits += !(multibitvector[divresult.quot][divresult.rem]);
+    }
     multibitvector[divresult.quot].set(divresult.rem);
   }
   void reset(size_t idx) noexcept
@@ -59,7 +63,10 @@ class Multibitvector
     assert(idx < bits &&
            (!multibitvector[divresult.quot][divresult.rem] ||
             set_bits > 0));
-    set_bits -= multibitvector[divresult.quot][divresult.rem];
+    if constexpr (track_count)
+    {
+      set_bits -= multibitvector[divresult.quot][divresult.rem];
+    }
     multibitvector[divresult.quot].reset(divresult.rem);
   }
   bool operator[](size_t idx) const noexcept
@@ -68,13 +75,23 @@ class Multibitvector
     DivResult divresult = quot_rem_get(idx);
     return multibitvector[divresult.quot][divresult.rem];
   }
-  size_t count(void) const noexcept
-  {
-    return set_bits;
-  }
   size_t size(void) const noexcept
   {
     return bits;
+  }
+  size_t count(void) const noexcept
+  {
+    if constexpr (track_count)
+    {
+      return set_bits;
+    } else
+    {
+      size_t this_count = 0;
+      for (size_t idx = 0; idx < num_bitvectors; idx++)
+      {
+        this_count += multibitvector[idx].count();
+      }
+    }
   }
 };
 #endif
