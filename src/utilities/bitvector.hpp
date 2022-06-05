@@ -3,6 +3,7 @@
 #include <cassert>
 #include <climits>
 #include <cstdint>
+#include "utilities/mathsupport.hpp"
 
 class Bitvector
 {
@@ -24,13 +25,17 @@ class Bitvector
   {
     value |= the_bit(idx);
   }
-  void unset(size_t idx)
+  void reset(size_t idx)
   {
     value &= ~the_bit(idx);
   }
-  bool is_set(size_t idx) const noexcept
+  bool operator[](size_t idx) const noexcept
   {
     return static_cast<bool>(value & the_bit(idx));
+  }
+  size_t count(void) const noexcept
+  {
+    return popcount_uint64_t(value);
   }
 };
 #endif

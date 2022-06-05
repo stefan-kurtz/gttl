@@ -50,32 +50,31 @@ class Multibitvector
   void set(size_t idx)
   {
     DivResult divresult = quot_rem_get(idx);
-    set_bits += !(multibitvector[divresult.quot].is_set(divresult.rem));
+    set_bits += !(multibitvector[divresult.quot][divresult.rem]);
     multibitvector[divresult.quot].set(divresult.rem);
   }
-  void unset(size_t idx) noexcept
+  void reset(size_t idx) noexcept
   {
     DivResult divresult = quot_rem_get(idx);
     assert(idx < bits &&
-           (!multibitvector[divresult.quot].is_set(divresult.rem) ||
+           (!multibitvector[divresult.quot][divresult.rem] ||
             set_bits > 0));
-    set_bits -= multibitvector[divresult.quot].is_set(divresult.rem);
-    multibitvector[divresult.quot].unset(divresult.rem);
+    set_bits -= multibitvector[divresult.quot][divresult.rem];
+    multibitvector[divresult.quot].reset(divresult.rem);
   }
-  bool is_set(size_t idx) const noexcept
+  bool operator[](size_t idx) const noexcept
   {
     assert(idx < bits);
     DivResult divresult = quot_rem_get(idx);
-    return multibitvector[divresult.quot].is_set(divresult.rem);
+    return multibitvector[divresult.quot][divresult.rem];
   }
-  size_t set_bits_get(void) const noexcept
+  size_t count(void) const noexcept
   {
     return set_bits;
   }
-  size_t unset_bits_get(void) const noexcept
+  size_t size(void) const noexcept
   {
-    assert(bits >= set_bits);
-    return bits - set_bits;
+    return bits;
   }
 };
 #endif
