@@ -3,27 +3,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdbool>
-#include <vector>
-#include <tuple>
-#include <algorithm>
 #include <climits>
-#include "utilities/bitpacker.hpp"
-#include "utilities/bytes_unit.hpp"
 
 /* This file implements the essence of the bottom up traversal, independent
    of the specific needs for the maxpair computation. */
-
-template<int sizeof_unit>
-static std::pair<uint32_t,uint32_t> decode_seqnum_relpos(
-                                         const BytesUnit<sizeof_unit,2> &suffix,
-                                         const GttlBitPacker<sizeof_unit,2> &bp)
-{
-  const uint64_t leafnumber_seqnum = suffix.template decode_at<0>(bp);
-  const uint64_t leafnumber_relpos = suffix.template decode_at<1>(bp);
-  assert(leafnumber_relpos <= UINT32_MAX && leafnumber_seqnum <= UINT32_MAX);
-  return {static_cast<uint32_t>(leafnumber_seqnum),
-          static_cast<uint32_t>(leafnumber_relpos)};
-}
 
 template<typename Basetype>
 class BottomUpTraversalStack
@@ -74,8 +57,8 @@ class BottomUpTraversalStack
   }
 };
 
-template<typename StateType,typename IntervalRecord>
-using ProcessLeafEdgeFunction = void (*)(StateType *,
+template<class StateClass,class IntervalRecord>
+using ProcessLeafEdgeFunction = void (*)(StateClass *,
                                          bool,
                                          size_t,
                                          IntervalRecord *,
@@ -83,8 +66,8 @@ using ProcessLeafEdgeFunction = void (*)(StateType *,
                                          uint32_t,
                                          bool);
 
-template<typename StateType,typename IntervalRecord>
-using ProcessBranchingEdgeFunction = void (*)(StateType *,
+template<class StateClass,class IntervalRecord>
+using ProcessBranchingEdgeFunction = void (*)(StateClass *,
                                               bool,
                                               size_t,
                                               size_t,
@@ -102,57 +85,28 @@ struct BUItvinfo
   Basetype info;
 };
 
-template<class SuffixArray,
-         typename StateType,typename IntervalRecord,int sizeof_unit>
-static void bottomup_generic(bool with_mmap,
-                             StateType *bu_state,
-                             const SuffixArray *suffixarray,
-                             size_t nonspecial_suffixes,
-                             ProcessLeafEdgeFunction<StateType,IntervalRecord>
+template<class SuftabClass, class LCPtabClass,
+         class StateClass,class IntervalRecord>
+static void bottomup_generic(StateClass *bu_state,
+                             const SuftabClass &suftab,
+                             const LCPtabClass &lcptab,
+                             ProcessLeafEdgeFunction<StateClass,IntervalRecord>
                                process_leafedge,
-                             ProcessBranchingEdgeFunction<StateType,
+                             ProcessBranchingEdgeFunction<StateClass,
                                                           IntervalRecord>
                                process_branchingedge)
 {
-  const int sequences_number_bits = suffixarray->sequences_number_bits_get();
-  const int sequences_length_bits = suffixarray->sequences_length_bits_get();
-  int first_group_bits;
   bool first_edge_from_root = true;
   BUItvinfo<IntervalRecord> *last_interval = nullptr;
   BottomUpTraversalStack<BUItvinfo<IntervalRecord>> stack{};
 
-  assert(sequences_number_bits + sequences_length_bits <=
-         sizeof_unit * CHAR_BIT);
-  if (suffixarray->sequences_number_get() == 1)
-  {
-    assert(sequences_number_bits == 0);
-    first_group_bits = sizeof_unit * CHAR_BIT - sequences_length_bits;
-  } else
-  {
-    assert(sequences_number_bits > 0);
-    first_group_bits = sequences_number_bits;
-  }
-  const GttlBitPacker<sizeof_unit,2> bp({first_group_bits,
-                                         sequences_length_bits});
-  const BytesUnit<sizeof_unit,2> *bu_suftab;
-  if (with_mmap)
-  {
-    const uint8_t* suftab_bytes = suffixarray->get_mmap_suftab_bytes();
-    bu_suftab = reinterpret_cast<const BytesUnit<sizeof_unit,2> *>
-                                (suftab_bytes);
-  } else
-  {
-    const std::vector<uint8_t> &suftab_bytes = suffixarray->get_suftab_bytes();
-    bu_suftab = reinterpret_cast<const BytesUnit<sizeof_unit,2> *>
-                                (suftab_bytes.data());
-  }
-  const LCPtable &lcptable = suffixarray->lcptable_get();
   stack.push_back(0,0);
   size_t interval_bound = 0;
-  for (auto it = lcptable.begin(); it != lcptable.end(); ++it)
+  const size_t nonspecial_suffixes = suftab.nonspecial_suffixes_get();
+  for (auto it = lcptab.begin(); it != lcptab.end(); ++it)
   {
     const unsigned int lcpvalue = *it; /* at interval_bound + 1 */
-    auto seqnum_relpos = decode_seqnum_relpos(bu_suftab[interval_bound],bp);
+    auto seqnum_relpos = suftab[interval_bound];
     assert(stack.size() > 0);
     if (lcpvalue <= stack.back_ptr()->lcp)
     {
