@@ -57,13 +57,12 @@ class BottomUpTraversalStack
   }
 };
 
-template<class StateClass,class IntervalRecord>
+template<class StateClass,class IntervalRecord,typename SuftabType>
 using ProcessLeafEdgeFunction = void (*)(StateClass *,
                                          bool,
                                          size_t,
                                          IntervalRecord *,
-                                         uint32_t,
-                                         uint32_t,
+                                         const SuftabType &,
                                          bool);
 
 template<class StateClass,class IntervalRecord>
@@ -86,11 +85,12 @@ struct BUItvinfo
 };
 
 template<class SuftabClass, class LCPtabClass,
-         class StateClass,class IntervalRecord>
+         class StateClass,class IntervalRecord, typename SuftabType>
 static void bottomup_generic(StateClass *bu_state,
                              const SuftabClass &suftab,
                              const LCPtabClass &lcptab,
-                             ProcessLeafEdgeFunction<StateClass,IntervalRecord>
+                             ProcessLeafEdgeFunction<StateClass,IntervalRecord,
+                                                     SuftabType>
                                process_leafedge,
                              ProcessBranchingEdgeFunction<StateClass,
                                                           IntervalRecord>
@@ -125,8 +125,7 @@ static void bottomup_generic(StateClass *bu_state,
                        first_edge,
                        stack.back_ptr()->lcp,
                        &stack.back_ptr()->info,
-                       std::get<0>(seqnum_relpos),
-                       std::get<1>(seqnum_relpos),
+                       seqnum_relpos,
                        last_child);
     }
     assert(last_interval == nullptr);
@@ -189,8 +188,7 @@ static void bottomup_generic(StateClass *bu_state,
                          first_edge,
                          stack.back_ptr()->lcp,
                          &stack.back_ptr()->info,
-                         std::get<0>(seqnum_relpos),
-                         std::get<1>(seqnum_relpos),
+                         seqnum_relpos,
                          false);
       }
     }
