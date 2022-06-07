@@ -102,7 +102,7 @@ static void bottomup_generic(StateClass *bu_state,
 
   stack.push_back(0,0);
   size_t interval_bound = 0;
-  const size_t nonspecial_suffixes = suftab.nonspecial_suffixes_get();
+  const size_t nonspecial_suffixes = suftab.size();
   for (auto it = lcptab.begin(); it != lcptab.end(); ++it)
   {
     const unsigned int lcpvalue = *it; /* at interval_bound + 1 */
@@ -198,6 +198,5 @@ static void bottomup_generic(StateClass *bu_state,
       break;
     }
   }
-  assert(stack.size() > 0 && stack.back_ptr()->lcp == 0);
 }
 #endif
