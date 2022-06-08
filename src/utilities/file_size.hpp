@@ -27,4 +27,19 @@ inline size_t gttl_file_size(const char *filename)
   close(filedesc);
   return static_cast<size_t>(buf.st_size);
 }
+
+inline size_t gttl_file_size(const std::string &inputfile)
+{
+  return gttl_file_size(inputfile.c_str());
+}
+
+inline size_t gttl_file_size(const std::vector<std::string> &inputfiles)
+{
+  size_t files_bytes = 0;
+  for (auto &inputfile : inputfiles)
+  {
+    files_bytes += gttl_file_size(inputfile);
+  }
+  return files_bytes;
+}
 #endif

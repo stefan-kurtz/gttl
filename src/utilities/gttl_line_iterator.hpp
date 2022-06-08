@@ -103,6 +103,16 @@ class GttlLineIterator
       return false;
     }
  public:
+    void reset(void)
+    {
+      bufptr = buffer;
+      bufend = buffer;
+      file_exhausted = false;
+      endofunit = false;
+      file_index = 0;
+      line_number = 0;
+      gzrewind(in_fp);
+    }
     GttlLineIterator(GttlFpType _in_fp)
         : inputfiles(nullptr)
         , bufptr(buffer)
