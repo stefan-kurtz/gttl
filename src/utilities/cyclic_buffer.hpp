@@ -39,7 +39,7 @@ class CyclicBuffer
   void initialize(size_t _max_num_elems) noexcept
   {
     max_num_elems = _max_num_elems;
-    assert(max_num_elems > 1 && max_num_elems <= max_size);
+    assert(max_num_elems >= 1 && max_num_elems <= max_size);
     for (size_t idx = 0; idx < max_num_elems; idx++)
     {
       next[idx] = idx < max_num_elems - 1 ? idx + 1 : 0;
