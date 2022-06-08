@@ -162,7 +162,7 @@ class QgramRecHash2ValueIterator
     {
       return Iterator(current_window,sequence + seqlen);
     }
-    /* The following functions are for qgram integer codes only */
+    /* The following functions are for qgram invertible integer codes only */
     uint64_t qgram_encode(const SequenceBaseType *qgram)
     {
       uint64_t code = 0, mult= 1;
