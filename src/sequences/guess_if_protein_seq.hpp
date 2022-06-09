@@ -107,7 +107,7 @@ inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
 {
   for (auto && inputfile : inputfiles)
   {
-    if(guess_if_protein_file(inputfile.c_str()))
+    if (guess_if_protein_file(inputfile.c_str()))
     {
       return true;
     }

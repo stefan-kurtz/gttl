@@ -16,11 +16,15 @@
 */
 #ifndef QGRAMS_HASH2_INVINT_HPP
 #define QGRAMS_HASH2_INVINT_HPP
-#include "sequences/alphabet.hpp"
 #include "sequences/qgrams_rec_hash2_value_iter.hpp"
 
 static constexpr const uint64_t invint4_complement_table[]
   = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
+
+namespace qgrams_hash2_invint
+{
+  static constexpr const char nucleotides_upper[] = "ACTG";
+}
 
 static int aux_data_invint4(size_t qgram_length)
 {
