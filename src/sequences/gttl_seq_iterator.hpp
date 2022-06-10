@@ -9,8 +9,14 @@ struct SequenceEntry
 {
   std::string header{},
               sequence{};
+  SequenceEntry(void) {}
+  SequenceEntry(std::string _header,std::string _sequence)
+    : header(_header)
+    , sequence(_sequence)
+  {}
   const std::string_view header_get(void) { return header;}
   const std::string_view sequence_get(void) {return sequence;}
+  const std::string_view operator *(void) {return sequence;}
 };
 
 template<int buf_size>
@@ -19,17 +25,18 @@ class GttlSeqIterator
   struct Iterator
   {
     private:
-      SequenceEntry sequence_entry{};
-      std::string *current_string = &sequence_entry.header;
+      SequenceEntry sequence_entry;
+      std::string *current_string;
       GttlLineIterator<buf_size> &gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
     public:
       Iterator(GttlLineIterator<buf_size> &_gttl_li,
-               bool _input_exhausted) :
-        gttl_li(_gttl_li),
-        last_seq_was_processed(false),
-        input_exhausted(_input_exhausted)
+               bool _input_exhausted)
+        : current_string(&sequence_entry.header)
+        , gttl_li(_gttl_li)
+        , last_seq_was_processed(false)
+        , input_exhausted(_input_exhausted)
       {
       }
       SequenceEntry &operator*()
@@ -94,10 +101,6 @@ class GttlSeqIterator
   private:
     GttlLineIterator<buf_size> gttl_li;
   public:
-    void reset(void)
-    {
-      gttl_li.reset();
-    }
     GttlSeqIterator(GttlFpType _in_fp) :
         gttl_li(GttlLineIterator<buf_size>(_in_fp))
     {
@@ -119,6 +122,7 @@ class GttlSeqIterator
     }
     Iterator begin()
     {
+      gttl_li.reset();
       return Iterator(gttl_li,false);
     }
     Iterator end()
