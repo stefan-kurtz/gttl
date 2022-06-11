@@ -16,7 +16,6 @@ struct SequenceEntry
   {}
   const std::string_view header_get(void) { return header;}
   const std::string_view sequence_get(void) {return sequence;}
-  const std::string_view operator *(void) {return sequence;}
 };
 
 template<int buf_size>
