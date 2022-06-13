@@ -44,7 +44,7 @@ class QgramDecoder
   };
   ~QgramDecoder(void)
   {
-    delete qgram_buffer;
+    delete[] qgram_buffer;
   }
 };
 

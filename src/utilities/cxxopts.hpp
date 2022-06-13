@@ -1131,6 +1131,27 @@ struct HelpOptionDetails
   std::string arg_help;
   bool is_container;
   bool is_boolean;
+  HelpOptionDetails(std::string _s,
+                    std::string _l,
+                    String _desc,
+                    bool _has_default,
+                    std::string _default_value,
+                    bool _has_implicit,
+                    std::string _implicit_value,
+                    std::string _arg_help,
+                    bool _is_container,
+                    bool _is_boolean)
+    : s(_s)
+    , l(_l)
+    , desc(_desc)
+    , has_default(_has_default)
+    , default_value(_default_value)
+    , has_implicit(_has_implicit)
+    , implicit_value(_implicit_value)
+    , arg_help(_arg_help)
+    , is_container(_is_container)
+    , is_boolean(_is_boolean)
+   {}
 };
 
 struct HelpGroupDetails
@@ -2047,10 +2068,17 @@ inline void Options::add_option(const std::string& group, const std::string& s,
   // add the help details
   auto& options = m_help[group];
 
-  options.options.emplace_back(HelpOptionDetails{
-      s, l, stringDesc, value->has_default(), value->get_default_value(),
-      value->has_implicit(), value->get_implicit_value(), std::move(arg_help),
-      value->is_container(), value->is_boolean()});
+  options.options.emplace_back(HelpOptionDetails(
+      s,
+      l,
+      stringDesc,
+      value->has_default(),
+      value->get_default_value(),
+      value->has_implicit(),
+      value->get_implicit_value(),
+      std::move(arg_help),
+      value->is_container(),
+      value->is_boolean()));
 }
 
 inline void Options::add_one_option(
