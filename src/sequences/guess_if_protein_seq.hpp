@@ -41,7 +41,7 @@ inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
     for_protein_only_lookup[static_cast<int>(protein_only_characters[idx])] =
                             true;
   }
-  for (size_t idx = 0; idx < std::min((size_t) GUESS_SIZE_TO_DECIDE,seqlen);
+  for (size_t idx = 0; idx < std::min(size_t(GUESS_SIZE_TO_DECIDE),seqlen);
        idx++)
   {
     if (for_protein_only_lookup[static_cast<int>(sequence[idx])])
@@ -113,5 +113,29 @@ inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
     }
   }
   return false;
+}
+
+template<class MultiseqClass>
+bool guess_if_protein_multiseq(const MultiseqClass *multiseq)
+{
+  const size_t sequences_number = multiseq->sequences_number_get();
+  bool is_protein_sequence = false;
+  size_t sequences_total_length = 0;
+  for (size_t seqnum = 0; seqnum < sequences_number; seqnum++)
+  {
+    const char *seqptr = multiseq->sequence_ptr_get(seqnum);
+    const size_t seqlen = multiseq->sequence_length_get(seqnum);
+    sequences_total_length += seqlen;
+    if (guess_if_protein_sequence(seqptr,seqlen))
+    {
+      is_protein_sequence = true;
+      break;
+    }
+    if (sequences_total_length >= size_t(GUESS_SIZE_TO_DECIDE))
+    {
+      break;
+    }
+  }
+  return is_protein_sequence;
 }
 #endif

@@ -12,41 +12,7 @@
 #include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_invint.hpp"
 #include "sequences/qgrams_hash2_invint.hpp"
-
-template<size_t alphabetsize>
-class QgramDecoder
-{
-  private:
-  const char *alphabet;
-  size_t qgram_length;
-  size_t number_of_all_qgrams;
-  char *qgram_buffer;
-  public:
-  QgramDecoder(const char *_alphabet,size_t _qgram_length)
-    : alphabet(_alphabet)
-    , qgram_length(_qgram_length)
-    , number_of_all_qgrams(std::pow(alphabetsize,qgram_length))
-    , qgram_buffer(new char [qgram_length + 1])
-  {
-    assert(strlen(alphabet) >= alphabetsize);
-  }
-  const char *decode(uint64_t integer_code) const noexcept
-  {
-    assert(integer_code < number_of_all_qgrams);
-    qgram_buffer[qgram_length] = '\0';
-    for (char *qgram_ptr = qgram_buffer + qgram_length-1;
-         qgram_ptr >= qgram_buffer; qgram_ptr--)
-    {
-      *qgram_ptr = alphabet[integer_code % alphabetsize];
-      integer_code /= alphabetsize;
-    }
-    return qgram_buffer;
-  };
-  ~QgramDecoder(void)
-  {
-    delete[] qgram_buffer;
-  }
-};
+#include "sequences/qgram_decoder.hpp"
 
 class Unwords
 {
@@ -200,8 +166,8 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
   return last_successful_unwords;
 }
 
-static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
-static constexpr const char_finder::AminoacidFinder aminoacid_finder{};
+static constexpr const char_finder::NucleotideFinder unw_nucleotide_finder{};
+static constexpr const char_finder::AminoacidFinder unw_aminoacid_finder{};
 
 template<class SeqIterator>
 static Unwords *unwords_finder(bool is_protein_sequence,
@@ -218,7 +184,7 @@ static Unwords *unwords_finder(bool is_protein_sequence,
           == static_cast<int>(reverse_complement))
       {
         using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
-                                               nucleotide_finder,
+                                               unw_nucleotide_finder,
                                                true, false>;
         unwords = unwords_binary_search<NucleotideRanger,
                                         InvertibleIntegercode2Iterator4,
@@ -232,7 +198,7 @@ static Unwords *unwords_finder(bool is_protein_sequence,
   } else
   {
     using AminoacidRanger = GttlCharRange<char_finder::AminoacidFinder,
-                                          aminoacid_finder,
+                                          unw_aminoacid_finder,
                                           true, false>;
     unwords = unwords_binary_search<AminoacidRanger,
                                     InvertibleIntegercodeIterator20,
