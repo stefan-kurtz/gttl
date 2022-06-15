@@ -113,7 +113,7 @@ class Unwords
   }
 };
 
-template<class CharFinder, class InvertibleIntcodeIterator,
+template<class CharRanger, class InvertibleIntcodeIterator,
          bool reverse_complement_option, class SeqIterator>
 static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
                                         size_t alphabetsize,
@@ -126,7 +126,7 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
     for (auto si : seq_iterator)
     {
       auto sequence = si.sequence_get();
-      CharFinder ranger(sequence.data(),sequence.size());
+      CharRanger ranger(sequence.data(),sequence.size());
       for (auto const &&range : ranger)
       {
         const size_t this_length = std::get<1>(range);
@@ -163,7 +163,7 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
   return unwords;
 }
 
-template<class CharFinder, class InvertibleIntcodeIterator,
+template<class CharRanger, class InvertibleIntcodeIterator,
          bool reverse_complement, class SeqIterator>
 static Unwords *unwords_binary_search(size_t qgram_length_max,
                                       size_t alphabetsize,
@@ -177,7 +177,7 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
     const size_t qgram_length = (l+r)/2;
 
     RunTimeClass compute_unwords_runtime{};
-    Unwords *unwords = try_if_all_qgrams_occur<CharFinder,
+    Unwords *unwords = try_if_all_qgrams_occur<CharRanger,
                                                InvertibleIntcodeIterator,
                                                reverse_complement,
                                                SeqIterator>
