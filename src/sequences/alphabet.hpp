@@ -401,22 +401,4 @@ namespace alphabet
     = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
   using GttlAlphabet_20 = GttlAlphabet<amino_acids,20>;
 }
-
-static inline char complement_plain(char cc)
-{
-  switch (cc)
-  {
-    case 'A': return 'T';
-    case 'C': return 'G';
-    case 'G': return 'C';
-    case 'T': return 'A';
-#ifdef NO_MASKING_LOWERCASE
-    case 'a': return 't';
-    case 'c': return 'g';
-    case 'g': return 'c';
-    case 't': return 'a';
-#endif
-    default: return cc;
-  }
-}
 #endif

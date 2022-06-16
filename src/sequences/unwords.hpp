@@ -60,7 +60,7 @@ class Unwords
   template<size_t alphabetsize>
   void show(const char *alphabet) const noexcept
   {
-    QgramDecoder<alphabetsize> qgram_decoder(alphabet,qgram_length);
+    QgramDecoder<alphabetsize,false> qgram_decoder(alphabet,qgram_length);
     std::cout << "# alphabet size:\t" << alphabetsize << std::endl;
     std::cout << "# length of qgrams:\t" << qgram_length << std::endl;
     std::cout << "# number of all qgrams:\t" << number_of_all_qgrams
