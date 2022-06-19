@@ -25,10 +25,6 @@ class KeyValuePair
     : key(_key)
     , value(_value)
   {}
-  double key_get(void) const noexcept
-  {
-    return key;
-  }
   std::string to_string(void) const noexcept
   {
     std::string s{};
@@ -52,18 +48,24 @@ class KeyValuePair
 };
 
 template<class T>
-static void sort_values(const char *progname,bool use_radix_sort,
-                        size_t number_of_values,
+static void sort_values(const char *progname,bool show,bool use_radix_sort,
+                        size_t number_of_values,double max_random,
                         int num_sort_bits)
 {
   std::vector<T> values{};
   values.reserve(number_of_values);
-  UniformRandomDouble urd_gen(0,DBL_MAX);
+  UniformRandomDouble urd_gen(0,max_random,2334147U);
   RunTimeClass rt_random_number_generation{};
   for (size_t idx = 0; idx < number_of_values; idx++)
   {
     double r = urd_gen.get();
-    values.push_back(T(r,idx));
+    if constexpr (sizeof(T) == 2 * sizeof(void *))
+    {
+      values.push_back(T(r,idx));
+    } else
+    {
+      values.push_back(static_cast<T>(r));
+    }
   }
   rt_random_number_generation.show("random number generation");
   std::cout << "# size of array (MB):\t"
@@ -89,20 +91,34 @@ static void sort_values(const char *progname,bool use_radix_sort,
     StrFormat msg("sort %lu values with std::sort",values.size());
     rt_sorting.show(msg.str());
   }
-#ifdef SHOW_VALUES
-  for (auto v : values)
+  if (show)
   {
-    std::cout << v.to_string() << std::endl;
+    for (auto v : values)
+    {
+      if constexpr (sizeof(T) == 2 * sizeof(void *))
+      {
+        std::cout << v.to_string() << std::endl;
+      } else
+      {
+        std::cout << v << std::endl;
+      }
+    }
   }
-#endif
   T previous;
   bool previous_defined = false;
   for (auto v : values)
   {
     if (previous_defined && v < previous)
     {
-      std::cerr << progname << ": previous=" << previous.to_string() << " > "
-                << v.to_string() << "=next" << std::endl;
+      if constexpr (sizeof(T) == 2 * sizeof(void *))
+      {
+        std::cerr << progname << ": previous=" << previous.to_string()
+                  << " > " << v.to_string() << "=next" << std::endl;
+      } else
+      {
+        std::cerr << progname << ": previous=" << previous
+                  << " > " << v << "=next" << std::endl;
+      }
       exit(EXIT_FAILURE);
     }
     previous = v;
@@ -112,24 +128,38 @@ static void sort_values(const char *progname,bool use_radix_sort,
 
 int main(int argc, char *argv[])
 {
+  static_assert(sizeof(KeyValuePair) == 2 * sizeof(void *));
   long readlong;
 
-  if (argc != 3 || (strcmp(argv[1],"std") != 0 && strcmp(argv[1],"rad") != 0) ||
-      sscanf(argv[2], "%ld", &readlong) != 1 || readlong <= 0)
+  if (argc != 4 ||
+      (strcmp(argv[1],"p") != 0 && strcmp(argv[1],"i") != 0) ||
+      (strcmp(argv[2],"rad") != 0 && strcmp(argv[2],"std") != 0) ||
+       sscanf(argv[3], "%ld", &readlong) != 1 || readlong <= 0)
   {
-    std::cerr << "Usage: " << argv[0]
-              << "rad|std <number of key/value (double/size_t) pairs>"
-              << std::endl << "rad triggers the use of radix sort"
-              << std::endl << "std triggers the use of std::sort"
+    std::cerr << "Usage: " << argv[0] << " p|i rad|std <number of values>"
+              << std::endl << "p     create array of pairs"
+              << std::endl << "i     create array of integers"
+              << std::endl << "rad   use radix sort"
+              << std::endl << "std   use std::sort"
               << std::endl;
     return EXIT_FAILURE;
   }
-  const bool use_radix_sort = strcmp(argv[1],"rad") == 0 ? true : false;
+  const bool use_pairs = strcmp(argv[1],"p") == 0 ? true : false;
+  const bool use_radix_sort = strcmp(argv[2],"rad") == 0 ? true : false;
   const size_t number_of_values = static_cast<size_t>(readlong);
-  static_assert(sizeof(KeyValuePair) == 2 * sizeof(void *));
-  static constexpr const int num_sort_bits
-    = static_cast<int>(CHAR_BIT * sizeof(double));
-  sort_values<KeyValuePair>(argv[0],use_radix_sort,number_of_values,
-                            num_sort_bits);
+  const bool show = false;
+  if (use_pairs)
+  {
+    static constexpr const int num_sort_bits
+      = static_cast<int>(CHAR_BIT * sizeof(double));
+    sort_values<KeyValuePair>(argv[0],show,use_radix_sort,number_of_values,
+                              DBL_MAX,num_sort_bits);
+  } else
+  {
+    const int num_sort_bits = 64;//gttl_required_bits<size_t>(number_of_values);
+    sort_values<size_t>(argv[0],show,use_radix_sort,number_of_values,
+                               static_cast<double>(number_of_values),
+                               num_sort_bits);
+  }
   return EXIT_SUCCESS;
 }

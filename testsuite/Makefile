@@ -111,8 +111,16 @@ test_thread_pool:thread_pool_mn.x
 .PHONY:test_sort_kvp
 test_sort_kvp:sort_key_value_pairs.x
 	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
-	   ./sort_key_value_pairs.x rad $$num;\
-	   ./sort_key_value_pairs.x std $$num;\
+	   ./sort_key_value_pairs.x p rad $$num;\
+	   ./sort_key_value_pairs.x p std $$num;\
+	done
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_sort_i
+test_sort_i:sort_key_value_pairs.x
+	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
+	   ./sort_key_value_pairs.x i rad $$num;\
+	   ./sort_key_value_pairs.x i std $$num;\
 	done
 	@echo "Congratulations. $@ passed."
 
