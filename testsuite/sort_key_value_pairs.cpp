@@ -48,13 +48,14 @@ class KeyValuePair
 };
 
 template<class T>
-static void sort_values(const char *progname,bool show,bool use_radix_sort,
+static void sort_values(unsigned int seed,
+                        const char *progname,bool show,bool use_radix_sort,
                         size_t number_of_values,double max_random,
                         int num_sort_bits)
 {
   std::vector<T> values{};
   values.reserve(number_of_values);
-  UniformRandomDouble urd_gen(0,max_random,2334147U);
+  UniformRandomDouble urd_gen(0,max_random,seed);
   RunTimeClass rt_random_number_generation{};
   for (size_t idx = 0; idx < number_of_values; idx++)
   {
@@ -158,18 +159,19 @@ int main(int argc, char *argv[])
   const bool use_radix_sort = strcmp(argv[2],"rad") == 0 ? true : false;
   const size_t number_of_values = static_cast<size_t>(readlong);
   const bool show = false;
+  unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
   if (use_pairs)
   {
     static constexpr const int num_sort_bits
       = static_cast<int>(CHAR_BIT * sizeof(double));
-    sort_values<KeyValuePair>(argv[0],show,use_radix_sort,number_of_values,
+    sort_values<KeyValuePair>(seed,argv[0],show,use_radix_sort,number_of_values,
                               DBL_MAX,num_sort_bits);
   } else
   {
     const int num_sort_bits = 64;//gttl_required_bits<size_t>(number_of_values);
-    sort_values<size_t>(argv[0],show,use_radix_sort,number_of_values,
-                               static_cast<double>(number_of_values),
-                               num_sort_bits);
+    sort_values<size_t>(seed,argv[0],show,use_radix_sort,number_of_values,
+                        static_cast<double>(number_of_values),
+                        num_sort_bits);
   }
   return EXIT_SUCCESS;
 }
