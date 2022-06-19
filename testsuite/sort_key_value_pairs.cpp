@@ -74,14 +74,24 @@ static void sort_values(const char *progname,bool show,bool use_radix_sort,
   RunTimeClass rt_sorting{};
   if (use_radix_sort)
   {
-    static constexpr const int sizeof_unit
-      = static_cast<int>(sizeof(T));
-    const bool reversed_byte_order = is_big_endian() ? false : true;
-    ska_large_lsb_small_radix_sort(sizeof_unit,
-                                   num_sort_bits,
-                                   reinterpret_cast<uint8_t *>(values.data()),
-                                   values.size(),
-                                   reversed_byte_order);
+    if constexpr (sizeof(T) == 2 * sizeof(void *))
+    {
+      static constexpr const int sizeof_unit
+        = static_cast<int>(sizeof(T));
+      const bool reversed_byte_order = is_big_endian() ? false : true;
+      ska_large_lsb_small_radix_sort(sizeof_unit,
+                                     num_sort_bits,
+                                     reinterpret_cast<uint8_t *>(values.data()),
+                                     values.size(),
+                                     reversed_byte_order);
+    } else
+    {
+      static_assert(sizeof(T) == sizeof(void *));
+      ska_large_lsb_small_radix_sort(num_sort_bits,
+                                     reinterpret_cast<uint64_t *>
+                                                     (values.data()),
+                                     values.size());
+    }
     StrFormat msg("sort %lu values with ska_large_lsb_small_radix_sort",
                   values.size());
     rt_sorting.show(msg.str());

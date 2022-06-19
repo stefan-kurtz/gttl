@@ -118,7 +118,7 @@ test_sort_kvp:sort_key_value_pairs.x
 
 .PHONY:test_sort_i
 test_sort_i:sort_key_value_pairs.x
-	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
+	@for num in 200 2000 20000 200000 2000000 20000000 200000000; do \
 	   ./sort_key_value_pairs.x i rad $$num;\
 	   ./sort_key_value_pairs.x i std $$num;\
 	done

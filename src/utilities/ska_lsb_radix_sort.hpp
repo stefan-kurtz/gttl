@@ -464,6 +464,7 @@ static Buckets<Counttype> *ska_lsb_radix_sort(int sizeof_unit,
   return buckets;
 }
 
+#undef SHOW_NON_EMPTY_BUCKETS
 #ifdef SHOW_NON_EMPTY_BUCKETS
 static void show_non_empty_buckets(const Buckets<size_t> *buckets,
                                    int byte_index,size_t num_units)
@@ -524,8 +525,8 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
       buckets = countingsort_skarupke<Counttype>(first_pass_msb_bits,
                                                  56 -
                                                  CHAR_BIT * current.byte_index,
-                                                 array,
-                                                 num_units);
+                                                 array + current.offset,
+                                                 current.num_units);
     } else
     {
       assert(num_sort_bits >= 8);
