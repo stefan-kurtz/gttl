@@ -37,8 +37,8 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 all:${EXECS}
 
 test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool test_sort_kvp test_eoplist \
-              test_invint test_line_iterator_mapped
+              test_multiseq test_thread_pool test_sort_kvp test_sort_i \
+              test_eoplist test_invint test_line_iterator_mapped
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
