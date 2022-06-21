@@ -20,7 +20,9 @@ class QgramDecoder
     : characters(nullptr)
     , qgram_buffer(new char [_qgram_length + 1])
     , qgram_length(_qgram_length)
+#ifndef NDEBUG
     , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
+#endif
   {
     characters = new char [alphabetsize];
     for (size_t idx = 0; idx < alphabetsize; idx++)
