@@ -110,6 +110,10 @@ class GttlFastQIterator
     GttlFastQIterator(LineIterator &_line_iterator)
       : line_iterator(_line_iterator)
       {}
+    void reset(void)
+    {
+      line_iterator.reset();
+    }
     size_t line_number(void) const noexcept
     {
       return line_iterator->line_number_get();
