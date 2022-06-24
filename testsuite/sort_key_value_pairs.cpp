@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
+#include <type_traits>
 #include <algorithm>
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
@@ -60,7 +61,7 @@ static void sort_values(unsigned int seed,
   for (size_t idx = 0; idx < number_of_values; idx++)
   {
     double r = urd_gen.get();
-    if constexpr (sizeof(T) == 2 * sizeof(void *))
+    if constexpr (std::is_same_v<T, KeyValuePair>)
     {
       values.push_back(T(r,idx));
     } else
@@ -75,7 +76,7 @@ static void sort_values(unsigned int seed,
   RunTimeClass rt_sorting{};
   if (use_radix_sort)
   {
-    if constexpr (sizeof(T) == 2 * sizeof(void *))
+    if constexpr (std::is_same_v<T, KeyValuePair>)
     {
       static constexpr const int sizeof_unit
         = static_cast<int>(sizeof(T));
@@ -106,7 +107,7 @@ static void sort_values(unsigned int seed,
   {
     for (auto v : values)
     {
-      if constexpr (sizeof(T) == 2 * sizeof(void *))
+      if constexpr (std::is_same_v<T, KeyValuePair>)
       {
         std::cout << v.to_string() << std::endl;
       } else
