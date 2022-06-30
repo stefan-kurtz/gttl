@@ -49,9 +49,11 @@ class TrackEditoperations
   {
     const size_t max_d = max_d_get();
     assert(trace.size() >= max_d + 1);
+#ifndef NDEBUG
     size_t u_remain = ulen,
-           v_remain = vlen,
-           front_mid = trace.size() - 1 - max_d;
+           v_remain = vlen;
+#endif
+    size_t front_mid = trace.size() - 1 - max_d;
     assert(front_mid + vlen >= ulen);
     int64_t diag = static_cast<int64_t>(vlen) - static_cast<int64_t>(ulen);
     Eoplist eoplist(true);
@@ -69,8 +71,10 @@ class TrackEditoperations
       {
         assert(u_remain > match_length &&
                v_remain > match_length);
+#ifndef NDEBUG
         u_remain -= (match_length + 1);
         v_remain -= (match_length + 1);
+#endif
         eoplist.mismatch_add();
       } else
       {
@@ -79,8 +83,10 @@ class TrackEditoperations
           diag++;
           assert(u_remain > match_length &&
                  v_remain >= match_length);
+#ifndef NDEBUG
           u_remain -= (match_length + 1);
           v_remain -= match_length;
+#endif
           eoplist.deletion_add();
         } else
         {
@@ -89,8 +95,10 @@ class TrackEditoperations
             diag--;
             assert(u_remain >= match_length &&
                    v_remain > match_length);
+#ifndef NDEBUG
             u_remain -= match_length;
             v_remain -= (match_length+1);
+#endif
             eoplist.insertion_add();
           } else
           {
@@ -98,8 +106,10 @@ class TrackEditoperations
             assert(current_d == 0);
             assert(u_remain >= match_length &&
                    v_remain >= match_length);
+#ifndef NDEBUG
             u_remain -= match_length;
             v_remain -= match_length;
+#endif
             break;
           }
         }
