@@ -99,7 +99,7 @@ static inline std::pair<size_t,size_t> maximize_on_both_ends(
                                   pp.startpos1,\
                                   qgram_length)
 
-template<class MatchEnumeratorClass,
+template<class SeedEnumeratorClass,
          bool self_match,
          int sizeof_unit_match,
          bool seed_output,
@@ -122,7 +122,7 @@ class SortedMatchList
   public:
   SortedMatchList(size_t qgram_length,
                   size_t minimum_mem_length,
-                  const MatchEnumeratorClass &enum_pos_pair_enumerator,
+                  const SeedEnumeratorClass &seed_enumerator,
                   const GttlMultiseq *_ref_multiseq,
                   const GttlMultiseq *_query_multiseq)
     : encoded_match_list({})
@@ -133,7 +133,7 @@ class SortedMatchList
                             If all positions refer to the same sequences,
                             then the sequence number are represented by 0
                             bits. */
-    , bits_for_sequences(enum_pos_pair_enumerator.sequences_bits_sum_get())
+    , bits_for_sequences(seed_enumerator.sequences_bits_sum_get())
     , remaining_bits_for_length(sizeof_unit_match * CHAR_BIT -
                                 bits_for_sequences)
     , ref_multiseq(_ref_multiseq)
@@ -145,7 +145,7 @@ class SortedMatchList
                       pos 3: number of bits for the query sequence positions
                       pos 4: remaining_bits_for_length.
                       if ref_idx is not 0, then pos 2 and 3 are swapped */
-                   enum_pos_pair_enumerator
+                   seed_enumerator
                    .template match_packer_order_units<ref_idx>
                                                      (remaining_bits_for_length)
                   )
@@ -155,10 +155,10 @@ class SortedMatchList
       = gttl_bits2maxvalue<uint64_t>(remaining_bits_for_length);
 
     /* For the following loop to work the
-       enum_pos_pair_enumerator must provide iterators begin() and end() which
+       seed_enumerator must provide iterators begin() and end() which
        when dereferenced deliver an instance of
        struct SortedMatchListPositionPair */
-    for (auto &&pp : enum_pos_pair_enumerator)
+    for (auto &&pp : seed_enumerator)
     {
       if constexpr (seed_output)
       {
