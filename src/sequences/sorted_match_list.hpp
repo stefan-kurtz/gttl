@@ -298,7 +298,6 @@ class SortedMatchList
   {
     /* The following definition must be consistent with the definition in
        output_matches */
-    constexpr const int query_idx = ref_idx == 0 ? 1 : 0;
     constexpr const int ref_pos_idx = ref_idx == 0 ? 2 : 3;
     constexpr const int query_pos_idx = ref_idx == 0 ? 3 : 2;
     auto p = segment_match_list[i];
