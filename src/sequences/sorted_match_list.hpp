@@ -252,11 +252,7 @@ class SortedMatchList
                                      (encoded_match_list.data()),
                                    encoded_match_list.size(),
                                    reversed_byte_order);
-    const size_t num_of_unique_matches
-      = remove_duplicates<BytesUnitMatch>
-                         (encoded_match_list.data(),
-                          encoded_match_list.size());
-    encoded_match_list.resize(num_of_unique_matches);
+    remove_duplicates<BytesUnitMatch>(&encoded_match_list);
   }
   const GttlBitPacker<sizeof_unit_match,5> &match_packer_reference_get(void)
         const noexcept

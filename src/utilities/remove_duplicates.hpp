@@ -1,9 +1,10 @@
 #ifndef REMOVE_DUPLICATES_HPP
 #define REMOVE_DUPLICATES_HPP
+#include <cstddef>
+#include <vector>
 
-/* a function to remove duplicates in a sorted array. Does not use branches
-   in inner loop. Returns number of pairwise distinct elements.
-   is_duplicate must return 1 if elements are identical, otherwise 0 */
+/* Function to remove duplicates in a sorted array. Does not use branches
+   in inner loop. Returns number of pairwise distinct elements. */
 
 template<typename T>
 static size_t remove_duplicates(T *arr,size_t len)
@@ -15,5 +16,15 @@ static size_t remove_duplicates(T *arr,size_t len)
     arr[idx-n_dup] = arr[idx];
   }
   return len - n_dup;
+}
+
+/* When a vector is given we call this function with the data pointer
+   and resize the vector afterwords. */
+
+template<typename T>
+static void remove_duplicates(std::vector<T> *vec)
+{
+  size_t n = remove_duplicates(vec->data(),vec->size());
+  vec->resize(n);
 }
 #endif
