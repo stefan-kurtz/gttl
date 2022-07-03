@@ -8,17 +8,19 @@
 /* This file implements the essence of the bottom up traversal, independent
    of the specific needs for the maxpair computation. */
 
-template<typename Basetype>
+template<typename Basetype,bool track_max_stack_size>
 class BottomUpTraversalStack
 {
   private:
   Basetype *space;
-  size_t allocated, nextfree;
+  size_t allocated, nextfree, max_stack_size;
   public:
-  BottomUpTraversalStack(void) :
-    space(nullptr),
-    allocated(0),
-    nextfree(0) {}
+  BottomUpTraversalStack(void)
+    : space(nullptr)
+    , allocated(0)
+    , nextfree(0)
+    , max_stack_size(0)
+  {}
   ~BottomUpTraversalStack(void)
   {
     free(space);
@@ -40,6 +42,10 @@ class BottomUpTraversalStack
     space[nextfree].lcp = lcp;
     space[nextfree].lb = lb;
     nextfree++;
+    if constexpr (track_max_stack_size)
+    {
+      max_stack_size = std::max(max_stack_size,nextfree);
+    }
   }
   Basetype *back_ptr(void) const noexcept
   {
@@ -54,6 +60,10 @@ class BottomUpTraversalStack
   size_t size(void) const noexcept
   {
     return nextfree;
+  }
+  size_t max_stack_size_get(void) const noexcept
+  {
+    return max_stack_size;
   }
 };
 
@@ -96,9 +106,11 @@ static void bottomup_generic(StateClass *bu_state,
                                                           IntervalRecord>
                                process_branchingedge)
 {
+  constexpr const bool track_max_stack_size = true;
   bool first_edge_from_root = true;
   BUItvinfo<IntervalRecord> *last_interval = nullptr;
-  BottomUpTraversalStack<BUItvinfo<IntervalRecord>> stack{};
+  BottomUpTraversalStack<BUItvinfo<IntervalRecord>,track_max_stack_size>
+    stack{};
 
   stack.push_back(0,0);
   size_t interval_bound = 0;
@@ -197,6 +209,11 @@ static void bottomup_generic(StateClass *bu_state,
     {
       break;
     }
+  }
+  if constexpr (track_max_stack_size)
+  {
+    std::cout << "# maximum size of stack for bottom up traversal\t"
+              << stack.max_stack_size_get() << std::endl;
   }
 }
 #endif
