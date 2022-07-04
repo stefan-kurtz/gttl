@@ -95,7 +95,8 @@ struct BUItvinfo
 };
 
 template<class SuftabClass, class LCPtabClass,
-         class StateClass,class IntervalRecord, typename SuftabType>
+         class StateClass,class IntervalRecord, typename SuftabType,
+         bool track_max_stack_size>
 static void bottomup_generic(StateClass *bu_state,
                              const SuftabClass &suftab,
                              const LCPtabClass &lcptab,
@@ -106,7 +107,6 @@ static void bottomup_generic(StateClass *bu_state,
                                                           IntervalRecord>
                                process_branchingedge)
 {
-  constexpr const bool track_max_stack_size = true;
   bool first_edge_from_root = true;
   BUItvinfo<IntervalRecord> *last_interval = nullptr;
   BottomUpTraversalStack<BUItvinfo<IntervalRecord>,track_max_stack_size>
