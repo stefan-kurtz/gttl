@@ -288,11 +288,12 @@ class PolishedPoints
    - uint64_t match_history_get(void) const noexcept;
      return the match history
 
-   - size_t aligned_len_get(size_t idx, size_t d, size_t ulen,
+   - size_t aligned_len_get(int64_t diag_idx, size_t ulen,
                             size_t vlen) const noexcept
      returns the sum of the length of the aligned sequences.
-     Here d is the distance value of the front to which the value belongs
-     and idx is the index of this entry in a array indexed from 0 to 2 * d.
+     Here diag_idx is the diagonal index in the range from
+     -d to + d and ulen and vlen are the length of the aligned
+     sequences.
 
   - std::string to_string(void) const noexcept;
     return a string representation of the entry, used for debugging
@@ -325,7 +326,9 @@ class TrackPolishedPoints
         {
           strong_history++;
           const size_t dest_row = front.row_get(ulen);
-          const size_t aligned_len = front.aligned_len_get(idx,d,ulen,vlen);
+          const int64_t diag_idx = (static_cast<int64_t>(idx) -
+                                    static_cast<int64_t>(d));
+          const size_t aligned_len = front.aligned_len_get(diag_idx,ulen,vlen);
           best_polished_points->add(d,dest_row,aligned_len);
 #ifdef SKDEBUG
           std::cout << "*";
