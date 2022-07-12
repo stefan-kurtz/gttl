@@ -11,7 +11,6 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_invint.hpp"
-#include "sequences/qgrams_hash2_invint.hpp"
 #include "sequences/qgram_decoder.hpp"
 
 class Unwords

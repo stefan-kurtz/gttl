@@ -56,7 +56,8 @@ class QgramRecHash2ValueIterator
       using reference = uint64_t&;
 
       /* Constructor for begin() */
-      Iterator(const QgramTransformer &qgram_transformer,
+      Iterator(const QgramTransformer &_qgram_transformer,
+               size_t _qgram_length,
                CyclicBuffer_uint8 &_current_window,
                pointer _sequence,
                uint64_t first_hash_value,
@@ -71,7 +72,8 @@ class QgramRecHash2ValueIterator
       {
       }
       /* Constructor for end() */
-      Iterator(CyclicBuffer_uint8 &_current_window,
+      Iterator(const QgramTransformer &_qgram_transformer,
+               CyclicBuffer_uint8 &_current_window,
                pointer _end_of_sequence)
         : qgram_transformer(_qgram_transformer)
         , current_window(_current_window)
@@ -120,7 +122,7 @@ class QgramRecHash2ValueIterator
     QgramRecHash2ValueIterator(size_t _qgram_length,
                                const SequenceBaseType *_sequence,
                                size_t _seqlen)
-      : qgram_transformer(QgramTransformer(_qgram_length)
+      : qgram_transformer(QgramTransformer(_qgram_length))
       , qgram_length(_qgram_length)
       , sequence(_sequence)
       , seqlen(_seqlen)

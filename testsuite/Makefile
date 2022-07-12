@@ -166,9 +166,9 @@ test_eoplist:eoplist_mn.x
 
 .PHONY:test_invint
 test_invint:enum_invint.x
-	@./enum_invint.x 14 ../testdata/at1MB.fna
-	@./enum_invint.x 15 ../testdata/vaccg.fna
-	@./enum_invint.x 20 ../testdata/ychrIII.fna
+	@./enum_invint.x 14 ../testdata/at1MB.fna | diff - ../testdata/at1MB_invint14.tsv
+	@./enum_invint.x 15 ../testdata/vaccg.fna | diff - ../testdata/vaccg_invint15.tsv
+	@./enum_invint.x 20 ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_invint20.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator_mapped

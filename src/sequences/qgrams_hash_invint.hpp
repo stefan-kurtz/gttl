@@ -40,6 +40,7 @@ class InvertibleIntegercodeTransformer4
     = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
   int shift;
   public:
+  static constexpr const char nucleotides_upper[] = "ACTG";
   InvertibleIntegercodeTransformer4(size_t qgram_length)
     : shift(static_cast<int>(2 * (qgram_length-1)))
   {}
@@ -50,7 +51,7 @@ class InvertibleIntegercodeTransformer4
   }
   uint64_t next_hash_value_get(uint8_t old_t_char,
                                uint64_t integer_code,
-                               uint8_t new_t_char)
+                               uint8_t new_t_char) const noexcept
   {
     integer_code -= (static_cast<uint64_t>(old_t_char) << shift);
     integer_code *= static_cast<uint64_t>(4);
@@ -91,7 +92,7 @@ using InvertibleIntegercodeIterator4_Wildcard2_a
                               InvertibleIntegercodeTransformer4>;
 
 using InvertibleIntegercode2Iterator4
-  = QgramRecHash2ValueIterator<InvertibleIntegercode2Transformer4>;
+  = QgramRecHash2ValueIterator<InvertibleIntegercodeTransformer4>;
 
 class InvertibleIntegercodeTransformer20
 {

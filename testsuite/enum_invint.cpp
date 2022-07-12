@@ -4,7 +4,7 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
-#include "sequences/qgrams_hash2_invint.hpp"
+#include "sequences/qgrams_hash_invint.hpp"
 
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
@@ -77,10 +77,6 @@ int main(int argc,char *argv[])
       {
         const size_t this_length = std::get<1>(range);
         const char *substring = sequence.data() + std::get<0>(range);
-#ifndef NDEBUG
-        std::cout << seqnum << "\t" << std::get<0>(range)
-                  << "\t" << this_length << std::endl;
-#endif
         InvertibleIntegercode2Iterator4 qgiter(qgram_length,substring,
                                                this_length);
         for (auto const &&code_pair : qgiter)
