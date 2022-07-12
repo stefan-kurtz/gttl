@@ -31,12 +31,7 @@ static uint8_t nucleotide2rank(char cc)
 /* Implementation of iterator class follows concept described in
    https://davidgorski.ca/posts/stl-iterators/ */
 
-template<uint64_t first_hash_value_get(const uint8_t *,size_t),
-         uint64_t first_compl_hash_value_get(const uint8_t *,size_t),
-         class AuxData,
-         AuxData aux_data_get(size_t),
-         uint64_t next_hash_value_get(uint8_t,uint64_t,uint8_t,AuxData &),
-         uint64_t next_compl_hash_value_get(uint8_t,uint64_t,uint8_t,AuxData &)>
+template<class QgramTransformer>
 class QgramRecHash2ValueIterator
 {
   static constexpr const size_t alpha_size = 4;
@@ -46,11 +41,11 @@ class QgramRecHash2ValueIterator
   struct Iterator
   {
     private:
+      const QgramTransformer &qgram_transformer;
       CyclicBuffer_uint8 &current_window;
       const SequenceBaseType *next_char_ptr;
       bool last_qgram_was_processed;
       const SequenceBaseType *end_of_sequence;
-      AuxData aux_data;
       uint64_t hash_value, compl_hash_value;
       uint8_t wildcards_in_qgram;
     public:
@@ -61,25 +56,26 @@ class QgramRecHash2ValueIterator
       using reference = uint64_t&;
 
       /* Constructor for begin() */
-      Iterator(size_t _qgram_length,
+      Iterator(const QgramTransformer &qgram_transformer,
                CyclicBuffer_uint8 &_current_window,
                pointer _sequence,
                uint64_t first_hash_value,
                uint64_t first_compl_hash_value)
-        : current_window(_current_window)
+        : qgram_transformer(_qgram_transformer)
+        , current_window(_current_window)
         , next_char_ptr(_sequence + _qgram_length - 1)
         , last_qgram_was_processed(true)
         , end_of_sequence(nullptr)
-        , aux_data(aux_data_get(_qgram_length))
         , hash_value(first_hash_value)
         , compl_hash_value(first_compl_hash_value)
       {
       }
       /* Constructor for end() */
       Iterator(CyclicBuffer_uint8 &_current_window,
-               pointer _end_of_sequence) :
-        current_window(_current_window),
-        end_of_sequence(_end_of_sequence)
+               pointer _end_of_sequence)
+        : qgram_transformer(_qgram_transformer)
+        , current_window(_current_window)
+        , end_of_sequence(_end_of_sequence)
       {
       }
       std::pair<uint64_t,uint64_t> operator*()
@@ -88,14 +84,13 @@ class QgramRecHash2ValueIterator
         {
           const uint8_t new_rank = nucleotide2rank(*next_char_ptr);
           const uint8_t old_rank = current_window.shift(new_rank);
-          hash_value = next_hash_value_get(old_rank,
-                                           hash_value,
-                                           new_rank,
-                                           aux_data);
-          compl_hash_value = next_compl_hash_value_get(old_rank,
+          hash_value = qgram_transformer.next_hash_value_get(old_rank,
+                                                             hash_value,
+                                                             new_rank);
+          compl_hash_value = qgram_transformer.next_compl_hash_value_get(
+                                                       old_rank,
                                                        compl_hash_value,
-                                                       new_rank,
-                                                       aux_data);
+                                                       new_rank);
         }
         return {hash_value,compl_hash_value};
       }
@@ -112,6 +107,7 @@ class QgramRecHash2ValueIterator
   };
 
   private:
+    QgramTransformer qgram_transformer;
     size_t qgram_length;
     const SequenceBaseType *sequence;
     size_t seqlen;
@@ -123,10 +119,11 @@ class QgramRecHash2ValueIterator
   public:
     QgramRecHash2ValueIterator(size_t _qgram_length,
                                const SequenceBaseType *_sequence,
-                               size_t _seqlen):
-      qgram_length(_qgram_length),
-      sequence(_sequence),
-      seqlen(_seqlen)
+                               size_t _seqlen)
+      : qgram_transformer(QgramTransformer(_qgram_length)
+      , qgram_length(_qgram_length)
+      , sequence(_sequence)
+      , seqlen(_seqlen)
     {
       max_integer_code = qgram_length == 32
                            ? UINT64_MAX
@@ -145,22 +142,24 @@ class QgramRecHash2ValueIterator
           current_window.prepend(rank);
         }
         this_hash_value
-          = first_hash_value_get(current_window.pointer_to_array(),
+          = qgram_transformer.first_hash_value_get(
+                                 current_window.pointer_to_array(),
                                  qgram_length);
         this_compl_hash_value
-          = first_compl_hash_value_get(current_window.pointer_to_array(),
+          = qgram_transformer.first_compl_hash_value_get(
+                                       current_window.pointer_to_array(),
                                        qgram_length);
       } else
       {
         /* the next two values will not be used as there is no qgram */
         this_hash_value = this_compl_hash_value = 0;
       }
-      return Iterator(qgram_length,current_window,sequence,
+      return Iterator(qgram_transformer,qgram_length,current_window,sequence,
                       this_hash_value,this_compl_hash_value);
     }
     Iterator end()
     {
-      return Iterator(current_window,sequence + seqlen);
+      return Iterator(qgram_transformer,current_window,sequence + seqlen);
     }
     /* The following functions are for qgram invertible integer codes only */
     uint64_t qgram_encode(const SequenceBaseType *qgram)

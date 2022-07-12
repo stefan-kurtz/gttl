@@ -23,9 +23,6 @@
 using QgramNtHashFwdIterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
                               4,
-                              NTF64_first_hash_value_get,
-                              NThashAux,
-                              NTF64_aux_data_get,
-                              NTF64_next_hash_value_get>;
+                              NThashTransformer>;
 
 #endif

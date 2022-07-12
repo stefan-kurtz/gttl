@@ -18,72 +18,60 @@
 #define QGRAMS_HASH2_INVINT_HPP
 #include "sequences/qgrams_rec_hash2_value_iter.hpp"
 
-static constexpr const uint64_t invint4_complement_table[]
-  = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
-
-namespace qgrams_hash2_invint
+class InvertibleIntegercode2Transformer4
 {
+  static constexpr const uint64_t invint4_complement_table[]
+    = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
   static constexpr const char nucleotides_upper[] = "ACTG";
-}
-
-static int aux_data_invint4(size_t qgram_length)
-{
-  return static_cast<int>(2 * (qgram_length-1));
-}
-
-static uint64_t first_qgram_invint4(const uint8_t *t_qgram,
-                                    size_t qgram_length)
-{
-  uint64_t code = 0, mult= 1;
-  for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
-       t_qgram_ptr >= t_qgram; t_qgram_ptr--)
+  int shift;
+  public:
+  InvertibleIntegercode2Transformer4(size_t qgram_length)
+    : shift(static_cast<int>(2 * (qgram_length-1)))
+  { }
+  uint64_t first_hash_value_get(const uint8_t *t_sequence, size_t qgram_length)
+    const noexcept
   {
-    code += mult * static_cast<uint64_t>(*t_qgram_ptr);
-    mult *= 4;
+    uint64_t code = 0, mult= 1;
+    for (const uint8_t *t_qgram_ptr = t_sequence + qgram_length - 1;
+         t_qgram_ptr >= t_sequence; t_qgram_ptr--)
+    {
+      code += mult * static_cast<uint64_t>(*t_qgram_ptr);
+      mult *= 4;
+    }
+    return code;
   }
-  return code;
-}
-
-static uint64_t first_compl_qgram_invint4(const uint8_t *t_qgram,
-                                          size_t qgram_length)
-{
-  uint64_t code = 0, mult= 1;
-  for (const uint8_t *t_qgram_ptr = t_qgram;
-       t_qgram_ptr < t_qgram + qgram_length; t_qgram_ptr++)
+  uint64_t first_compl_hash_value_get(const uint8_t *t_sequence,
+                                      size_t qgram_length) const noexcept
   {
-    code += mult * invint4_complement_table[*t_qgram_ptr];
-    mult *= 4;
+    uint64_t code = 0, mult= 1;
+    for (const uint8_t *t_qgram_ptr = t_sequence;
+         t_qgram_ptr < t_sequence + qgram_length; t_qgram_ptr++)
+    {
+      code += mult * invint4_complement_table[*t_qgram_ptr];
+      mult *= 4;
+    }
+    return code;
   }
-  return code;
-}
-
-static uint64_t next_qgram_invint4(uint8_t old_t_char,
-                                   uint64_t integer_code,
-                                   uint8_t new_t_char,
-                                   int &shift)
-{
-  integer_code -= (static_cast<uint64_t>(old_t_char) << shift);
-  integer_code *= static_cast<uint64_t>(4);
-  integer_code += static_cast<uint64_t>(new_t_char);
-  return integer_code;
-}
-
-static uint64_t next_compl_qgram_invint4(uint8_t old_t_char,
-                                         uint64_t integer_code,
-                                         uint8_t new_t_char,
-                                         int &shift)
-{
-  integer_code -= invint4_complement_table[old_t_char];
-  integer_code /= static_cast<uint64_t>(4);
-  integer_code += (invint4_complement_table[new_t_char] << shift);
-  return integer_code;
-}
+  uint64_t next_hash_value_get(uint8_t old_t_char,
+                               uint64_t integer_code,
+                               uint8_t new_t_char) const noexcept
+  {
+    integer_code -= (static_cast<uint64_t>(old_t_char) << shift);
+    integer_code *= static_cast<uint64_t>(4);
+    integer_code += static_cast<uint64_t>(new_t_char);
+    return integer_code;
+  }
+  uint64_t next_compl_hash_value_get(uint8_t old_t_char,
+                                     uint64_t integer_code,
+                                     uint8_t new_t_char) const noexcept
+  {
+    integer_code -= invint4_complement_table[old_t_char];
+    integer_code /= static_cast<uint64_t>(4);
+    integer_code += (invint4_complement_table[new_t_char] << shift);
+    return integer_code;
+  }
+};
 
 using InvertibleIntegercode2Iterator4
-  = QgramRecHash2ValueIterator<first_qgram_invint4,
-                               first_compl_qgram_invint4,
-                               int,
-                               aux_data_invint4,
-                               next_qgram_invint4,
-                               next_compl_qgram_invint4>;
+  = QgramRecHash2ValueIterator<InvertibleIntegercode2Transformer4>;
 #endif

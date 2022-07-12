@@ -36,21 +36,55 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 
 all:${EXECS}
 
-test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool test_sort_kvp test_sort_i \
-              test_eoplist test_invint test_line_iterator_mapped
-	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
-	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
-	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
-	@./enum_nthash.x --bytes_unit ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
-	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
-	@./bitpacker_main.x 100
+test:test_alphabet \
+     test_endian \
+     test_nthash \
+     test_bitpacker \
+     test_char_range \
+     test_matrix_partition \
+     test_non_wc_ranges \
+     test_line_iterator \
+     test_fastq_iterator \
+     test_multiseq \
+     test_thread_pool \
+     test_sort_kvp \
+     test_sort_i \
+     test_eoplist \
+     test_invint \
+     test_line_iterator_mapped
+	@echo "Congratulations. $@ passed."
+
+test_endian:./endian.x
 	@./endian.x
+	@echo "Congratulations. $@ passed."
+
+test_bitpacker:./bitpacker_main.x
+	@./bitpacker_main.x 100
+	@echo "Congratulations. $@ passed."
+
+test_non_wc_ranges:./count_non_wc_ranges.x
+	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
+	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
+	@echo "Congratulations. $@ passed."
+
+test_alphabet:./alphabet.x
+	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
+	@echo "Congratulations. $@ passed."
+
+test_char_range:char_range_mn.x
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
 	@./char_range_compare.sh ${AT1MB}
+	@echo "Congratulations. $@ passed."
+
+test_nthash:enum_nthash.x
+	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
+	@./enum_nthash.x --bytes_unit ${AT1MB} | \
+           grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
+           grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
+           grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq

@@ -29,10 +29,7 @@
 
 template<const char *_char_spec,
          uint8_t _undefined_rank,
-         uint64_t first_hash_value_get(const uint8_t *,size_t),
-         typename AuxData,
-         AuxData aux_data_get(size_t),
-         uint64_t next_hash_value_get(uint8_t,uint64_t,uint8_t,AuxData &)>
+         class QgramTransformer>
 class QgramRecHashValueIterator
 {
   using SequenceBaseType = char;
@@ -41,12 +38,12 @@ class QgramRecHashValueIterator
   struct Iterator
   {
     private:
-      GttlAlphabet<_char_spec,_undefined_rank> &alphabet;
+      const GttlAlphabet<_char_spec,_undefined_rank> &alphabet;
       CyclicBuffer_uint8 &current_window;
       const SequenceBaseType *next_char_ptr;
       bool last_qgram_was_processed;
       const SequenceBaseType *end_of_sequence;
-      AuxData aux_data;
+      const QgramTransformer &qgram_transformer;
       uint64_t hash_value;
       uint8_t wildcards_in_qgram;
     public:
@@ -57,31 +54,32 @@ class QgramRecHashValueIterator
       using reference = uint64_t&;
 
       /* Constructor for begin() */
-      Iterator(GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
+      Iterator(const GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
                size_t _qgram_length,
                CyclicBuffer_uint8 &_current_window,
                pointer _sequence,
+               const QgramTransformer &_qgram_transformer,
                uint64_t first_hash_value,
-               uint8_t first_wildcards_in_qgram) :
-        alphabet(_alphabet),
-        current_window(_current_window),
-        next_char_ptr(_sequence + _qgram_length - 1),
-        last_qgram_was_processed(true),
-        end_of_sequence(nullptr),
-        aux_data(aux_data_get(_qgram_length)),
-        hash_value(first_hash_value),
-        wildcards_in_qgram(first_wildcards_in_qgram)
-      {
-      }
+               uint8_t first_wildcards_in_qgram)
+        : alphabet(_alphabet)
+        , current_window(_current_window)
+        , next_char_ptr(_sequence + _qgram_length - 1)
+        , last_qgram_was_processed(true)
+        , end_of_sequence(nullptr)
+        , qgram_transformer(_qgram_transformer)
+        , hash_value(first_hash_value)
+        , wildcards_in_qgram(first_wildcards_in_qgram)
+      {}
       /* Constructor for end() */
-      Iterator(GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
+      Iterator(const GttlAlphabet<_char_spec,_undefined_rank> &_alphabet,
                CyclicBuffer_uint8 &_current_window,
-               pointer _end_of_sequence) :
-        alphabet(_alphabet),
-        current_window(_current_window),
-        end_of_sequence(_end_of_sequence)
-      {
-      }
+               pointer _end_of_sequence,
+               const QgramTransformer &_qgram_transformer)
+        : alphabet(_alphabet)
+        , current_window(_current_window)
+        , end_of_sequence(_end_of_sequence)
+        , qgram_transformer(_qgram_transformer)
+      {}
       std::pair<uint64_t,uint8_t> operator*()
       {
         if (!last_qgram_was_processed)
@@ -92,8 +90,9 @@ class QgramRecHashValueIterator
           const uint8_t old_rank = current_window.shift(new_rank);
           wildcards_in_qgram
             -= static_cast<uint8_t>(old_rank == alphabet.undefined_rank());
-          hash_value = next_hash_value_get(old_rank,hash_value,new_rank,
-                                           aux_data);
+          hash_value = qgram_transformer.next_hash_value_get(old_rank,
+                                                             hash_value,
+                                                             new_rank);
         }
         return {hash_value,wildcards_in_qgram};
       }
@@ -110,6 +109,7 @@ class QgramRecHashValueIterator
   };
 
   private:
+    QgramTransformer qgram_transformer;
     size_t qgram_length;
     const SequenceBaseType *sequence;
     size_t seqlen;
@@ -119,14 +119,15 @@ class QgramRecHashValueIterator
 #ifndef NDEBUG
     uint8_t qgram_buffer[MAX_QGRAM_LENGTH];
 #endif
-    GttlAlphabet<_char_spec,_undefined_rank> alphabet;
+    GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
   public:
     QgramRecHashValueIterator(size_t _qgram_length,
                               const SequenceBaseType *_sequence,
-                              size_t _seqlen):
-      qgram_length(_qgram_length),
-      sequence(_sequence),
-      seqlen(_seqlen)
+                              size_t _seqlen)
+      : qgram_transformer(QgramTransformer(_qgram_length))
+      , qgram_length(_qgram_length)
+      , sequence(_sequence)
+      , seqlen(_seqlen)
     {
       alpha_size = static_cast<uint64_t>(alphabet.size());
       max_integer_code = qgram_length == 32
@@ -148,9 +149,9 @@ class QgramRecHashValueIterator
           wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
           current_window.prepend(rank);
         }
-        this_hash_value
-          = first_hash_value_get(current_window.pointer_to_array(),
-                                 qgram_length);
+        this_hash_value = qgram_transformer.first_hash_value_get(
+                                              current_window.pointer_to_array(),
+                                              qgram_length);
       } else
       {
         /* the next two values will not be used as there is no qgram */
@@ -158,11 +159,12 @@ class QgramRecHashValueIterator
         wc = 1;
       }
       return Iterator(alphabet,qgram_length,current_window,sequence,
-                      this_hash_value,wc);
+                      qgram_transformer,this_hash_value,wc);
     }
     Iterator end()
     {
-      return Iterator(alphabet,current_window,sequence + seqlen);
+      return Iterator(alphabet,current_window,sequence + seqlen,
+                      qgram_transformer);
     }
     /* The following functions are for qgram integer codes only */
     std::pair<uint64_t,uint8_t> qgram_encode(const SequenceBaseType *qgram)

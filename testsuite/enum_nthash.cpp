@@ -114,9 +114,9 @@ class NtHashOptions
   }
 };
 
-
 #ifndef NDEBUG
-static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
+static void qgrams_nt_fwd_compare(const NThashTransformer &nt_hash_transformer,
+                                  const alphabet::GttlAlphabet_UL_4 &alphabet,
                                   uint8_t *qgram_buffer,
                                   const char *orig_qgram,
                                   size_t qgram_length,
@@ -126,8 +126,9 @@ static void qgrams_nt_fwd_compare(alphabet::GttlAlphabet_UL_4 &alphabet,
   {
     qgram_buffer[idx] = alphabet.char_to_rank(orig_qgram[idx]);
   }
-  uint64_t bf_hash_value = NTF64_first_hash_value_get(qgram_buffer,
-                                                      qgram_length);
+  uint64_t bf_hash_value
+    = nt_hash_transformer.first_hash_value_get(qgram_buffer,
+                                                            qgram_length);
   assert(bf_hash_value == expected_hash_value);
 }
 #endif
@@ -145,7 +146,8 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
 {
   uint8_t *qgram_buffer = new uint8_t [qgram_length];
 #ifndef NDEBUG
-  alphabet::GttlAlphabet_UL_4 dna_alphabet;
+  const alphabet::GttlAlphabet_UL_4 dna_alphabet;
+  NThashTransformer nt_hash_transformer(qgram_length);
 #endif
   uint64_t sum_hash_values = 0;
   size_t seqpos = 0;
@@ -158,7 +160,7 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
       uint64_t this_hash = std::get<0>(code_pair);
       sum_hash_values += this_hash;
 #ifndef NDEBUG
-      qgrams_nt_fwd_compare(dna_alphabet,qgram_buffer,
+      qgrams_nt_fwd_compare(nt_hash_transformer,dna_alphabet,qgram_buffer,
                             sequence + seqpos,qgram_length,
                             std::get<0>(code_pair));
 #endif
