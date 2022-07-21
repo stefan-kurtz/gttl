@@ -40,6 +40,7 @@ class KeyValuePair
         s += " ";
       }
     }
+    s += '\t' + std::to_string(value);
     return s;
   }
   bool operator < (const KeyValuePair& other) const noexcept
