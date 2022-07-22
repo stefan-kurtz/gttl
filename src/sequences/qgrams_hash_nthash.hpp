@@ -19,10 +19,14 @@
 #include "sequences/alphabet.hpp"
 #include "sequences/nthash_fwd.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
+#include "sequences/qgrams_rec_hash2_value_iter.hpp"
 
 using QgramNtHashFwdIterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
                               4,
                               NThashTransformer>;
+
+using QgramNtHashIterator4
+  = QgramRecHash2ValueIterator<NThashTransformer>;
 
 #endif

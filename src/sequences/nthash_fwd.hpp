@@ -41,14 +41,19 @@ SOFTWARE.
 #define NTHASH_FWD_HPP
 #include <cstdint>
 #include <cassert>
-#include "utilities/constexpr_for.hpp"
 
 class NThashTransformer
 {
   // rotate "v" to the left 1 position
-  uint64_t rotate_left1(const uint64_t v) const noexcept
+  uint64_t rotate_left_1(const uint64_t v) const noexcept
   {
     return (v << 1) | (v >> 63);
+  }
+
+  // rotate "v" to the right 1 position
+  uint64_t rotate_right_1(const uint64_t v) const noexcept
+  {
+    return (v >> 1) | (v << 63);
   }
 
   // swap bit 0 with bit 33 in "v"
@@ -56,6 +61,13 @@ class NThashTransformer
   {
     uint64_t x = (v ^ (v >> 33)) & 1;
     return v ^ (x | (x << 33));
+  }
+
+  // swap bit 32 with bit 63 in "v"
+  inline uint64_t swapbits3263(const uint64_t v) const noexcept
+  {
+    uint64_t x = ((v >> 32) ^ (v >> 63)) & 1;
+    return v ^ ((x << 32) | (x << 63));
   }
 
   // 64-bit random seeds corresponding to bases and their complements
@@ -197,10 +209,24 @@ class NThashTransformer
     uint64_t hVal = 0;
     for (size_t idx = 0; idx < qgram_length; idx++)
     {
-      hVal = rotate_left1(hVal);
+      hVal = rotate_left_1(hVal);
       hVal = swapbits033(hVal);
       assert(kmerSeq[idx] <= 4);
       hVal ^= nt_hash_seed_table[kmerSeq[idx]];
+    }
+    return hVal;
+  }
+  uint64_t first_compl_hash_value_get(const uint8_t *kmerSeq,
+                                      size_t qgram_length)
+    const noexcept
+  {
+    uint64_t hVal = 0;
+    for (const uint8_t *ptr = kmerSeq + qgram_length - 1; ptr >= kmerSeq; ptr--)
+    {
+      hVal = rotate_left_1(hVal);
+      hVal = swapbits033(hVal);
+      assert(*ptr < 4);
+      hVal ^= nt_hash_seed_table[3 - *ptr];
     }
     return hVal;
   }
@@ -209,10 +235,21 @@ class NThashTransformer
                                uint8_t charIn) const noexcept
   {
     assert(charIn <= 4 && charOut <= 4);
-    uint64_t hVal = rotate_left1(fhVal);
+    uint64_t hVal = rotate_left_1(fhVal);
     hVal = swapbits033(hVal);
     hVal ^= nt_hash_seed_table[charIn];
     hVal ^= msTab31l_33r_or[charOut];
+    return hVal;
+  }
+  // forward-strand ntHash for sliding k-mers
+  uint64_t next_compl_hash_value_get(uint8_t charOut, uint64_t rhVal,
+                                     uint8_t charIn) const noexcept
+  {
+    assert(charIn < 4 && charOut < 4);
+    uint64_t hVal = rhVal ^ msTab31l_33r_or[3 - charIn];
+    hVal ^= nt_hash_seed_table[3 - charOut];
+    hVal = rotate_right_1(hVal);
+    hVal = swapbits3263(hVal);
     return hVal;
   }
 };

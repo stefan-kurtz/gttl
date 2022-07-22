@@ -115,20 +115,29 @@ class NtHashOptions
 };
 
 #ifndef NDEBUG
-static void qgrams_nt_fwd_compare(const NThashTransformer &nt_hash_transformer,
-                                  const alphabet::GttlAlphabet_UL_4 &alphabet,
-                                  uint8_t *qgram_buffer,
-                                  const char *orig_qgram,
-                                  size_t qgram_length,
-                                  uint64_t expected_hash_value)
+template<bool forward>
+static void qgrams_nt_compare(const NThashTransformer &nt_hash_transformer,
+                              const alphabet::GttlAlphabet_UL_4 &alphabet,
+                              uint8_t *qgram_buffer,
+                              const char *orig_qgram,
+                              size_t qgram_length,
+                              uint64_t expected_hash_value)
 {
   for (size_t idx = 0; idx < qgram_length; idx++)
   {
     qgram_buffer[idx] = alphabet.char_to_rank(orig_qgram[idx]);
   }
-  uint64_t bf_hash_value
-    = nt_hash_transformer.first_hash_value_get(qgram_buffer,
-                                                            qgram_length);
+  uint64_t bf_hash_value;
+  if constexpr (forward)
+  {
+    bf_hash_value = nt_hash_transformer.first_hash_value_get(qgram_buffer,
+                                                             qgram_length);
+  } else
+  {
+    bf_hash_value
+      = nt_hash_transformer.first_compl_hash_value_get(qgram_buffer,
+                                                       qgram_length);
+  }
   assert(bf_hash_value == expected_hash_value);
 }
 #endif
@@ -160,9 +169,9 @@ static std::tuple<uint64_t,size_t,size_t> apply_qgram_iterator(
       uint64_t this_hash = std::get<0>(code_pair);
       sum_hash_values += this_hash;
 #ifndef NDEBUG
-      qgrams_nt_fwd_compare(nt_hash_transformer,dna_alphabet,qgram_buffer,
-                            sequence + seqpos,qgram_length,
-                            std::get<0>(code_pair));
+      qgrams_nt_compare<true>(nt_hash_transformer,dna_alphabet,qgram_buffer,
+                              sequence + seqpos,qgram_length,
+                              std::get<0>(code_pair));
 #endif
       if constexpr (create_bytes_unit)
       {
