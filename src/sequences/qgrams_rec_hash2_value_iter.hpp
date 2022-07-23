@@ -20,21 +20,34 @@
 #include <cstddef>
 #include <cstdint>
 #include <cmath>
+#include "sequences/alphabet.hpp"
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/max_qgram_length.hpp"
 
-static uint8_t nucleotide2rank(char cc)
+static inline uint8_t QgramRecHash2ValueIterator_complement(uint8_t rank)
 {
-  return (static_cast<uint8_t>(cc) >> 1) & uint8_t(3);
+  assert(rank < 4);
+  return 3 - rank;
 }
 
 /* Implementation of iterator class follows concept described in
    https://davidgorski.ca/posts/stl-iterators/ */
 
-template<class QgramTransformer>
+template<const char *_char_spec,
+         uint8_t _undefined_rank,
+         class QgramTransformer>
 class QgramRecHash2ValueIterator
 {
-  static constexpr const size_t alpha_size = 4;
+  public:
+  static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
+  /* As we use the expression uses 3 - base to compute the
+     complement of a rank for a base, the following must be checked */
+  static_assert(alphabet.char_to_rank('A') == 0 &&
+                alphabet.char_to_rank('C') == 1 &&
+                alphabet.char_to_rank('G') == 2 &&
+                alphabet.char_to_rank('T') == 3);
+  private:
+  static constexpr const size_t alpha_size = alphabet.size();
   using SequenceBaseType = char;
   using CyclicBuffer_uint8 = CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH>;
 
@@ -84,15 +97,16 @@ class QgramRecHash2ValueIterator
       {
         if (!last_qgram_was_processed)
         {
-          const uint8_t new_rank = nucleotide2rank(*next_char_ptr);
+          const uint8_t new_rank = alphabet.char_to_rank(*next_char_ptr);
           const uint8_t old_rank = current_window.shift(new_rank);
           hash_value = qgram_transformer.next_hash_value_get(old_rank,
                                                              hash_value,
                                                              new_rank);
-          compl_hash_value = qgram_transformer.next_compl_hash_value_get(
-                                                       old_rank,
-                                                       compl_hash_value,
-                                                       new_rank);
+          compl_hash_value
+            = qgram_transformer.next_compl_hash_value_get(
+                 QgramRecHash2ValueIterator_complement(old_rank),
+                 compl_hash_value,
+                 QgramRecHash2ValueIterator_complement(new_rank));
         }
         return {hash_value,compl_hash_value};
       }
@@ -132,36 +146,50 @@ class QgramRecHash2ValueIterator
                            : std::pow(alpha_size,_qgram_length) - 1;
       current_window.initialize(_qgram_length);
     }
-    Iterator begin()
+    Iterator begin(void)
     {
       uint64_t this_hash_value, this_compl_hash_value;
+      uint8_t rc_transformed_sequence[MAX_QGRAM_LENGTH];
       if (qgram_length <= seqlen)
       {
         for (const SequenceBaseType *qgram_ptr = sequence + qgram_length - 1;
              qgram_ptr >= sequence; qgram_ptr--)
         {
-          const uint8_t rank = nucleotide2rank(*qgram_ptr);
+          const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
           current_window.prepend(rank);
         }
         this_hash_value
           = qgram_transformer.first_hash_value_get(
                                  current_window.pointer_to_array(),
                                  qgram_length);
+        const uint8_t *fwd_transformed_sequence
+          = current_window.pointer_to_array();
+        for (size_t idx = 0; idx < qgram_length; idx++)
+        {
+          rc_transformed_sequence[qgram_length - 1 - idx]
+            = QgramRecHash2ValueIterator_complement(
+                fwd_transformed_sequence[idx]);
+        }
         this_compl_hash_value
-          = qgram_transformer.first_compl_hash_value_get(
-                                       current_window.pointer_to_array(),
-                                       qgram_length);
+          = qgram_transformer.first_hash_value_get(rc_transformed_sequence,
+                                                   qgram_length);
       } else
       {
         /* the next two values will not be used as there is no qgram */
         this_hash_value = this_compl_hash_value = 0;
       }
-      return Iterator(qgram_transformer,qgram_length,current_window,sequence,
-                      this_hash_value,this_compl_hash_value);
+      return Iterator(qgram_transformer,
+                      qgram_length,
+                      current_window,
+                      sequence,
+                      this_hash_value,
+                      this_compl_hash_value);
     }
-    Iterator end()
+    Iterator end(void)
     {
-      return Iterator(qgram_transformer,current_window,sequence + seqlen);
+      return Iterator(qgram_transformer,
+                      current_window,
+                      sequence + seqlen);
     }
     /* The following functions are for qgram invertible integer codes only */
     uint64_t qgram_encode(const SequenceBaseType *qgram)
@@ -170,7 +198,7 @@ class QgramRecHash2ValueIterator
       for (const SequenceBaseType *qgram_ptr = qgram + qgram_length - 1;
            qgram_ptr >= qgram; qgram_ptr--)
       {
-        const uint8_t rank = nucleotide2rank(*qgram_ptr);
+        const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
         current_window.prepend(rank);
         code += mult * static_cast<uint64_t>(rank);
         mult *= alpha_size;
@@ -183,7 +211,7 @@ class QgramRecHash2ValueIterator
       for (const SequenceBaseType *qgram_ptr = qgram;
            qgram_ptr < qgram + qgram_length; qgram_ptr++)
       {
-        const uint8_t rank = nucleotide2rank(*qgram_ptr);
+        const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
         code += mult * static_cast<uint64_t>(rank);
         mult *= alpha_size;
       }
@@ -211,7 +239,7 @@ class QgramRecHash2ValueIterator
     {
       for (size_t idx = 0; idx < qgram_length; idx++)
       {
-        uint8_t rank = nucleotide2rank(orig_qgram[idx]);
+        uint8_t rank = alphabet.char_to_rank(orig_qgram[idx]);
         assert(rank == mapped_qgram[idx]);
       }
     }

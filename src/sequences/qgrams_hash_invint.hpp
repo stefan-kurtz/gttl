@@ -36,11 +36,8 @@ static uint64_t first_qgram_integer_code(const uint8_t *t_qgram,
 
 class InvertibleIntegercodeTransformer4
 {
-  static constexpr const uint64_t invint4_complement_table[]
-    = {uint64_t(2),uint64_t(3), uint64_t(0),uint64_t(1)};
   int shift;
   public:
-  static constexpr const char nucleotides_upper[] = "ACTG";
   InvertibleIntegercodeTransformer4(size_t qgram_length)
     : shift(static_cast<int>(2 * (qgram_length-1)))
   {}
@@ -58,25 +55,13 @@ class InvertibleIntegercodeTransformer4
     integer_code += static_cast<uint64_t>(new_t_char);
     return integer_code;
   }
-  uint64_t first_compl_hash_value_get(const uint8_t *t_sequence,
-                                      size_t qgram_length) const noexcept
-  {
-    uint64_t code = 0, mult= 1;
-    for (const uint8_t *t_qgram_ptr = t_sequence;
-         t_qgram_ptr < t_sequence + qgram_length; t_qgram_ptr++)
-    {
-      code += mult * invint4_complement_table[*t_qgram_ptr];
-      mult *= 4;
-    }
-    return code;
-  }
-  uint64_t next_compl_hash_value_get(uint8_t old_t_char,
+  uint64_t next_compl_hash_value_get(uint8_t compl_old_t_char,
                                      uint64_t integer_code,
-                                     uint8_t new_t_char) const noexcept
+                                     uint8_t compl_new_t_char) const noexcept
   {
-    integer_code -= invint4_complement_table[old_t_char];
+    integer_code -= compl_old_t_char;
     integer_code /= static_cast<uint64_t>(4);
-    integer_code += (invint4_complement_table[new_t_char] << shift);
+    integer_code += (compl_new_t_char << shift);
     return integer_code;
   }
 };
@@ -92,7 +77,9 @@ using InvertibleIntegercodeIterator4_Wildcard2_a
                               InvertibleIntegercodeTransformer4>;
 
 using InvertibleIntegercode2Iterator4
-  = QgramRecHash2ValueIterator<InvertibleIntegercodeTransformer4>;
+  = QgramRecHash2ValueIterator<alphabet::nucleotides_upper_lower,
+                               4,
+                               InvertibleIntegercodeTransformer4>;
 
 class InvertibleIntegercodeTransformer20
 {

@@ -1,8 +1,8 @@
-# num_of_sequences	1
-# total_length	315339
-# max_sequence_length	315339
-# num_of_sequences.bits	1
-# max_sequence_length.bits	19
-# count_all_qgrams	315322
-# sum_hash_values	15678791637692252400
 # bytes_unit_sum	15668032890429533504
+# count_all_qgrams	315322
+# max_sequence_length	315339
+# max_sequence_length.bits	19
+# num_of_sequences	1
+# num_of_sequences.bits	1
+# sum_hash_values	15678791637692252400
+# total_length	315339

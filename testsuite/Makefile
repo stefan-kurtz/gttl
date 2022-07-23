@@ -80,11 +80,11 @@ test_char_range:char_range_mn.x
 test_nthash:enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./enum_nthash.x --bytes_unit ${AT1MB} | \
-           grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
+           grep -v '^# TIME' | sort -u | diff - ../testdata/at1MB_nthash.tsv
 	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
-           grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
+           grep -v '^# TIME' | sort -u | diff - ../testdata/vaccg_nthash.tsv
 	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
-           grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
+           grep -v '^# TIME' | sort -u | diff - ../testdata/ychrIII_nthash.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq
@@ -166,9 +166,9 @@ test_eoplist:eoplist_mn.x
 
 .PHONY:test_invint
 test_invint:enum_invint.x
-	@./enum_invint.x 14 ../testdata/at1MB.fna | diff - ../testdata/at1MB_invint14.tsv
 	@./enum_invint.x 15 ../testdata/vaccg.fna | diff - ../testdata/vaccg_invint15.tsv
-	@./enum_invint.x 20 ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_invint20.tsv
+	@./enum_invint.x 15 ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_invint15.tsv
+	@./enum_invint.x 14 ../testdata/at1MB.fna | diff - ../testdata/at1MB_invint14.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator_mapped

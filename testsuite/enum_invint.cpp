@@ -11,8 +11,7 @@ static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
 #ifndef NDEBUG
 template<class HashValuePairIterator>
-static void verify_hash_value_pair(const std::array<uint8_t,4> &complement,
-                                   HashValuePairIterator &qgiter,
+static void verify_hash_value_pair(HashValuePairIterator &qgiter,
                                    uint64_t hash_value,
                                    uint64_t compl_hash_value)
 {
@@ -25,11 +24,11 @@ static void verify_hash_value_pair(const std::array<uint8_t,4> &complement,
   {
     uint8_t cc = qgram_rc[qgram_length - 1 - idx];
     assert(cc < 4);
-    cc = complement[cc];
+    cc = QgramRecHash2ValueIterator_complement(cc);
     if (cc != qgram_direct[idx])
     {
       StrFormat msg("incorrect reverse complement "
-                    "hash_value=%lu\tcompl_hash_value%lu",
+                    "hash_value=%llu\tcompl_hash_value=%llu",
                     hash_value, compl_hash_value);
       delete[] qgram_direct;
       throw msg.str();
@@ -40,8 +39,7 @@ static void verify_hash_value_pair(const std::array<uint8_t,4> &complement,
 #endif
 
 template<class HashValuePairIterator>
-static void verify_hashvalues_for_file(const std::array<uint8_t,4> &complement,
-                                       const char *inputfilename,
+static void verify_hashvalues_for_file(const char *inputfilename,
                                        size_t qgram_length)
 {
   constexpr const int buf_size = 1 << 14;
@@ -80,7 +78,7 @@ static void verify_hashvalues_for_file(const std::array<uint8_t,4> &complement,
           compl_hash_value_sum += compl_hash_value;
 #ifndef NDEBUG
           verify_hash_value_pair<HashValuePairIterator>
-                                (complement,qgiter,hash_value,compl_hash_value);
+                                (qgiter,hash_value,compl_hash_value);
 #endif
         }
         ranges_total_length += this_length;
@@ -115,10 +113,8 @@ int main(int argc,char *argv[])
   const char *inputfilename = argv[2];
   try
   {
-    const std::array<uint8_t,4> complement{uint8_t(2),uint8_t(3),
-                                           uint8_t(0),uint8_t(1)};
     verify_hashvalues_for_file<InvertibleIntegercode2Iterator4>
-                              (complement,inputfilename,qgram_length);
+                              (inputfilename,qgram_length);
   }
   catch (std::string &msg)
   {

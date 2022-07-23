@@ -27,6 +27,8 @@ using QgramNtHashFwdIterator4
                               NThashTransformer>;
 
 using QgramNtHashIterator4
-  = QgramRecHash2ValueIterator<NThashTransformer>;
+  = QgramRecHash2ValueIterator<alphabet::nucleotides_upper_lower,
+                              4,
+                              NThashTransformer>;
 
 #endif
