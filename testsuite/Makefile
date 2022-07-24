@@ -80,11 +80,22 @@ test_char_range:char_range_mn.x
 test_nthash:enum_nthash.x
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./enum_nthash.x --bytes_unit ${AT1MB} | \
-           grep -v '^# TIME' | sort -u | diff - ../testdata/at1MB_nthash.tsv
+           grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+           grep '_rc' | diff - ../testdata/at1MB_nthash_rc.tsv
 	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
-           grep -v '^# TIME' | sort -u | diff - ../testdata/vaccg_nthash.tsv
+           grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ../testdata/vaccg.fna | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/vaccg_nthash.tsv
 	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
-           grep -v '^# TIME' | sort -u | diff - ../testdata/ychrIII_nthash.tsv
+           grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/ychrIII_nthash.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq

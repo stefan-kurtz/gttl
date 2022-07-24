@@ -59,7 +59,7 @@ class NThashTransformer
   // swap bit 0 with bit 33 in "v"
   uint64_t swapbits033(const uint64_t v) const noexcept
   {
-    uint64_t x = (v ^ (v >> 33)) & 1;
+    uint64_t x = (v ^ (v >> 33)) & uint64_t(1);
     return v ^ (x | (x << 33));
   }
 
@@ -227,9 +227,11 @@ class NThashTransformer
     hVal ^= msTab31l_33r_or[charOut];
     return hVal;
   }
-  // forward-strand ntHash for sliding k-mers
-  uint64_t next_compl_hash_value_get(uint8_t compl_charOut, uint64_t rhVal,
-                                     uint8_t compl_charIn) const noexcept
+  // reverse-strand ntHash for sliding k-mers
+  uint64_t next_compl_hash_value_get(uint8_t compl_charOut,
+                                     uint64_t rhVal,
+                                     uint8_t compl_charIn)
+                                     const noexcept
   {
     assert(compl_charIn < 4 && compl_charOut < 4);
     uint64_t hVal = rhVal ^ msTab31l_33r_or[compl_charIn];
