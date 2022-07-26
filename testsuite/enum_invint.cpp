@@ -24,7 +24,7 @@ static void verify_hash_value_pair(HashValuePairIterator &qgiter,
   {
     uint8_t cc = qgram_rc[qgram_length - 1 - idx];
     assert(cc < 4);
-    cc = QgramRecHash2ValueIterator_complement(cc);
+    cc = QgramRecHashValueIterator_complement(cc);
     if (cc != qgram_direct[idx])
     {
       StrFormat msg("incorrect reverse complement "

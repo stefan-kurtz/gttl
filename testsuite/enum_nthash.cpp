@@ -186,7 +186,7 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
       for (size_t idx = 0; idx < qgram_length; idx++)
       {
         qgram_buffer[qgram_length - 1 - idx]
-          = QgramRecHash2ValueIterator_complement(
+          = QgramRecHashValueIterator_complement(
               alphabet.char_to_rank(substring[seqpos + idx]));
       }
       assert(this_rc_hash ==

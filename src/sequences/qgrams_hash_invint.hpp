@@ -17,8 +17,8 @@
 #ifndef QGRAMS_HASH_INVINT_HPP
 #define QGRAMS_HASH_INVINT_HPP
 #include "sequences/alphabet.hpp"
+#include "sequences/qgrams_rec_hash_value_fwd_iter.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
-#include "sequences/qgrams_rec_hash2_value_iter.hpp"
 
 template<size_t alpha_size>
 static uint64_t first_qgram_integer_code(const uint8_t *t_qgram,
@@ -67,19 +67,19 @@ class InvertibleIntegercodeTransformer4
 };
 
 using InvertibleIntegercodeIterator4
+  = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
+                                 4,
+                                 InvertibleIntegercodeTransformer4>;
+
+using InvertibleIntegercodeIterator4_Wildcard2_a
+  = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
+                                 0,
+                                 InvertibleIntegercodeTransformer4>;
+
+using InvertibleIntegercode2Iterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
                               4,
                               InvertibleIntegercodeTransformer4>;
-
-using InvertibleIntegercodeIterator4_Wildcard2_a
-  = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
-                              0,
-                              InvertibleIntegercodeTransformer4>;
-
-using InvertibleIntegercode2Iterator4
-  = QgramRecHash2ValueIterator<alphabet::nucleotides_upper_lower,
-                               4,
-                               InvertibleIntegercodeTransformer4>;
 
 class InvertibleIntegercodeTransformer20
 {
@@ -106,8 +106,8 @@ class InvertibleIntegercodeTransformer20
 };
 
 using InvertibleIntegercodeIterator20
-  = QgramRecHashValueIterator<alphabet::amino_acids,
-                              20,
-                              InvertibleIntegercodeTransformer20>;
+  = QgramRecHashValueFwdIterator<alphabet::amino_acids,
+                                 20,
+                                 InvertibleIntegercodeTransformer20>;
 
 #endif
