@@ -34,6 +34,7 @@ class QgramRecHashValueFwdIterator
 {
   public:
   static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
+  static constexpr const bool handle_both_strands = false;
   private:
   static constexpr uint64_t alpha_size = static_cast<uint64_t>(alphabet.size());
   using SequenceBaseType = char;

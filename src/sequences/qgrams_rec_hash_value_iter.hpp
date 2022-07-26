@@ -40,6 +40,7 @@ class QgramRecHashValueIterator
 {
   public:
   static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
+  static constexpr const bool handle_both_strands = true;
   /* As we use the expression uses 3 - base to compute the
      complement of a rank for a base, the following must be checked */
   static_assert(alphabet.char_to_rank('A') == 0 &&
