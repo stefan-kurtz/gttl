@@ -108,24 +108,30 @@ class SortedMatchList
 {
   static_assert(sizeof_unit_match == 8 || sizeof_unit_match == 9);
   static_assert(ref_idx == 0 || ref_idx == 1);
-  private:
+  static constexpr const int query_idx = ref_idx == 0 ? 1 : 0;
+  static constexpr const int ref_pos_idx = ref_idx == 0 ? 2 : 3;
+  static constexpr const int query_pos_idx = ref_idx == 0 ? 3 : 2;
   using BytesUnitMatch = BytesUnit<sizeof_unit_match,5>;
+  private:
   std::vector<BytesUnitMatch> encoded_match_list;
-  size_t number_of_seeds,
+  size_t minimum_mem_length,
+         number_of_seeds,
          number_of_all_matches;
   int bits_for_sequences;
   int remaining_bits_for_length;
+  uint64_t maximum_storable_match_length;
   const GttlMultiseq *ref_multiseq,
                      *query_multiseq;
   GttlBitPacker<sizeof_unit_match,5> match_packer;
 
   public:
   SortedMatchList(size_t qgram_length,
-                  size_t minimum_mem_length,
+                  size_t _minimum_mem_length,
                   const SeedEnumeratorClass &seed_enumerator,
                   const GttlMultiseq *_ref_multiseq,
                   const GttlMultiseq *_query_multiseq)
     : encoded_match_list({})
+    , minimum_mem_length(_minimum_mem_length)
     , number_of_seeds(0)
     , number_of_all_matches(0)
                          /* this must deliver sum of number of bits needed for
@@ -136,6 +142,8 @@ class SortedMatchList
     , bits_for_sequences(seed_enumerator.sequences_bits_sum_get())
     , remaining_bits_for_length(sizeof_unit_match * CHAR_BIT -
                                 bits_for_sequences)
+    , maximum_storable_match_length(gttl_bits2maxvalue<uint64_t>
+                                       (remaining_bits_for_length))
     , ref_multiseq(_ref_multiseq)
     , query_multiseq(_query_multiseq)
     , match_packer(/* Deliver a std::array<int,5> such that at
@@ -150,15 +158,15 @@ class SortedMatchList
                                                      (remaining_bits_for_length)
                   )
   {
+    assert(minimum_mem_length >= qgram_length);
     const size_t length_threshold = minimum_mem_length - qgram_length;
-    const uint64_t maximum_storable_match_length
-      = gttl_bits2maxvalue<uint64_t>(remaining_bits_for_length);
 
     /* For the following loop to work the
        seed_enumerator must provide iterators begin() and end() which
        when dereferenced deliver an instance of
-       struct SortedMatchListPositionPair */
-    for (auto &&pp : seed_enumerator)
+       struct SortedMatchListPositionPair, or some struct which is compatible.
+    */
+    for (auto const &pp : seed_enumerator)
     {
       if constexpr (seed_output)
       {
@@ -212,12 +220,18 @@ class SortedMatchList
         assert(pp.startpos0 >= left_extend && pp.startpos1 >= left_extend);
         const size_t this_match_length = left_extend + qgram_length +
                                          right_extend;
+        assert(this_match_length >= minimum_mem_length);
+        uint64_t length_stored;
         if (this_match_length >
             minimum_mem_length + maximum_storable_match_length)
         {
-          std::cerr << "cannot store match of length " << this_match_length
-                    << std::endl;
-          exit(EXIT_FAILURE);
+          length_stored = maximum_storable_match_length;
+          StrFormat msg("cannot store match of length %lu, resort to using "
+                        "more space for matches",this_match_length);
+          throw msg.str();
+        } else
+        {
+          length_stored = this_match_length - minimum_mem_length;
         }
         if constexpr (ref_idx == 0)
         {
@@ -227,7 +241,7 @@ class SortedMatchList
                            pp.seqnum1,
                            pp.startpos0 - left_extend + this_match_length - 1,
                            pp.startpos1 - left_extend + this_match_length - 1,
-                           this_match_length - minimum_mem_length});
+                           length_stored});
           encoded_match_list.emplace_back(encoded_match);
         } else
         {
@@ -238,7 +252,7 @@ class SortedMatchList
                            pp.seqnum0,
                            pp.startpos1 - left_extend + this_match_length - 1,
                            pp.startpos0 - left_extend + this_match_length - 1,
-                           this_match_length - minimum_mem_length});
+                           length_stored});
           encoded_match_list.emplace_back(encoded_match);
         }
       }
@@ -253,16 +267,6 @@ class SortedMatchList
                                    encoded_match_list.size(),
                                    reversed_byte_order);
     remove_duplicates<BytesUnitMatch>(&encoded_match_list);
-  }
-  const GttlBitPacker<sizeof_unit_match,5> &match_packer_reference_get(void)
-        const noexcept
-  {
-    return match_packer;
-  }
-  const std::vector<BytesUnitMatch>
-        &encoded_match_list_reference_get(void) const noexcept
-  {
-    return encoded_match_list;
   }
   size_t number_of_all_matches_get(void) const noexcept
   {
@@ -289,7 +293,6 @@ class SortedMatchList
   /* This is currently not used */
   std::pair<size_t,size_t> gaps_of_adjacent(const BytesUnitMatch
                                                *segment_match_list,
-                                            size_t minimum_mem_length,
                                             size_t i,size_t j) const noexcept
   {
     /* The following definition must be consistent with the definition in
@@ -311,6 +314,95 @@ class SortedMatchList
     assert(p_endpos0 < m_startpos0 && p_endpos1 < m_startpos1);
     return std::make_pair(static_cast<size_t>(m_startpos0 - p_endpos0 - 1),
                           static_cast<size_t>(m_startpos1 - p_endpos1 - 1));
+  }
+  bool all_same_segment(void) const noexcept
+  {
+    return ref_multiseq->sequences_number_get() == 1 &&
+           query_multiseq->sequences_number_get() == 1;
+  }
+  size_t size(void) const noexcept
+  {
+    return encoded_match_list.size();
+  }
+  bool same_segment(size_t i, size_t j) const noexcept
+  {
+    assert(i < size() && j < size());
+    const BytesUnitMatch &a = encoded_match_list[i];
+    const BytesUnitMatch &b = encoded_match_list[j];
+    return (a.template decode_at<ref_idx>(match_packer) ==
+            b.template decode_at<ref_idx>(match_packer)) &&
+           (a.template decode_at<query_idx>(match_packer) ==
+            b.template decode_at<query_idx>(match_packer));
+  }
+  size_t ref_seqnum_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return static_cast<size_t>(encoded_match_list[this_idx]
+                               .template decode_at<ref_idx>(match_packer));
+  }
+  size_t query_seqnum_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return static_cast<size_t>(encoded_match_list[this_idx]
+                               .template decode_at<query_idx>(match_packer));
+  }
+  size_t ref_endpos_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return static_cast<size_t>(encoded_match_list[this_idx]
+                               .template decode_at<ref_pos_idx>(match_packer));
+  }
+  size_t query_endpos_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return static_cast<size_t>
+                      (encoded_match_list[this_idx]
+                       .template decode_at<query_pos_idx>(match_packer));
+  }
+  size_t length_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return minimum_mem_length +
+           static_cast<size_t>(encoded_match_list[this_idx]
+                               .template decode_at<4>(match_packer));
+  }
+  size_t order_endpos_get(size_t this_idx) const noexcept
+  {
+    assert(this_idx < size());
+    return static_cast<size_t>(encoded_match_list[this_idx]
+                               .template decode_at<2>(match_packer));
+  }
+  std::pair<uint64_t,uint64_t> colinear_match_pair(size_t i,size_t j)
+    const noexcept
+  {
+    auto p = encoded_match_list[i];
+    auto m = encoded_match_list[j];
+    const uint64_t j_endpos0
+      = m.template decode_at<ref_pos_idx>(match_packer);
+    const uint64_t j_endpos1
+      = m.template decode_at<query_pos_idx>(match_packer);
+    const size_t j_match_length = minimum_mem_length +
+                                  m.template decode_at<4>(match_packer);
+    assert(j_endpos0 + 1 >= j_match_length &&
+           j_endpos1 + 1 >= j_match_length);
+    const uint64_t j_startpos0 = j_endpos0 + 1 - j_match_length,
+                   j_startpos1 = j_endpos1 + 1 - j_match_length;
+
+    const uint64_t p_endpos0 = p.template decode_at<ref_pos_idx>(match_packer);
+
+    if (p_endpos0 < j_startpos0)
+    {
+      const uint64_t p_endpos1
+        = p.template decode_at<query_pos_idx>(match_packer);
+      if (p_endpos1 < j_startpos1)
+      {
+        const uint64_t gap0 = j_startpos0 - p_endpos0 - 1,
+                       gap1 = j_startpos1 - p_endpos1 - 1;
+        assert(gap0 > 0 || gap1 > 0);
+        return std::pair<uint64_t,uint64_t>(gap0,gap1);
+      }
+    }
+    return std::pair<uint64_t,uint64_t>(0,0);
   }
 };
 #endif
