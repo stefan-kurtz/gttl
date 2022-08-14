@@ -170,7 +170,10 @@ int main(int argc, char *argv[])
   {
     std::cout << "# filename\t" << inputfile << std::endl;
   }
-  multiseq->statistics(nullptr); /* no mutex necessary */
+  for (auto &msg : multiseq->statistics())
+  {
+    std::cout << "# " << msg << std::endl;
+  }
   if (options.rankdist_option_is_set())
   {
     if (options.protein_option_is_set())

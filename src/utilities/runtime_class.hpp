@@ -28,6 +28,11 @@ class RunTimeClass
     start_time = end_time;
     return s;
   }
+  std::string to_string(const char *msg)
+  {
+    return std::string("TIME\t") + std::string(msg) + std::string(" (ms):\t")
+                                 + this->to_string();
+  }
   size_t show(const char *msg)
   {
     auto end_time = std::chrono::high_resolution_clock::now();

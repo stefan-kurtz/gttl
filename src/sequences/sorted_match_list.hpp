@@ -168,7 +168,7 @@ class SortedMatchList
     {
       if constexpr (seed_output)
       {
-        std::cout << "# seed\t" /* only for debugging and thus not locked */
+        std::cout << "# seed\t"
                   << pp.seqnum0 << "\t"
                   << pp.startpos0 << "\t"
                   << pp.seqnum1 << "\t"
@@ -356,15 +356,13 @@ class SortedMatchList
     }
     return std::pair<uint64_t,uint64_t>(0,0);
   }
-  void statistics(void) const noexcept
+  void statistics(FILE *out_fp) const noexcept
   {
-    std::cout << "# bits for sequences\t" << bits_for_sequences
-              << std::endl;
-    std::cout << "# number of seeds\t" << number_of_seeds_get() << std::endl;
-    std::cout << "# number of matches\t" << number_of_all_matches_get()
-              << std::endl;
-    std::cout << "# number of unique matches\t" << size()
-              << std::endl;
+    fprintf(out_fp,"# bits for sequences\t%d\n",bits_for_sequences);
+    fprintf(out_fp,"# number of seeds\t%lu\n",number_of_seeds_get());
+    fprintf(out_fp,"# number of all matches\t%lu\n",
+            number_of_all_matches_get());
+    fprintf(out_fp,"# number of unique matches\t%lu\n",size());
   }
   bool all_same_segment(void) const noexcept
   {
