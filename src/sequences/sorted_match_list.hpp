@@ -42,12 +42,12 @@
 
 template<bool check_bounds,bool (*matching_method)(char,char)>
 static inline std::pair<size_t,size_t> maximize_on_both_ends(
-                                               const char *seq0,
-                                               size_t len0,
-                                               size_t abs_start_pos0,
-                                               const char *seq1,
-                                               size_t len1,
-                                               size_t abs_start_pos1,
+                                               const char *ref_seq,
+                                               size_t ref_seq_len,
+                                               size_t ref_seq_abs_start_pos,
+                                               const char *query_seq,
+                                               size_t query_seq_len,
+                                               size_t query_seq_abs_start_pos,
                                                size_t seed_size)
 {
   static auto pointers_leq = [] (const char *a,const char *b)
@@ -59,42 +59,44 @@ static inline std::pair<size_t,size_t> maximize_on_both_ends(
     return true;
   };
 
-  assert(abs_start_pos0 + seed_size - 1 < len0 &&
-         abs_start_pos1 + seed_size - 1 < len1);
-  const char *bwd0, *bwd1;
-  for (bwd0 = seq0 + abs_start_pos0 - 1,
-       bwd1 = seq1 + abs_start_pos1 - 1;
-       pointers_leq(seq0,bwd0) &&
-       pointers_leq(seq1,bwd1) &&
-       matching_method(*bwd0,*bwd1);
-       bwd0--, bwd1--)
+  assert(ref_seq_abs_start_pos + seed_size - 1 < ref_seq_len &&
+         query_seq_abs_start_pos + seed_size - 1 < query_seq_len);
+  const char *ref_seq_bwd, *query_seq_bwd;
+  for (ref_seq_bwd = ref_seq + ref_seq_abs_start_pos - 1,
+       query_seq_bwd = query_seq + query_seq_abs_start_pos - 1;
+       pointers_leq(ref_seq,ref_seq_bwd) &&
+       pointers_leq(query_seq,query_seq_bwd) &&
+       matching_method(*ref_seq_bwd,*query_seq_bwd);
+       ref_seq_bwd--, query_seq_bwd--)
        /* Nothing */ ;
-  assert(seq0 + abs_start_pos0 >= (bwd0+1));
+  assert(ref_seq + ref_seq_abs_start_pos >= (ref_seq_bwd+1));
   const size_t left_extend
-    = static_cast<size_t>(seq0 + abs_start_pos0 - 1 - (bwd0+1) + 1);
+    = static_cast<size_t>(ref_seq + ref_seq_abs_start_pos - 1
+                                  - (ref_seq_bwd+1) + 1);
 
-  const char *fwd0, *fwd1;
-  for (fwd0 = seq0 + abs_start_pos0 + seed_size,
-       fwd1 = seq1 + abs_start_pos1 + seed_size;
-       pointers_leq(fwd0,seq0 + len0 - 1) &&
-       pointers_leq(fwd1,seq1 + len1 - 1) &&
-       matching_method(*fwd0,*fwd1);
-       fwd0++, fwd1++)
+  const char *ref_seq_fwd, *query_seq_fwd;
+  for (ref_seq_fwd = ref_seq + ref_seq_abs_start_pos + seed_size,
+       query_seq_fwd = query_seq + query_seq_abs_start_pos + seed_size;
+       pointers_leq(ref_seq_fwd,ref_seq + ref_seq_len - 1) &&
+       pointers_leq(query_seq_fwd,query_seq + query_seq_len - 1) &&
+       matching_method(*ref_seq_fwd,*query_seq_fwd);
+       ref_seq_fwd++, query_seq_fwd++)
          /* Nothing */;
-  assert(fwd0 >= seq0 + abs_start_pos0 + seed_size);
+  assert(ref_seq_fwd >= ref_seq + ref_seq_abs_start_pos + seed_size);
   const size_t right_extend
-    = static_cast<size_t>(fwd0 - (seq0 + abs_start_pos0 + seed_size));
+    = static_cast<size_t>(ref_seq_fwd - (ref_seq + ref_seq_abs_start_pos
+                                                 + seed_size));
   return std::make_pair(left_extend,right_extend);
 }
 
 #define MAXIMIZE_ON_BOTH_ENDS(CHECK_BOUNDS,MATCHING_CHARACTERS)\
         std::tie(left_extend,right_extend) \
           = maximize_on_both_ends<CHECK_BOUNDS,MATCHING_CHARACTERS>\
-                                 (seq0,\
-                                  len0,\
+                                 (ref_seq,\
+                                  ref_seq_len,\
                                   pp.startpos0,\
-                                  seq1,\
-                                  len1,\
+                                  query_seq,\
+                                  query_seq_len,\
                                   pp.startpos1,\
                                   qgram_length)
 
@@ -174,10 +176,11 @@ class SortedMatchList
                   << pp.seqnum1 << "\t"
                   << pp.startpos1 << std::endl;
       }
-      const char *seq0 = ref_multiseq->sequence_ptr_get(pp.seqnum0);
-      const char *seq1 = query_multiseq->sequence_ptr_get(pp.seqnum1);
-      const size_t len0 = ref_multiseq->sequence_length_get(pp.seqnum0);
-      const size_t len1 = query_multiseq->sequence_length_get(pp.seqnum1);
+      const char *ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
+      const char *query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
+      const size_t ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
+      const size_t query_seq_len
+        = query_multiseq->sequence_length_get(pp.seqnum1);
       size_t left_extend, right_extend;
 
       if constexpr (self_match)
@@ -202,14 +205,14 @@ class SortedMatchList
         if constexpr (self_match)
         {
           seed_okay = (count_mismatches<matching_characters_wc>
-                                       (seq0 + pp.startpos0,
-                                        seq1 + pp.startpos1,
+                                       (ref_seq + pp.startpos0,
+                                        query_seq + pp.startpos1,
                                         qgram_length) == 0);
         } else
         {
           seed_okay = (count_mismatches<matching_characters>
-                                       (seq0 + pp.startpos0,
-                                        seq1 + pp.startpos1,
+                                       (ref_seq + pp.startpos0,
+                                        query_seq + pp.startpos1,
                                         qgram_length) == 0);
         }
       }
@@ -334,27 +337,27 @@ class SortedMatchList
   std::pair<uint64_t,uint64_t> colinear_match_pair(size_t i,size_t j)
     const noexcept
   {
-    const uint64_t j_endpos0 = this->ref_endpos_get(j);
-    const uint64_t j_endpos1 = this->query_endpos_get(j);
+    const uint64_t ref_endpos_j = this->ref_endpos_get(j);
+    const uint64_t query_endpos_j = this->query_endpos_get(j);
     const size_t j_match_length = this->length_get(j);
-    assert(j_endpos0 + 1 >= j_match_length &&
-           j_endpos1 + 1 >= j_match_length);
-    const uint64_t j_startpos0 = j_endpos0 + 1 - j_match_length,
-                   j_startpos1 = j_endpos1 + 1 - j_match_length;
+    assert(ref_endpos_j + 1 >= j_match_length &&
+           query_endpos_j + 1 >= j_match_length);
+    const uint64_t ref_startpos_j = ref_endpos_j + 1 - j_match_length,
+                   query_startpos_j = query_endpos_j + 1 - j_match_length;
 
-    const uint64_t p_endpos0 = this->ref_endpos_get(i);
-    if (p_endpos0 < j_startpos0)
+    const uint64_t ref_endpos_i = this->ref_endpos_get(i);
+    if (ref_endpos_i < ref_startpos_j)
     {
-      const uint64_t p_endpos1 = this->query_endpos_get(i);
-      if (p_endpos1 < j_startpos1)
+      const uint64_t query_endpos_i = this->query_endpos_get(i);
+      if (query_endpos_i < query_startpos_j)
       {
-        const uint64_t gap0 = j_startpos0 - p_endpos0 - 1,
-                       gap1 = j_startpos1 - p_endpos1 - 1;
-        assert(gap0 > 0 || gap1 > 0);
-        return std::pair<uint64_t,uint64_t>(gap0,gap1);
+        const uint64_t ref_gap = ref_startpos_j - ref_endpos_i - 1,
+                       query_gap = query_startpos_j - query_endpos_i - 1;
+        assert(ref_gap > 0 || query_gap > 0);
+        return std::make_pair(ref_gap,query_gap);
       }
     }
-    return std::pair<uint64_t,uint64_t>(0,0);
+    return std::make_pair(uint64_t(0),uint64_t(0));
   }
   void statistics(FILE *out_fp) const noexcept
   {
@@ -378,19 +381,23 @@ class SortedMatchList
        output_matches */
     const BytesUnitMatch &p = segment_match_list[i];
     const BytesUnitMatch &m = segment_match_list[j];
-    const uint64_t p_endpos0 = p.template decode_at<ref_pos_idx>(match_packer);
-    const uint64_t p_endpos1
+    const uint64_t ref_endpos_p
+      = p.template decode_at<ref_pos_idx>(match_packer);
+    const uint64_t query_endpos_p
       = p.template decode_at<query_pos_idx>(match_packer);
-    const uint64_t m_endpos0 = m.template decode_at<ref_pos_idx>(match_packer);
-    const uint64_t m_endpos1
+    const uint64_t ref_endpos_m
+      = m.template decode_at<ref_pos_idx>(match_packer);
+    const uint64_t query_endpos_m
       = m.template decode_at<query_pos_idx>(match_packer);
     const uint64_t m_match_length
       = minimum_mem_length + m.template decode_at<4>(match_packer);
-    const uint64_t m_startpos0 = m_endpos0 - m_match_length + 1,
-                   m_startpos1 = m_endpos1 - m_match_length + 1;
-    assert(p_endpos0 < m_startpos0 && p_endpos1 < m_startpos1);
-    return std::make_pair(static_cast<size_t>(m_startpos0 - p_endpos0 - 1),
-                          static_cast<size_t>(m_startpos1 - p_endpos1 - 1));
+    const uint64_t ref_startpos_m = ref_endpos_m - m_match_length + 1,
+                   query_startpos_m = query_endpos_m - m_match_length + 1;
+    assert(ref_endpos_p < ref_startpos_m && query_endpos_p < query_startpos_m);
+    return std::make_pair(static_cast<size_t>(ref_startpos_m - ref_endpos_p
+                                                             - 1),
+                          static_cast<size_t>(query_startpos_m - query_endpos_p
+                                                               - 1));
   }
 };
 #endif
