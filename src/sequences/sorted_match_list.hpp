@@ -37,7 +37,6 @@
 #include "utilities/ska_lsb_radix_sort.hpp"
 #include "utilities/remove_duplicates.hpp"
 #include "utilities/bytes_unit.hpp"
-#include "sequences/gttl_multiseq.hpp"
 #include "sequences/matching_characters.hpp"
 
 template<bool check_bounds,bool (*matching_method)(char,char)>
@@ -100,8 +99,10 @@ static inline std::pair<size_t,size_t> maximize_on_both_ends(
                                   pp.startpos1,\
                                   qgram_length)
 
-template<class SeedEnumeratorClass,
+template<class SequenceClass,
+         class SeedEnumeratorClass,
          bool self_match,
+         bool from_same_sequence,
          int sizeof_unit_match,
          bool seed_output,
          int ref_idx>
@@ -120,16 +121,16 @@ class SortedMatchList
          number_of_all_matches;
   int bits_for_sequences;
   int remaining_bits_for_length;
-  const GttlMultiseq *ref_multiseq,
-                     *query_multiseq;
+  const SequenceClass *ref_multiseq,
+                      *query_multiseq;
   GttlBitPacker<sizeof_unit_match,5> match_packer;
 
   public:
   SortedMatchList(size_t qgram_length,
                   size_t _minimum_mem_length,
                   const SeedEnumeratorClass &seed_enumerator,
-                  const GttlMultiseq *_ref_multiseq,
-                  const GttlMultiseq *_query_multiseq)
+                  const SequenceClass *_ref_multiseq,
+                  const SequenceClass *_query_multiseq)
     : encoded_match_list({})
     , minimum_mem_length(_minimum_mem_length)
     , number_of_seeds(0)
@@ -156,43 +157,81 @@ class SortedMatchList
                                                      (remaining_bits_for_length)
                   )
   {
+    if constexpr (from_same_sequence)
+    {
+      static_assert(self_match);
+    }
     assert(minimum_mem_length >= qgram_length);
     const size_t length_threshold = minimum_mem_length - qgram_length;
     const uint64_t maximum_storable_match_length
       = gttl_bits2maxvalue<uint64_t>(remaining_bits_for_length);
 
     /* For the following loop to work the
-       seed_enumerator must provide iterators begin() and end() which
-       when dereferenced deliver an instance of
-       struct SortedMatchListPositionPair, or some struct which is compatible.
+       seed_enumerator must provide iterators begin() and end(), which,
+       when dereferenced deliver an instance of a structure with components
+       seqnum0, seqnum1, startpos0 and startpos1. In case all
+       seeds come from the same sequence, set
+       from_same_sequence to true, and seqnum0 and seqnum1 are not relevant.
+       In this case, it is assumed that the pointer to the
+       instance of class SequenceClass delivers the sequence and their
+       length using functions sequence_ptr_get() and sequence_length_get().
+       Otherwise, the class SequenceClass provides functions with the
+       same name to deliver the sequence and their
+       length, but depending on the sequence number.
     */
+    const char *ref_seq, *query_seq;
+    size_t ref_seq_len, query_seq_len;
+    if constexpr (from_same_sequence)
+    {
+      ref_seq = ref_multiseq->sequence_ptr_get();
+      query_seq = query_multiseq->sequence_ptr_get();
+      ref_seq_len = ref_multiseq->sequence_length_get();
+      query_seq_len = query_multiseq->sequence_length_get();
+    }
     for (auto const &pp : seed_enumerator)
     {
       if constexpr (seed_output)
       {
-        std::cout << "# seed\t"
-                  << pp.seqnum0 << "\t"
-                  << pp.startpos0 << "\t"
-                  << pp.seqnum1 << "\t"
-                  << pp.startpos1 << std::endl;
+        if constexpr (from_same_sequence)
+        {
+          std::cout << "# seed\t"
+                    << pp.startpos0 << "\t"
+                    << pp.startpos1 << std::endl;
+        } else
+        {
+          std::cout << "# seed\t"
+                    << pp.seqnum0 << "\t"
+                    << pp.startpos0 << "\t"
+                    << pp.seqnum1 << "\t"
+                    << pp.startpos1 << std::endl;
+        }
       }
-      const char *ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
-      const char *query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
-      const size_t ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
-      const size_t query_seq_len
-        = query_multiseq->sequence_length_get(pp.seqnum1);
+      if constexpr (!from_same_sequence)
+      {
+        ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
+        query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
+        ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
+        query_seq_len = query_multiseq->sequence_length_get(pp.seqnum1);
+      }
       size_t left_extend, right_extend;
 
       if constexpr (self_match)
       {
-        if (pp.seqnum0 != pp.seqnum1)
-        {
-          constexpr const bool check_bounds = true;
-          MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
-        } else
+        if constexpr (from_same_sequence)
         {
           constexpr const bool check_bounds = false;
           MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+        } else
+        {
+          if (pp.seqnum0 != pp.seqnum1)
+          {
+            constexpr const bool check_bounds = true;
+            MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+          } else
+          {
+            constexpr const bool check_bounds = false;
+            MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+          }
         }
       } else
       {
@@ -244,12 +283,22 @@ class SortedMatchList
           assert(this_match_length >= minimum_mem_length);
           length_stored = this_match_length - minimum_mem_length;
         }
+        uint64_t seqnum0, seqnum1;
+        if constexpr (from_same_sequence)
+        {
+          seqnum0 = 0;
+          seqnum1 = 0;
+        } else
+        {
+          seqnum0 = pp.seqnum0;
+          seqnum1 = pp.seqnum1;
+        }
         if constexpr (ref_idx == 0)
         {
           BytesUnitMatch
             encoded_match(match_packer, /* create match */
-                          {pp.seqnum0,
-                           pp.seqnum1,
+                          {seqnum0,
+                           seqnum1,
                            pp.startpos0 - left_extend + this_match_length - 1,
                            pp.startpos1 - left_extend + this_match_length - 1,
                            length_stored});
@@ -259,8 +308,8 @@ class SortedMatchList
           static_assert(ref_idx == 1);
           BytesUnitMatch
             encoded_match(match_packer, /* create match */
-                          {pp.seqnum1,
-                           pp.seqnum0,
+                          {seqnum1,
+                           seqnum0,
                            pp.startpos1 - left_extend + this_match_length - 1,
                            pp.startpos0 - left_extend + this_match_length - 1,
                            length_stored});
