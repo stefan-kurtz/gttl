@@ -450,8 +450,7 @@ class GttlMultiseq
     size_t seq_len = sequence_length_get(seqnum);
     std::string_view this_seq{seq_ptr,seq_len};
 
-    return std::pair<std::string_view,std::string_view>(headers[seqnum],
-                                                        this_seq);
+    return std::make_pair(headers[seqnum],this_seq);
   }
   template<class T,void (*transformation)(T &,char *,size_t)>
   void transformer(T &t)
