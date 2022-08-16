@@ -59,9 +59,11 @@ class InvertibleIntegercodeTransformer4
                                      uint64_t integer_code,
                                      uint8_t compl_new_t_char) const noexcept
   {
+    assert(integer_code >= static_cast<uint64_t>(compl_old_t_char));
     integer_code -= compl_old_t_char;
+    assert(integer_code % static_cast<uint64_t>(4) == 0);
     integer_code /= static_cast<uint64_t>(4);
-    integer_code += (compl_new_t_char << shift);
+    integer_code += (static_cast<uint64_t>(compl_new_t_char) << shift);
     return integer_code;
   }
 };
