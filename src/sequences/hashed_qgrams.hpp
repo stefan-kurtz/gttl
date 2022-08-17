@@ -574,7 +574,7 @@ class HashedQgrams
   /* the following method has a side effect */
   void show(size_t offset = 0) const noexcept
   {
-    printf("# Hash\tSeqNr\tStart");
+    printf("# Hash\tSeqNr\tStart\n");
     for (size_t idx = 0; idx < size(); idx++)
     {
       const uint64_t hash_value = hash_value_get(idx);
