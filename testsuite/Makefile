@@ -51,7 +51,8 @@ test:test_alphabet \
      test_sort_i \
      test_eoplist \
      test_invint \
-     test_line_iterator_mapped
+     test_line_iterator_mapped \
+     test_nt_minimizer_count
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -187,6 +188,18 @@ test_line_iterator_mapped:line_iterator_mapped.x
 	@./line_iterator_mapped.x `ls ../testdata/*.fna | egrep -v 'empty.fna|\.gz'`
 	@./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
+
+.PHONY:test_nt_minimizer_count
+test_nt_minimizer_count:nt_minimizer.x
+	@$(eval TMPFILE := $(shell mktemp))
+	@echo "# number of hashed kmers\t37465" > ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@echo "# number of hashed kmers\t37507" > ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
+	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
