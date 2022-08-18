@@ -400,5 +400,8 @@ namespace alphabet
   static constexpr const char amino_acids[]
     = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
   using GttlAlphabet_20 = GttlAlphabet<amino_acids,20>;
+  /* This is the order of the protein alphabet used in the genometools. */
+  static constexpr const char amino_acids_gt_order[] =
+    "L|V|I|F|K|R|E|D|A|G|S|T|N|Q|Y|W|P|H|M|C";
 }
 #endif

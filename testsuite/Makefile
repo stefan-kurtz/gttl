@@ -52,7 +52,8 @@ test:test_alphabet \
      test_eoplist \
      test_invint \
      test_line_iterator_mapped \
-     test_nt_minimizer_count
+     test_nt_minimizer_count \
+     test_guess_if_protein_seq
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -199,6 +200,11 @@ test_nt_minimizer_count:nt_minimizer.x
 	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@${RM} ${TMPFILE}
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_guess_if_protein_seq
+test_guess_if_protein_seq:./guess_if_protein_seq.x
+	./test_guess_if_protein_seq.sh
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
