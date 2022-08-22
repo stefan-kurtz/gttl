@@ -78,6 +78,12 @@ class LiterateMultiseq
       cout_mutex->unlock();
     }
   }
+  size_t *rank_dist_copy(void) const noexcept
+  {
+    size_t *rdc = new size_t [rank_dist.size()];
+    std::memcpy(rdc, rank_dist.data(), rank_dist.size() * sizeof *rdc);
+    return rdc;
+  }
   const std::array<size_t,alpha.size()+1> &rank_dist_get(void)
   {
     return rank_dist;
