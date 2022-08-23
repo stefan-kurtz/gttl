@@ -15,13 +15,13 @@ inline size_t gttl_file_size(const char *filename)
   int filedesc = open(filename,O_RDONLY);
   if (filedesc == -1)       // check for error code
   {
-    StrFormat msg("cannot open file %s",filename);
+    StrFormat msg(": cannot open file %s",filename);
     throw msg.str();
   }
   struct stat buf;
   if (fstat(filedesc,&buf) == -1) // get status of file
   {
-    StrFormat msg("cannot access status of file %s",filename);
+    StrFormat msg(": cannot access status of file %s",filename);
     throw msg.str();
   }
   close(filedesc);
