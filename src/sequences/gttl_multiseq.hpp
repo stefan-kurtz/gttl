@@ -29,7 +29,8 @@ class GttlMultiseq
   std::vector<size_t> sequence_offsets{};
   std::string concatenated_sequences{};
   std::vector<std::string> headers{};
-  size_t sequences_number{0},
+  size_t header_total_length{0},
+         sequences_number{0},
          sequences_total_length{0},
          sequences_minimum_length{ULONG_MAX},
          sequences_maximum_length{0};
@@ -40,6 +41,17 @@ class GttlMultiseq
 
   public:
 
+  size_t size_in_bytes(void) const noexcept
+  {
+    return
+      sizeof(GttlMultiseq) +
+      sequence_offsets.size() * sizeof(size_t) +
+      concatenated_sequences.size() * sizeof(char) +
+      sizeof(std::string) * headers.size() +
+      header_total_length * sizeof(char) +
+      length_dist_map.size() * 2 * sizeof(size_t);
+  }
+
   template<bool store>
   void append(const std::string_view header,
               const std::string_view sequence,
@@ -48,6 +60,7 @@ class GttlMultiseq
     if constexpr (store)
     {
       headers.push_back(std::string(header.substr(1,header.size()-1)));
+      header_total_length += header.size() - 1;
       concatenated_sequences += sequence;
       concatenated_sequences.push_back(static_cast<char>(this_padding_char));
       sequence_offsets.push_back(concatenated_sequences.size());
