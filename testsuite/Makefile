@@ -47,6 +47,7 @@ test:test_alphabet \
      test_fastq_iterator \
      test_multiseq \
      test_thread_pool \
+     test_sort_kvt \
      test_sort_kvp \
      test_sort_i \
      test_eoplist \
@@ -153,6 +154,14 @@ test_fastq_iterator:./fastq_mn.x
 .PHONY:test_thread_pool
 test_thread_pool:thread_pool_mn.x
 	@./thread_pool_mn.x 4 40
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_sort_kvt
+test_sort_kvt:sort_key_value_pairs.x
+	@for num in 66 666 66666 666666 6666666 66666666; do \
+	   ./sort_key_value_pairs.x t rad $$num;\
+	   ./sort_key_value_pairs.x t std $$num;\
+	done
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_sort_kvp
