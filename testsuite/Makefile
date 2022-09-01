@@ -36,21 +36,69 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 
 all:${EXECS}
 
-test:${EXECS} test_matrix_partition test_line_iterator test_fastq_iterator \
-              test_multiseq test_thread_pool test_sort_kvp test_sort_i \
-              test_eoplist test_invint test_line_iterator_mapped
-	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
-	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
-	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
-	@./enum_nthash.x --bytes_unit ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
-	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
-	@./bitpacker_main.x 100
+test:test_alphabet \
+     test_endian \
+     test_nthash \
+     test_bitpacker \
+     test_char_range \
+     test_matrix_partition \
+     test_non_wc_ranges \
+     test_line_iterator \
+     test_fastq_iterator \
+     test_multiseq \
+     test_thread_pool \
+     test_sort_kvt \
+     test_sort_kvp \
+     test_sort_i \
+     test_eoplist \
+     test_invint \
+     test_line_iterator_mapped \
+     test_nt_minimizer_count \
+     test_guess_if_protein_seq
+	@echo "Congratulations. $@ passed."
+
+test_endian:./endian.x
 	@./endian.x
+	@echo "Congratulations. $@ passed."
+
+test_bitpacker:./bitpacker_main.x
+	@./bitpacker_main.x 100
+	@echo "Congratulations. $@ passed."
+
+test_non_wc_ranges:./count_non_wc_ranges.x
+	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
+	@./count_non_wc_ranges.x ${AT1MB} | diff - ../testdata/at1MB_non_wc.tsv
+	@echo "Congratulations. $@ passed."
+
+test_alphabet:./alphabet.x
+	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
+	@echo "Congratulations. $@ passed."
+
+test_char_range:char_range_mn.x
 	@./char_range_compare.sh ../testdata/small.fna
 	@./char_range_compare.sh ../testdata/simple.fna
 	@./char_range_compare.sh ${AT1MB}
+	@echo "Congratulations. $@ passed."
+
+test_nthash:enum_nthash.x
+	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
+	@./enum_nthash.x --bytes_unit ${AT1MB} | \
+           grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/at1MB_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+           grep '_rc' | diff - ../testdata/at1MB_nthash_rc.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
+           grep -v '^# TIME' | diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ../testdata/vaccg.fna | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/vaccg_nthash.tsv
+	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
+           grep -v '^# TIME' | diff - ../testdata/ychrIII_nthash.tsv
+	@./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
+           grep -v '^# TIME' | grep -v '_rc' | \
+           diff - ../testdata/ychrIII_nthash.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq
@@ -108,6 +156,14 @@ test_thread_pool:thread_pool_mn.x
 	@./thread_pool_mn.x 4 40
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_sort_kvt
+test_sort_kvt:sort_key_value_pairs.x
+	@for num in 66 666 66666 666666 6666666 66666666; do \
+	   ./sort_key_value_pairs.x t rad $$num;\
+	   ./sort_key_value_pairs.x t std $$num;\
+	done
+	@echo "Congratulations. $@ passed."
+
 .PHONY:test_sort_kvp
 test_sort_kvp:sort_key_value_pairs.x
 	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
@@ -132,9 +188,9 @@ test_eoplist:eoplist_mn.x
 
 .PHONY:test_invint
 test_invint:enum_invint.x
-	@./enum_invint.x 14 ../testdata/at1MB.fna
-	@./enum_invint.x 15 ../testdata/vaccg.fna
-	@./enum_invint.x 20 ../testdata/ychrIII.fna
+	@./enum_invint.x 15 ../testdata/vaccg.fna | diff - ../testdata/vaccg_invint15.tsv
+	@./enum_invint.x 15 ../testdata/ychrIII.fna | diff - ../testdata/ychrIII_invint15.tsv
+	@./enum_invint.x 14 ../testdata/at1MB.fna | diff - ../testdata/at1MB_invint14.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator_mapped
@@ -142,6 +198,23 @@ test_line_iterator_mapped:line_iterator_mapped.x
 	@./line_iterator_mapped.x `ls ../testdata/*.fna | egrep -v 'empty.fna|\.gz'`
 	@./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
+
+.PHONY:test_nt_minimizer_count
+test_nt_minimizer_count:nt_minimizer.x
+	@$(eval TMPFILE := $(shell mktemp))
+	@echo "# number of hashed kmers\t37465" > ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@echo "# number of hashed kmers\t37507" > ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_guess_if_protein_seq
+test_guess_if_protein_seq:./guess_if_protein_seq.x
+	./test_guess_if_protein_seq.sh
+	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}

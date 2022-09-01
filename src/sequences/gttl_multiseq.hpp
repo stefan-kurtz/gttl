@@ -7,7 +7,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include <mutex>
 #include <map>
 #include <tuple>
 #include <algorithm>
@@ -30,7 +29,8 @@ class GttlMultiseq
   std::vector<size_t> sequence_offsets{};
   std::string concatenated_sequences{};
   std::vector<std::string> headers{};
-  size_t sequences_number{0},
+  size_t header_total_length{0},
+         sequences_number{0},
          sequences_total_length{0},
          sequences_minimum_length{ULONG_MAX},
          sequences_maximum_length{0};
@@ -41,6 +41,17 @@ class GttlMultiseq
 
   public:
 
+  size_t size_in_bytes(void) const noexcept
+  {
+    return
+      sizeof(GttlMultiseq) +
+      sequence_offsets.size() * sizeof(size_t) +
+      concatenated_sequences.size() * sizeof(char) +
+      sizeof(std::string) * headers.size() +
+      header_total_length * sizeof(char) +
+      length_dist_map.size() * 2 * sizeof(size_t);
+  }
+
   template<bool store>
   void append(const std::string_view header,
               const std::string_view sequence,
@@ -49,6 +60,7 @@ class GttlMultiseq
     if constexpr (store)
     {
       headers.push_back(std::string(header.substr(1,header.size()-1)));
+      header_total_length += header.size() - 1;
       concatenated_sequences += sequence;
       concatenated_sequences.push_back(static_cast<char>(this_padding_char));
       sequence_offsets.push_back(concatenated_sequences.size());
@@ -337,30 +349,22 @@ class GttlMultiseq
     return short_header_cache[seqnum];
   }
 
-  void statistics(std::mutex *cout_mutex) const noexcept
+  std::vector<std::string> statistics() const noexcept
   {
-    if (cout_mutex != nullptr)
-    {
-      cout_mutex->lock();
-    }
-    std::cout << "# sequences_number\t" << sequences_number_get()
-              << std::endl;
-    std::cout << "# sequences_number_bits\t" << sequences_number_bits_get()
-              << std::endl;
-    std::cout << "# sequences_minimum_length\t"
-              << sequences_minimum_length_get()
-              << std::endl;
-    std::cout << "# sequences_maximum_length\t"
-              << sequences_maximum_length_get()
-              << std::endl;
-    std::cout << "# sequences_length_bits\t" << sequences_length_bits_get()
-              << std::endl;
-    std::cout << "# sequences_total_length\t" << sequences_total_length_get()
-              << std::endl;
-    if (cout_mutex != nullptr)
-    {
-      cout_mutex->unlock();
-    }
+    std::vector<std::string> log_vector{};
+    log_vector.push_back(std::string("sequences_number\t") +
+                         std::to_string(sequences_number_get()));
+    log_vector.push_back(std::string("sequences_number_bits\t") +
+                         std::to_string(sequences_number_bits_get()));
+    log_vector.push_back(std::string("sequences_minimum_length\t") +
+                         std::to_string(sequences_minimum_length_get()));
+    log_vector.push_back(std::string("sequences_maximum_length\t") +
+                         std::to_string(sequences_maximum_length_get()));
+    log_vector.push_back(std::string("sequences_length_bits\t") +
+                         std::to_string(sequences_length_bits_get()));
+    log_vector.push_back(std::string("sequences_total_length\t") +
+                         std::to_string(sequences_total_length_get()));
+    return log_vector;
   }
 
   std::vector<std::pair<size_t,size_t>> length_distribution(void)
@@ -459,8 +463,7 @@ class GttlMultiseq
     size_t seq_len = sequence_length_get(seqnum);
     std::string_view this_seq{seq_ptr,seq_len};
 
-    return std::pair<std::string_view,std::string_view>(headers[seqnum],
-                                                        this_seq);
+    return std::make_pair(headers[seqnum],this_seq);
   }
   template<class T,void (*transformation)(T &,char *,size_t)>
   void transformer(T &t)

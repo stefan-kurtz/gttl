@@ -32,7 +32,8 @@ class GttlSeqIterator
     public:
       Iterator(GttlLineIterator<buf_size> &_gttl_li,
                bool _input_exhausted)
-        : current_string(&sequence_entry.header)
+        : sequence_entry({})
+        , current_string(&sequence_entry.header)
         , gttl_li(_gttl_li)
         , last_seq_was_processed(false)
         , input_exhausted(_input_exhausted)

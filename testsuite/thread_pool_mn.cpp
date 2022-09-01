@@ -1,8 +1,6 @@
 #include <vector>
 #include <thread>
 #include <memory>
-#include <cstring>
-#include <cstdlib>
 #include <iostream>
 #include "utilities/unused.hpp"
 #include "threading/thread_pool.hpp"
@@ -25,11 +23,11 @@ class SumFibThreadData
   size_t num_threads;
   public:
   size_t n;
-  size_t *thread_sums;
-  SumFibThreadData(size_t _num_threads,size_t _n) :
-    num_threads(_num_threads),
-    n(_n),
-    thread_sums(static_cast<size_t *>(calloc(num_threads,sizeof *thread_sums)))
+  std::vector<size_t> thread_sums;
+  SumFibThreadData(size_t _num_threads,size_t _n)
+    : num_threads(_num_threads)
+    , n(_n)
+    , thread_sums(num_threads,0)
   {}
   void output(void) const noexcept
   {
@@ -38,10 +36,7 @@ class SumFibThreadData
       std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << std::endl;
     }
   }
-  ~SumFibThreadData(void)
-  {
-    free(thread_sums);
-  }
+  ~SumFibThreadData(void) { }
 };
 
 static void sum_fibonacci(size_t thread_id, GTTL_UNUSED size_t task_id,
@@ -63,14 +58,12 @@ int main(int argc, char *argv[])
   }
   const size_t num_threads = (size_t) readlong1;
   const size_t n = (size_t) readlong2;
-  size_t *thread_sums = new size_t [num_threads];
-  memset(thread_sums,0,num_threads * sizeof *thread_sums);
-  GttlThreadPoolVar(num_threads,10,sum_fibonacci_var,n,thread_sums);
+  std::vector<size_t> thread_sums(num_threads,0);
+  GttlThreadPoolVar(num_threads,10,sum_fibonacci_var,n,thread_sums.data());
   for (size_t idx = 0; idx < num_threads; idx++)
   {
     std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << std::endl;
   }
-  delete[] thread_sums;
   SumFibThreadData thread_data(num_threads,n);
   GttlThreadPool(num_threads,10,sum_fibonacci,&thread_data);
   thread_data.output();

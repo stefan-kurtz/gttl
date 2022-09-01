@@ -6,21 +6,21 @@ from mysubprocess import mysubprocess_expect
 def files2msg_get(fail_for_protein_sequence,p):
   d = {'{}/testdata/empty.fna'.format(p)
               : ', line 1: corrupted sequence',
-          '{}/testdata/fake.fna.gz'.format(p)
+       '{}/testdata/fake.fna.gz'.format(p)
               : ', line 1: corrupted sequence',
-          '{}/testdata/only_header.fna'.format(p)
+       '{}/testdata/only_header.fna'.format(p)
               : ', line 2: corrupted sequence',
-          '{}/testdata/only_sequence.fna'.format(p)
+       '{}/testdata/only_sequence.fna'.format(p)
               : ', line 2: corrupted sequence',
-          '{}/testdata/first_corrupt.fna'.format(p)
+       '{}/testdata/first_corrupt.fna'.format(p)
               : ', line 4: corrupted sequence',
-          '{}/testdata/second_corrupt.fna'.format(p)
+       '{}/testdata/second_corrupt.fna'.format(p)
               : ', line 4: corrupted sequence',
-          '{}/testdata/middle_of_3_err.fna'.format(p)
+       '{}/testdata/middle_of_3_err.fna'.format(p)
               : ', line 6: corrupted sequence',
-          '{}/testdata/non_existing.fna'.format(p)
+       '{}/testdata/non_existing.fna'.format(p)
               : ': cannot open file',
-          '{}/testdata/no_eol.fna'.format(p)
+       '{}/testdata/no_eol.fna'.format(p)
               : ', line 2: missing newline character',
          }
   if fail_for_protein_sequence:

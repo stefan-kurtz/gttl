@@ -1,21 +1,20 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include <array>
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
-#include "sequences/qgrams_hash2_invint.hpp"
+#include "sequences/qgrams_hash_invint.hpp"
 
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
 #ifndef NDEBUG
-static void verify_hash_values(const char *progname,
-                               InvertibleIntegercode2Iterator4 &qgiter,
-                               uint64_t hash_value,
-                               uint64_t compl_hash_value)
+template<class HashValuePairIterator>
+static void verify_hash_value_pair(HashValuePairIterator &qgiter,
+                                   uint64_t hash_value,
+                                   uint64_t compl_hash_value)
 {
-  static constexpr const uint8_t complement[] = {uint8_t(2),uint8_t(3),
-                                                 uint8_t(0),uint8_t(1)};
   size_t qgram_length = qgiter.qgram_length_get();
   const uint8_t *qgram = qgiter.qgram_decode(hash_value);
   uint8_t *qgram_direct = new uint8_t [qgram_length];
@@ -25,39 +24,32 @@ static void verify_hash_values(const char *progname,
   {
     uint8_t cc = qgram_rc[qgram_length - 1 - idx];
     assert(cc < 4);
-    cc = complement[cc];
+    cc = QgramRecHashValueIterator_complement(cc);
     if (cc != qgram_direct[idx])
     {
-      std::cerr << progname << ": incorrect reverse complement integer code"
-                << "hash_value=" << hash_value
-                << "\tcompl_hash_value=" << compl_hash_value << std::endl;
-      exit(EXIT_FAILURE);
+      StrFormat msg("incorrect reverse complement "
+                    "hash_value=%llu\tcompl_hash_value=%llu",
+                    hash_value, compl_hash_value);
+      delete[] qgram_direct;
+      throw msg.str();
     }
   }
   delete[] qgram_direct;
 }
 #endif
 
-int main(int argc,char *argv[])
+template<class HashValuePairIterator>
+static void verify_hashvalues_for_file(const char *inputfilename,
+                                       size_t qgram_length)
 {
-  long read_long;
-  if (argc != 3 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
-  {
-    std::cerr << "Usage: " << argv[0] << ": <kmer_length> <inputfile>"
-              << std::endl;
-    return EXIT_FAILURE;
-  }
-  const size_t qgram_length = static_cast<size_t>(read_long);
-  const char *inputfilename = argv[2];
+  constexpr const int buf_size = 1 << 14;
+  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
                                          nucleotide_finder,
                                          true,false>;
-  constexpr const int buf_size = 1 << 14;
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    std::cerr << argv[0] << " cannot open file " << inputfilename << std::endl;
-    return EXIT_FAILURE;
+    throw (std::string("cannot open file ") + inputfilename);
   }
   GttlSeqIterator<buf_size> gttl_si(in_fp);
   try /* need this, as the catch needs to close the file pointer
@@ -77,12 +69,7 @@ int main(int argc,char *argv[])
       {
         const size_t this_length = std::get<1>(range);
         const char *substring = sequence.data() + std::get<0>(range);
-#ifndef NDEBUG
-        std::cout << seqnum << "\t" << std::get<0>(range)
-                  << "\t" << this_length << std::endl;
-#endif
-        InvertibleIntegercode2Iterator4 qgiter(qgram_length,substring,
-                                               this_length);
+        HashValuePairIterator qgiter(qgram_length,substring, this_length);
         for (auto const &&code_pair : qgiter)
         {
           uint64_t hash_value = std::get<0>(code_pair),
@@ -90,7 +77,8 @@ int main(int argc,char *argv[])
           hash_value_sum += hash_value;
           compl_hash_value_sum += compl_hash_value;
 #ifndef NDEBUG
-          verify_hash_values(argv[0],qgiter,hash_value,compl_hash_value);
+          verify_hash_value_pair<HashValuePairIterator>
+                                (qgiter,hash_value,compl_hash_value);
 #endif
         }
         ranges_total_length += this_length;
@@ -107,9 +95,31 @@ int main(int argc,char *argv[])
   catch (std::string &msg)
   {
     gttl_fp_type_close(in_fp);
-    std::cerr << argv[0] << msg << std::endl;
-    return EXIT_FAILURE;
+    throw msg;
   }
   gttl_fp_type_close(in_fp);
+}
+
+int main(int argc,char *argv[])
+{
+  long read_long;
+  if (argc != 3 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
+  {
+    std::cerr << "Usage: " << argv[0] << ": <kmer_length> <inputfile>"
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+  const size_t qgram_length = static_cast<size_t>(read_long);
+  const char *inputfilename = argv[2];
+  try
+  {
+    verify_hashvalues_for_file<InvertibleIntegercode2Iterator4>
+                              (inputfilename,qgram_length);
+  }
+  catch (std::string &msg)
+  {
+    std::cerr << argv[0] << ": " << msg << std::endl;
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }

@@ -18,14 +18,17 @@
 #define QGRAMS_HASH_NTHASH_HPP
 #include "sequences/alphabet.hpp"
 #include "sequences/nthash_fwd.hpp"
+#include "sequences/qgrams_rec_hash_value_fwd_iter.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
 
 using QgramNtHashFwdIterator4
+  = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
+                                 4,
+                                 NThashTransformer>;
+
+using QgramNtHashIterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
                               4,
-                              NTF64_first_hash_value_get,
-                              NThashAux,
-                              NTF64_aux_data_get,
-                              NTF64_next_hash_value_get>;
+                              NThashTransformer>;
 
 #endif

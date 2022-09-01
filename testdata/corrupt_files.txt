@@ -1,0 +1,8 @@
+empty.fna
+fake.fna.gz
+only_header.fna
+only_sequence.fna
+first_corrupt.fna
+second_corrupt.fna
+middle_of_3_err.fna
+no_eol.fna
