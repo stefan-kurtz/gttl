@@ -1,5 +1,6 @@
 #ifndef MATCHING_CHARACTERS_HPP
 #define MATCHING_CHARACTERS_HPP
+#include "utilities/unused.hpp"
 #include "sequences/alphabet.hpp"
 #include <cstdbool>
 
@@ -21,6 +22,22 @@ static inline bool matching_characters_wc(char a,char b)
 static inline bool matching_characters(char a,char b)
 {
   return a == b;
+}
+
+template<bool wildcards>
+static inline bool matching_characters_template(char a, char b)
+{
+  if constexpr (wildcards)
+  {
+    static constexpr const alphabet::GttlAlphabet_UL_4 dna_alpha{};
+    uint8_t a_rank = dna_alpha.char_to_rank(a);
+    uint8_t b_rank = dna_alpha.char_to_rank(b);
+    return a_rank == b_rank && a_rank != dna_alpha.undefined_rank();
+  }
+  else
+  {
+    return a == b;
+  }
 }
 
 template<bool (*match_method)(char,char)>
@@ -68,5 +85,29 @@ static inline size_t lcslen_bwd(const char *seq0,size_t start0,
     ptr1--;
   }
   return static_cast<size_t>((seq0 + len0 - 1 - start0) - ptr0);
+}
+
+static inline size_t block_wise_lcplen_fwd(const char *seq0,size_t start0,
+                                           const char *seq1,size_t start1,
+                                           GTTL_UNUSED size_t len0,
+                                           GTTL_UNUSED size_t len1,
+                                           GTTL_UNUSED size_t seqnum0,
+                                           GTTL_UNUSED size_t seqnum1)
+{
+  // Fetch pattern/text blocks
+  const uint64_t* block_ptr0 = reinterpret_cast<const uint64_t*>(seq0+start0);
+  const uint64_t* block_ptr1 = reinterpret_cast<const uint64_t*>(seq1+start1);
+  size_t lcplen;
+  // Compare 64-bits blocks
+  uint64_t cmp = (*block_ptr0) ^ (*block_ptr1);
+  for (lcplen = 0; __builtin_expect(!cmp,0); lcplen += sizeof(uint64_t))
+  {
+    ++block_ptr0;
+    ++block_ptr1;
+    cmp = (*block_ptr0) ^ (*block_ptr1);
+  }
+  // Count equal characters
+  const int equal_right_bits = __builtin_ctzl(cmp);
+  return lcplen + (equal_right_bits >> 3);
 }
 #endif
