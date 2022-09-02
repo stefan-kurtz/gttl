@@ -87,6 +87,10 @@ static inline size_t lcslen_bwd(const char *seq0,size_t start0,
   return static_cast<size_t>((seq0 + len0 - 1 - start0) - ptr0);
 }
 
+/* The following blockwise comparison function requires a padding of
+   the sequences with 7 characters to prevent accessing undefined 
+   memory. */
+
 static inline size_t block_wise_lcplen_fwd(const char *seq0,size_t start0,
                                            const char *seq1,size_t start1,
                                            GTTL_UNUSED size_t len0,
