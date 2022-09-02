@@ -309,25 +309,26 @@ class TrackPolishedPoints
            vlen,
            lag_last_d_with_pp,
            last_d_with_polished_point;
-    size_t weight_frontentries(size_t d,const FrontValueClass *destfront)
+    size_t weight_frontentries(size_t d,int32_t lo_diag, int32_t hi_diag,
+                               const FrontValueClass *destfront)
     {
       size_t strong_history = 0;
-      for (size_t idx = 0; idx <= 2 * d; idx++)
+      for (int32_t idx = lo_diag; idx <= hi_diag; idx++)
       {
         const FrontValueClass &front = destfront[idx];
         const uint64_t match_history = front.match_history_get();
 #undef SKDEBUG
 #ifdef SKDEBUG
         std::cout << "evaluatefrontentry(d=" << d << "\tdiag="
-                  << (static_cast<long>(idx) - static_cast<long>(d))
+                  << (idx - static_cast<int32_t>(d))
                   << "\trow=" << front.to_string() << ")";
 #endif
         if (alignment_polishing.is_polished(match_history))
         {
           strong_history++;
           const size_t dest_row = front.row_get(ulen);
-          const int64_t diag_idx = (static_cast<int64_t>(idx) -
-                                    static_cast<int64_t>(d));
+          const int64_t diag_idx = static_cast<int64_t>(idx)
+                                   - static_cast<int64_t>(d);
           const size_t aligned_len = front.aligned_len_get(diag_idx,ulen,vlen);
           best_polished_points->add(d,dest_row,aligned_len);
 #ifdef SKDEBUG
@@ -360,13 +361,14 @@ class TrackPolishedPoints
       , lag_last_d_with_pp(_alignment_polishing.lag_last_d_with_pp_get())
       , last_d_with_polished_point(0)
      {}
-  size_t evaluate(size_t d,const FrontValueClass *front)
+  size_t evaluate(size_t d,int32_t lo_diag, int32_t hi_diag,
+                  const FrontValueClass *front)
   {
     if (d == 0)
     {
       return 1;
     }
-    const size_t strong_history = weight_frontentries(d,front);
+    const size_t strong_history = weight_frontentries(d,lo_diag,hi_diag,front);
     if (strong_history > 0)
     {
       last_d_with_polished_point = d;

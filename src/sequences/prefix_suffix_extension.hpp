@@ -31,7 +31,7 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
   size_t upper_bound_d = 32;
   front.reserve(2 * upper_bound_d + 1);
   front.push_back(FrontValue(initial_lcp));
-  if (tracker->evaluate(0, front.data()) == 0)
+  if (tracker->evaluate(0, 0, 0, front.data()) == 0)
   {
     return;
   }
@@ -53,7 +53,7 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
                                 vlen,
                                 seqnum0,
                                 seqnum1);
-    if (tracker->evaluate(d, front.data()) == 0)
+    if (tracker->evaluate(d, 0, 2 * d, front.data()) == 0)
     {
       break;
     }

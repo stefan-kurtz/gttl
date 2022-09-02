@@ -23,9 +23,10 @@ class TrackEditoperations
     TrackEditoperations(void)
       : trace({})
      {}
-  size_t evaluate(size_t d,const FrontValueTrace *front)
+  size_t evaluate(GTTL_UNUSED size_t d,int32_t lo_diag, int32_t hi_diag,
+                  const FrontValueTrace *front)
   {
-    for (size_t idx = 0; idx <= 2 * d; idx++)
+    for (int32_t idx = lo_diag; idx <= hi_diag; idx++)
     {
       trace.push_back(front[idx].backreference_get());
     }
