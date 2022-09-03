@@ -313,22 +313,19 @@ class TrackPolishedPoints
                                const FrontValueClass *destfront)
     {
       size_t strong_history = 0;
-      for (int32_t idx = lo_diag; idx <= hi_diag; idx++)
+      for (int32_t diag_idx = lo_diag; diag_idx <= hi_diag; diag_idx++)
       {
-        const FrontValueClass &front = destfront[idx];
+        const FrontValueClass &front = destfront[diag_idx];
         const uint64_t match_history = front.match_history_get();
 #undef SKDEBUG
 #ifdef SKDEBUG
-        std::cout << "evaluatefrontentry(d=" << d << "\tdiag="
-                  << (idx - static_cast<int32_t>(d))
+        std::cout << "evaluatefrontentry(d=" << d << "\tdiag=" << diag_idx
                   << "\trow=" << front.to_string() << ")";
 #endif
         if (alignment_polishing.is_polished(match_history))
         {
           strong_history++;
           const size_t dest_row = front.row_get(ulen);
-          const int64_t diag_idx = static_cast<int64_t>(idx)
-                                   - static_cast<int64_t>(d);
           const size_t aligned_len = front.aligned_len_get(diag_idx,ulen,vlen);
           best_polished_points->add(d,dest_row,aligned_len);
 #ifdef SKDEBUG
