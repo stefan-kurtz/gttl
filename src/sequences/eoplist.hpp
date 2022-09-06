@@ -80,8 +80,7 @@ class Eoplist
       bool stop = false;
       while (!stop && eop_idx < eoplist_ref.size())
       {
-        const uint8_t this_eop
-          = eoplist_ref[eop_idx];
+        const uint8_t this_eop = eoplist_ref[eop_idx];
         if (cigar_operator.iteration > 0)
         {
           assert(cigar_operator.edit_operation != UndefinedOp);
@@ -394,7 +393,7 @@ class Eoplist
     }
   }
   /* A constructor to create an Eoplist from a cigar string encoding as
-     use in SAM */
+     used in SAM */
   Eoplist(bool _distinguish_mismatch_match,const char *useq,const char *vseq,
           const std::vector<uint32_t> &cigar_string_encoding)
     : eoplist({})

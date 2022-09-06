@@ -69,7 +69,7 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
          range from 0 to 2*d and thus front[d+vlen-ulen] is defined. */
       if (front[d + vlen - ulen] >= ulen)
       {
-       break;
+        break;
       }
     }
   }
