@@ -18,15 +18,15 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
                                                size_t ulen,
                                                const char *vseq,
                                                size_t vlen,
-                                               size_t seqnum0,
-                                               size_t seqnum1)
+                                               size_t useqnum,
+                                               size_t vseqnum)
 {
   if (ulen == 0 || vlen == 0)
   {
     return;
   }
   const size_t initial_lcp
-    = suffix_or_prefix_match_len(useq,0,vseq,0,ulen,vlen,seqnum0,seqnum1);
+    = suffix_or_prefix_match_len(useq,0,vseq,0,ulen,vlen,useqnum,vseqnum);
   std::vector<FrontValue> front{};
   size_t upper_bound_d = 32;
   front.reserve(2 * upper_bound_d + 1);
@@ -51,8 +51,8 @@ static void prefix_or_suffix_extension_generic(Tracker *tracker,
                                 ulen,
                                 vseq,
                                 vlen,
-                                seqnum0,
-                                seqnum1);
+                                useqnum,
+                                vseqnum);
     if (tracker->evaluate(d, -static_cast<int32_t>(d), static_cast<int32_t>(d),
                           front.data() + d) == 0)
     {
