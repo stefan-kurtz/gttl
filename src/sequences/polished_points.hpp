@@ -179,16 +179,16 @@ class PolishedPoints
           size_t n_rm = 0; /* number of elements removed */
           /* remove all entries with a larger error percentage. They
              are also not longer than the current match has maximum length. */
-          for (size_t read_idx = 1; read_idx < best.size(); read_idx++)
+          for (size_t read_idx = 0; read_idx < best.size(); read_idx++)
           {
-            assert(read_idx > n_rm);
-            const PolishedPoint &cmp_pp = best[read_idx - 1 - n_rm];
+            assert(read_idx >= n_rm);
+            best[read_idx - n_rm] = best[read_idx];
+            const PolishedPoint &cmp_pp = best[read_idx];
             n_rm += (error_percentage_get(cmp_pp.distance_get()
                                             + context_distance,
                                           cmp_pp.aligned_len_get()
                                             + context_aligned_len)
                      >= this_error_percentage);
-            best[read_idx - n_rm] = best[read_idx];
           }
           best.resize(best.size() - n_rm);
         }
@@ -202,12 +202,11 @@ class PolishedPoints
           /* remove all entries with a smaller aligned length than the current
              They also have a larger error percentage and does are dominated
              by the current entry */
-          for (size_t read_idx = 1; read_idx < best.size(); read_idx++)
+          for (size_t read_idx = 0; read_idx < best.size(); read_idx++)
           {
-            assert(read_idx > n_rm);
-            n_rm += (best[read_idx - 1 - n_rm].aligned_len_get()
-                     <= _aligned_len);
+            assert(read_idx >= n_rm);
             best[read_idx - n_rm] = best[read_idx];
+            n_rm += (best[read_idx].aligned_len_get() <= _aligned_len);
           }
           best.resize(best.size() - n_rm);
           best.push_back(PolishedPoint(_distance,_row,_aligned_len));
