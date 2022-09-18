@@ -362,6 +362,7 @@ class TrackPolishedPoints
   {
     if (d == 0)
     {
+      (void) weight_frontentries(d,lo_diag,hi_diag,front);
       return 1;
     }
     const size_t strong_history = weight_frontentries(d,lo_diag,hi_diag,front);
