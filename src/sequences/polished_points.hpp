@@ -14,17 +14,20 @@
 class PolishedPoint
 {
   private:
-  size_t distance, row, aligned_len;
+  size_t distance, row, aligned_len, unit_cost;
   public:
   PolishedPoint(void)
     : distance(0)
     , row(0)
     , aligned_len(0)
+    , unit_cost(0)
   {}
-  PolishedPoint(size_t _distance, size_t _row, size_t _aligned_len)
+  PolishedPoint(size_t _distance, size_t _row, size_t _aligned_len,
+                size_t _unit_cost)
     : distance(_distance)
     , row(_row)
     , aligned_len(_aligned_len)
+    , unit_cost(_unit_cost)
   {
     assert(_aligned_len >= _row);
   }
@@ -33,7 +36,8 @@ class PolishedPoint
   {
     return distance == other.distance
            && row == other.row
-           && aligned_len == other.aligned_len;
+           && aligned_len == other.aligned_len
+           && unit_cost == other.unit_cost;
   }
 
   bool operator != (const PolishedPoint& other) const noexcept
@@ -43,14 +47,18 @@ class PolishedPoint
 
   std::string to_string(void) const noexcept
   {
+    const std::string error_percentage_string
+      = aligned_len == 0 ? "undef"
+                         : std::to_string(error_percentage_get(unit_cost,
+                                                               aligned_len));
     return "(" +
            std::to_string(distance) + "," +
            std::to_string(row) + "," +
-           std::to_string(aligned_len) + "," +
-           (aligned_len == 0 ? "undef"
-                             : std::to_string(error_percentage_get(distance,
-                                                                   aligned_len))
-           ) + ")";
+	   std::to_string(aligned_len) + "," +
+           (unit_cost == distance
+             ? error_percentage_string
+	     : (std::to_string(unit_cost) + "," + error_percentage_string))
+           + ")";
   }
 
   size_t distance_get(void) const noexcept
@@ -66,6 +74,11 @@ class PolishedPoint
   size_t row_get(void) const noexcept
   {
     return row;
+  }
+
+  size_t unit_cost_get(void) const noexcept
+  {
+    return unit_cost;
   }
 
   size_t column_get(void) const noexcept
@@ -158,10 +171,11 @@ class PolishedPoints
     s += "]";
     return s;
   }
-  void add(size_t _distance, size_t _row, size_t _aligned_len)
+  void add(size_t _distance, size_t _row, size_t _aligned_len,
+           size_t _unit_cost)
   {
     const double this_error_percentage
-      = error_percentage_get(_distance + context_distance,
+      = error_percentage_get(_unit_cost + context_distance,
                              _aligned_len + context_aligned_len);
     if (defined)
     {
@@ -184,7 +198,7 @@ class PolishedPoints
             assert(read_idx >= n_rm);
             best[read_idx - n_rm] = best[read_idx];
             const PolishedPoint &cmp_pp = best[read_idx];
-            n_rm += (error_percentage_get(cmp_pp.distance_get()
+            n_rm += (error_percentage_get(cmp_pp.unit_cost_get()
                                             + context_distance,
                                           cmp_pp.aligned_len_get()
                                             + context_aligned_len)
@@ -192,7 +206,7 @@ class PolishedPoints
           }
           best.resize(best.size() - n_rm);
         }
-        best.push_back(PolishedPoint(_distance,_row,_aligned_len));
+        best.push_back(PolishedPoint(_distance,_row,_aligned_len,_unit_cost));
       } else
       {
         if (smallest_error_percentage > this_error_percentage)
@@ -209,7 +223,8 @@ class PolishedPoints
             n_rm += (best[read_idx].aligned_len_get() <= _aligned_len);
           }
           best.resize(best.size() - n_rm);
-          best.push_back(PolishedPoint(_distance,_row,_aligned_len));
+          best.push_back(PolishedPoint(_distance,_row,_aligned_len,
+                                       _unit_cost));
         }
         /* in the else case the current match does neither improve the
            aligned length value nor the error percentage and so we can ignore
@@ -220,7 +235,7 @@ class PolishedPoints
       defined = true;
       longest_aligned_len = _aligned_len;
       smallest_error_percentage = this_error_percentage;
-      best.push_back(PolishedPoint(_distance,_row,_aligned_len));
+      best.push_back(PolishedPoint(_distance,_row,_aligned_len, _unit_cost));
     }
   }
   bool operator == (const PolishedPoints& other) const noexcept
@@ -266,7 +281,7 @@ class PolishedPoints
   {
     return smallest_error_percentage;
   }
-  size_t smallest_distance_get(void) const noexcept
+  size_t smallest_unit_cost_get(void) const noexcept
   {
     return (longest_aligned_len/2) * (smallest_error_percentage/100.0);
   }
@@ -326,7 +341,15 @@ class TrackPolishedPoints
           strong_history++;
           const size_t dest_row = front.row_get(ulen);
           const size_t aligned_len = front.aligned_len_get(diag_idx,ulen,vlen);
-          best_polished_points->add(d,dest_row,aligned_len);
+          size_t unit_cost;
+          if constexpr (FrontValueClass::unit_cost_model)
+          {
+            unit_cost = d;
+          } else
+          {
+            unit_cost = front.error_count_get();
+          }
+          best_polished_points->add(d,dest_row,aligned_len, unit_cost);
 #ifdef SKDEBUG
           std::cout << "*";
           std::cout << std::endl;
