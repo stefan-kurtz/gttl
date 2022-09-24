@@ -9,12 +9,22 @@
 #include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"
 
+template<typename char_type>
 struct AlignmentSequenceInfo
 {
-  const char *useq, *vseq;
+  const char_type *useq, *vseq;
   size_t ustart, ulen, vstart, vlen;
-  AlignmentSequenceInfo (const char *_useq,
-                         const char *_vseq,
+  AlignmentSequenceInfo (void)
+    : useq(nullptr)
+    , vseq(nullptr)
+    , ustart(0)
+    , ulen(0)
+    , vstart(0)
+    , vlen(0)
+  {}
+
+  AlignmentSequenceInfo (const char_type *_useq,
+                         const char_type *_vseq,
                          size_t _ustart,
                          size_t _ulen,
                          size_t _vstart,
@@ -26,6 +36,20 @@ struct AlignmentSequenceInfo
     , vstart(_vstart)
     , vlen(_vlen)
   {}
+  void set (const char_type *_useq,
+            const char_type *_vseq,
+            size_t _ustart,
+            size_t _ulen,
+            size_t _vstart,
+            size_t _vlen)
+  {
+    useq = _useq;
+    vseq = _vseq;
+    ustart = _ustart;
+    ulen = _ulen;
+    vstart = _vstart;
+    vlen = _vlen;
+  }
   int width_of_numbers_get(void) const
   {
     assert(ustart + ulen > 0 || vstart + vlen > 0);
@@ -133,7 +157,7 @@ static void alignment_output_write_lines(size_t one_off,
   fputc('\n',fp);
 }
 
-static size_t alignment_output_show_advance(size_t one_off,
+static inline size_t alignment_output_show_advance(size_t one_off,
                                             bool subject_first,
                                             int width_of_numbers,
                                             size_t pos,
@@ -170,8 +194,10 @@ static size_t alignment_output_show_advance(size_t one_off,
   return 0;
 }
 
-template<bool (*match_method)(char,char)>
-static void alignment_output(const AlignmentSequenceInfo &asi,
+template<typename char_type,
+         bool (&match_method)(char_type,char_type),
+         char (&to_char)(char_type)>
+static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
                              const Eoplist &eoplist,
                              size_t top_seqlength,
                              size_t low_reference,
@@ -210,20 +236,23 @@ static void alignment_output(const AlignmentSequenceInfo &asi,
                                                idx_v < asi.vlen; j++)
         {
           char cc_a, cc_b;
+          bool is_match;
 
           if (alignment_show_forward)
           {
-            cc_a = asi.useq[idx_u];
-            cc_b = asi.vseq[idx_v];
+            is_match = match_method(asi.useq[idx_u],asi.vseq[idx_v]);
+            cc_a = to_char(asi.useq[idx_u]);
+            cc_b = to_char(asi.vseq[idx_v]);
           } else
           {
-            cc_a = asi.useq[asi.ulen - 1 - idx_u];
-            cc_b = asi.vseq[asi.vlen - 1 - idx_v];
+            is_match = match_method(asi.useq[asi.ulen - 1 -idx_u],
+                                    asi.vseq[asi.vlen - 1 -idx_v]);
+            cc_a = to_char(asi.useq[asi.ulen - 1 - idx_u]);
+            cc_b = to_char(asi.vseq[asi.vlen - 1 - idx_v]);
           }
           assert(pos < width_alignment);
           topbuf[pos] = cc_a;
           lowbuf[pos] = cc_b;
-          const bool is_match = match_method(cc_a,cc_b);
           if (distinguish_mismatch_match)
           {
             if (co.edit_operation == MatchOp)
@@ -237,19 +266,19 @@ static void alignment_output(const AlignmentSequenceInfo &asi,
           midbuf[pos] = is_match ? alignment_output_matchsymbol
                                  : alignment_output_mismatchsymbol;
           pos = alignment_output_show_advance(one_off,
-                                     subject_first,
-                                     width_of_numbers,
-                                     pos,
-                                     width_alignment,
-                                     topbuf,
-                                     top_seqlength,
-                                     top_start_pos,
-                                     asi.ustart + idx_u,
-                                     midbuf,
-                                     lowbuf,
-                                     low_start_pos,
-                                     low_start_base + idx_v,
-                                     fp);
+                                              subject_first,
+                                              width_of_numbers,
+                                              pos,
+                                              width_alignment,
+                                              topbuf,
+                                              top_seqlength,
+                                              top_start_pos,
+                                              asi.ustart + idx_u,
+                                              midbuf,
+                                              lowbuf,
+                                              low_start_pos,
+                                              low_start_base + idx_v,
+                                              fp);
           if (pos == 0)
           {
             top_start_pos = asi.ustart + idx_u + 1;
@@ -263,26 +292,27 @@ static void alignment_output(const AlignmentSequenceInfo &asi,
       case DeletionOp:
         for (size_t j = 0; j < co.iteration && idx_u < asi.ulen; j++)
         {
-          const char cc_a = asi.useq[alignment_show_forward ? idx_u
-                                                            : asi.ulen-1-idx_u];
+          const char cc_a = to_char(asi.useq[alignment_show_forward
+                                              ? idx_u
+                                              : asi.ulen-1-idx_u]);
           assert(pos < width_alignment);
           topbuf[pos] = cc_a;
           midbuf[pos] = alignment_output_mismatchsymbol;
           lowbuf[pos] = alignment_output_gapsymbol;
           pos = alignment_output_show_advance(one_off,
-                                     subject_first,
-                                     width_of_numbers,
-                                     pos,
-                                     width_alignment,
-                                     topbuf,
-                                     top_seqlength,
-                                     top_start_pos,
-                                     asi.ustart + idx_u,
-                                     midbuf,
-                                     lowbuf,
-                                     low_start_pos,
-                                     low_start_base + idx_v,
-                                     fp);
+                                              subject_first,
+                                              width_of_numbers,
+                                              pos,
+                                              width_alignment,
+                                              topbuf,
+                                              top_seqlength,
+                                              top_start_pos,
+                                              asi.ustart + idx_u,
+                                              midbuf,
+                                              lowbuf,
+                                              low_start_pos,
+                                              low_start_base + idx_v,
+                                              fp);
           if (pos == 0)
           {
             top_start_pos = asi.ustart + idx_u + 1;
@@ -295,26 +325,27 @@ static void alignment_output(const AlignmentSequenceInfo &asi,
       case InsertionOp:
         for (size_t j = 0; j < co.iteration && idx_v < asi.vlen; j++)
         {
-          const char cc_b = asi.vseq[alignment_show_forward ? idx_v
-                                                            : asi.vlen-1-idx_v];
+          const char cc_b = to_char(asi.vseq[alignment_show_forward
+                                               ? idx_v
+                                               : asi.vlen-1-idx_v]);
           assert(pos < width_alignment);
           topbuf[pos] = alignment_output_gapsymbol;
           midbuf[pos] = alignment_output_mismatchsymbol;
           lowbuf[pos] = cc_b;
           pos = alignment_output_show_advance(one_off,
-                                     subject_first,
-                                     width_of_numbers,
-                                     pos,
-                                     width_alignment,
-                                     topbuf,
-                                     top_seqlength,
-                                     top_start_pos,
-                                     asi.ustart + idx_u,
-                                     midbuf,
-                                     lowbuf,
-                                     low_start_pos,
-                                     low_start_base + idx_v,
-                                     fp);
+                                              subject_first,
+                                              width_of_numbers,
+                                              pos,
+                                              width_alignment,
+                                              topbuf,
+                                              top_seqlength,
+                                              top_start_pos,
+                                              asi.ustart + idx_u,
+                                              midbuf,
+                                              lowbuf,
+                                              low_start_pos,
+                                              low_start_base + idx_v,
+                                              fp);
           if (pos == 0)
           {
             top_start_pos = asi.ustart + idx_u + 1;
@@ -331,18 +362,18 @@ static void alignment_output(const AlignmentSequenceInfo &asi,
   if (pos > 0)
   {
     alignment_output_write_lines(one_off,
-                        subject_first,
-                        width_of_numbers,
-                        pos,
-                        topbuf,
-                        top_seqlength,
-                        top_start_pos,
-                        asi.ustart + std::min(idx_u,asi.ulen - 1),
-                        midbuf,
-                        lowbuf,
-                        low_start_pos,
-                        low_start_base + std::min(idx_v,asi.vlen - 1),
-                        fp);
+                                 subject_first,
+                                 width_of_numbers,
+                                 pos,
+                                 topbuf,
+                                 top_seqlength,
+                                 top_start_pos,
+                                 asi.ustart + std::min(idx_u,asi.ulen - 1),
+                                 midbuf,
+                                 lowbuf,
+                                 low_start_pos,
+                                 low_start_base + std::min(idx_v,asi.vlen - 1),
+                                 fp);
   }
   delete[] topbuf;
 }

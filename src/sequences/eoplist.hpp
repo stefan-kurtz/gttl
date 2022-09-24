@@ -5,8 +5,8 @@
 #include <cctype>
 #include <cassert>
 #include <vector>
+#include <string>
 #include <algorithm>
-#include "utilities/str_format.hpp"
 
 enum EopType
 {
@@ -211,6 +211,16 @@ class Eoplist
     , previous_was_gap(false)
     , distinguish_mismatch_match(_distinguish_mismatch_match)
   {}
+  void reset(void)
+  {
+    eoplist.clear();
+    count_matches = 0;
+    count_mismatches = 0;
+    count_deletions = 0;
+    count_insertions = 0;
+    count_gap_opens = 0;
+    previous_was_gap = false;
+  }
   void match_add(size_t length)
   {
     assert(length > 0);
@@ -382,8 +392,8 @@ class Eoplist
                 match_add(iteration);
               } else
               {
-                StrFormat msg("illegal symbol '%c' in cigar string",cc);
-                throw msg.str();
+                throw "illegal symbol '" + std::to_string(cc) +
+                      "' in cigar string";
               }
             }
           }

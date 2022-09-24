@@ -10,6 +10,16 @@
 
 static bool simple_matching_characters(char a,char b) { return a == b; }
 
+static char to_char_identity(char cc) { return cc; }
+
+class IdentityEncodingHandler
+{
+  public:
+  using source_type = char;
+  static bool match_method(source_type a,source_type b) { return a == b; }
+  static char to_char(source_type a) { return a; }
+};
+
 static void display_alignment(const Eoplist &eoplist)
 {
   const size_t ulen = eoplist.count_deletions_get() +
@@ -64,8 +74,8 @@ static void display_alignment(const Eoplist &eoplist)
   }
   assert(i == ulen);
   assert(j == vlen);
-  AlignmentSequenceInfo asi(useq,vseq,0,ulen,0,vlen);
-  alignment_output<simple_matching_characters>
+  AlignmentSequenceInfo<char> asi(useq,vseq,0,ulen,0,vlen);
+  alignment_output<char,simple_matching_characters,to_char_identity>
                   (asi,
                    eoplist,
                    0,0,0,

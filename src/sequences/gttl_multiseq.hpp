@@ -306,6 +306,18 @@ class GttlMultiseq
     return concatenated_sequences.data() + sequence_offsets[seqnum];
   }
 
+  /* Returns a pointer to the sequence with number seqnum */
+  /* This function shall only be called after transforming the sequences
+      using a LiterateMultiseq */
+  const uint8_t *encoded_sequence_ptr_get(size_t seqnum) const noexcept
+  {
+    assert(seqnum < sequences_number_get() &&
+           sequence_offsets[seqnum] < concatenated_sequences.size());
+    return reinterpret_cast<const uint8_t *>
+                           (concatenated_sequences.data() +
+                            sequence_offsets[seqnum]);
+  }
+
   const char *sequence_ptr_get(void) const noexcept
   {
     return sequence_ptr_get(0);

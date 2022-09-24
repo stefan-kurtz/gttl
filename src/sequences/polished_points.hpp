@@ -54,10 +54,10 @@ class PolishedPoint
     return "(" +
            std::to_string(distance) + "," +
            std::to_string(row) + "," +
-	   std::to_string(aligned_len) + "," +
+           std::to_string(aligned_len) + "," +
            (unit_cost == distance
              ? error_percentage_string
-	     : (std::to_string(unit_cost) + "," + error_percentage_string))
+             : (std::to_string(unit_cost) + "," + error_percentage_string))
            + ")";
   }
 
