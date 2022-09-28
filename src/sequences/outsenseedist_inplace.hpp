@@ -19,6 +19,7 @@ static inline void outsense_next_front_after_second_inplace(
                                                 size_t seqnum0,
                                                 size_t seqnum1)
 {
+  assert(d > 0);
   FrontValue insertion_value = front[0]; /* from previous diag -(d-1)
                                             => -d => DELETION */
   FrontValue bestfront = insertion_value;
