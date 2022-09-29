@@ -224,19 +224,38 @@ class Eoplist
   void match_add(size_t length)
   {
     assert(length > 0);
-    while (true)
+    count_matches += length;
+    while (length > 0)
     {
-      if (length <= ft_eopcode_maxmatches)
+      if (eoplist.size() > 0 &&
+          eoplist[eoplist.size()-1] < ft_eopcode_maxmatches - 1)
       {
-        assert(length > 0);
-        eoplist.push_back(static_cast<uint8_t>(length - 1)); /* R length */
-        count_matches += length;
-        break;
+        if (static_cast<size_t>(eoplist[eoplist.size()-1]) + length
+              < static_cast<size_t>(ft_eopcode_maxmatches))
+        {
+          eoplist[eoplist.size()-1] += static_cast<uint8_t>(length);
+          length = 0;
+        } else
+        {
+          assert(static_cast<size_t>(ft_eopcode_maxmatches -
+                                     eoplist[eoplist.size()-1]) < length);
+          length = ft_eopcode_maxmatches - eoplist[eoplist.size()-1];
+          /* R max */
+          eoplist[eoplist.size()-1] = ft_eopcode_maxmatches - 1;
+        }
+      } else
+      {
+        if (length <= static_cast<size_t>(ft_eopcode_maxmatches))
+        {
+          eoplist.push_back(static_cast<uint8_t>(length - 1)); /* R length */
+          length = 0;
+        } else
+        {
+          /* R max */
+          eoplist.push_back(ft_eopcode_maxmatches-1);
+          length -= static_cast<size_t>(ft_eopcode_maxmatches);
+        }
       }
-      /* R max */
-      eoplist.push_back(static_cast<uint8_t>(ft_eopcode_maxmatches - 1));
-      count_matches += ft_eopcode_maxmatches;
-      length -= ft_eopcode_maxmatches;
     }
     previous_was_gap = false;
   }
@@ -313,25 +332,9 @@ class Eoplist
   std::string to_string(void) const noexcept
   {
     std::string s{};
-    for (size_t idx = 0; idx < eoplist.size(); idx++)
+    for (auto &&co : *this)
     {
-      const uint8_t this_eop = eoplist[idx];
-      switch(this_eop)
-      {
-        case ft_eopcode_insertion:
-          s += CigarOperator::insertion_char;
-          break;
-        case ft_eopcode_deletion:
-          s += CigarOperator::deletion_char;
-          break;
-        case ft_eopcode_mismatch:
-          s += CigarOperator::mismatch_char;
-          break;
-        default:
-          s += std::to_string(1 + static_cast<int>(this_eop));
-          s += CigarOperator::match_char;
-          break;
-      }
+      s += co.to_string(distinguish_mismatch_match);
     }
     return s;
   }
