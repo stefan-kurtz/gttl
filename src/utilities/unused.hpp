@@ -6,4 +6,11 @@
 #define GTTL_UNUSED \
         __attribute__ ((unused))
 
+#ifdef NDEBUG
+#define GTTL_DEBUG_USED \
+        __attribute__ ((unused))
+#else
+#define GTTL_DEBUG_USED /* Nothing */
+#endif
+
 #endif
