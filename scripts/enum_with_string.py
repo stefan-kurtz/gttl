@@ -79,7 +79,7 @@ def parse_arguments(argv):
   p = argparse.ArgumentParser(description=('generate code for enumeration '
                                            'class with string representations'))
   p.add_argument('-p','--prefix',type=str,default='',
-                 help='specify prefix of identiers')
+                 help='specify prefix of identifiers')
   p.add_argument('classname',type=str,
                   help='specify name of class')
   p.add_argument('items',nargs='+',
