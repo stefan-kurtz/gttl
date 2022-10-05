@@ -340,6 +340,11 @@ class SortedMatchList
   {
     return encoded_match_list.size();
   }
+  size_t size_in_bytes(void) const noexcept
+  {
+    return sizeof(SortedMatchList) +
+           encoded_match_list.size() * sizeof(BytesUnitMatch);
+  }
   size_t ref_seqnum_get(size_t idx) const noexcept
   {
     assert(idx < size());

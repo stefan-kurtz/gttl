@@ -76,7 +76,7 @@ static inline void outsense_next_front_after_second_inplace(
     {
       bestfront.insertion_set();
     }
-    bestfront += 0; /* do not delete */
+    bestfront += 0; /* do not delete this line */
     if (idx <= frontmaxidx - 1)
     {
       if (bestfront <= replacement_value)
