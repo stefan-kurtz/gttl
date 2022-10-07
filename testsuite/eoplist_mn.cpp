@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <string_view>
 #include "utilities/uniform_random_double.hpp"
 #include "sequences/eoplist.hpp"
 #include "sequences/alignment_output.hpp"
@@ -74,12 +76,14 @@ static void display_alignment(const Eoplist &eoplist)
   }
   assert(i == ulen);
   assert(j == vlen);
-  AlignmentSequenceInfo<char> asi(useq,vseq,0,ulen,0,vlen);
-  alignment_output<char,simple_matching_characters,to_char_identity>
+  const std::string ustring(useq,ulen),
+                    vstring(vseq,vlen);
+  AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0);
+  alignment_output<std::string,std::string,char,
+                   simple_matching_characters,to_char_identity>
                   (asi,
                    eoplist,
                    0,0,0,
-                   true,
                    true,
                    true,
                    60,

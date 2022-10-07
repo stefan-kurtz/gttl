@@ -9,51 +9,43 @@
 #include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"
 
-template<typename char_type>
+template<class SeqClass_u,class SeqClass_v>
 struct AlignmentSequenceInfo
 {
-  const char_type *useq, *vseq;
-  size_t ustart, ulen, vstart, vlen;
+  const SeqClass_u *useq;
+  const SeqClass_v *vseq;
+  size_t ustart, vstart;
   AlignmentSequenceInfo (void)
     : useq(nullptr)
     , vseq(nullptr)
     , ustart(0)
-    , ulen(0)
     , vstart(0)
-    , vlen(0)
   {}
 
-  AlignmentSequenceInfo (const char_type *_useq,
-                         const char_type *_vseq,
-                         size_t _ustart,
-                         size_t _ulen,
-                         size_t _vstart,
-                         size_t _vlen)
+  AlignmentSequenceInfo(const SeqClass_u *_useq,
+                        size_t _ustart,
+                        const SeqClass_v *_vseq,
+                        size_t _vstart)
     : useq(_useq)
     , vseq(_vseq)
     , ustart(_ustart)
-    , ulen(_ulen)
     , vstart(_vstart)
-    , vlen(_vlen)
   {}
-  void set (const char_type *_useq,
-            const char_type *_vseq,
-            size_t _ustart,
-            size_t _ulen,
-            size_t _vstart,
-            size_t _vlen)
+  void set(const SeqClass_u *_useq,
+           size_t _ustart,
+           const SeqClass_v *_vseq,
+           size_t _vstart)
   {
     useq = _useq;
     vseq = _vseq;
     ustart = _ustart;
-    ulen = _ulen;
     vstart = _vstart;
-    vlen = _vlen;
   }
   int width_of_numbers_get(void) const
   {
-    assert(ustart + ulen > 0 || vstart + vlen > 0);
-    size_t maximum_position = std::max(ustart + ulen,vstart + vlen) - 1;
+    assert(ustart + useq->size() > 0 || vstart + vseq->size() > 0);
+    size_t maximum_position = std::max(ustart + useq->size(),
+                                       vstart + vseq->size()) - 1;
     if (maximum_position < 10)
     {
       return 1;
@@ -194,16 +186,18 @@ static inline size_t alignment_output_show_advance(size_t one_off,
   return 0;
 }
 
-template<typename char_type,
-         bool (&match_method)(char_type,char_type),
-         char (&to_char)(char_type)>
-static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
+template<class SeqClass_u,
+         class SeqClass_v,
+         typename CharType,
+         bool (&match_method)(CharType,CharType),
+         char (&to_char)(CharType)>
+static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
+                               &asi,
                              const Eoplist &eoplist,
                              size_t top_seqlength,
                              size_t low_reference,
                              size_t one_off,
                              bool subject_first,
-                             bool alignment_show_forward,
                              GTTL_UNUSED bool distinguish_mismatch_match,
                              size_t width_alignment,
                              FILE *fp)
@@ -225,31 +219,23 @@ static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
        *midbuf = topbuf + width_alignment,
        *lowbuf = midbuf + width_alignment;
 
-  assert(alignment_show_forward || top_seqlength > 0);
+  const SeqClass_u &useq = *(asi.useq);
+  const SeqClass_v &vseq = *(asi.vseq);
   for (auto &&co : eoplist)
   {
     switch (co.edit_operation)
     {
       case MatchOp:
       case MismatchOp:
-        for (size_t j = 0; j < co.iteration && idx_u < asi.ulen &&
-                                               idx_v < asi.vlen; j++)
+        for (size_t j = 0; j < co.iteration && idx_u < useq.size() &&
+                                               idx_v < vseq.size(); j++)
         {
           char cc_a, cc_b;
           bool is_match;
 
-          if (alignment_show_forward)
-          {
-            is_match = match_method(asi.useq[idx_u],asi.vseq[idx_v]);
-            cc_a = to_char(asi.useq[idx_u]);
-            cc_b = to_char(asi.vseq[idx_v]);
-          } else
-          {
-            is_match = match_method(asi.useq[asi.ulen - 1 -idx_u],
-                                    asi.vseq[asi.vlen - 1 -idx_v]);
-            cc_a = to_char(asi.useq[asi.ulen - 1 - idx_u]);
-            cc_b = to_char(asi.vseq[asi.vlen - 1 - idx_v]);
-          }
+          is_match = match_method(useq[idx_u],vseq[idx_v]);
+          cc_a = to_char(useq[idx_u]);
+          cc_b = to_char(vseq[idx_v]);
           assert(pos < width_alignment);
           topbuf[pos] = cc_a;
           lowbuf[pos] = cc_b;
@@ -290,11 +276,9 @@ static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
         }
         break;
       case DeletionOp:
-        for (size_t j = 0; j < co.iteration && idx_u < asi.ulen; j++)
+        for (size_t j = 0; j < co.iteration && idx_u < useq.size(); j++)
         {
-          const char cc_a = to_char(asi.useq[alignment_show_forward
-                                              ? idx_u
-                                              : asi.ulen-1-idx_u]);
+          const char cc_a = to_char(useq[idx_u]);
           assert(pos < width_alignment);
           topbuf[pos] = cc_a;
           midbuf[pos] = alignment_output_mismatchsymbol;
@@ -323,11 +307,9 @@ static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
         }
         break;
       case InsertionOp:
-        for (size_t j = 0; j < co.iteration && idx_v < asi.vlen; j++)
+        for (size_t j = 0; j < co.iteration && idx_v < vseq.size(); j++)
         {
-          const char cc_b = to_char(asi.vseq[alignment_show_forward
-                                               ? idx_v
-                                               : asi.vlen-1-idx_v]);
+          const char cc_b = to_char(vseq[idx_v]);
           assert(pos < width_alignment);
           topbuf[pos] = alignment_output_gapsymbol;
           midbuf[pos] = alignment_output_mismatchsymbol;
@@ -368,11 +350,12 @@ static void alignment_output(const AlignmentSequenceInfo <char_type> &asi,
                                  topbuf,
                                  top_seqlength,
                                  top_start_pos,
-                                 asi.ustart + std::min(idx_u,asi.ulen - 1),
+                                 asi.ustart + std::min(idx_u,useq.size() - 1),
                                  midbuf,
                                  lowbuf,
                                  low_start_pos,
-                                 low_start_base + std::min(idx_v,asi.vlen - 1),
+                                 low_start_base + std::min(idx_v,
+                                                           vseq.size() - 1),
                                  fp);
   }
   delete[] topbuf;
