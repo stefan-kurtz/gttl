@@ -184,11 +184,11 @@ class Eoplist
     }
   };
   std::vector<uint8_t> eoplist;
-  size_t count_matches,
-         count_mismatches,
-         count_deletions,
-         count_insertions,
-         count_gap_opens;
+  size_t counter_for_matches,
+         counter_for_mismatches,
+         counter_for_deletions,
+         counter_for_insertions,
+         counter_for_gap_opens;
   bool previous_was_gap,
        distinguish_mismatch_match;
   void indel_add(int code)
@@ -196,35 +196,35 @@ class Eoplist
     eoplist.push_back(static_cast<uint8_t>(code));
     if (!previous_was_gap)
     {
-      count_gap_opens++;
+      counter_for_gap_opens++;
       previous_was_gap = true;
     }
   }
   public:
   Eoplist(bool _distinguish_mismatch_match)
     : eoplist({})
-    , count_matches(0)
-    , count_mismatches(0)
-    , count_deletions(0)
-    , count_insertions(0)
-    , count_gap_opens(0)
+    , counter_for_matches(0)
+    , counter_for_mismatches(0)
+    , counter_for_deletions(0)
+    , counter_for_insertions(0)
+    , counter_for_gap_opens(0)
     , previous_was_gap(false)
     , distinguish_mismatch_match(_distinguish_mismatch_match)
   {}
   void reset(void)
   {
     eoplist.clear();
-    count_matches = 0;
-    count_mismatches = 0;
-    count_deletions = 0;
-    count_insertions = 0;
-    count_gap_opens = 0;
+    counter_for_matches = 0;
+    counter_for_mismatches = 0;
+    counter_for_deletions = 0;
+    counter_for_insertions = 0;
+    counter_for_gap_opens = 0;
     previous_was_gap = false;
   }
   void match_add(size_t length)
   {
     assert(length > 0);
-    count_matches += length;
+    counter_for_matches += length;
     while (length > 0)
     {
       if (eoplist.size() > 0 &&
@@ -262,18 +262,18 @@ class Eoplist
   void mismatch_add(void)
   {
     eoplist.push_back(static_cast<uint8_t>(ft_eopcode_mismatch)); /* R 1 */
-    count_mismatches++;
+    counter_for_mismatches++;
     previous_was_gap = false;
   }
   void deletion_add(void)
   {
     indel_add(ft_eopcode_deletion);
-    count_deletions++;
+    counter_for_deletions++;
   }
   void insertion_add(void)
   {
     indel_add(ft_eopcode_insertion);
-    count_insertions++;
+    counter_for_insertions++;
   }
   size_t size(void) const noexcept
   {
@@ -289,23 +289,23 @@ class Eoplist
   }
   size_t count_matches_get(void) const noexcept
   {
-    return count_matches;
+    return counter_for_matches;
   }
   size_t count_mismatches_get(void) const noexcept
   {
-    return count_mismatches;
+    return counter_for_mismatches;
   }
   size_t count_deletions_get(void) const noexcept
   {
-    return count_deletions;
+    return counter_for_deletions;
   }
   size_t count_insertions_get(void) const noexcept
   {
-    return count_insertions;
+    return counter_for_insertions;
   }
   size_t count_gap_opens_get(void) const noexcept
   {
-    return count_gap_opens;
+    return counter_for_gap_opens;
   }
   size_t aligned_len_get(void) const noexcept
   {
@@ -348,11 +348,11 @@ class Eoplist
   }
   Eoplist(bool _distinguish_mismatch_match,const std::string &cigar_string)
     : eoplist({})
-    , count_matches(0)
-    , count_mismatches(0)
-    , count_deletions(0)
-    , count_insertions(0)
-    , count_gap_opens(0)
+    , counter_for_matches(0)
+    , counter_for_mismatches(0)
+    , counter_for_deletions(0)
+    , counter_for_insertions(0)
+    , counter_for_gap_opens(0)
     , previous_was_gap(false)
     , distinguish_mismatch_match(_distinguish_mismatch_match)
   {
@@ -410,11 +410,11 @@ class Eoplist
   Eoplist(bool _distinguish_mismatch_match,const char *useq,const char *vseq,
           const std::vector<uint32_t> &cigar_string_encoding)
     : eoplist({})
-    , count_matches(0)
-    , count_mismatches(0)
-    , count_deletions(0)
-    , count_insertions(0)
-    , count_gap_opens(0)
+    , counter_for_matches(0)
+    , counter_for_mismatches(0)
+    , counter_for_deletions(0)
+    , counter_for_insertions(0)
+    , counter_for_gap_opens(0)
     , previous_was_gap(false)
     , distinguish_mismatch_match(_distinguish_mismatch_match)
   {
