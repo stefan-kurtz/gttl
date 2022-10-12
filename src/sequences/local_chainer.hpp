@@ -204,23 +204,23 @@ class LocalChainAttributes
 };
 
 #ifndef NDEBUG
-template<class MatchTable>
-static void check_chain_element_order(const MatchTable &match_table,
+template<class SeedTable>
+static void check_chain_element_order(const SeedTable &seed_table,
                                       size_t segment_start,
                                       size_t segment_length)
 {
   assert(segment_length > 0);
-  size_t prev_j_endpos = match_table.order_endpos_get(segment_start);
+  size_t prev_j_endpos = seed_table.order_endpos_get(segment_start);
   for (size_t j = 1; j < segment_length; j++)
   {
-    const size_t j_endpos = match_table.order_endpos_get(segment_start + j);
+    const size_t j_endpos = seed_table.order_endpos_get(segment_start + j);
     assert(prev_j_endpos <= j_endpos);
     prev_j_endpos = j_endpos;
   }
 }
 #endif
 
-template<class MatchTable,
+template<class SeedTable,
          typename GapType,typename ScoreType,typename PredecessorType>
 class LocalChainer
 {
@@ -234,9 +234,9 @@ class LocalChainer
   {
     return static_cast<ScoreType>(ref_gap_length + query_gap_length)/2;
   }
-  const MatchTable &match_table;
-  size_t segment_start, /* offset for all access to match_table */
-         segment_length, /* number of elements of match_table segment */
+  const SeedTable &seed_table;
+  size_t segment_start, /* offset for all access to seed_table */
+         segment_length, /* number of elements of seed_table segment */
          max_previous;
   ThisLocalChainElemInfo chain_elem_info_fwd,
                          chain_elem_info_bck,
@@ -261,7 +261,7 @@ class LocalChainer
       step = -1;
       end_segment = 0;
     }
-    const size_t match_length = match_table.length_get(segment_start + j);
+    const size_t match_length = seed_table.length_get(segment_start + j);
     var_chain_elem_info->score_set(j,static_cast<ScoreType>(match_length));
     var_chain_elem_info->chain_elem_init(j);
     j += step;
@@ -280,7 +280,7 @@ class LocalChainer
                         : (segment_length - 1);
         }
         assert(j < segment_length);
-        const size_t j_match_length = match_table.length_get(segment_start + j);
+        const size_t j_match_length = seed_table.length_get(segment_start + j);
         ScoreType j_maxscore = static_cast<ScoreType>(j_match_length);
         var_chain_elem_info->chain_elem_init(j);
         assert(step < 0 || static_cast<size_t>(step) <= j);
@@ -292,12 +292,12 @@ class LocalChainer
           if constexpr (upwards_chaining)
           {
             std::tie(ref_gap_length,query_gap_length)
-              = match_table.colinear_match_pair(segment_start + i,
+              = seed_table.colinear_match_pair(segment_start + i,
                                                 segment_start + j);
           } else
           {
             std::tie(ref_gap_length,query_gap_length)
-              = match_table.colinear_match_pair(segment_start + j,
+              = seed_table.colinear_match_pair(segment_start + j,
                                                 segment_start + i);
           }
           assert(ref_gap_length <= static_cast<uint64_t>(ScoreTypeMax) &&
@@ -376,11 +376,11 @@ class LocalChainer
     }
   }
   public:
-  LocalChainer(const MatchTable &_match_table,
+  LocalChainer(const SeedTable &_seed_table,
         size_t _segment_start,
         size_t _segment_length,
         size_t _max_previous)
-    : match_table(_match_table)
+    : seed_table(_seed_table)
     , segment_start(_segment_start)
     , segment_length(_segment_length)
     , max_previous(_max_previous)
@@ -390,7 +390,7 @@ class LocalChainer
     , chain_ends_lengths({})
   {
 #ifndef NDEBUG
-    check_chain_element_order<MatchTable>(match_table,segment_start,
+    check_chain_element_order<SeedTable>(seed_table,segment_start,
                                           segment_length);
 #endif
     std::vector<PredecessorType> chain_ends{};
@@ -452,7 +452,7 @@ class LocalChainer
     {
       size_t j = static_cast<size_t>(ce);
       int64_t score_sum
-        = static_cast<int64_t>(match_table.length_get(segment_start + j));
+        = static_cast<int64_t>(seed_table.length_get(segment_start + j));
       uint32_t chain_len = 1;
       while (true)
       {
@@ -467,7 +467,7 @@ class LocalChainer
                          chain_elem_info.query_gap_length_get(j));
         score_sum -= static_cast<int64_t>(gap_score);
         score_sum
-          += static_cast<int64_t>(match_table.length_get(segment_start + i));
+          += static_cast<int64_t>(seed_table.length_get(segment_start + i));
         chain_len++;
         j = i;
       }
@@ -600,7 +600,7 @@ class LocalChainer
   }
   class Iterator
   {
-    const MatchTable &match_table;
+    const SeedTable &seed_table;
     size_t segment_start;
     const ThisLocalChainElemInfo &chain_elem_info_ref;
     const std::vector<EndLengthPair> &chain_ends_lengths_ref;
@@ -622,12 +622,12 @@ class LocalChainer
       return j;
     }
     public:
-    Iterator(const MatchTable &_match_table,
+    Iterator(const SeedTable &_seed_table,
              const ThisLocalChainElemInfo &_chain_elem_info_ref,
              const std::vector<EndLengthPair> &_chain_ends_lengths_ref,
              size_t _segment_start,
              size_t _current_idx)
-     : match_table(_match_table)
+     : seed_table(_seed_table)
      , segment_start(_segment_start)
      , chain_elem_info_ref(_chain_elem_info_ref)
      , chain_ends_lengths_ref(_chain_ends_lengths_ref)
@@ -654,10 +654,10 @@ class LocalChainer
       {
         const size_t ce = segment_start + chain_end;
         return LocalChainAttributes<ScoreType>
-                          (match_table.ref_endpos_get(ce),
-                           match_table.length_get(ce),
-                           match_table.query_endpos_get(ce),
-                           match_table.length_get(ce),
+                          (seed_table.ref_endpos_get(ce),
+                           seed_table.length_get(ce),
+                           seed_table.query_endpos_get(ce),
+                           seed_table.length_get(ce),
                            chain_elem_info_ref.score_get(chain_end),
                            chain_end,
                            chain_len);
@@ -665,17 +665,17 @@ class LocalChainer
       const size_t first_chain_idx
         = first_in_chain_idx_get(chain_end,chain_len);
       const uint64_t first_match_length
-        = match_table.length_get(segment_start + first_chain_idx);
+        = seed_table.length_get(segment_start + first_chain_idx);
       const uint64_t ref_chain_start
-        = match_table.ref_endpos_get(segment_start + first_chain_idx)
+        = seed_table.ref_endpos_get(segment_start + first_chain_idx)
           + 1 - first_match_length;
       const uint64_t query_chain_start
-        = match_table.query_endpos_get(segment_start + first_chain_idx)
+        = seed_table.query_endpos_get(segment_start + first_chain_idx)
           + 1 - first_match_length;
       const uint64_t ref_chain_end
-        = match_table.ref_endpos_get(segment_start + chain_end);
+        = seed_table.ref_endpos_get(segment_start + chain_end);
       const uint64_t query_chain_end
-        = match_table.query_endpos_get(segment_start + chain_end);
+        = seed_table.query_endpos_get(segment_start + chain_end);
       return LocalChainAttributes<ScoreType>
                                  (static_cast<size_t>(ref_chain_end),
                                   ref_chain_end - ref_chain_start + 1,
@@ -697,12 +697,12 @@ class LocalChainer
   };
   Iterator begin(void) const noexcept
   {
-    return Iterator(match_table,chain_elem_info,chain_ends_lengths,
+    return Iterator(seed_table,chain_elem_info,chain_ends_lengths,
                     segment_start,0);
   }
   Iterator end(void) const noexcept
   {
-    return Iterator(match_table,chain_elem_info,chain_ends_lengths,
+    return Iterator(seed_table,chain_elem_info,chain_ends_lengths,
                     segment_start,chain_ends_lengths.size());
   }
 };
