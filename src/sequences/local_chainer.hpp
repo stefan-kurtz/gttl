@@ -16,7 +16,7 @@ class LocalChainElemInfo
     = static_cast<PredecessorType>(1) <<
       (sizeof(PredecessorType) * CHAR_BIT - 1);
   using LocalChainElemInfoType = struct {GapType ref_gap_length,
-                                         query_gap_length;
+                                                 query_gap_length;
                                          ScoreType score;
                                          PredecessorType predecessor;
                                          bool is_referenced;};

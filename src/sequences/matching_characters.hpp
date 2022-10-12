@@ -40,8 +40,9 @@ static inline bool matching_characters_template(char a, char b)
   }
 }
 
-template<bool (*match_method)(char,char)>
-static inline size_t count_mismatches(const char *seq0,const char *seq1,
+template<typename CharType,bool (*match_method)(CharType,CharType)>
+static inline size_t count_mismatches(const CharType *seq0,
+                                      const CharType *seq1,
                                       size_t len)
 {
   size_t mismatches = 0;

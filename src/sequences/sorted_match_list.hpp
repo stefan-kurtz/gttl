@@ -243,13 +243,13 @@ class SortedMatchList
       {
         if constexpr (self_match)
         {
-          seed_okay = (count_mismatches<matching_characters_wc>
+          seed_okay = (count_mismatches<char,matching_characters_wc>
                                        (ref_seq + pp.startpos0,
                                         query_seq + pp.startpos1,
                                         qgram_length) == 0);
         } else
         {
-          seed_okay = (count_mismatches<matching_characters>
+          seed_okay = (count_mismatches<char,matching_characters>
                                        (ref_seq + pp.startpos0,
                                         query_seq + pp.startpos1,
                                         qgram_length) == 0);
