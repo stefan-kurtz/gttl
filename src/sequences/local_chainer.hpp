@@ -15,7 +15,8 @@ class LocalChainElemInfo
   static constexpr const PredecessorType first_bit
     = static_cast<PredecessorType>(1) <<
       (sizeof(PredecessorType) * CHAR_BIT - 1);
-  using LocalChainElemInfoType = struct {GapType ref_gap, query_gap;
+  using LocalChainElemInfoType = struct {GapType ref_gap_length,
+                                         query_gap_length;
                                          ScoreType score;
                                          PredecessorType predecessor;
                                          bool is_referenced;};
@@ -82,21 +83,25 @@ class LocalChainElemInfo
     assert(idx < nextfree &&
            idx <= PredecessorTypeMax &&
            !(static_cast<PredecessorType>(idx) & first_bit));
-    chain_elem_info_array[idx].ref_gap = 0;
-    chain_elem_info_array[idx].query_gap = 0;
+    chain_elem_info_array[idx].ref_gap_length = 0;
+    chain_elem_info_array[idx].query_gap_length = 0;
     chain_elem_info_array[idx].predecessor = static_cast<PredecessorType>(idx);
     chain_elem_info_array[idx].is_referenced = false;
   }
   void predecessor_set(GTTL_DEBUG_USED bool upwards_chaining,
                        size_t idx,PredecessorType p,
-                       uint64_t ref_gap,uint64_t query_gap)
+                       uint64_t ref_gap_length,uint64_t query_gap_length)
   {
-    assert(idx < nextfree && ref_gap <= GapTypeMax && query_gap <= GapTypeMax);
+    assert(idx < nextfree &&
+           ref_gap_length <= GapTypeMax &&
+           query_gap_length <= GapTypeMax);
     assert((upwards_chaining && idx > static_cast<size_t>(p)) ||
            (!upwards_chaining && idx < static_cast<size_t>(p)));
     chain_elem_info_array[idx].predecessor = p;
-    chain_elem_info_array[idx].ref_gap = static_cast<GapType>(ref_gap);
-    chain_elem_info_array[idx].query_gap = static_cast<GapType>(query_gap);
+    chain_elem_info_array[idx].ref_gap_length
+      = static_cast<GapType>(ref_gap_length);
+    chain_elem_info_array[idx].query_gap_length
+      = static_cast<GapType>(query_gap_length);
   }
   void marked_set(size_t idx)
   {
@@ -114,15 +119,15 @@ class LocalChainElemInfo
     return static_cast<bool>(chain_elem_info_array[idx].predecessor
                              & first_bit);
   }
-  GapType ref_gap_get(size_t idx) const noexcept
+  GapType ref_gap_length_get(size_t idx) const noexcept
   {
     assert(idx < nextfree);
-    return chain_elem_info_array[idx].ref_gap;
+    return chain_elem_info_array[idx].ref_gap_length;
   }
-  GapType query_gap_get(size_t idx) const noexcept
+  GapType query_gap_length_get(size_t idx) const noexcept
   {
     assert(idx < nextfree);
-    return chain_elem_info_array[idx].query_gap;
+    return chain_elem_info_array[idx].query_gap_length;
   }
   void resize(size_t segment_length)
   {
@@ -224,9 +229,10 @@ class LocalChainer
   using EndLengthPair = std::pair<PredecessorType,uint32_t>;
   static constexpr const ScoreType ScoreTypeMax = ~static_cast<ScoreType>(0);
   private:
-  ScoreType gap_function(ScoreType ref_gap,ScoreType query_gap) const noexcept
+  ScoreType gap_function(ScoreType ref_gap_length,ScoreType query_gap_length)
+    const noexcept
   {
-    return static_cast<ScoreType>(ref_gap + query_gap)/2;
+    return static_cast<ScoreType>(ref_gap_length + query_gap_length)/2;
   }
   const MatchTable &match_table;
   size_t segment_start, /* offset for all access to match_table */
@@ -282,36 +288,42 @@ class LocalChainer
         while (true)
         {
           assert(i < segment_length);
-          uint64_t ref_gap, query_gap;
+          uint64_t ref_gap_length, query_gap_length;
           if constexpr (upwards_chaining)
           {
-            std::tie(ref_gap,query_gap)
+            std::tie(ref_gap_length,query_gap_length)
               = match_table.colinear_match_pair(segment_start + i,
                                                 segment_start + j);
           } else
           {
-            std::tie(ref_gap,query_gap)
+            std::tie(ref_gap_length,query_gap_length)
               = match_table.colinear_match_pair(segment_start + j,
                                                 segment_start + i);
           }
-          assert(ref_gap <= static_cast<uint64_t>(ScoreTypeMax) &&
-                 query_gap <= static_cast<uint64_t>(ScoreTypeMax) &&
-                 ref_gap <= static_cast<uint64_t>(ScoreTypeMax) - query_gap);
-          if (ref_gap > 0 || query_gap > 0)
+          assert(ref_gap_length <= static_cast<uint64_t>(ScoreTypeMax) &&
+                 query_gap_length <= static_cast<uint64_t>(ScoreTypeMax) &&
+                 ref_gap_length <= static_cast<uint64_t>(ScoreTypeMax)
+                                   - query_gap_length);
+          if (ref_gap_length > 0 || query_gap_length > 0)
           {
 #ifdef SKDEBUG
-            printf("ref_gap\t%lu\n",static_cast<unsigned long>(ref_gap));
-            printf("query_gap\t%lu\n",static_cast<unsigned long>(query_gap));
+            printf("ref_gap\t%lu\n",
+                   static_cast<unsigned long>(ref_gap_length));
+            printf("query_gap\t%lu\n",
+                   static_cast<unsigned long>(query_gap_length));
 #endif
 #define DIFF_CHECK
 #ifdef DIFF_CHECK
-            const ScoreType diff = ref_gap >= query_gap ? ref_gap - query_gap
-                                                        : query_gap - ref_gap;
+            const ScoreType diff = ref_gap_length >= query_gap_length
+                                     ? ref_gap_length - query_gap_length
+                                     : query_gap_length - ref_gap_length;
             if (diff < 100 ||
-                static_cast<double>(diff)/std::max(ref_gap,query_gap) <= 0.3)
+                static_cast<double>(diff)/std::max(ref_gap_length,
+                                                   query_gap_length) <= 0.3)
 #endif
             {
-              const ScoreType gap_score = gap_function(ref_gap,query_gap);
+              const ScoreType gap_score = gap_function(ref_gap_length,
+                                                       query_gap_length);
               const ScoreType scorefrom_i
                 = var_chain_elem_info->score_get(i) +
                   static_cast<ScoreType>(j_match_length);
@@ -327,7 +339,8 @@ class LocalChainer
               {
                 j_maxscore = scorefrom_i - gap_score;
                 var_chain_elem_info->predecessor_set(upwards_chaining,/*unused*/
-                                                     j,i,ref_gap,query_gap);
+                                                     j,i,ref_gap_length,
+                                                     query_gap_length);
               }
             }
           }
@@ -450,8 +463,8 @@ class LocalChainer
           break;
         }
         const ScoreType gap_score
-          = gap_function(chain_elem_info.ref_gap_get(j),
-                         chain_elem_info.query_gap_get(j));
+          = gap_function(chain_elem_info.ref_gap_length_get(j),
+                         chain_elem_info.query_gap_length_get(j));
         score_sum -= static_cast<int64_t>(gap_score);
         score_sum
           += static_cast<int64_t>(match_table.length_get(segment_start + i));
@@ -512,25 +525,26 @@ class LocalChainer
         size_t j = std::get<0>(ce);
         PredecessorType i = chain_elem_info.predecessor_get(j);
         assert(i >= j);
-        auto j_ref_gap = chain_elem_info.ref_gap_get(j);
-        auto j_query_gap = chain_elem_info.query_gap_get(j);
+        auto j_ref_gap_length = chain_elem_info.ref_gap_length_get(j);
+        auto j_query_gap_length = chain_elem_info.query_gap_length_get(j);
         assert (belongs_to[i] == j);
         for (size_t chain_elem_idx = 1; chain_elem_idx < chain_len && i != j;
              chain_elem_idx++)
         {
           assert (belongs_to[i] == std::get<0>(ce));
           const PredecessorType next_pred = chain_elem_info.predecessor_get(i);
-          auto i_ref_gap = chain_elem_info.ref_gap_get(i);
-          auto i_query_gap = chain_elem_info.query_gap_get(i);
+          auto i_ref_gap_length = chain_elem_info.ref_gap_length_get(i);
+          auto i_query_gap_length = chain_elem_info.query_gap_length_get(i);
           /* We here consider the case of downwards_chaining, i.e.
              upwards_chaining = false and we want to convert it such that
              the condition of upwards_chaining are true, so we
              supply !upwards_training = true as first argument */
-          chain_elem_info.predecessor_set(!upwards_chaining,i,j,j_ref_gap,
-                                          j_query_gap);
+          chain_elem_info.predecessor_set(!upwards_chaining,i,j,
+                                          j_ref_gap_length,
+                                          j_query_gap_length);
           j = i;
-          j_ref_gap = i_ref_gap;
-          j_query_gap = i_query_gap;
+          j_ref_gap_length = i_ref_gap_length;
+          j_query_gap_length = i_query_gap_length;
           i = next_pred;
         }
         chain_ends_lengths[idx] = std::make_pair<PredecessorType,uint32_t>
@@ -572,13 +586,13 @@ class LocalChainer
     }
     return chain_elements;
   }
-  GapType ref_gap_get(size_t idx) const noexcept
+  GapType ref_gap_length_get(size_t idx) const noexcept
   {
-    return chain_elem_info.ref_gap_get(idx);
+    return chain_elem_info.ref_gap_length_get(idx);
   }
-  GapType query_gap_get(size_t idx) const noexcept
+  GapType query_gap_length_get(size_t idx) const noexcept
   {
-    return chain_elem_info.query_gap_get(idx);
+    return chain_elem_info.query_gap_length_get(idx);
   }
   PredecessorType predecessor_get(size_t idx) const noexcept
   {

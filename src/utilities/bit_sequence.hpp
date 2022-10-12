@@ -1,5 +1,5 @@
-#ifndef BITSEQUENCE_HPP
-#define BITSEQUENCE_HPP
+#ifndef BIT_SEQUENCE_HPP
+#define BIT_SEQUENCE_HPP
 
 #include <string>
 #include <vector>
