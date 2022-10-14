@@ -115,9 +115,14 @@ class MatrixPartition
     }
     sort_itv_list(itv_list);
   }
-  const std::vector<MatrixPartitionIntervalPair> &intervals(void) const noexcept
+  MatrixPartitionIntervalPair operator [](size_t idx) const noexcept
   {
-    return itv_list;
+    assert(idx < itv_list.size());
+    return itv_list[idx];
+  }
+  size_t size(void) const noexcept
+  {
+    return itv_list.size();
   }
 };
 #endif
