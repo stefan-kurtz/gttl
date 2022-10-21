@@ -8,16 +8,19 @@ class VirtualQueue {
     std::atomic<size_t> current;
     size_t last;
   public:
-    VirtualQueue(size_t number_of_elements) {
-      current = 0;
+    VirtualQueue(size_t number_of_elements)
+      : current(0)
+      , last(number_of_elements - 1)
+    {
       assert(number_of_elements > 0);
-      last = number_of_elements - 1;
     }
     ~VirtualQueue(void) {}
-    size_t next_element(void) {
+    size_t next_element(void)
+    {
       return current++;
     }
-    size_t last_element(void) const {
+    size_t last_element(void) const noexcept
+    {
       return last;
    }
 };
