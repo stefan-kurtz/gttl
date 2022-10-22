@@ -39,17 +39,21 @@ class GttlMultiseq
   std::map<size_t,size_t> length_dist_map{};
   char **short_header_cache{nullptr};
 
+  void append_padding_char(uint8_t this_padding_char)
+  {
+    concatenated_sequences.push_back(static_cast<char>(this_padding_char));
+  }
+
   public:
 
   size_t size_in_bytes(void) const noexcept
   {
-    return
-      sizeof(GttlMultiseq) +
-      sequence_offsets.size() * sizeof(size_t) +
-      concatenated_sequences.size() * sizeof(char) +
-      sizeof(std::string) * headers.size() +
-      header_total_length * sizeof(char) +
-      length_dist_map.size() * 2 * sizeof(size_t);
+    return sizeof(GttlMultiseq) +
+           sequence_offsets.size() * sizeof(size_t) +
+           concatenated_sequences.size() * sizeof(char) +
+           sizeof(std::string) * headers.size() +
+           header_total_length * sizeof(char) +
+           length_dist_map.size() * 2 * sizeof(size_t);
   }
 
   template<bool store>
@@ -62,7 +66,7 @@ class GttlMultiseq
       headers.push_back(std::string(header.substr(1,header.size()-1)));
       header_total_length += header.size() - 1;
       concatenated_sequences += sequence;
-      concatenated_sequences.push_back(static_cast<char>(this_padding_char));
+      append_padding_char(this_padding_char);
       sequence_offsets.push_back(concatenated_sequences.size());
     }
     sequences_number++;
@@ -74,16 +78,11 @@ class GttlMultiseq
     length_dist_map[sequence.size()]++;
   }
 
-  void append_padding_char(uint8_t this_padding_char)
-  {
-    concatenated_sequences.push_back(static_cast<char>(this_padding_char));
-  }
-
   private:
 
-  void init(uint8_t this_padding_char)
+  void initialize(uint8_t this_padding_char)
   {
-    concatenated_sequences.push_back(static_cast<char>(this_padding_char));
+    append_padding_char(this_padding_char);
     sequence_offsets.push_back(size_t(1));
   }
 
@@ -92,7 +91,7 @@ class GttlMultiseq
   {
     if (store)
     {
-      init(padding_char);
+      initialize(padding_char);
     }
     static constexpr const int buf_size = 1 << 14;
     if (zip_readpair_files)
@@ -196,7 +195,7 @@ class GttlMultiseq
   {
     if (store)
     {
-      init(padding_char);
+      initialize(padding_char);
     }
   }
 
@@ -205,7 +204,7 @@ class GttlMultiseq
     : constant_padding_char(false)
   {
     constexpr const uint8_t initial_padding_char = 0;
-    init(initial_padding_char);
+    initialize(initial_padding_char);
     uint32_t padding_char = initial_padding_char;
     bool mark[UINT8_MAX+1] = {false};
     for (const char *f = forbidden_as_padding; *f != '\0'; f++)
