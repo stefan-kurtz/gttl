@@ -14,6 +14,7 @@
 
 #include "utilities/unused.hpp"
 #include "utilities/mathsupport.hpp"
+#include "utilities/cycle_of_numbers.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 
@@ -203,30 +204,20 @@ class GttlMultiseq
                const char *forbidden_as_padding)
     : constant_padding_char(false)
   {
-    constexpr const uint8_t initial_padding_char = 0;
-    initialize(initial_padding_char);
-    uint32_t padding_char = initial_padding_char;
-    bool mark[UINT8_MAX+1] = {false};
-    for (const char *f = forbidden_as_padding; *f != '\0'; f++)
-    {
-      mark[static_cast<int>(*f)] = true;
-    }
+    CycleOfNumbers padding_char(forbidden_as_padding);
     static constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> gttl_si(&inputfiles);
     for (auto &&si : gttl_si)
     {
-      assert(padding_char <= UINT8_MAX);
-      append<true>(si.header_get(),si.sequence_get(),
-                   static_cast<uint8_t>(padding_char));
-      padding_char = (padding_char + 1) & uint32_t(255);
-      padding_char += mark[padding_char];
+      const uint8_t this_padding_char = padding_char.next();
+      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
        so that the lcp-computation crosses sequence boundaries involving
        identical sequence padding characters. Then the position after
        the padding character for the last sequence is accessed. To provide
        a value, we add an additional padding char */
-    append_padding_char(static_cast<uint8_t>(padding_char));
+    append_padding_char(padding_char.next());
   }
 
   ~GttlMultiseq(void)

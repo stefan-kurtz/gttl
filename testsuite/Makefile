@@ -37,6 +37,7 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 all:${EXECS}
 
 test:test_alphabet \
+     test_cycle_of_numbers \
      test_endian \
      test_nthash \
      test_bitpacker \
@@ -72,6 +73,13 @@ test_non_wc_ranges:./count_non_wc_ranges.x
 
 test_alphabet:./alphabet.x
 	@./alphabet.x | diff - ../testdata/DNA_AA.tsv
+	@echo "Congratulations. $@ passed."
+
+test_cycle_of_numbers:./cycle_of_numbers_mn.x
+	@$(eval TMPFILE := $(shell mktemp))
+	@./cycle_of_numbers.py > ${TMPFILE}
+	@./cycle_of_numbers_mn.x | sort -nu | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 test_char_range:char_range_mn.x
