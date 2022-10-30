@@ -328,14 +328,14 @@ class GttlMultiseq
 
   /* Returns length of header,
    * short version from start to first space(excluded). */
-  size_t short_header_length_get(size_t seqnum) const noexcept
+  std::pair<size_t,size_t> short_header_coords(size_t seqnum) const noexcept
   {
     assert(seqnum < headers.size());
     size_t idx;
     for (idx = 0; idx < headers[seqnum].size() &&
                   !isspace(headers[seqnum][idx]); idx++)
       /* Nothing */;
-    return idx;
+    return std::make_pair(0,idx);
   }
 
   const std::string_view header_get(size_t seqnum) const noexcept
@@ -484,7 +484,7 @@ class GttlMultiseq
     size_t total_short_length = 0;
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      total_short_length += short_header_length_get(seqnum);
+      total_short_length += std::get<1>(short_header_coords(seqnum));
     }
     short_header_cache[0] = new char [total_short_length +
                                       sequences_number_get()];
@@ -492,11 +492,12 @@ class GttlMultiseq
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       short_header_cache[seqnum] = next_header;
-      const size_t shlen = short_header_length_get(seqnum);
-      auto short_header = header_get(seqnum).substr(0,shlen);
-      memcpy(short_header_cache[seqnum],short_header.data(),shlen);
-      short_header_cache[seqnum][shlen] = '\0';
-      next_header += (shlen + 1);
+      size_t sh_offset, sh_len;
+      std::tie(sh_offset,sh_len) = short_header_coords(seqnum);
+      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
+      memcpy(short_header_cache[seqnum],short_header.data() + sh_offset,sh_len);
+      short_header_cache[seqnum][sh_len] = '\0';
+      next_header += (sh_len + 1);
     }
   }
 };

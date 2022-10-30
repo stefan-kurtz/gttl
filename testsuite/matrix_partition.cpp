@@ -14,21 +14,15 @@ int main(int argc,char *argv[])
     std::cerr << "Usage: " << argv[0] << " <cutlen> <rows> <cols>" << std::endl;
     return EXIT_FAILURE;
   }
-  MatrixPartition *mp;
-  if (cols == 0)
-  {
-    mp = new MatrixPartition(static_cast<size_t>(cutlen),
-                             static_cast<size_t>(rows));
-  } else
-  {
-    mp = new MatrixPartition(static_cast<size_t>(cutlen),
-                             static_cast<size_t>(rows),
-                             static_cast<size_t>(cols));
-  }
-  auto itv_list = mp->intervals();
+  MatrixPartition mp = cols == 0 ? MatrixPartition(static_cast<size_t>(cutlen),
+                                                   static_cast<size_t>(rows))
+                                 : MatrixPartition(static_cast<size_t>(cutlen),
+                                                   static_cast<size_t>(rows),
+                                                   static_cast<size_t>(cols));
   size_t num_pairs = 0;
-  for (auto const &itv : itv_list)
+  for (size_t idx = 0; idx < mp.size(); idx++)
   {
+    auto itv = mp[idx];
     std::cout << "((" << itv[0] << ", " << itv[1] << "), ";
     size_t this_pairs;
     if (itv[3] == 0)
@@ -46,7 +40,7 @@ int main(int argc,char *argv[])
     }
     num_pairs += this_pairs;
   }
-  std::cout << "# number of parts\t" << itv_list.size() << std::endl;
+  std::cout << "# number of parts\t" << mp.size() << std::endl;
 #ifndef NDEBUG
   size_t expected;
 #endif
@@ -64,6 +58,5 @@ int main(int argc,char *argv[])
   }
   assert(num_pairs == expected);
   std::cout << "# number of pairs\t" << num_pairs << std::endl;
-  delete mp;
   return EXIT_SUCCESS;
 }
