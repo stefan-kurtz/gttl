@@ -332,8 +332,8 @@ class GttlMultiseq
   /* Returns a pointer to the sequence with number seqnum */
   const char *sequence_ptr_get(size_t seqnum) const noexcept
   {
-    assert(seqnum < sequences_number_get() &&
-           sequence_offsets[seqnum] < concatenated_sequences.size());
+    assert(seqnum < sequences_number_get());
+    assert(sequence_offsets[seqnum] < concatenated_sequences.size());
     return concatenated_sequences.data() + sequence_offsets[seqnum];
   }
 
@@ -485,17 +485,13 @@ class GttlMultiseq
   }
 
   /* Overload access operator[] */
-  std::pair<const std::string_view,const std::string_view>
-              operator[](size_t seqnum)
-      const noexcept
+  std::string_view operator [](size_t idx) const noexcept
   {
-    assert(seqnum < sequences_number_get());
-    const char *seq_ptr = sequence_ptr_get(seqnum);
-    size_t seq_len = sequence_length_get(seqnum);
-    std::string_view this_seq{seq_ptr,seq_len};
-
-    return std::make_pair(headers[seqnum],this_seq);
+    const char *seq_ptr = sequence_ptr_get(idx);
+    const size_t len = sequence_length_get(idx);
+    return std::string_view(seq_ptr,len);
   }
+
   template<class T,void (*transformation)(T &,char *,size_t)>
   void transformer(T &t)
   {
