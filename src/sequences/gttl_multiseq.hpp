@@ -154,6 +154,47 @@ class GttlMultiseq
     }
   }
 
+  /* Returns start position and length of header substring,
+   * short version from start to first space(excluded). */
+
+  template<const char *delims>
+  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
+     const noexcept
+  {
+    if constexpr (delims != nullptr)
+    {
+      static constexpr const char first_delim = delims[0];
+      const char *first_delim_ptr
+        = static_cast<const char *>
+                     (std::memchr(static_cast<const void *>(header.data()),
+                                  first_delim,header.size()));
+      if (first_delim_ptr != NULL)
+      {
+        static constexpr const char second_delim = delims[1];
+        const char *second_delim_ptr
+          = static_cast<const char *>
+                       (memchr(static_cast<const void *>
+                                          (first_delim_ptr+1),
+                                           second_delim,
+                                           static_cast<size_t>
+                                                      (header.data() +
+                                                       header.size()
+                                                       - (first_delim_ptr+1))));
+        const char *header_end
+          = second_delim_ptr != NULL ? second_delim_ptr
+                                     : (header.data() + header.size());
+        return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
+                                                  header.data()),
+                              static_cast<size_t>(header_end -
+                                                  (first_delim_ptr+1)));
+      }
+    }
+    size_t idx;
+    for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
+      /* Nothing */ ;
+    return std::make_pair(0,idx);
+  }
+
   public:
 
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
@@ -326,18 +367,6 @@ class GttlMultiseq
     return concatenated_sequences.data() + sequence_offsets[seqnum];
   }
 
-  /* Returns length of header,
-   * short version from start to first space(excluded). */
-  std::pair<size_t,size_t> short_header_coords(size_t seqnum) const noexcept
-  {
-    assert(seqnum < headers.size());
-    size_t idx;
-    for (idx = 0; idx < headers[seqnum].size() &&
-                  !isspace(headers[seqnum][idx]); idx++)
-      /* Nothing */;
-    return std::make_pair(0,idx);
-  }
-
   const std::string_view header_get(size_t seqnum) const noexcept
   {
     assert(seqnum < headers.size());
@@ -477,6 +506,7 @@ class GttlMultiseq
     }
   }
 
+  template<const char *delims = nullptr>
   void short_header_cache_create(void)
   {
     assert(short_header_cache == nullptr && sequences_number_get() > 0);
@@ -484,7 +514,8 @@ class GttlMultiseq
     size_t total_short_length = 0;
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      total_short_length += std::get<1>(short_header_coords(seqnum));
+      total_short_length
+        += std::get<1>(short_header_substring<delims>(header_get(seqnum)));
     }
     short_header_cache[0] = new char [total_short_length +
                                       sequences_number_get()];
@@ -493,9 +524,10 @@ class GttlMultiseq
     {
       short_header_cache[seqnum] = next_header;
       size_t sh_offset, sh_len;
-      std::tie(sh_offset,sh_len) = short_header_coords(seqnum);
+      std::tie(sh_offset,sh_len)
+        = short_header_substring<delims>(header_get(seqnum));
       auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
-      memcpy(short_header_cache[seqnum],short_header.data() + sh_offset,sh_len);
+      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
       short_header_cache[seqnum][sh_len] = '\0';
       next_header += (sh_len + 1);
     }
