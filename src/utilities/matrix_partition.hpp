@@ -45,16 +45,16 @@ static void sort_itv_list(std::vector<MatrixPartitionIntervalPair> &itv_list)
 
 class MatrixPartition
 {
-  private:
-  MatrixPartitionIntervalPair split_interval(size_t a,size_t b)
+  std::vector<MatrixPartitionIntervalPair> itv_list;
+  MatrixPartitionIntervalPair split_interval(size_t a,size_t b) const noexcept
   {
     const size_t h = b/2 + (b % 2);
     return MatrixPartitionIntervalPair{a,h,a+h,b-h};
   }
-  std::vector<MatrixPartitionIntervalPair> itv_list{};
 
   public:
   MatrixPartition(size_t cutlen,size_t m,size_t n)
+    : itv_list({})
   {
     std::vector<MatrixPartitionIntervalPair> stack{};
     stack.push_back(MatrixPartitionIntervalPair{0,m,0,n});
@@ -87,6 +87,7 @@ class MatrixPartition
     sort_itv_list(itv_list);
   }
   MatrixPartition(size_t cutlen,size_t m)
+    : itv_list({})
   {
     for (size_t idx = 0; idx < m; idx += cutlen)
     {

@@ -157,37 +157,32 @@ class GttlMultiseq
   /* Returns start position and length of header substring,
    * short version from start to first space(excluded). */
 
-  template<const char *delims>
+  template<char first_delim,char second_delim>
   std::pair<size_t,size_t> short_header_substring(const std::string_view header)
      const noexcept
   {
-    if constexpr (delims != nullptr)
+    const char *first_delim_ptr
+      = static_cast<const char *>
+                   (std::memchr(static_cast<const void *>(header.data()),
+                                first_delim,header.size()));
+    if (first_delim_ptr != NULL)
     {
-      static constexpr const char first_delim = delims[0];
-      const char *first_delim_ptr
+      const char *second_delim_ptr
         = static_cast<const char *>
-                     (std::memchr(static_cast<const void *>(header.data()),
-                                  first_delim,header.size()));
-      if (first_delim_ptr != NULL)
-      {
-        static constexpr const char second_delim = delims[1];
-        const char *second_delim_ptr
-          = static_cast<const char *>
-                       (memchr(static_cast<const void *>
-                                          (first_delim_ptr+1),
-                                           second_delim,
-                                           static_cast<size_t>
-                                                      (header.data() +
-                                                       header.size()
-                                                       - (first_delim_ptr+1))));
-        const char *header_end
-          = second_delim_ptr != NULL ? second_delim_ptr
-                                     : (header.data() + header.size());
-        return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
-                                                  header.data()),
-                              static_cast<size_t>(header_end -
-                                                  (first_delim_ptr+1)));
-      }
+                     (memchr(static_cast<const void *>
+                                        (first_delim_ptr+1),
+                                         second_delim,
+                                         static_cast<size_t>
+                                                    (header.data() +
+                                                     header.size()
+                                                     - (first_delim_ptr+1))));
+      const char *header_end
+        = second_delim_ptr != NULL ? second_delim_ptr
+                                   : (header.data() + header.size());
+      return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
+                                                header.data()),
+                            static_cast<size_t>(header_end -
+                                                (first_delim_ptr+1)));
     }
     size_t idx;
     for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
@@ -502,16 +497,18 @@ class GttlMultiseq
     }
   }
 
-  template<const char *delims = nullptr>
+  template<char first_delim,char second_delim>
   void short_header_cache_create(void)
   {
-    assert(short_header_cache == nullptr && sequences_number_get() > 0);
+    assert(short_header_cache == nullptr &&
+           sequences_number_get() > 0);
     short_header_cache = new char * [sequences_number_get()];
     size_t total_short_length = 0;
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       total_short_length
-        += std::get<1>(short_header_substring<delims>(header_get(seqnum)));
+        += std::get<1>(short_header_substring<first_delim,second_delim>
+                                             (header_get(seqnum)));
     }
     short_header_cache[0] = new char [total_short_length +
                                       sequences_number_get()];
@@ -521,7 +518,7 @@ class GttlMultiseq
       short_header_cache[seqnum] = next_header;
       size_t sh_offset, sh_len;
       std::tie(sh_offset,sh_len)
-        = short_header_substring<delims>(header_get(seqnum));
+        = short_header_substring<first_delim,second_delim>(header_get(seqnum));
       auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
       memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
       short_header_cache[seqnum][sh_len] = '\0';
