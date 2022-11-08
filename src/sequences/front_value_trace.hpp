@@ -1,5 +1,5 @@
-#ifndef FRONTVALUE_TRACE_HPP
-#define FRONTVALUE_TRACE_HPP
+#ifndef FRONT_VALUE_TRACE_HPP
+#define FRONT_VALUE_TRACE_HPP
 #include <cstddef>
 #include <cstdbool>
 #include <string>

@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdio>
+#include <cinttypes>
 #include <iostream>
 #include <array>
 #include "sequences/char_range.hpp"
@@ -28,7 +29,7 @@ static void verify_hash_value_pair(HashValuePairIterator &qgiter,
     if (cc != qgram_direct[idx])
     {
       StrFormat msg("incorrect reverse complement "
-                    "hash_value=%llu\tcompl_hash_value=%llu",
+                    "hash_value=%" PRIu64 "\tcompl_hash_value=%" PRIu64,
                     hash_value, compl_hash_value);
       delete[] qgram_direct;
       throw msg.str();

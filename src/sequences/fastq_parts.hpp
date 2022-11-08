@@ -1,5 +1,5 @@
-#ifndef GTTL_FASTQ_PARTS_HPP
-#define GTTL_FASTQ_PARTS_HPP
+#ifndef FASTQ_PARTS_HPP
+#define FASTQ_PARTS_HPP
 #include <string>
 #include <iostream>
 #include <algorithm>

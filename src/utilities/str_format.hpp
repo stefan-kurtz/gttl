@@ -1,5 +1,5 @@
-#ifndef STR_FORMAT_CLASS_HPP
-#define STR_FORMAT_CLASS_HPP
+#ifndef STR_FORMAT_HPP
+#define STR_FORMAT_HPP
 /*
   Copyright (c) 2021 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2021 Center for Bioinformatics, University of Hamburg

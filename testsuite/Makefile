@@ -116,9 +116,9 @@ test_multiseq:./multiseq_mn.x
 	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
 	@./multiseq_mn.x -r -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
 	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
-	@./multiseq_mn.x -w 70 -s ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
 	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
+	@./multiseq_mn.x -w 70 -s ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator
@@ -210,10 +210,10 @@ test_line_iterator_mapped:line_iterator_mapped.x
 .PHONY:test_nt_minimizer_count
 test_nt_minimizer_count:nt_minimizer.x
 	@$(eval TMPFILE := $(shell mktemp))
-	@echo "# number of hashed kmers\t37465" > ${TMPFILE}
+	@echo "# number of hashed kmers	37465" > ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@echo "# number of hashed kmers\t37507" > ${TMPFILE}
+	@echo "# number of hashed kmers	37507" > ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@${RM} ${TMPFILE}

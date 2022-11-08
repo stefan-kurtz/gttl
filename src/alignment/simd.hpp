@@ -2,8 +2,8 @@
    originally developed by Martin Steinegger, ported to C by
    Leo Foerster and Stefan Kurtz, ported to Neon ny Henning Lindemann. */
 
-#ifndef SIMD_H
-#define SIMD_H
+#ifndef SIMD_HPP
+#define SIMD_HPP
 #include <stdlib.h>
 #include <stdint.h>
 

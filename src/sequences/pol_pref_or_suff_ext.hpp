@@ -1,5 +1,5 @@
-#ifndef POL_PREFIX_OR_SUFFIX_EXT_HPP
-#define POL_PREFIX_OR_SUFFIX_EXT_HPP
+#ifndef POL_PREF_OR_SUFF_EXT_HPP
+#define POL_PREF_OR_SUFF_EXT_HPP
 #include <cstdio>
 #include <cstddef>
 #include <cstdint>

@@ -1,5 +1,5 @@
-#ifndef ALIGNMENT_OUTPUT
-#define ALIGNMENT_OUTPUT
+#ifndef ALIGNMENT_OUTPUT_HPP
+#define ALIGNMENT_OUTPUT_HPP
 #include <cmath>
 #include <cstdio>
 #include <cstddef>

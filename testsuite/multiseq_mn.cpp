@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
   }
   if (options.short_header_option_is_set())
   {
-    multiseq->short_header_cache_create<'|','|'>();
+    multiseq->short_header_cache_create();
   }
   rt.show("create GttlMultiseq");
   if (options.width_option_get() >= 0)

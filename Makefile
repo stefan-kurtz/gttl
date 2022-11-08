@@ -15,3 +15,4 @@ tags:
 .PHONY:code_check
 code_check:
 	code_check.py -wt `find . -name '*.[ch]pp'`
+	scripts/check_ifndef.py `find . -name '*.hpp'`

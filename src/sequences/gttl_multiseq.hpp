@@ -157,6 +157,15 @@ class GttlMultiseq
   /* Returns start position and length of header substring,
    * short version from start to first space(excluded). */
 
+  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
+     const noexcept
+  {
+    size_t idx;
+    for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
+      /* Nothing */ ;
+    return std::make_pair(0,idx);
+  }
+
   template<char first_delim,char second_delim>
   std::pair<size_t,size_t> short_header_substring(const std::string_view header)
      const noexcept
@@ -184,10 +193,7 @@ class GttlMultiseq
                             static_cast<size_t>(header_end -
                                                 (first_delim_ptr+1)));
     }
-    size_t idx;
-    for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
-      /* Nothing */ ;
-    return std::make_pair(0,idx);
+    return short_header_substring(header);
   }
 
   public:
@@ -519,6 +525,33 @@ class GttlMultiseq
       size_t sh_offset, sh_len;
       std::tie(sh_offset,sh_len)
         = short_header_substring<first_delim,second_delim>(header_get(seqnum));
+      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
+      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
+      short_header_cache[seqnum][sh_len] = '\0';
+      next_header += (sh_len + 1);
+    }
+  }
+
+  void short_header_cache_create(void)
+  {
+    assert(short_header_cache == nullptr &&
+           sequences_number_get() > 0);
+    short_header_cache = new char * [sequences_number_get()];
+    size_t total_short_length = 0;
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      total_short_length
+        += std::get<1>(short_header_substring(header_get(seqnum)));
+    }
+    short_header_cache[0] = new char [total_short_length +
+                                      sequences_number_get()];
+    char *next_header = short_header_cache[0];
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      short_header_cache[seqnum] = next_header;
+      size_t sh_offset, sh_len;
+      std::tie(sh_offset,sh_len)
+        = short_header_substring(header_get(seqnum));
       auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
       memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
       short_header_cache[seqnum][sh_len] = '\0';

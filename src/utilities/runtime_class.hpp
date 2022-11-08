@@ -1,5 +1,5 @@
-#ifndef RUN_TIME_CLASS_HPP
-#define RUN_TIME_CLASS_HPP
+#ifndef RUNTIME_CLASS_HPP
+#define RUNTIME_CLASS_HPP
 #include <iostream>
 #include <mutex>
 #include <cassert>

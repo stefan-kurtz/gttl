@@ -1,5 +1,5 @@
-#ifndef ALIGN_POLISH_H
-#define ALIGN_POLISH_H
+#ifndef ALIGN_POLISH_HPP
+#define ALIGN_POLISH_HPP
 #include <cstddef>
 #include <cassert>
 #include <string>
