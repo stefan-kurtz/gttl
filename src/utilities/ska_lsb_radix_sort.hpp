@@ -19,7 +19,7 @@
 #include "utilities/lsb_radix_sort.hpp"
 
 #ifndef RADIX_SORT8_MAX_SIZEOF_UNIT
-#define RADIX_SORT8_MAX_SIZEOF_UNIT 24
+#define RADIX_SORT8_MAX_SIZEOF_UNIT 32
 #endif
 
 /* code up until function countingsort_skarupke_it was adapted from
