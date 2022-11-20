@@ -17,4 +17,3 @@ struct Unit_score_nuc
   static constexpr const int8_t smallest_score = -1;
 };
 #endif
-

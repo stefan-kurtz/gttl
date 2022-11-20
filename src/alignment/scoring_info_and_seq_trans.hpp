@@ -5,6 +5,7 @@
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
+#include "alignment/unit_score_nuc_2_2.hpp"
 #include "alignment/unit_score_nuc_lower.hpp"
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "alignment/score_class_base.hpp"
@@ -52,32 +53,43 @@ std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
               literate_multiseqs<Unit_score_nuc>(db_multiseq, query_multiseq)};
     } else
     {
-      if (score_matrix_name.is(Score_matrix_unit_score_nuc_lower))
+      if (score_matrix_name.is(Score_matrix_undefined) ||
+          score_matrix_name.is(Score_matrix_unit_score_nuc_2_2))
       {
-        return {scorematrix2D_get<Unit_score_nuc_lower::num_of_chars>(
-                    Unit_score_nuc_lower::score_matrix),
-                Unit_score_nuc_lower::smallest_score,
-                literate_multiseqs<Unit_score_nuc_lower>(db_multiseq,
-                                                         query_multiseq)};
+        return {scorematrix2D_get<Unit_score_nuc_2_2::num_of_chars>(
+                    Unit_score_nuc_2_2::score_matrix),
+                Unit_score_nuc_2_2::smallest_score,
+                literate_multiseqs<Unit_score_nuc_2_2>(db_multiseq,
+                                                       query_multiseq)};
       } else
       {
-        if (score_matrix_name.is(Score_matrix_unit_score_nuc_upper))
+        if (score_matrix_name.is(Score_matrix_unit_score_nuc_lower))
         {
-          return {scorematrix2D_get<Unit_score_nuc_upper::num_of_chars>(
-                      Unit_score_nuc_upper::score_matrix),
-                  Unit_score_nuc_upper::smallest_score,
-                  literate_multiseqs<Unit_score_nuc_upper>(db_multiseq,
+          return {scorematrix2D_get<Unit_score_nuc_lower::num_of_chars>(
+                      Unit_score_nuc_lower::score_matrix),
+                  Unit_score_nuc_lower::smallest_score,
+                  literate_multiseqs<Unit_score_nuc_lower>(db_multiseq,
                                                            query_multiseq)};
         } else
         {
-          ScoreMatrixName score_matrix_name_instance{};
-          StrFormat msg(
-              ": score matrix %s is not possible for DNA "
-              "sequences; the following choices are "
-              "available: %s",
-              score_matrix_id,
-              score_matrix_name_instance.string_values_joined(", ").c_str());
-          throw msg.str();
+          if (score_matrix_name.is(Score_matrix_unit_score_nuc_upper))
+          {
+            return {scorematrix2D_get<Unit_score_nuc_upper::num_of_chars>(
+                        Unit_score_nuc_upper::score_matrix),
+                    Unit_score_nuc_upper::smallest_score,
+                    literate_multiseqs<Unit_score_nuc_upper>(db_multiseq,
+                                                             query_multiseq)};
+          } else
+          {
+            ScoreMatrixName score_matrix_name_instance{};
+            StrFormat msg(
+                ": score matrix %s is not possible for DNA "
+                "sequences; the following choices are "
+                "available: %s",
+                score_matrix_id,
+                score_matrix_name_instance.string_values_joined(", ").c_str());
+            throw msg.str();
+          }
         }
       }
     }

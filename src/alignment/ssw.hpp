@@ -167,13 +167,13 @@ static inline SimdIntVector ssw_seq_profile (const int8_t *score_vector,
       size_t seq_pos = i;
       for (size_t seg_num = 0; GTTL_IS_LIKELY(seg_num < simd_size); seg_num++)
       {
-        const Basetype this_score
+        const int8_t this_score
           = seq_pos < seq_len
               ? score_row[seq[sequence_index(seq_len,seq_pos)]]
               : 0;
         if constexpr (sizeof(Basetype) == 1)
         {
-          *ptr++ = (int8_t) abs_smallest_score + this_score;
+          *ptr++ = abs_smallest_score + this_score;
         } else
         {
           *ptr++ = this_score;
