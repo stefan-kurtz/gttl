@@ -13,14 +13,12 @@ static std::vector<T> split_string(const std::string &str,char sep,
   while (true)
   {
     auto next = std::find(previous, str.end(),sep);
-    if (next == str.end())
-    {
-      std::string this_string = std::string(previous,next-1);
-      result.push_back(convert(result.size(),this_string));
-      break;
-    }
     std::string this_string = std::string(previous,next);
     result.push_back(convert(result.size(),this_string));
+    if (next == str.end())
+    {
+      break;
+    }
     previous = next + skip;
   }
   return result;

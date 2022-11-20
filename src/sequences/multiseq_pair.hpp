@@ -64,4 +64,10 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   return std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
                    (db_multiseq,query_multiseq,dna_alphabet);
 }
+
+static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
+  create_multiseq_pair(const std::string &dbfile,const std::string &queryfile)
+{
+  return create_multiseq_pair(dbfile.c_str(),queryfile.c_str());
+}
 #endif
