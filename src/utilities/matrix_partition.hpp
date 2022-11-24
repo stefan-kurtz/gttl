@@ -56,6 +56,7 @@ class MatrixPartition
   MatrixPartition(size_t cutlen,size_t m,size_t n)
     : itv_list({})
   {
+    assert(cutlen > 0);
     std::vector<MatrixPartitionIntervalPair> stack{};
     stack.push_back(MatrixPartitionIntervalPair{0,m,0,n});
     while (!stack.empty())
@@ -89,6 +90,7 @@ class MatrixPartition
   MatrixPartition(size_t cutlen,size_t m)
     : itv_list({})
   {
+    assert(cutlen > 0);
     for (size_t idx = 0; idx < m; idx += cutlen)
     {
       if (idx + cutlen <= m)
