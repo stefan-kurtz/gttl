@@ -246,23 +246,22 @@ class GttlMultiseq
                const std::vector<uint8_t> &forbidden_as_padding)
     : constant_padding_char(false)
   {
-    constexpr const uint8_t initial_padding_char = 0;
-    initialize(initial_padding_char);
     CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
     uint8_t this_padding_char = cycle_of_numbers.next();
-    assert(this_padding_char == initial_padding_char);
+    initialize(this_padding_char);
     static constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> gttl_si(&inputfiles);
     for (auto &&si : gttl_si)
     {
-      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
       this_padding_char = cycle_of_numbers.next();
+      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
        so that the lcp-computation crosses sequence boundaries involving
        identical sequence padding characters. Then the position after
        the padding character for the last sequence is accessed. To provide
        a value, we add an additional padding char */
+    this_padding_char = cycle_of_numbers.next();
     append_padding_char(this_padding_char);
   }
 
