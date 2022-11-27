@@ -11,23 +11,34 @@ class CycleOfNumbers
 
   public:
 
-  CycleOfNumbers(const char *forbidden)
+  CycleOfNumbers(const std::vector<uint8_t> &forbidden_characters)
     : current(0)
     , next_tab(UINT8_MAX+1,0)
   {
-    for (const char *f = forbidden; *f != '\0'; f++)
+    for (size_t idx = 0; idx < forbidden_characters.size(); idx++)
     {
-      next_tab[static_cast<int>(*f)] = uint8_t(1);
+      const uint8_t this_forbidden_character = forbidden_characters[idx];
+      assert(idx == 0 || forbidden_characters[idx-1] <
+                         this_forbidden_character);
+      next_tab[static_cast<int>(this_forbidden_character)] = uint8_t(1);
     }
-    assert(next_tab[UINT8_MAX] == 0 && next_tab[0] == 0);
-    uint8_t next_value = UINT8_MAX;
-    for (uint8_t idx = UINT8_MAX; idx > 0; idx--)
+    int next_value = -1;
+    for (int idx = 0; idx <= UINT8_MAX; idx++)
     {
-      if (next_tab[idx-1] == 0)
+      if (next_tab[idx] == 0)
       {
-        assert(idx-1 < next_value);
-        next_tab[idx-1] = next_value;
-        next_value = idx-1;
+        next_value = idx;
+        break;
+      }
+    }
+    assert(next_value != -1);
+    for (int idx = static_cast<int>(UINT8_MAX); idx >= 0; idx--)
+    {
+      if (next_tab[idx] == 0)
+      {
+        assert(next_value >= 0 && next_value <= UINT8_MAX);
+        next_tab[idx] = static_cast<uint8_t>(next_value);
+        next_value = idx;
       }
     }
   }

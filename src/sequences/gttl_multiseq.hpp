@@ -199,16 +199,16 @@ class GttlMultiseq
   public:
 
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char),
-      constant_padding_char(true)
+    : padding_char(_padding_char)
+    , constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store,false);
   }
 
   GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char),
-      constant_padding_char(true)
+    : padding_char(_padding_char)
+    , constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{inputfile};
     multiseq_reader(inputfiles,store,false);
@@ -216,8 +216,8 @@ class GttlMultiseq
 
   GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
                uint8_t _padding_char)
-    : padding_char(_padding_char),
-      constant_padding_char(true)
+    : padding_char(_padding_char)
+    , constant_padding_char(true)
   {
     multiseq_reader(inputfiles,store,false);
   }
@@ -225,16 +225,16 @@ class GttlMultiseq
   GttlMultiseq(const std::string &readpair_file1,
                const std::string &readpair_file2,
                bool store, uint8_t _padding_char)
-    : padding_char(_padding_char),
-      constant_padding_char(true)
+    : padding_char(_padding_char)
+    , constant_padding_char(true)
   {
     std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
     multiseq_reader(inputfiles,store,true);
   }
 
   GttlMultiseq(bool store, uint8_t _padding_char)
-    : padding_char(_padding_char),
-      constant_padding_char(true)
+    : padding_char(_padding_char)
+    , constant_padding_char(true)
   {
     if (store)
     {
@@ -243,33 +243,27 @@ class GttlMultiseq
   }
 
   GttlMultiseq(const std::vector<std::string> &inputfiles,
-               const char *forbidden_as_padding)
+               const std::vector<uint8_t> &forbidden_as_padding)
     : constant_padding_char(false)
   {
     constexpr const uint8_t initial_padding_char = 0;
     initialize(initial_padding_char);
-    uint32_t padding_char = initial_padding_char;
-    bool mark[UINT8_MAX+1] = {false};
-    for (const char *f = forbidden_as_padding; *f != '\0'; f++)
-    {
-      mark[static_cast<int>(*f)] = true;
-    }
+    CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
+    uint8_t this_padding_char = cycle_of_numbers.next();
+    assert(this_padding_char == initial_padding_char);
     static constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> gttl_si(&inputfiles);
     for (auto &&si : gttl_si)
     {
-      assert(padding_char <= UINT8_MAX);
-      append<true>(si.header_get(),si.sequence_get(),
-                   static_cast<uint8_t>(padding_char));
-      padding_char = (padding_char + 1) & uint32_t(255);
-      padding_char += mark[padding_char];
+      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
+      this_padding_char = cycle_of_numbers.next();
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
        so that the lcp-computation crosses sequence boundaries involving
        identical sequence padding characters. Then the position after
        the padding character for the last sequence is accessed. To provide
        a value, we add an additional padding char */
-    append_padding_char(static_cast<uint8_t>(padding_char));
+    append_padding_char(this_padding_char);
   }
 
   ~GttlMultiseq(void)
