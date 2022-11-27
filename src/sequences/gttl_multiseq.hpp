@@ -154,48 +154,6 @@ class GttlMultiseq
     }
   }
 
-  /* Returns start position and length of header substring,
-   * short version from start to first space(excluded). */
-
-  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
-     const noexcept
-  {
-    size_t idx;
-    for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
-      /* Nothing */ ;
-    return std::make_pair(0,idx);
-  }
-
-  template<char first_delim,char second_delim>
-  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
-     const noexcept
-  {
-    const char *first_delim_ptr
-      = static_cast<const char *>
-                   (std::memchr(static_cast<const void *>(header.data()),
-                                first_delim,header.size()));
-    if (first_delim_ptr != NULL)
-    {
-      const char *second_delim_ptr
-        = static_cast<const char *>
-                     (memchr(static_cast<const void *>
-                                        (first_delim_ptr+1),
-                                         second_delim,
-                                         static_cast<size_t>
-                                                    (header.data() +
-                                                     header.size()
-                                                     - (first_delim_ptr+1))));
-      const char *header_end
-        = second_delim_ptr != NULL ? second_delim_ptr
-                                   : (header.data() + header.size());
-      return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
-                                                header.data()),
-                            static_cast<size_t>(header_end -
-                                                (first_delim_ptr+1)));
-    }
-    return short_header_substring(header);
-  }
-
   public:
 
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
@@ -246,20 +204,30 @@ class GttlMultiseq
                const char *forbidden_as_padding)
     : constant_padding_char(false)
   {
-    CycleOfNumbers padding_char(forbidden_as_padding);
+    constexpr const uint8_t initial_padding_char = 0;
+    initialize(initial_padding_char);
+    uint32_t padding_char = initial_padding_char;
+    bool mark[UINT8_MAX+1] = {false};
+    for (const char *f = forbidden_as_padding; *f != '\0'; f++)
+    {
+      mark[static_cast<int>(*f)] = true;
+    }
     static constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> gttl_si(&inputfiles);
     for (auto &&si : gttl_si)
     {
-      const uint8_t this_padding_char = padding_char.next();
-      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
+      assert(padding_char <= UINT8_MAX);
+      append<true>(si.header_get(),si.sequence_get(),
+                   static_cast<uint8_t>(padding_char));
+      padding_char = (padding_char + 1) & uint32_t(255);
+      padding_char += mark[padding_char];
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
        so that the lcp-computation crosses sequence boundaries involving
        identical sequence padding characters. Then the position after
        the padding character for the last sequence is accessed. To provide
        a value, we add an additional padding char */
-    append_padding_char(padding_char.next());
+    append_padding_char(static_cast<uint8_t>(padding_char));
   }
 
   ~GttlMultiseq(void)
@@ -333,8 +301,8 @@ class GttlMultiseq
   /* Returns a pointer to the sequence with number seqnum */
   const char *sequence_ptr_get(size_t seqnum) const noexcept
   {
-    assert(seqnum < sequences_number_get());
-    assert(sequence_offsets[seqnum] < concatenated_sequences.size());
+    assert(seqnum < sequences_number_get() &&
+           sequence_offsets[seqnum] < concatenated_sequences.size());
     return concatenated_sequences.data() + sequence_offsets[seqnum];
   }
 
@@ -366,6 +334,18 @@ class GttlMultiseq
     assert(seqnum < sequences_number_get() &&
            sequence_offsets[seqnum] < concatenated_sequences.size());
     return concatenated_sequences.data() + sequence_offsets[seqnum];
+  }
+
+  /* Returns length of header,
+   * short version from start to first space(excluded). */
+  size_t short_header_length_get(size_t seqnum) const noexcept
+  {
+    assert(seqnum < headers.size());
+    size_t idx;
+    for (idx = 0; idx < headers[seqnum].size() &&
+                  !isspace(headers[seqnum][idx]); idx++)
+      /* Nothing */;
+    return idx;
   }
 
   const std::string_view header_get(size_t seqnum) const noexcept
@@ -486,13 +466,17 @@ class GttlMultiseq
   }
 
   /* Overload access operator[] */
-  std::string_view operator [](size_t idx) const noexcept
+  std::pair<const std::string_view,const std::string_view>
+              operator[](size_t seqnum)
+      const noexcept
   {
-    const char *seq_ptr = sequence_ptr_get(idx);
-    const size_t len = sequence_length_get(idx);
-    return std::string_view(seq_ptr,len);
-  }
+    assert(seqnum < sequences_number_get());
+    const char *seq_ptr = sequence_ptr_get(seqnum);
+    size_t seq_len = sequence_length_get(seqnum);
+    std::string_view this_seq{seq_ptr,seq_len};
 
+    return std::make_pair(headers[seqnum],this_seq);
+  }
   template<class T,void (*transformation)(T &,char *,size_t)>
   void transformer(T &t)
   {
@@ -503,18 +487,14 @@ class GttlMultiseq
     }
   }
 
-  template<char first_delim,char second_delim>
   void short_header_cache_create(void)
   {
-    assert(short_header_cache == nullptr &&
-           sequences_number_get() > 0);
+    assert(short_header_cache == nullptr && sequences_number_get() > 0);
     short_header_cache = new char * [sequences_number_get()];
     size_t total_short_length = 0;
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      total_short_length
-        += std::get<1>(short_header_substring<first_delim,second_delim>
-                                             (header_get(seqnum)));
+      total_short_length += short_header_length_get(seqnum);
     }
     short_header_cache[0] = new char [total_short_length +
                                       sequences_number_get()];
@@ -522,40 +502,11 @@ class GttlMultiseq
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       short_header_cache[seqnum] = next_header;
-      size_t sh_offset, sh_len;
-      std::tie(sh_offset,sh_len)
-        = short_header_substring<first_delim,second_delim>(header_get(seqnum));
-      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
-      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
-      short_header_cache[seqnum][sh_len] = '\0';
-      next_header += (sh_len + 1);
-    }
-  }
-
-  void short_header_cache_create(void)
-  {
-    assert(short_header_cache == nullptr &&
-           sequences_number_get() > 0);
-    short_header_cache = new char * [sequences_number_get()];
-    size_t total_short_length = 0;
-    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
-    {
-      total_short_length
-        += std::get<1>(short_header_substring(header_get(seqnum)));
-    }
-    short_header_cache[0] = new char [total_short_length +
-                                      sequences_number_get()];
-    char *next_header = short_header_cache[0];
-    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
-    {
-      short_header_cache[seqnum] = next_header;
-      size_t sh_offset, sh_len;
-      std::tie(sh_offset,sh_len)
-        = short_header_substring(header_get(seqnum));
-      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
-      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
-      short_header_cache[seqnum][sh_len] = '\0';
-      next_header += (sh_len + 1);
+      const size_t shlen = short_header_length_get(seqnum);
+      auto short_header = header_get(seqnum).substr(0,shlen);
+      memcpy(short_header_cache[seqnum],short_header.data(),shlen);
+      short_header_cache[seqnum][shlen] = '\0';
+      next_header += (shlen + 1);
     }
   }
 };
