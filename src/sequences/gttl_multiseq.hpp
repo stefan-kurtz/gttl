@@ -81,10 +81,21 @@ class GttlMultiseq
 
   private:
 
-  void initialize(uint8_t this_padding_char)
+  void multipadding(bool add_offset,uint8_t this_padding_char, size_t how_many)
   {
-    append_padding_char(this_padding_char);
-    sequence_offsets.push_back(size_t(1));
+    for (size_t idx = 0; idx < how_many; idx++)
+    {
+      append_padding_char(this_padding_char);
+    }
+    if (add_offset)
+    {
+      sequence_offsets.push_back(how_many);
+    }
+  }
+
+  void padding_before_first_sequence(uint8_t this_padding_char)
+  {
+    multipadding(true,this_padding_char,7);
   }
 
   void multiseq_reader(const std::vector<std::string> &inputfiles,
@@ -92,7 +103,7 @@ class GttlMultiseq
   {
     if (store)
     {
-      initialize(padding_char);
+      padding_before_first_sequence(padding_char);
     }
     static constexpr const int buf_size = 1 << 14;
     if (zip_readpair_files)
@@ -198,6 +209,11 @@ class GttlMultiseq
 
   public:
 
+  void padding_after_last_sequence(uint8_t this_padding_char)
+  {
+    multipadding(false,this_padding_char,6);
+  }
+
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
@@ -238,7 +254,7 @@ class GttlMultiseq
   {
     if (store)
     {
-      initialize(padding_char);
+      padding_before_first_sequence(padding_char);
     }
   }
 
@@ -248,7 +264,7 @@ class GttlMultiseq
   {
     CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
     uint8_t this_padding_char = cycle_of_numbers.next();
-    initialize(this_padding_char);
+    padding_before_first_sequence(this_padding_char);
     static constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> gttl_si(&inputfiles);
     for (auto &&si : gttl_si)
@@ -258,11 +274,12 @@ class GttlMultiseq
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
        so that the lcp-computation crosses sequence boundaries involving
-       identical sequence padding characters. Then the position after
-       the padding character for the last sequence is accessed. To provide
-       a value, we add an additional padding char */
-    this_padding_char = cycle_of_numbers.next();
-    append_padding_char(this_padding_char);
+       identical sequence padding characters. Then the positions after
+       the padding character for the last sequence are accessed. When
+       blockwise comparisons are used, even 7 characters after the end
+       of the last sequence are accessed. So after the padding character
+       used anyway, we add 6 more padding characters. */
+    padding_after_last_sequence(this_padding_char);
   }
 
   ~GttlMultiseq(void)
