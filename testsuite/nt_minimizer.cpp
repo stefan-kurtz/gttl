@@ -25,6 +25,7 @@
 #include "sequences/complement_plain.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_multiseq.hpp"
+#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
 
 static void usage(const cxxopts::Options &options)
@@ -261,30 +262,33 @@ int main(int argc, char *argv[])
           std::vector<std::string> log_vector{};
           if (options.canonical_option_is_set())
           {
-            HashedQgrams<sizeof_unit_hashed_qgram,true>
-                    hqg (multiseq,
-                         options.number_of_threads_get(),
-                         options.qgram_length_get(),
-                         options.window_size_get(),
-                         hashbits,
-                         options.sort_by_hash_value_option_is_set(),
-                         options.at_constant_distance_option_is_set(),
-                         &log_vector);
+            using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                     QgramNtHashIterator4>;
+
+            HashedQgrams hqg (multiseq,
+                              options.number_of_threads_get(),
+                              options.qgram_length_get(),
+                              options.window_size_get(),
+                              hashbits,
+                              options.sort_by_hash_value_option_is_set(),
+                              options.at_constant_distance_option_is_set(),
+                              &log_vector);
             RunTimeClass rt_output_hashed_qgrams{};
             hqg.show();
             log_vector.push_back(rt_output_hashed_qgrams
                                  .to_string("output of hashed kmers"));
           } else
           {
-            HashedQgrams<sizeof_unit_hashed_qgram,false>
-                    hqg (multiseq,
-                         options.number_of_threads_get(),
-                         options.qgram_length_get(),
-                         options.window_size_get(),
-                         hashbits,
-                         options.sort_by_hash_value_option_is_set(),
-                         options.at_constant_distance_option_is_set(),
-                         &log_vector);
+            using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                     QgramNtHashFwdIterator4>;
+            HashedQgrams hqg (multiseq,
+                              options.number_of_threads_get(),
+                              options.qgram_length_get(),
+                              options.window_size_get(),
+                              hashbits,
+                              options.sort_by_hash_value_option_is_set(),
+                              options.at_constant_distance_option_is_set(),
+                              &log_vector);
             RunTimeClass rt_output_hashed_qgrams{};
             hqg.show();
             log_vector.push_back(rt_output_hashed_qgrams

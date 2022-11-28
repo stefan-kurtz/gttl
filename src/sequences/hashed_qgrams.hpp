@@ -24,7 +24,6 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_multiseq.hpp"
-#include "sequences/qgrams_hash_nthash.hpp"
 
 template<int sizeof_unit>
 using HashedQgramVector = std::vector<BytesUnit<sizeof_unit,3>>;
@@ -400,13 +399,9 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
     hashed_qgram_vector_table->has_wildcards[thread_id] || this_has_wildcards;
 }
 
-template<int sizeof_unit,bool rc_opt>
-class HashedQgrams
+template<int sizeof_unit,class HashIterator>
+class HashedQgramsGeneric
 {
-  using HashIterator
-    = typename std::conditional<rc_opt,
-                                QgramNtHashIterator4,
-                                QgramNtHashFwdIterator4>::type;
   public:
   static constexpr int sizeof_unit_const = sizeof_unit;
   const GttlMultiseq *multiseq;
@@ -421,7 +416,7 @@ class HashedQgrams
   {
     return hashed_qgram_vector.size();
   }
-  HashedQgrams(const GttlMultiseq *_multiseq,
+  HashedQgramsGeneric(const GttlMultiseq *_multiseq,
                size_t number_of_threads,
                size_t qgram_length,
                size_t window_size,

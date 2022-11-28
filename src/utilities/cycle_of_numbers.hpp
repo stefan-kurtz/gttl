@@ -18,6 +18,7 @@ class CycleOfNumbers
     for (size_t idx = 0; idx < forbidden_characters.size(); idx++)
     {
       const uint8_t this_forbidden_character = forbidden_characters[idx];
+      /* character must be supplied in alphabetical order */
       assert(idx == 0 || forbidden_characters[idx-1] <
                          this_forbidden_character);
       next_tab[static_cast<int>(this_forbidden_character)] = uint8_t(1);
