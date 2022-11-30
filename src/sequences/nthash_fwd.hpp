@@ -194,6 +194,7 @@ class NThashTransformer
   uint64_t msTab31l_33r_or[4 + 1];
 
  public:
+  static constexpr const bool possible_false_positive_matches = true;
   NThashTransformer(size_t qgram_length)
   {
     for (size_t idx = 0; idx < sizeof msTab31l_33r_or/sizeof msTab31l_33r_or[0];

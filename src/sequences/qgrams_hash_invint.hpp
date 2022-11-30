@@ -38,6 +38,7 @@ class InvertibleIntegercodeTransformer4
 {
   int shift;
   public:
+  static constexpr const bool possible_false_positive_matches = false;
   InvertibleIntegercodeTransformer4(size_t qgram_length)
     : shift(static_cast<int>(2 * (qgram_length-1)))
   {}
@@ -87,6 +88,7 @@ class InvertibleIntegercodeTransformer20
 {
   uint64_t msb_weight;
   public:
+  static constexpr const bool possible_false_positive_matches = false;
   InvertibleIntegercodeTransformer20(size_t qgram_length)
     : msb_weight(static_cast<uint64_t>(std::pow(static_cast<size_t>(20),
                                        qgram_length-1)))

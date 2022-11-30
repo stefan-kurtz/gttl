@@ -412,18 +412,20 @@ class HashedQgramsGeneric
   size_t count_all_qgrams;
   GttlBitPacker<sizeof_unit,3> hashed_qgram_packer;
   public:
+  static constexpr const bool possible_false_positive_matches
+    = HashIterator::possible_false_positive_matches;
   size_t size(void) const noexcept
   {
     return hashed_qgram_vector.size();
   }
   HashedQgramsGeneric(const GttlMultiseq *_multiseq,
-               size_t number_of_threads,
-               size_t qgram_length,
-               size_t window_size,
-               int _hashbits,
-               bool sort_them,
-               bool at_constant_distance,
-               std::vector<std::string> *log_vector)
+                      size_t number_of_threads,
+                      size_t qgram_length,
+                      size_t window_size,
+                      int _hashbits,
+                      bool sort_them,
+                      bool at_constant_distance,
+                      std::vector<std::string> *log_vector)
     : multiseq(_multiseq)
     , hashed_qgram_vector({})
     , has_wildcards(false)
