@@ -19,6 +19,7 @@
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>
+#include <cassert>
 #include <cmath>
 #include "sequences/alphabet.hpp"
 #include "utilities/cyclic_buffer.hpp"
@@ -48,6 +49,7 @@ class QgramRecHashValueIterator
                 alphabet.char_to_rank('G') == 2 &&
                 alphabet.char_to_rank('T') == 3);
   private:
+
   static constexpr const size_t alpha_size = alphabet.size();
   using SequenceBaseType = char;
   using CyclicBuffer_uint8 = CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH>;
@@ -150,7 +152,6 @@ class QgramRecHashValueIterator
     Iterator begin(void)
     {
       uint64_t this_hash_value, this_compl_hash_value;
-      uint8_t rc_transformed_sequence[MAX_QGRAM_LENGTH];
       if (qgram_length <= seqlen)
       {
         for (const SequenceBaseType *qgram_ptr = sequence + qgram_length - 1;
@@ -159,21 +160,11 @@ class QgramRecHashValueIterator
           const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
           current_window.prepend(rank);
         }
-        this_hash_value
-          = qgram_transformer.first_hash_value_get(
+        std::tie(this_hash_value,
+                 this_compl_hash_value)
+          = qgram_transformer.first_hash_value_pair_get(
                                  current_window.pointer_to_array(),
                                  qgram_length);
-        const uint8_t *fwd_transformed_sequence
-          = current_window.pointer_to_array();
-        for (size_t idx = 0; idx < qgram_length; idx++)
-        {
-          rc_transformed_sequence[qgram_length - 1 - idx]
-            = QgramRecHashValueIterator_complement(
-                fwd_transformed_sequence[idx]);
-        }
-        this_compl_hash_value
-          = qgram_transformer.first_hash_value_get(rc_transformed_sequence,
-                                                   qgram_length);
       } else
       {
         /* the next two values will not be used as there is no qgram */

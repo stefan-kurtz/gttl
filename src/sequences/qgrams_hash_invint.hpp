@@ -21,8 +21,8 @@
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
 
 template<size_t alpha_size>
-static uint64_t first_qgram_integer_code(const uint8_t *t_qgram,
-                                         size_t qgram_length)
+static uint64_t first_fwd_qgram_integer_code(const uint8_t *t_qgram,
+                                             size_t qgram_length)
 {
   uint64_t code = 0, mult= 1;
   for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
@@ -42,17 +42,35 @@ class InvertibleIntegercodeTransformer4
   InvertibleIntegercodeTransformer4(size_t qgram_length)
     : shift(static_cast<int>(2 * (qgram_length-1)))
   {}
-  uint64_t first_hash_value_get(const uint8_t *sequence, size_t qgram_length)
-    const noexcept
+  uint64_t first_fwd_hash_value_get(const uint8_t *sequence,
+                                    size_t qgram_length) const noexcept
   {
-    return first_qgram_integer_code<4>(sequence,qgram_length);
+    return first_fwd_qgram_integer_code<4>(sequence,qgram_length);
+  }
+  std::pair<uint64_t,uint64_t> first_hash_value_pair_get(
+                                    const uint8_t *t_qgram,
+                                    size_t qgram_length) const noexcept
+  {
+    uint64_t fwd_code = 0, fwd_mult = 1, rev_compl_code = 0,
+             rev_compl_mult= uint64_t(1) << (2 * (qgram_length - 1));
+    for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
+         t_qgram_ptr >= t_qgram; t_qgram_ptr--)
+    {
+      const uint64_t cc = static_cast<uint64_t>(*t_qgram_ptr);
+      fwd_code += fwd_mult * cc;
+      fwd_mult *= uint64_t(4);
+      assert(cc < uint64_t(4));
+      rev_compl_code += rev_compl_mult * (uint64_t(3) - cc);
+      rev_compl_mult /= uint64_t(4);
+    }
+    return std::make_pair(fwd_code,rev_compl_code);
   }
   uint64_t next_hash_value_get(uint8_t old_t_char,
                                uint64_t integer_code,
                                uint8_t new_t_char) const noexcept
   {
     integer_code -= (static_cast<uint64_t>(old_t_char) << shift);
-    integer_code *= static_cast<uint64_t>(4);
+    integer_code *= uint64_t(4);
     integer_code += static_cast<uint64_t>(new_t_char);
     return integer_code;
   }
@@ -62,8 +80,8 @@ class InvertibleIntegercodeTransformer4
   {
     assert(integer_code >= static_cast<uint64_t>(compl_old_t_char));
     integer_code -= compl_old_t_char;
-    assert(integer_code % static_cast<uint64_t>(4) == 0);
-    integer_code /= static_cast<uint64_t>(4);
+    assert(integer_code % uint64_t(4) == 0);
+    integer_code /= uint64_t(4);
     integer_code += (static_cast<uint64_t>(compl_new_t_char) << shift);
     return integer_code;
   }
@@ -96,7 +114,7 @@ class InvertibleIntegercodeTransformer20
   uint64_t first_hash_value_get(const uint8_t *sequence, size_t qgram_length)
     const noexcept
   {
-    return first_qgram_integer_code<20>(sequence,qgram_length);
+    return first_fwd_qgram_integer_code<20>(sequence,qgram_length);
   }
   uint64_t next_hash_value_get(uint8_t old_t_char,
                                uint64_t integer_code,

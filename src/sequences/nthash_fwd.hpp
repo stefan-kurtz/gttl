@@ -75,11 +75,9 @@ class NThashTransformer
   static constexpr const uint64_t nt_hash_seedC = 0x3193c18562a02b4c;
   static constexpr const uint64_t nt_hash_seedG = 0x20323ed082572324;
   static constexpr const uint64_t nt_hash_seedT = 0x295549f54be24456;
-  static const uint64_t nt_hash_seedN = 0x0000000000000000;
 
   static constexpr const uint64_t nt_hash_seed_table[] = {
-      nt_hash_seedA, nt_hash_seedC, nt_hash_seedG, nt_hash_seedT,
-      nt_hash_seedN};
+      nt_hash_seedA, nt_hash_seedC, nt_hash_seedG, nt_hash_seedT};
 
   static constexpr const uint64_t nt_hash_A33r[33] = {
       0x195c60474, 0x12b8c08e9, 0x571811d3,  0xae3023a6,  0x15c60474c,
@@ -169,29 +167,11 @@ class NThashTransformer
       0xa295549e00000000, 0x452aa93e00000000, 0x8a55527c00000000,
       0x14aaa4fa00000000};
 
-  static constexpr const uint64_t nt_hash_N33r[33] = {
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN};
-
-  static constexpr const uint64_t nt_hash_N31l[31] = {
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN, nt_hash_seedN,
-      nt_hash_seedN};
-
   static constexpr const uint64_t *msTab31l[] = {
-      nt_hash_A31l, nt_hash_C31l, nt_hash_G31l, nt_hash_T31l, nt_hash_N31l};
+      nt_hash_A31l, nt_hash_C31l, nt_hash_G31l, nt_hash_T31l};
   static constexpr const uint64_t *msTab33r[] = {
-      nt_hash_A33r, nt_hash_C33r, nt_hash_G33r, nt_hash_T33r, nt_hash_N33r};
-  uint64_t msTab31l_33r_or[4 + 1];
+      nt_hash_A33r, nt_hash_C33r, nt_hash_G33r, nt_hash_T33r};
+  uint64_t msTab31l_33r_or[4];
 
  public:
   static constexpr const bool possible_false_positive_matches = true;
@@ -204,24 +184,42 @@ class NThashTransformer
         = (msTab31l[idx][qgram_length % 31] | msTab33r[idx][qgram_length % 33]);
     }
   }
-  uint64_t first_hash_value_get(const uint8_t *kmerSeq, size_t qgram_length)
-    const noexcept
+  uint64_t first_fwd_hash_value_get(const uint8_t *sequence,
+                                    size_t qgram_length) const noexcept
   {
     uint64_t hVal = 0;
     for (size_t idx = 0; idx < qgram_length; idx++)
     {
       hVal = rotate_left_1(hVal);
       hVal = swapbits033(hVal);
-      assert(kmerSeq[idx] <= 4);
-      hVal ^= nt_hash_seed_table[kmerSeq[idx]];
+      assert(sequence[idx] < 4);
+      hVal ^= nt_hash_seed_table[sequence[idx]];
     }
     return hVal;
   }
+  std::pair<uint64_t,uint64_t> first_hash_value_pair_get(
+                                    const uint8_t *t_qgram,
+                                    size_t qgram_length) const noexcept
+  {
+    const uint64_t fwd_code = first_fwd_hash_value_get(t_qgram,qgram_length);
+    uint64_t rev_compl_code = 0;
+    for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
+         t_qgram_ptr >= t_qgram; t_qgram_ptr--)
+    {
+      rev_compl_code = rotate_left_1(rev_compl_code);
+      rev_compl_code = swapbits033(rev_compl_code);
+      assert(*t_qgram_ptr < uint8_t(4));
+      rev_compl_code
+        ^= nt_hash_seed_table[static_cast<size_t>(uint8_t(3) - *t_qgram_ptr)];
+    }
+    return std::make_pair(fwd_code,rev_compl_code);
+  }
+
   // forward-strand ntHash for sliding k-mers
   uint64_t next_hash_value_get(uint8_t charOut, uint64_t fhVal,
                                uint8_t charIn) const noexcept
   {
-    assert(charIn <= 4 && charOut <= 4);
+    assert(charIn < 4 && charOut < 4);
     uint64_t hVal = rotate_left_1(fhVal);
     hVal = swapbits033(hVal);
     hVal ^= nt_hash_seed_table[charIn];

@@ -167,7 +167,8 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
     {
       qgram_buffer[idx] = alphabet.char_to_rank(substring[seqpos + idx]);
     }
-    assert(this_hash == nt_hash_transformer.first_hash_value_get(qgram_buffer,
+    assert(this_hash == nt_hash_transformer.first_fwd_hash_value_get(
+                                                                 qgram_buffer,
                                                                  qgram_length));
 #endif
     if constexpr (create_bytes_unit)
@@ -190,8 +191,8 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
               alphabet.char_to_rank(substring[seqpos + idx]));
       }
       assert(this_rc_hash ==
-             nt_hash_transformer.first_hash_value_get(qgram_buffer,
-                                                      qgram_length));
+             nt_hash_transformer.first_fwd_hash_value_get(qgram_buffer,
+                                                          qgram_length));
 #endif
       sum_rc_hash_values += this_rc_hash;
       if constexpr (create_bytes_unit)

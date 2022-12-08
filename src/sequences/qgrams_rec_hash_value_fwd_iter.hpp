@@ -148,7 +148,7 @@ class QgramRecHashValueFwdIterator
           wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
           current_window.prepend(rank);
         }
-        this_hash_value = qgram_transformer.first_hash_value_get(
+        this_hash_value = qgram_transformer.first_fwd_hash_value_get(
                                               current_window.pointer_to_array(),
                                               qgram_length);
       } else
