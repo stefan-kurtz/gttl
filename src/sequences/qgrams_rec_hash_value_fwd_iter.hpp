@@ -33,6 +33,8 @@ template<const char *_char_spec,
 class QgramRecHashValueFwdIterator
 {
   public:
+  static constexpr const bool possible_false_positive_matches
+    = QgramTransformer::possible_false_positive_matches;
   static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
   static constexpr const bool handle_both_strands = false;
   private:

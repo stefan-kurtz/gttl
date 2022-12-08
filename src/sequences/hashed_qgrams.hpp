@@ -297,11 +297,12 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
                                {this_hash,
                                 static_cast<uint64_t>(stored_seqnum),
                                 static_cast<uint64_t>(stored_seqpos)});
-        hashed_qgrams_vector->push_back(current_hashed_qgram);
+        hashed_qgrams_vector->emplace_back(current_hashed_qgram);
         steps = window_size;
       }
       assert(steps > 0);
       steps--;
+      seqpos++;
     }
   }
   return std::make_pair(count_all_qgrams, has_wildcards);
@@ -445,8 +446,6 @@ class HashedQgramsGeneric
                             std::to_string(qgram_length));
       log_vector->push_back(std::string("window_size\t") +
                             std::to_string(window_size));
-      log_vector->push_back(std::string("hashbits\t") +
-                            std::to_string(hashbits));
     }
     const uint64_t hash_mask = gttl_bits2maxvalue<uint64_t>(hashbits);
     if (number_of_threads == 1)
@@ -457,17 +456,17 @@ class HashedQgramsGeneric
         size_t this_count, this_has_wildcards;
         std::tie(this_count,this_has_wildcards)
           = (at_constant_distance
-               ? append_constant_distance_hashed_qgrams<sizeof_unit,
-                                                        HashIterator>
+               ? append_constant_distance_hashed_qgrams
+                                  <sizeof_unit,HashIterator>
                : append_minimizers<sizeof_unit,HashIterator>)
-                             (qgram_length,
-                              window_size,
-                              hash_mask,
-                              hashed_qgram_packer,
-                              &hashed_qgram_vector,
-                              multiseq->sequence_ptr_get(seqnum),
-                              multiseq->sequence_length_get(seqnum),
-                              seqnum);
+                                  (qgram_length,
+                                   window_size,
+                                   hash_mask,
+                                   hashed_qgram_packer,
+                                   &hashed_qgram_vector,
+                                   multiseq->sequence_ptr_get(seqnum),
+                                   multiseq->sequence_length_get(seqnum),
+                                   seqnum);
         count_all_qgrams += this_count;
         has_wildcards = has_wildcards || this_has_wildcards;
       }
