@@ -411,6 +411,7 @@ class HashedQgramsGeneric
   bool has_wildcards;
   int hashbits;
   size_t count_all_qgrams;
+  size_t qgram_length;
   GttlBitPacker<sizeof_unit,3> hashed_qgram_packer;
   public:
   static constexpr const bool possible_false_positive_matches
@@ -421,7 +422,7 @@ class HashedQgramsGeneric
   }
   HashedQgramsGeneric(const GttlMultiseq *_multiseq,
                       size_t number_of_threads,
-                      size_t qgram_length,
+                      size_t _qgram_length,
                       size_t window_size,
                       int _hashbits,
                       bool sort_them,
@@ -432,6 +433,7 @@ class HashedQgramsGeneric
     , has_wildcards(false)
     , hashbits(_hashbits)
     , count_all_qgrams(0)
+    , qgram_length(_qgram_length)
     , hashed_qgram_packer(GttlBitPacker<sizeof_unit,3>(
                             {_hashbits,
                              multiseq->sequences_number_bits_get(),
@@ -563,9 +565,14 @@ class HashedQgramsGeneric
     return static_cast<size_t>(hashed_qgram_vector[idx]
                                .template decode_at<2>(hashed_qgram_packer));
   }
-  int bit_group_size_get(int idx) const noexcept
+  int packer_bit_group_size_get(int idx) const noexcept
   {
     return hashed_qgram_packer.bit_group_size_get(idx);
+  }
+
+  size_t qgram_length_get(void) const noexcept
+  {
+    return qgram_length;
   }
   /* the following method has a side effect */
   void show(size_t offset = 0) const noexcept
