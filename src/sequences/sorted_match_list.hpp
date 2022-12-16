@@ -188,145 +188,208 @@ class SortedMatchList
       ref_seq_len = ref_multiseq->sequence_length_get();
       query_seq_len = query_multiseq->sequence_length_get();
     }
-    for (auto const &pp : seed_enumerator)
+    if constexpr (seed_enumerator.delivers_length_value)
     {
-      if constexpr (seed_output)
+      /* XXX: we also know the number of matches beforehand and so
+         could reserve space for encoded_matchlist */
+      for (auto const &pp : seed_enumerator)
       {
-        if constexpr (from_same_sequence)
+        if (pp.length >= minimum_mem_length)
         {
-          std::cout << "# seed\t"
-                    << pp.startpos0 << "\t"
-                    << pp.startpos1 << std::endl;
-        } else
-        {
-          std::cout << "# seed\t"
-                    << pp.seqnum0 << "\t"
-                    << pp.startpos0 << "\t"
-                    << pp.seqnum1 << "\t"
-                    << pp.startpos1 << std::endl;
+          if (pp.length > minimum_mem_length + maximum_storable_match_length)
+          {
+            if (sizeof_unit_match == 8)
+            {
+              StrFormat msg("cannot store match of length %lu in 8 bytes, "
+                            "resort to using 9 bytes of space for each MEM",
+                            static_cast<unsigned long>(pp.length));
+              throw msg.str();
+            } else
+            {
+              StrFormat msg("cannot store match of length %lu in 9 bytes, "
+                            "please inform the developer",
+                            static_cast<unsigned long>(pp.length));
+              throw msg.str();
+            }
+          } else
+          {
+            uint64_t seqnum0, seqnum1;
+            if constexpr (from_same_sequence)
+            {
+              seqnum0 = 0;
+              seqnum1 = 0;
+            } else
+            {
+              seqnum0 = pp.seqnum0;
+              seqnum1 = pp.seqnum1;
+            }
+            if constexpr (ref_idx == 0)
+            {
+              BytesUnitMatch
+                encoded_match(match_packer, /* create match */
+                              {seqnum0,
+                               seqnum1,
+                               pp.startpos0 + pp.length - 1,
+                               pp.startpos1 + pp.length - 1,
+                               pp.length - minimum_mem_length});
+              encoded_match_list.emplace_back(encoded_match);
+            } else
+            {
+              static_assert(ref_idx == 1);
+              BytesUnitMatch
+                encoded_match(match_packer, /* create match */
+                              {seqnum1,
+                               seqnum0,
+                               pp.startpos1 + pp.length - 1,
+                               pp.startpos0 + pp.length - 1,
+                               pp.length - minimum_mem_length});
+              encoded_match_list.emplace_back(encoded_match);
+            }
+          }
         }
       }
-      if constexpr (!from_same_sequence)
+    } else
+    {
+      for (auto const &pp : seed_enumerator)
       {
-        ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
-        query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
-        ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
-        query_seq_len = query_multiseq->sequence_length_get(pp.seqnum1);
-      }
-      size_t left_extend, right_extend;
-
-      if constexpr (self_match)
-      {
-        if constexpr (from_same_sequence)
+        if constexpr (seed_output)
         {
-          constexpr const bool check_bounds = false;
-          MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
-        } else
-        {
-          if (pp.seqnum0 != pp.seqnum1)
+          if constexpr (from_same_sequence)
           {
-            constexpr const bool check_bounds = true;
-            MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+            std::cout << "# seed\t"
+                      << pp.startpos0 << "\t"
+                      << pp.startpos1 << std::endl;
           } else
+          {
+            std::cout << "# seed\t"
+                      << pp.seqnum0 << "\t"
+                      << pp.startpos0 << "\t"
+                      << pp.seqnum1 << "\t"
+                      << pp.startpos1 << std::endl;
+          }
+        }
+        if constexpr (!from_same_sequence)
+        {
+          ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
+          query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
+          ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
+          query_seq_len = query_multiseq->sequence_length_get(pp.seqnum1);
+        }
+        size_t left_extend, right_extend;
+
+        if constexpr (self_match)
+        {
+          if constexpr (from_same_sequence)
           {
             constexpr const bool check_bounds = false;
             MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
-          }
-        }
-      } else
-      {
-        constexpr const bool check_bounds = false;
-        MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters);
-      }
-      bool seed_okay = false;
-      if (left_extend + right_extend >= length_threshold)
-      {
-        if constexpr (self_match)
-        {
-          seed_okay = (count_mismatches<char,matching_characters_wc>
-                                       (ref_seq + pp.startpos0,
-                                        query_seq + pp.startpos1,
-                                        qgram_length) == 0);
-        } else
-        {
-          seed_okay = (count_mismatches<char,matching_characters>
-                                       (ref_seq + pp.startpos0,
-                                        query_seq + pp.startpos1,
-                                        qgram_length) == 0);
-        }
-      }
-      if (seed_okay)
-      {
-        assert(pp.startpos0 >= left_extend && pp.startpos1 >= left_extend);
-        const size_t this_match_length = left_extend + qgram_length +
-                                         right_extend;
-        uint64_t length_stored;
-        if (this_match_length >
-            minimum_mem_length + maximum_storable_match_length)
-        {
-          length_stored = maximum_storable_match_length;
-          if (sizeof_unit_match == 8)
-          {
-            StrFormat msg("cannot store match of length %lu in 8 bytes, resort "
-                          "to using 9 bytes of space for each MEM",
-                          this_match_length);
-            throw msg.str();
           } else
           {
-            StrFormat msg("cannot store match of length %lu in 9 bytes, please "
-                          "inform the developer",
-                          this_match_length);
-            throw msg.str();
+            if (pp.seqnum0 != pp.seqnum1)
+            {
+              constexpr const bool check_bounds = true;
+              MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+            } else
+            {
+              constexpr const bool check_bounds = false;
+              MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters_wc);
+            }
           }
         } else
         {
-          assert(this_match_length >= minimum_mem_length);
-          length_stored = this_match_length - minimum_mem_length;
+          constexpr const bool check_bounds = false;
+          MAXIMIZE_ON_BOTH_ENDS(check_bounds,matching_characters);
         }
-        uint64_t seqnum0, seqnum1;
-        if constexpr (from_same_sequence)
+        bool seed_okay = false;
+        if (left_extend + right_extend >= length_threshold)
         {
-          seqnum0 = 0;
-          seqnum1 = 0;
-        } else
-        {
-          seqnum0 = pp.seqnum0;
-          seqnum1 = pp.seqnum1;
+          if constexpr (self_match)
+          {
+            seed_okay = (count_mismatches<char,matching_characters_wc>
+                                         (ref_seq + pp.startpos0,
+                                          query_seq + pp.startpos1,
+                                          qgram_length) == 0);
+          } else
+          {
+            seed_okay = (count_mismatches<char,matching_characters>
+                                         (ref_seq + pp.startpos0,
+                                          query_seq + pp.startpos1,
+                                          qgram_length) == 0);
+          }
         }
-        if constexpr (ref_idx == 0)
+        if (seed_okay)
         {
-          BytesUnitMatch
-            encoded_match(match_packer, /* create match */
-                          {seqnum0,
-                           seqnum1,
-                           pp.startpos0 - left_extend + this_match_length - 1,
-                           pp.startpos1 - left_extend + this_match_length - 1,
-                           length_stored});
-          encoded_match_list.emplace_back(encoded_match);
-        } else
-        {
-          static_assert(ref_idx == 1);
-          BytesUnitMatch
-            encoded_match(match_packer, /* create match */
-                          {seqnum1,
-                           seqnum0,
-                           pp.startpos1 - left_extend + this_match_length - 1,
-                           pp.startpos0 - left_extend + this_match_length - 1,
-                           length_stored});
-          encoded_match_list.emplace_back(encoded_match);
+          assert(pp.startpos0 >= left_extend && pp.startpos1 >= left_extend);
+          const size_t this_match_length = left_extend + qgram_length +
+                                           right_extend;
+          uint64_t length_stored;
+          if (this_match_length >
+              minimum_mem_length + maximum_storable_match_length)
+          {
+            length_stored = maximum_storable_match_length;
+            if (sizeof_unit_match == 8)
+            {
+              StrFormat msg("cannot store match of length %lu in 8 bytes, "
+                            "resort to using 9 bytes of space for each MEM",
+                            this_match_length);
+              throw msg.str();
+            } else
+            {
+              StrFormat msg("cannot store match of length %lu in 9 bytes, "
+                            "please inform the developer",
+                            this_match_length);
+              throw msg.str();
+            }
+          } else
+          {
+            assert(this_match_length >= minimum_mem_length);
+            length_stored = this_match_length - minimum_mem_length;
+          }
+          uint64_t seqnum0, seqnum1;
+          if constexpr (from_same_sequence)
+          {
+            seqnum0 = 0;
+            seqnum1 = 0;
+          } else
+          {
+            seqnum0 = pp.seqnum0;
+            seqnum1 = pp.seqnum1;
+          }
+          if constexpr (ref_idx == 0)
+          {
+            BytesUnitMatch
+              encoded_match(match_packer, /* create match */
+                            {seqnum0,
+                             seqnum1,
+                             pp.startpos0 - left_extend + this_match_length - 1,
+                             pp.startpos1 - left_extend + this_match_length - 1,
+                             length_stored});
+            encoded_match_list.emplace_back(encoded_match);
+          } else
+          {
+            static_assert(ref_idx == 1);
+            BytesUnitMatch
+              encoded_match(match_packer, /* create match */
+                            {seqnum1,
+                             seqnum0,
+                             pp.startpos1 - left_extend + this_match_length - 1,
+                             pp.startpos0 - left_extend + this_match_length - 1,
+                             length_stored});
+            encoded_match_list.emplace_back(encoded_match);
+          }
         }
+        number_of_seeds++;
       }
-      number_of_seeds++;
+      const bool reversed_byte_order = is_big_endian() ? false : true;
+      ska_large_lsb_small_radix_sort(sizeof_unit_match,
+                                     bits_for_sequences,
+                                     reinterpret_cast<uint8_t *>
+                                       (encoded_match_list.data()),
+                                     encoded_match_list.size(),
+                                     reversed_byte_order);
+      remove_duplicates<BytesUnitMatch>(&encoded_match_list);
     }
     number_of_all_matches = encoded_match_list.size();
-    const bool reversed_byte_order = is_big_endian() ? false : true;
-    ska_large_lsb_small_radix_sort(sizeof_unit_match,
-                                   bits_for_sequences,
-                                   reinterpret_cast<uint8_t *>
-                                     (encoded_match_list.data()),
-                                   encoded_match_list.size(),
-                                   reversed_byte_order);
-    remove_duplicates<BytesUnitMatch>(&encoded_match_list);
   }
   size_t number_of_all_matches_get(void) const noexcept
   {
