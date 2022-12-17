@@ -178,22 +178,18 @@ class SortedMatchList
        same name to deliver the sequence and their
        length, but depending on the sequence number.
     */
+    uint64_t seqnum0 = 0,
+             seqnum1 = 0;
     if constexpr (seed_enumerator.delivers_length_value)
     {
-      /* XXX: we also know the number of matches beforehand and so
-         could reserve space for encoded_matchlist */
+      encoded_match_list.reserve(seed_enumerator.number_of_MEMs_get());
       for (auto const &pp : seed_enumerator)
       {
         if (pp.length >= minimum_mem_length)
         {
           assert (pp.length <= minimum_mem_length +
                                maximum_storable_match_length);
-          uint64_t seqnum0, seqnum1;
-          if constexpr (from_same_sequence)
-          {
-            seqnum0 = 0;
-            seqnum1 = 0;
-          } else
+          if constexpr (!from_same_sequence)
           {
             seqnum0 = pp.seqnum0;
             seqnum1 = pp.seqnum1;
@@ -222,7 +218,6 @@ class SortedMatchList
           }
         }
       }
-      assert(encoded_match_list.size() == seed_enumerator.number_of_MEMs_get());
     } else
     {
       const size_t length_threshold = minimum_mem_length - qgram_length;
@@ -330,12 +325,7 @@ class SortedMatchList
             assert(this_match_length >= minimum_mem_length);
             length_stored = this_match_length - minimum_mem_length;
           }
-          uint64_t seqnum0, seqnum1;
-          if constexpr (from_same_sequence)
-          {
-            seqnum0 = 0;
-            seqnum1 = 0;
-          } else
+          if constexpr (!from_same_sequence)
           {
             seqnum0 = pp.seqnum0;
             seqnum1 = pp.seqnum1;
