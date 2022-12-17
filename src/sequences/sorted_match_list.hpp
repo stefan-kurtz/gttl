@@ -162,7 +162,6 @@ class SortedMatchList
       static_assert(self_match);
     }
     assert(minimum_mem_length >= qgram_length);
-    const size_t length_threshold = minimum_mem_length - qgram_length;
     const uint64_t maximum_storable_match_length
       = gttl_bits2maxvalue<uint64_t>(remaining_bits_for_length);
 
@@ -179,15 +178,6 @@ class SortedMatchList
        same name to deliver the sequence and their
        length, but depending on the sequence number.
     */
-    const char *ref_seq, *query_seq;
-    size_t ref_seq_len, query_seq_len;
-    if constexpr (from_same_sequence)
-    {
-      ref_seq = ref_multiseq->sequence_ptr_get();
-      query_seq = query_multiseq->sequence_ptr_get();
-      ref_seq_len = ref_multiseq->sequence_length_get();
-      query_seq_len = query_multiseq->sequence_length_get();
-    }
     if constexpr (seed_enumerator.delivers_length_value)
     {
       /* XXX: we also know the number of matches beforehand and so
@@ -196,60 +186,55 @@ class SortedMatchList
       {
         if (pp.length >= minimum_mem_length)
         {
-          if (pp.length > minimum_mem_length + maximum_storable_match_length)
+          assert (pp.length <= minimum_mem_length +
+                               maximum_storable_match_length);
+          uint64_t seqnum0, seqnum1;
+          if constexpr (from_same_sequence)
           {
-            if (sizeof_unit_match == 8)
-            {
-              StrFormat msg("cannot store match of length %lu in 8 bytes, "
-                            "resort to using 9 bytes of space for each MEM",
-                            static_cast<unsigned long>(pp.length));
-              throw msg.str();
-            } else
-            {
-              StrFormat msg("cannot store match of length %lu in 9 bytes, "
-                            "please inform the developer",
-                            static_cast<unsigned long>(pp.length));
-              throw msg.str();
-            }
+            seqnum0 = 0;
+            seqnum1 = 0;
           } else
           {
-            uint64_t seqnum0, seqnum1;
-            if constexpr (from_same_sequence)
-            {
-              seqnum0 = 0;
-              seqnum1 = 0;
-            } else
-            {
-              seqnum0 = pp.seqnum0;
-              seqnum1 = pp.seqnum1;
-            }
-            if constexpr (ref_idx == 0)
-            {
-              BytesUnitMatch
-                encoded_match(match_packer, /* create match */
-                              {seqnum0,
-                               seqnum1,
-                               pp.startpos0 + pp.length - 1,
-                               pp.startpos1 + pp.length - 1,
-                               pp.length - minimum_mem_length});
-              encoded_match_list.emplace_back(encoded_match);
-            } else
-            {
-              static_assert(ref_idx == 1);
-              BytesUnitMatch
-                encoded_match(match_packer, /* create match */
-                              {seqnum1,
-                               seqnum0,
-                               pp.startpos1 + pp.length - 1,
-                               pp.startpos0 + pp.length - 1,
-                               pp.length - minimum_mem_length});
-              encoded_match_list.emplace_back(encoded_match);
-            }
+            seqnum0 = pp.seqnum0;
+            seqnum1 = pp.seqnum1;
+          }
+          if constexpr (ref_idx == 0)
+          {
+            BytesUnitMatch
+              encoded_match(match_packer, /* create match */
+                            {seqnum0,
+                             seqnum1,
+                             pp.startpos0 + pp.length - 1,
+                             pp.startpos1 + pp.length - 1,
+                             pp.length - minimum_mem_length});
+            encoded_match_list.emplace_back(encoded_match);
+          } else
+          {
+            static_assert(ref_idx == 1);
+            BytesUnitMatch
+              encoded_match(match_packer, /* create match */
+                            {seqnum1,
+                             seqnum0,
+                             pp.startpos1 + pp.length - 1,
+                             pp.startpos0 + pp.length - 1,
+                             pp.length - minimum_mem_length});
+            encoded_match_list.emplace_back(encoded_match);
           }
         }
       }
+      assert(encoded_match_list.size() == seed_enumerator.number_of_MEMs_get());
     } else
     {
+      const size_t length_threshold = minimum_mem_length - qgram_length;
+      const char *ref_seq, *query_seq;
+      size_t ref_seq_len, query_seq_len;
+      if constexpr (from_same_sequence)
+      {
+        ref_seq = ref_multiseq->sequence_ptr_get();
+        query_seq = query_multiseq->sequence_ptr_get();
+        ref_seq_len = ref_multiseq->sequence_length_get();
+        query_seq_len = query_multiseq->sequence_length_get();
+      }
       for (auto const &pp : seed_enumerator)
       {
         if constexpr (seed_output)
