@@ -180,7 +180,7 @@ class SortedMatchList
     */
     uint64_t seqnum0 = 0,
              seqnum1 = 0;
-    if constexpr (seed_enumerator.delivers_length_value)
+    if constexpr (SeedEnumeratorClass::delivers_length_value)
     {
       encoded_match_list.reserve(seed_enumerator.number_of_MEMs_get());
       for (auto const &pp : seed_enumerator)
