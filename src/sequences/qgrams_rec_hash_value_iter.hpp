@@ -40,6 +40,8 @@ template<const char *_char_spec,
 class QgramRecHashValueIterator
 {
   public:
+  static constexpr const bool possible_false_positive_matches
+    = QgramTransformer::possible_false_positive_matches;
   static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
   static constexpr const bool handle_both_strands = true;
   /* As we use the expression uses 3 - base to compute the
