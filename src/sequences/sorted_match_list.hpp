@@ -461,8 +461,8 @@ class SortedMatchList
   }
   bool all_same_segment(void) const noexcept
   {
-    return ref_multiseq->sequences_number_get() == 1 &&
-           query_multiseq->sequences_number_get() == 1;
+    return ref_multiseq->sequences_number_get() == size_t(1) &&
+           query_multiseq->sequences_number_get() == size_t(1);
   }
   /* This is currently not used */
   std::pair<size_t,size_t> gaps_of_adjacent(const BytesUnitMatch
