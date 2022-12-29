@@ -108,7 +108,8 @@ template<class SequenceClass,
          int ref_idx>
 class SortedMatchList
 {
-  static_assert(sizeof_unit_match == 8 || sizeof_unit_match == 9);
+  static_assert(sizeof_unit_match == 8 || sizeof_unit_match == 9
+                                       || sizeof_unit_match == 10);
   static_assert(ref_idx == 0 || ref_idx == 1);
   static constexpr const int query_idx = ref_idx == 0 ? 1 : 0;
   static constexpr const int ref_pos_idx = ref_idx == 0 ? 2 : 3;
@@ -121,16 +122,16 @@ class SortedMatchList
          number_of_all_matches;
   int bits_for_sequences;
   int remaining_bits_for_length;
-  const SequenceClass *ref_multiseq,
-                      *query_multiseq;
+  const SequenceClass &ref_multiseq,
+                      &query_multiseq;
   GttlBitPacker<sizeof_unit_match,5> match_packer;
 
   public:
   SortedMatchList(size_t qgram_length,
                   size_t _minimum_mem_length,
                   const SeedEnumeratorClass &seed_enumerator,
-                  const SequenceClass *_ref_multiseq,
-                  const SequenceClass *_query_multiseq)
+                  const SequenceClass &_ref_multiseq,
+                  const SequenceClass &_query_multiseq)
     : encoded_match_list({})
     , minimum_mem_length(_minimum_mem_length)
     , number_of_seeds(0)
@@ -225,10 +226,10 @@ class SortedMatchList
       size_t ref_seq_len, query_seq_len;
       if constexpr (from_same_sequence)
       {
-        ref_seq = ref_multiseq->sequence_ptr_get();
-        query_seq = query_multiseq->sequence_ptr_get();
-        ref_seq_len = ref_multiseq->sequence_length_get();
-        query_seq_len = query_multiseq->sequence_length_get();
+        ref_seq = ref_multiseq.sequence_ptr_get();
+        query_seq = query_multiseq.sequence_ptr_get();
+        ref_seq_len = ref_multiseq.sequence_length_get();
+        query_seq_len = query_multiseq.sequence_length_get();
       }
       for (auto const &pp : seed_enumerator)
       {
@@ -250,10 +251,10 @@ class SortedMatchList
         }
         if constexpr (!from_same_sequence)
         {
-          ref_seq = ref_multiseq->sequence_ptr_get(pp.seqnum0);
-          query_seq = query_multiseq->sequence_ptr_get(pp.seqnum1);
-          ref_seq_len = ref_multiseq->sequence_length_get(pp.seqnum0);
-          query_seq_len = query_multiseq->sequence_length_get(pp.seqnum1);
+          ref_seq = ref_multiseq.sequence_ptr_get(pp.seqnum0);
+          query_seq = query_multiseq.sequence_ptr_get(pp.seqnum1);
+          ref_seq_len = ref_multiseq.sequence_length_get(pp.seqnum0);
+          query_seq_len = query_multiseq.sequence_length_get(pp.seqnum1);
         }
         size_t left_extend, right_extend;
 
@@ -461,8 +462,8 @@ class SortedMatchList
   }
   bool all_same_segment(void) const noexcept
   {
-    return ref_multiseq->sequences_number_get() == size_t(1) &&
-           query_multiseq->sequences_number_get() == size_t(1);
+    return ref_multiseq.sequences_number_get() == size_t(1) &&
+           query_multiseq.sequences_number_get() == size_t(1);
   }
   /* This is currently not used */
   std::pair<size_t,size_t> gaps_of_adjacent(const BytesUnitMatch

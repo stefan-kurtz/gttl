@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
             using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                      QgramNtHashIterator4>;
 
-            HashedQgrams hqg (multiseq,
+            HashedQgrams hqg (*multiseq,
                               options.number_of_threads_get(),
                               options.qgram_length_get(),
                               options.window_size_get(),
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
           {
             using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                      QgramNtHashFwdIterator4>;
-            HashedQgrams hqg (multiseq,
+            HashedQgrams hqg (*multiseq,
                               options.number_of_threads_get(),
                               options.qgram_length_get(),
                               options.window_size_get(),

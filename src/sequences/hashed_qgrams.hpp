@@ -375,7 +375,7 @@ struct HashedQgramVectorTable
 template<int sizeof_unit,class HashIterator>
 static void append_hashed_qgrams_threaded(size_t thread_id,
                                           size_t task_num,
-                                          const GttlMultiseq *multiseq,
+                                          const GttlMultiseq &multiseq,
                                           size_t qgram_length,
                                           size_t window_size,
                                           uint64_t hash_mask,
@@ -392,8 +392,8 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
                         hash_mask,
                         hashed_qgram_packer,
                         &hashed_qgram_vector_table->table[thread_id],
-                        multiseq->sequence_ptr_get(task_num),
-                        multiseq->sequence_length_get(task_num),
+                        multiseq.sequence_ptr_get(task_num),
+                        multiseq.sequence_length_get(task_num),
                         task_num);
   hashed_qgram_vector_table->count_all_qgrams[thread_id] += this_count;
   hashed_qgram_vector_table->has_wildcards[thread_id] =
@@ -405,7 +405,8 @@ class HashedQgramsGeneric
 {
   public:
   static constexpr int sizeof_unit_const = sizeof_unit;
-  const GttlMultiseq *multiseq;
+  static constexpr bool handle_both_strands = HashIterator::handle_both_strands;
+  const GttlMultiseq &multiseq;
   private:
   HashedQgramVector<sizeof_unit> hashed_qgram_vector;
   bool has_wildcards;
@@ -420,12 +421,12 @@ class HashedQgramsGeneric
   {
     return hashed_qgram_vector.size();
   }
-  HashedQgramsGeneric(const GttlMultiseq *_multiseq,
+  HashedQgramsGeneric(const GttlMultiseq &_multiseq,
                       size_t number_of_threads,
                       size_t _qgram_length,
                       size_t window_size,
                       int _hashbits,
-                      bool sort_them,
+                      bool sort_by_hashvalue,
                       bool at_constant_distance,
                       std::vector<std::string> *log_vector)
     : multiseq(_multiseq)
@@ -436,8 +437,8 @@ class HashedQgramsGeneric
     , qgram_length(_qgram_length)
     , hashed_qgram_packer(GttlBitPacker<sizeof_unit,3>(
                             {_hashbits,
-                             multiseq->sequences_number_bits_get(),
-                             multiseq->sequences_length_bits_get()}))
+                             multiseq.sequences_number_bits_get(),
+                             multiseq.sequences_length_bits_get()}))
   {
     assert(hashbits != -1);
     RunTimeClass rt_collect{};
@@ -452,7 +453,7 @@ class HashedQgramsGeneric
     const uint64_t hash_mask = gttl_bits2maxvalue<uint64_t>(hashbits);
     if (number_of_threads == 1)
     {
-      for (size_t seqnum = 0; seqnum < multiseq->sequences_number_get();
+      for (size_t seqnum = 0; seqnum < multiseq.sequences_number_get();
            seqnum++)
       {
         size_t this_count, this_has_wildcards;
@@ -466,8 +467,8 @@ class HashedQgramsGeneric
                                    hash_mask,
                                    hashed_qgram_packer,
                                    &hashed_qgram_vector,
-                                   multiseq->sequence_ptr_get(seqnum),
-                                   multiseq->sequence_length_get(seqnum),
+                                   multiseq.sequence_ptr_get(seqnum),
+                                   multiseq.sequence_length_get(seqnum),
                                    seqnum);
         count_all_qgrams += this_count;
         has_wildcards = has_wildcards || this_has_wildcards;
@@ -478,7 +479,7 @@ class HashedQgramsGeneric
       HashedQgramVectorTable<sizeof_unit>
         hashed_qgram_vector_table(number_of_threads);
       GttlThreadPoolVar(number_of_threads,
-                        multiseq->sequences_number_get(),
+                        multiseq.sequences_number_get(),
                         append_hashed_qgrams_threaded<sizeof_unit,HashIterator>,
                         multiseq,
                         qgram_length,
@@ -512,7 +513,7 @@ class HashedQgramsGeneric
       log_vector->push_back(s_space.str());
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }
-    if (sort_them)
+    if (sort_by_hashvalue)
     {
       RunTimeClass rt_sort{};
       if constexpr (sizeof_unit == 8)
