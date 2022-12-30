@@ -36,7 +36,8 @@ class GttlMultiseq
          sequences_minimum_length{ULONG_MAX},
          sequences_maximum_length{0};
   uint8_t padding_char;
-  bool constant_padding_char;
+  bool constant_padding_char,
+       has_reverse_complement;
   std::map<size_t,size_t> length_dist_map{};
   char **short_header_cache{nullptr};
 
@@ -217,6 +218,7 @@ class GttlMultiseq
   GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
+    , has_reverse_complement(false)
   {
     std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store,false);
@@ -225,6 +227,7 @@ class GttlMultiseq
   GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
+    , has_reverse_complement(false)
   {
     std::vector<std::string> inputfiles{inputfile};
     multiseq_reader(inputfiles,store,false);
@@ -234,6 +237,7 @@ class GttlMultiseq
                uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
+    , has_reverse_complement(false)
   {
     multiseq_reader(inputfiles,store,false);
   }
@@ -243,6 +247,7 @@ class GttlMultiseq
                bool store, uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
+    , has_reverse_complement(false)
   {
     std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
     multiseq_reader(inputfiles,store,true);
@@ -251,6 +256,7 @@ class GttlMultiseq
   GttlMultiseq(bool store, uint8_t _padding_char)
     : padding_char(_padding_char)
     , constant_padding_char(true)
+    , has_reverse_complement(false)
   {
     if (store)
     {
@@ -261,6 +267,7 @@ class GttlMultiseq
   GttlMultiseq(const std::vector<std::string> &inputfiles,
                const std::vector<uint8_t> &forbidden_as_padding)
     : constant_padding_char(false)
+    , has_reverse_complement(false)
   {
     CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
     uint8_t this_padding_char = cycle_of_numbers.next();
@@ -337,6 +344,16 @@ class GttlMultiseq
       exit(EXIT_FAILURE);
     }
     return padding_char;
+  }
+
+  void has_reverse_complement_set(void) noexcept
+  {
+    has_reverse_complement = true;
+  }
+
+  bool has_reverse_complement_is_set(void) const noexcept
+  {
+    return has_reverse_complement;
   }
 
   /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */
@@ -589,6 +606,7 @@ static GttlMultiseq *multiseq_with_reverse_complement(
   GttlSeqIterator<buf_size> gttl_si(&inputfiles);
   GttlMultiseq *multiseq
     = new GttlMultiseq(store,padding_char); /* CONSTRUCTOR */
+  multiseq->has_reverse_complement_set();
   for (auto &&si : gttl_si)
   {
     const std::string_view &seq = si.sequence_get();
