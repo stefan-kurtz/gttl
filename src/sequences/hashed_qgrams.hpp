@@ -107,6 +107,7 @@ static std::pair<size_t,bool> append_minimizers(
   size_t count_all_qgrams = 0;
   bool has_wildcards = false;
   NucleotideRanger ranger(sequence,seqlen);
+  HashedQgramVector<sizeof_unit> palindromic_vector{};
   for (auto const &&range : ranger)
   {
     const size_t this_length = std::get<1>(range);
@@ -140,6 +141,25 @@ static std::pair<size_t,bool> append_minimizers(
           stored_seqpos = seqlen - (seqpos + qgram_length);
         } else
         {
+          if (rc_hash == this_hash)
+          {
+            /* also add the coordinates for the reverse complement
+               as it would otherwise be neglected */
+            BytesUnit<sizeof_unit,3>
+              palindromic_hashed_qgram_rc(hashed_qgram_packer,
+                                       {this_hash,
+                                        static_cast<uint64_t>(seqnum+1),
+                                        static_cast<uint64_t>(seqlen -
+                                                              (seqpos +
+                                                               qgram_length))});
+            palindromic_vector.emplace_back(palindromic_hashed_qgram_rc);
+            BytesUnit<sizeof_unit,3>
+              palindromic_hashed_qgram_fwd(hashed_qgram_packer,
+                                           {this_hash,
+                                            static_cast<uint64_t>(seqnum),
+                                            static_cast<uint64_t>(seqpos)});
+            palindromic_vector.emplace_back(palindromic_hashed_qgram_fwd);
+          }
           stored_seqnum = seqnum;
           stored_seqpos = seqpos;
         }
@@ -224,6 +244,15 @@ static std::pair<size_t,bool> append_minimizers(
                                      search_start);
 #endif
     window_deque.clear();
+  }
+  if constexpr (HashIterator::handle_both_strands)
+  {
+    std::cout << "# add " << palindromic_vector.size() << " " << qgram_length
+              << "-mer DNA-palindromes to minimizer_vector" << std::endl;
+    for (auto && pq : palindromic_vector)
+    {
+      minimizer_vector->emplace_back(pq);
+    }
   }
   return std::make_pair(count_all_qgrams, has_wildcards);
 }

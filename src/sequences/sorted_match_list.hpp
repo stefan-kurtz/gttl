@@ -246,7 +246,9 @@ class SortedMatchList
                       << pp.seqnum0 << "\t"
                       << pp.startpos0 << "\t"
                       << pp.seqnum1 << "\t"
-                      << pp.startpos1 << std::endl;
+                      << pp.startpos1 << "\t"
+                      << static_cast<int>(pp.startpos1 - pp.startpos0)
+                      << std::endl;
           }
         }
         if constexpr (!from_same_sequence)

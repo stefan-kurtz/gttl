@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iostream>
 #include <tuple>
+#include <cinttypes>
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
@@ -46,7 +47,8 @@ class NtHashOptions
   std::vector<std::string> inputfiles;
   bool help_option,
        bytes_unit_option,
-       with_rc_option;
+       with_rc_option,
+       show_hash_values;
   int hashbits;
   size_t kmer_length;
 
@@ -77,6 +79,8 @@ class NtHashOptions
         cxxopts::value<bool>(bytes_unit_option)->default_value("false"))
       ("with_rc", "also compute hash values of reverse complement",
        cxxopts::value<bool>(with_rc_option)->default_value("false"))
+      ("s,show_hash_values", "show the hash values",
+       cxxopts::value<bool>(show_hash_values)->default_value("false"))
      ("h,help", "print usage");
     try
     {
@@ -124,6 +128,10 @@ class NtHashOptions
   {
     return with_rc_option;
   }
+  bool show_hash_values_is_set(void) const noexcept
+  {
+    return show_hash_values;
+  }
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
     return inputfiles;
@@ -134,6 +142,7 @@ static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
 template<class HashValueIterator,
          bool with_rc,
+         bool show_hash_values,
          int sizeof_unit_hashed_qgrams,
          bool create_bytes_unit>
 static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
@@ -194,6 +203,10 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
              nt_hash_transformer.first_fwd_hash_value_get(qgram_buffer,
                                                           qgram_length));
 #endif
+      if constexpr (show_hash_values)
+      {
+        printf("%" PRIu64 "\t%" PRIu64 "\n",this_hash,this_rc_hash);
+      }
       sum_rc_hash_values += this_rc_hash;
       if constexpr (create_bytes_unit)
       {
@@ -203,6 +216,12 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
                                           static_cast<uint64_t>(seqnum),
                                           static_cast<uint64_t>(seqpos)});
         bytes_unit_sum_rc += current_rc_hashed_qgram.sum();
+      }
+    } else
+    {
+      if constexpr (show_hash_values)
+      {
+        printf("%" PRIu64 "\n",this_hash);
       }
     }
     seqpos++;
@@ -216,6 +235,7 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
 
 template<class HashValueIterator,
          bool with_rc,
+         bool show_hash_values,
          int sizeof_unit_hashed_qgrams,
          bool create_bytes_unit>
 static void enumerate_nt_hash_template(const char *inputfilename,
@@ -267,6 +287,7 @@ static void enumerate_nt_hash_template(const char *inputfilename,
         const char *substring = sequence.data() + std::get<0>(range);
         auto result = apply_qgram_iterator<HashValueIterator,
                                            with_rc,
+                                           show_hash_values,
                                            sizeof_unit_hashed_qgrams,
                                            create_bytes_unit>
                                           (qgram_length,
@@ -308,17 +329,33 @@ static void enumerate_nt_hash_template(const char *inputfilename,
 }
 
 #define CALL_enumerate_nt_hash_template(BYTE_UNITS,BYTE_UNITS_OPTION)\
-        enumerate_nt_hash_template<HashValueIterator,\
-                                   with_rc,\
-                                   BYTE_UNITS,BYTE_UNITS_OPTION>\
-                                  (inputfilename,\
-                                   qgram_length,\
-                                   hashbits,\
-                                   sequences_number_bits,\
-                                   sequences_length_bits)
+        if (show_hash_values)\
+        {\
+          enumerate_nt_hash_template<HashValueIterator,\
+                                     with_rc,\
+                                     true,\
+                                     BYTE_UNITS,BYTE_UNITS_OPTION>\
+                                    (inputfilename,\
+                                     qgram_length,\
+                                     hashbits,\
+                                     sequences_number_bits,\
+                                     sequences_length_bits);\
+        } else\
+        {\
+          enumerate_nt_hash_template<HashValueIterator,\
+                                     with_rc,\
+                                     false,\
+                                     BYTE_UNITS,BYTE_UNITS_OPTION>\
+                                    (inputfilename,\
+                                     qgram_length,\
+                                     hashbits,\
+                                     sequences_number_bits,\
+                                     sequences_length_bits);\
+        }
 
 template<class HashValueIterator,bool with_rc>
 static void enumerate_nt_hash(const char *inputfilename,
+                              bool show_hash_values,
                               bool bytes_unit_option,
                               size_t qgram_length,
                               int hashbits)
@@ -388,6 +425,7 @@ int main(int argc,char *argv[])
       {
         enumerate_nt_hash<QgramNtHashIterator4,true>
                          (inputfile.c_str(),
+                          options.show_hash_values_is_set(),
                           options.bytes_unit_option_is_set(),
                           options.kmer_length_get(),
                           options.hashbits_get());
@@ -395,6 +433,7 @@ int main(int argc,char *argv[])
       {
         enumerate_nt_hash<QgramNtHashFwdIterator4,false>
                          (inputfile.c_str(),
+                          options.show_hash_values_is_set(),
                           options.bytes_unit_option_is_set(),
                           options.kmer_length_get(),
                           options.hashbits_get());

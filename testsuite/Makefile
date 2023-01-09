@@ -88,7 +88,7 @@ test_char_range:char_range_mn.x
 	@./char_range_compare.sh ${AT1MB}
 	@echo "Congratulations. $@ passed."
 
-test_nthash:enum_nthash.x
+test_nthash:enum_nthash.x test_nthash_wc_palindrome
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
 	@./enum_nthash.x --bytes_unit ${AT1MB} | \
            grep -v '^# TIME' | diff - ../testdata/at1MB_nthash.tsv
@@ -107,6 +107,14 @@ test_nthash:enum_nthash.x
 	@./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
            grep -v '^# TIME' | grep -v '_rc' | \
            diff - ../testdata/ychrIII_nthash.tsv
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_nthash_wc_palindrome
+test_nthash_wc_palindrome:enum_nthash.x
+	@$(eval TMPFILE := $(shell mktemp))
+	@./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 1 > ${TMPFILE}
+	@./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 2 | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq
