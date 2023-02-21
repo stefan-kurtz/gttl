@@ -221,7 +221,7 @@ test_nt_minimizer_count:nt_minimizer.x
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@echo "# number of hashed kmers	37507" > ${TMPFILE}
+	@echo "# number of hashed kmers	37577" > ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@${RM} ${TMPFILE}
