@@ -5,19 +5,17 @@
 
 class UniformRandomDouble
 {
-  std::random_device seed{};
-  std::mt19937 generator;
+  std::random_device seed_gen; // generate a seed
+  std::mt19937 generator; // mersenne_twister_engine
   std::uniform_real_distribution<double> distribution;
 
   public:
   UniformRandomDouble(double low = DBL_MIN,
                       double high = DBL_MAX,
                       unsigned int own_seed = 0)
-    : generator(own_seed == 0 ? seed() : own_seed)
-  {
-    std::uniform_real_distribution<double>::param_type param(low, high);
-    distribution.param(param);
-  }
+    : generator(own_seed == 0 ? seed_gen() : own_seed)
+    , distribution(low,high)
+  {}
   double get(void)
   {
     return distribution(generator);
