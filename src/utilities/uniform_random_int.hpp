@@ -5,17 +5,15 @@
 template<typename IntType>
 class UniformRandomInteger
 {
-  std::random_device seed{};
+  std::random_device seed;
   std::mt19937 generator;
   std::uniform_int_distribution<IntType> distribution;
 
   public:
-  UniformRandomInt(IntType low, IntType high, unsigned int own_seed = 0)
+  UniformRandomInteger(IntType low, IntType high, unsigned int own_seed = 0)
     : generator(own_seed == 0 ? seed() : own_seed)
-  {
-    std::uniform_int_distribution<IntType>::param_type param(low, high);
-    distribution.param(param);
-  }
+    , distribution(low,high)
+  {}
   IntType get(void)
   {
     return distribution(generator);

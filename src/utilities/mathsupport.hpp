@@ -87,7 +87,7 @@ inline size_t popcount_uint64_t(uint64_t value)
 
 inline double mega_bytes(size_t bytes)
 {
-  return (double) bytes/(static_cast<size_t>(1024 * 1024));
+  return static_cast<double>(bytes)/(size_t(1024) * size_t(1024));
 }
 
 /* compute base 2 logarithm at compile time:
