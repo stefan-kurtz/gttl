@@ -29,7 +29,7 @@ class GttlMultiseq
 
   std::vector<size_t> sequence_offsets{};
   std::string concatenated_sequences{};
-  std::vector<std::string> headers{};
+  std::vector<std::string> header_vector{};
   size_t header_total_length{0},
          sequences_number{0},
          sequences_total_length{0},
@@ -39,7 +39,7 @@ class GttlMultiseq
   bool constant_padding_char,
        has_reverse_complement;
   std::map<size_t,size_t> length_dist_map{};
-  char **short_header_cache{nullptr};
+  std::vector<std::pair<uint16_t,uint16_t>> short_header_cache{};
 
   void append_padding_char(uint8_t this_padding_char)
   {
@@ -53,7 +53,7 @@ class GttlMultiseq
     return sizeof(GttlMultiseq) +
            sequence_offsets.size() * sizeof(size_t) +
            concatenated_sequences.size() * sizeof(char) +
-           sizeof(std::string) * headers.size() +
+           sizeof(std::string) * header_vector.size() +
            header_total_length * sizeof(char) +
            length_dist_map.size() * 2 * sizeof(size_t);
   }
@@ -65,7 +65,7 @@ class GttlMultiseq
   {
     if constexpr (store)
     {
-      headers.push_back(std::string(header.substr(1,header.size()-1)));
+      header_vector.push_back(std::string(header.substr(1,header.size()-1)));
       header_total_length += header.size() - 1;
       concatenated_sequences += sequence;
       append_padding_char(this_padding_char);
@@ -291,11 +291,6 @@ class GttlMultiseq
 
   ~GttlMultiseq(void)
   {
-    if (short_header_cache != nullptr)
-    {
-      delete[] short_header_cache[0];
-      delete[] short_header_cache;
-    }
   }
 
   size_t sequences_number_get(void) const noexcept
@@ -407,15 +402,17 @@ class GttlMultiseq
 
   const std::string_view header_get(size_t seqnum) const noexcept
   {
-    assert(seqnum < headers.size());
-    return headers[seqnum];
+    assert(seqnum < header_vector.size());
+    return header_vector[seqnum];
   }
 
-  const char *short_header_get(size_t seqnum) const noexcept
+  const std::string_view short_header_get(size_t seqnum) const noexcept
   {
-    assert(short_header_cache != nullptr &&
-           seqnum < headers.size());
-    return short_header_cache[seqnum];
+    assert(seqnum < short_header_cache.size());
+    uint16_t sh_offset, sh_len;
+    std::tie(sh_offset,sh_len) = short_header_cache[seqnum];
+    return header_vector[seqnum].substr(static_cast<size_t>(sh_offset),
+                                        static_cast<size_t>(sh_len));
   }
 
   std::vector<std::string> statistics() const noexcept
@@ -481,7 +478,6 @@ class GttlMultiseq
       std::cout.put('>');
       if (short_header)
       {
-        assert(short_header_cache != nullptr);
         std::cout << short_header_get(seqnum);
       } else
       {
@@ -543,56 +539,33 @@ class GttlMultiseq
   template<char first_delim,char second_delim>
   void short_header_cache_create(void)
   {
-    assert(short_header_cache == nullptr &&
-           sequences_number_get() > 0);
-    short_header_cache = new char * [sequences_number_get()];
-    size_t total_short_length = 0;
+    assert(sequences_number_get() > 0);
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      total_short_length
-        += std::get<1>(short_header_substring<first_delim,second_delim>
-                                             (header_get(seqnum)));
-    }
-    short_header_cache[0] = new char [total_short_length +
-                                      sequences_number_get()];
-    char *next_header = short_header_cache[0];
-    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
-    {
-      short_header_cache[seqnum] = next_header;
+      const std::string_view header = header_get(seqnum);
       size_t sh_offset, sh_len;
       std::tie(sh_offset,sh_len)
-        = short_header_substring<first_delim,second_delim>(header_get(seqnum));
-      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
-      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
-      short_header_cache[seqnum][sh_len] = '\0';
-      next_header += (sh_len + 1);
+        = short_header_substring<first_delim,second_delim>(header);
+      assert(sh_offset <= UINT16_MAX && sh_len <= UINT16_MAX);
+      short_header_cache.push_back(std::make_pair(
+                                     static_cast<uint16_t>(sh_offset),
+                                     static_cast<uint16_t>(sh_len)));
     }
   }
 
   void short_header_cache_create(void)
   {
-    assert(short_header_cache == nullptr &&
-           sequences_number_get() > 0);
-    short_header_cache = new char * [sequences_number_get()];
-    size_t total_short_length = 0;
+    assert(sequences_number_get() > 0);
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      total_short_length
-        += std::get<1>(short_header_substring(header_get(seqnum)));
-    }
-    short_header_cache[0] = new char [total_short_length +
-                                      sequences_number_get()];
-    char *next_header = short_header_cache[0];
-    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
-    {
-      short_header_cache[seqnum] = next_header;
+      const std::string_view header = header_get(seqnum);
       size_t sh_offset, sh_len;
       std::tie(sh_offset,sh_len)
-        = short_header_substring(header_get(seqnum));
-      auto short_header = header_get(seqnum).substr(sh_offset,sh_len);
-      memcpy(short_header_cache[seqnum],short_header.data(),sh_len);
-      short_header_cache[seqnum][sh_len] = '\0';
-      next_header += (sh_len + 1);
+        = short_header_substring(header);
+      assert(sh_offset <= UINT16_MAX && sh_len <= UINT16_MAX);
+      short_header_cache.push_back(std::make_pair(
+                                     static_cast<uint16_t>(sh_offset),
+                                     static_cast<uint16_t>(sh_len)));
     }
   }
 };
