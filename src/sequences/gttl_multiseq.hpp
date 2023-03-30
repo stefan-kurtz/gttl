@@ -406,13 +406,13 @@ class GttlMultiseq
     return header_vector[seqnum];
   }
 
-  const std::string_view short_header_get(size_t seqnum) const noexcept
+  std::pair<size_t,size_t> short_header_get(size_t seqnum) const noexcept
   {
     assert(seqnum < short_header_cache.size());
     uint16_t sh_offset, sh_len;
     std::tie(sh_offset,sh_len) = short_header_cache[seqnum];
-    return header_vector[seqnum].substr(static_cast<size_t>(sh_offset),
-                                        static_cast<size_t>(sh_len));
+    return std::make_pair(static_cast<size_t>(sh_offset),
+                          static_cast<size_t>(sh_len));
   }
 
   std::vector<std::string> statistics() const noexcept
@@ -476,12 +476,15 @@ class GttlMultiseq
     for (seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       std::cout.put('>');
+      const std::string_view header = header_get(seqnum);
       if (short_header)
       {
-        std::cout << short_header_get(seqnum);
+        size_t sh_offset, sh_len;
+        std::tie(sh_offset,sh_len) = short_header_get(seqnum);
+        std::fwrite(header.data() + sh_offset,sizeof(char),sh_len,stdout);
       } else
       {
-        std::cout << header_get(seqnum);
+        std::cout << header;
       }
       std::cout << std::endl;
       const char *currentseq = this->sequence_ptr_get(seqnum);

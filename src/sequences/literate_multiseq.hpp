@@ -31,14 +31,14 @@ class LiterateMultiseq
     }
   }
   public:
-  LiterateMultiseq(const GttlMultiseq *_multiseq) :
+  LiterateMultiseq(const GttlMultiseq &_multiseq) :
     multiseq(nullptr)
   {
     rank_dist.fill(0);
-    for (size_t snum = 0; snum < _multiseq->sequences_number_get(); snum++)
+    for (size_t snum = 0; snum < _multiseq.sequences_number_get(); snum++)
     {
-      update_distribution(_multiseq->sequence_ptr_get(snum),
-                          _multiseq->sequence_length_get(snum));
+      update_distribution(_multiseq.sequence_ptr_get(snum),
+                          _multiseq.sequence_length_get(snum));
     }
   }
   LiterateMultiseq(GttlMultiseq *_multiseq) :
