@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, re, argparse
+import sys, argparse, re
 
 def print_sequence(seq,linelength = 70):
   for startpos in range(0,len(seq),linelength):
@@ -41,7 +41,6 @@ def fasta_next(filename):
 
 def fastq_next(filename):
   stream = stream_get(filename)
-  seq_list = list()
   state = 0
   header = None
   for line in stream:
@@ -60,21 +59,23 @@ def fastq_next(filename):
   if filename != '-':
     stream.close()
 
-def parse_arguments():
+def reader_get(filename):
+  if re.search(r'\.fq$',filename) or re.search(r'\.fastq$',filename):
+    return fastq_next
+  return fasta_next
+
+def parse_command_line(argv):
   p = argparse.ArgumentParser(description='parse fasta or fastq file')
   p.add_argument('-w','--width',type=int,default=64,metavar='<int>',
                  help='specify width of lines in sequence output')
   p.add_argument('inputfiles',nargs='+',
                  help='specify input files, - means stdin')
-  return p.parse_args()
+  return p.parse_args(argv)
 
 if __name__ == '__main__':
-  args = parse_arguments()
+  args = parse_command_line(sys.argv[1:])
   for filename in args.inputfiles:
-    if re.search(r'\.fq$',filename) or re.search(r'\.fastq$',filename):
-      reader = fastq_next
-    else:
-      reader = fasta_next
+    reader = reader_get(filename)
     for header, sequence in reader(filename):
       print('>{}'.format(header))
       print_sequence(sequence, args.width)
