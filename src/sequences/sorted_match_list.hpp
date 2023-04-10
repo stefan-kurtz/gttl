@@ -310,15 +310,16 @@ class SortedMatchList
               minimum_mem_length + maximum_storable_match_length)
           {
             length_stored = maximum_storable_match_length;
-            if (sizeof_unit_match == 8)
+            if (sizeof_unit_match >= 8 || sizeof_unit_match == 9)
             {
-              StrFormat msg("cannot store match of length %lu in 8 bytes, "
-                            "resort to using 9 bytes of space for each MEM",
-                            this_match_length);
+              StrFormat msg("cannot store match of length %lu in %d bytes, "
+                            "resort to using %d bytes of space for each MEM",
+                            this_match_length,sizeof_unit_match,
+                                              sizeof_unit_match+1);
               throw msg.str();
             } else
             {
-              StrFormat msg("cannot store match of length %lu in 9 bytes, "
+              StrFormat msg(": cannot store match of length %lu in 10 bytes, "
                             "please inform the developer",
                             this_match_length);
               throw msg.str();

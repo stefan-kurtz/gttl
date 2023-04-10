@@ -91,6 +91,7 @@ class Multibitvector
       {
         this_count += multibitvector[idx].count();
       }
+      return this_count;
     }
   }
 };
