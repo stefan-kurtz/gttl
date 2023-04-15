@@ -23,7 +23,7 @@ static inline void outsense_next_front_after_second_inplace(
   FrontValue insertion_value = front[0]; /* from previous diag -(d-1)
                                             => -d => DELETION */
   FrontValue bestfront = insertion_value;
-  bestfront += 1;
+  bestfront += 1; /* only increment row */
   front[0] = bestfront;
   if constexpr (track_eop)
   {
@@ -37,6 +37,9 @@ static inline void outsense_next_front_after_second_inplace(
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
     front[0] += l; /* add match of length l */
+  } else
+  {
+    front[0] += size_t(0);
   }
   FrontValue replacement_value = front[1];
   if (bestfront <= replacement_value)
@@ -46,7 +49,7 @@ static inline void outsense_next_front_after_second_inplace(
     {
       bestfront.deletion_set();
     }
-    bestfront += 1;
+    bestfront += 1; /* only increment row */
   } else
   {
     if constexpr (track_eop)
@@ -67,6 +70,9 @@ static inline void outsense_next_front_after_second_inplace(
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
     front[1] += l;
+  } else
+  {
+    front[1] += size_t(0);
   }
   const size_t frontmaxidx = 2 * d;
   for (size_t idx=size_t(2); idx <= frontmaxidx; idx++)
@@ -86,7 +92,7 @@ static inline void outsense_next_front_after_second_inplace(
         {
           bestfront.mismatch_set();
         }
-        bestfront += 1;
+        bestfront += 1; /* only increment row */
       } else
       {
         if constexpr (track_eop)
@@ -107,7 +113,7 @@ static inline void outsense_next_front_after_second_inplace(
         {
           bestfront.deletion_set();
         }
-        bestfront += 1;
+        bestfront += 1; /* only increment row */
       } else
       {
         if constexpr (track_eop)
@@ -133,6 +139,9 @@ static inline void outsense_next_front_after_second_inplace(
                                                   ulen,vlen,
                                                   seqnum0,seqnum1);
       front[idx] += l;
+    } else
+    {
+      front[idx] += size_t(0);
     }
   }
 }
@@ -152,7 +161,7 @@ static inline void outsense_second_front_inplace(FrontValue *front,
   {
     front[0].deletion_set();
   }
-  front[0] += 1;
+  front[0] += 1; /* only increment row */
   if (front[0] < ulen && front[0] < vlen + 1)
   {
     assert((front[0] + 0) > 0);
@@ -160,13 +169,16 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 vseq,(front[0] + 0) - 1,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
-    front[0] += l;
+    front[0] += l; /* increment row and set match_length */
+  } else
+  {
+    front[0] += size_t(0);
   }
   if constexpr (track_eop)
   {
     front[1].mismatch_set();
   }
-  front[1] += 1;
+  front[1] += 1; /* only increment row */
   if (front[1] < ulen && front[1] < vlen)
   {
     const size_t l = suffix_or_prefix_match_len(useq,front[1] + 0,
@@ -174,6 +186,9 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
     front[1] += l;
+  } else
+  {
+    front[1] += size_t(0);
   }
   if constexpr (track_eop)
   {
@@ -187,6 +202,9 @@ static inline void outsense_second_front_inplace(FrontValue *front,
                                                 ulen,vlen,
                                                 seqnum0,seqnum1);
     front[2] += l;
+  } else
+  {
+    front[2] += size_t(0);
   }
 }
 

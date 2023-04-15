@@ -40,7 +40,7 @@ static inline size_t equal_length_sequences_edist(const CharType *useq,
   const size_t d_max = mismatches + 2;
   const size_t edist
     = fastedist_unrolled_same_seq_length<CharType,size_t,
-                                         lcplen_fwd<match_method>>
+                                         lcplen_fwd<match_method,false>>
                                         (d_max,
                                          useq,
                                          gap_len,
@@ -63,7 +63,7 @@ static inline size_t different_length_sequences_edist(
 {
   if (ulen < vlen)
   {
-    return fastedist_unrolled<CharType,size_t,lcplen_fwd<match_method>>
+    return fastedist_unrolled<CharType,size_t,lcplen_fwd<match_method,false>>
                              (vlen,
                               useq,
                               ulen,
@@ -72,7 +72,7 @@ static inline size_t different_length_sequences_edist(
                               useqnum,
                               vseqnum);
   }
-  return fastedist_unrolled<CharType,size_t,lcplen_fwd<match_method>>
+  return fastedist_unrolled<CharType,size_t,lcplen_fwd<match_method,false>>
                            (ulen,
                             vseq,
                             vlen,

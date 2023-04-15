@@ -53,7 +53,7 @@ static inline size_t count_mismatches(const CharType *seq0,
   return mismatches;
 }
 
-template<bool (*match_method)(char,char)>
+template<bool (*match_method)(char,char),bool respect_length>
 static inline size_t lcplen_fwd(const char *seq0,size_t start0,
                                 const char *seq1,size_t start1,
                                 GTTL_UNUSED size_t len0,
@@ -64,8 +64,21 @@ static inline size_t lcplen_fwd(const char *seq0,size_t start0,
   const char *ptr0 = seq0 + start0,
              *ptr1 = seq1 + start1;
   size_t idx;
-  for (idx = 0; match_method(ptr0[idx],ptr1[idx]); idx++)
-      /* Nothing */ ;
+  if constexpr (respect_length)
+  {
+    const size_t max_idx = len0 < len1 ? len0 : len1;
+    for (idx = 0; idx < max_idx; idx++)
+    {
+      if (not match_method(ptr0[idx],ptr1[idx]))
+      {
+        break;
+      }
+    }
+  } else
+  {
+    for (idx = 0; match_method(ptr0[idx],ptr1[idx]); idx++)
+        /* Nothing */;
+  }
   return idx;
 }
 

@@ -132,7 +132,7 @@ static bool polished_prefix_and_suffix_extension(
                              query_seqnum);
   PolishedPoints best_polished_points_prefix(inner_match.distance_get(),
                                              inner_match.aligned_len_get());
-  prefix_or_suffix_extension<lcplen_fwd<matching_characters_wc>>
+  prefix_or_suffix_extension<lcplen_fwd<matching_characters_wc,false>>
                             (&best_polished_points_prefix,
                              alignment_polishing,
                              ref_seq + inner_match.s_endpos_get() + 1,

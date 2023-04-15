@@ -54,6 +54,7 @@ class TrackEditoperations
     size_t u_remain = ulen,
            v_remain = vlen;
 #endif
+
     size_t front_mid = trace.size() - 1 - max_d;
     assert(front_mid + vlen >= ulen);
     int64_t diag = static_cast<int64_t>(vlen) - static_cast<int64_t>(ulen);
@@ -63,7 +64,7 @@ class TrackEditoperations
       assert(diag >= -static_cast<int64_t>(current_d) &&
              diag <= static_cast<int64_t>(current_d));
       const Backreference &br = trace[front_mid + diag];
-      uint32_t match_length = br.local_matchcount_get();
+      const uint32_t match_length = br.local_matchcount_get();
       if (match_length > 0)
       {
         eoplist.match_add(static_cast<size_t>(match_length));
