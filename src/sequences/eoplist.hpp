@@ -65,6 +65,22 @@ class Eoplist
   static constexpr const uint8_t ft_eopcode_deletion = uint8_t(254);
   static constexpr const uint8_t ft_eopcode_insertion = uint8_t(255);
 
+  bool eopcode_is_match(uint8_t eopcode) const noexcept
+  {
+    return eopcode < ft_eopcode_mismatch;
+  }
+  bool eopcode_is_mismatch(uint8_t eopcode) const noexcept
+  {
+    return eopcode == ft_eopcode_mismatch;
+  }
+  bool eopcode_is_deletion(uint8_t eopcode) const noexcept
+  {
+    return eopcode == ft_eopcode_deletion;
+  }
+  bool eopcode_is_insertion(uint8_t eopcode) const noexcept
+  {
+    return eopcode == ft_eopcode_insertion;
+  }
   struct Iterator
   {
     private:
@@ -312,6 +328,15 @@ class Eoplist
     return count_deletions_get() + count_insertions_get() +
            2 * (count_mismatches_get() + count_matches_get());
   }
+  size_t aligned_len_u_get(void) const noexcept
+  {
+    return count_deletions_get() + count_mismatches_get() + count_matches_get();
+  }
+  size_t aligned_len_v_get(void) const noexcept
+  {
+    return count_insertions_get() + count_mismatches_get()
+                                  + count_matches_get();
+  }
   size_t errors_get(void) const noexcept
   {
     return count_deletions_get() + count_insertions_get() +
@@ -467,6 +492,48 @@ class Eoplist
       cigar_string += cigar_operator.to_string(distinguish_mismatch_match);
     }
     return cigar_string;
+  }
+  bool cut_off_unpolished_tail(void)
+  {
+    assert(eoplist.size() > 0);
+    size_t idx = eoplist.size()-1;
+    uint8_t eopcode;
+
+    while (not eopcode_is_match(eopcode = eoplist[idx]))
+    {
+      if (eopcode_is_mismatch(eopcode))
+      {
+        assert(counter_for_mismatches > 0);
+        counter_for_mismatches--;
+      } else
+      {
+        if (eopcode_is_deletion(eopcode))
+        {
+          assert(counter_for_deletions > 0);
+          counter_for_deletions--;
+        } else
+        {
+          assert(eopcode_is_insertion(eopcode) && counter_for_insertions > 0);
+          counter_for_insertions--;
+        }
+      }
+      if (idx > 0)
+      {
+        idx--;
+      } else
+      {
+        assert(false); /* This case implies that all eops are
+                          mismatches or indels, which is not supposed to occur
+                        */
+        break;
+      }
+    }
+    const size_t diff_dist = eoplist.size() - 1 - idx;
+    for (size_t j = 0; j < diff_dist; j++)
+    {
+      eoplist.pop_back();
+    }
+    return diff_dist > 0;
   }
 };
 #endif
