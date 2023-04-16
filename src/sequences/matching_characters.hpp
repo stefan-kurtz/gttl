@@ -61,25 +61,26 @@ static inline size_t lcplen_fwd(const char *seq0,size_t start0,
                                 GTTL_UNUSED size_t seqnum0,
                                 GTTL_UNUSED size_t seqnum1)
 {
-  const char *ptr0 = seq0 + start0,
-             *ptr1 = seq1 + start1;
-  size_t idx;
   if constexpr (respect_length)
   {
-    const size_t max_idx = len0 < len1 ? len0 : len1;
-    for (idx = 0; idx < max_idx; idx++)
+    size_t i, j;
+    for (i = start0, j = start1; i < len0 && j < len1; i++, j++)
     {
-      if (not match_method(ptr0[idx],ptr1[idx]))
+      if (not match_method(seq0[i],seq1[j]))
       {
         break;
       }
     }
+    return i - start0;
   } else
   {
+    size_t idx;
+    const char *ptr0 = seq0 + start0,
+               *ptr1 = seq1 + start1;
     for (idx = 0; match_method(ptr0[idx],ptr1[idx]); idx++)
         /* Nothing */;
+    return idx;
   }
-  return idx;
 }
 
 template<bool (*match_method)(char,char)>

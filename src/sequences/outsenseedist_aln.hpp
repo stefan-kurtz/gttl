@@ -54,7 +54,6 @@ class TrackEditoperations
     size_t u_remain = ulen,
            v_remain = vlen;
 #endif
-
     size_t front_mid = trace.size() - 1 - max_d;
     assert(front_mid + vlen >= ulen);
     int64_t diag = static_cast<int64_t>(vlen) - static_cast<int64_t>(ulen);
@@ -106,11 +105,9 @@ class TrackEditoperations
           {
             /* Now at d=0 and h=0 */
             assert(current_d == 0);
-            assert(u_remain >= match_length &&
-                   v_remain >= match_length);
 #ifndef NDEBUG
-            u_remain -= match_length;
-            v_remain -= match_length;
+            u_remain = u_remain <= match_length ? 0 : (u_remain - match_length);
+            v_remain = v_remain <= match_length ? 0 : (v_remain - match_length);
 #endif
             break;
           }
