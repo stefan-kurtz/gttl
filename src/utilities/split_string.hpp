@@ -12,12 +12,10 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
   std::vector<T> result{};
   while (true)
   {
-    auto next
-      = std::find_if(previous, str.cend(),
-                     [&](const char &cc) { return cc == sep or cc == '\n'; });
+    auto next = std::find(previous, str.cend(),sep);
     std::string this_string = std::string(previous,next);
     result.push_back(convert(result.size(),this_string));
-    if (next == str.cend())
+    if ((next < str.cend() and *next == '\n') or next == str.cend())
     {
       break;
     }
@@ -39,12 +37,10 @@ static inline std::vector<std::string> gttl_split_string(const std::string &str,
   std::vector<std::string> result{};
   while (true)
   {
-    auto next
-      = std::find_if(previous, str.cend(),
-                     [&](const char &cc) { return cc == sep or cc == '\n'; });
+    auto next = std::find(previous, str.cend(),sep);
     std::string this_string = std::string(previous,next);
     result.push_back(this_string);
-    if (next == str.cend())
+    if ((next < str.cend() and *next == '\n') or next == str.cend())
     {
       break;
     }
