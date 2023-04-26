@@ -9,7 +9,7 @@ static inline std::vector<size_t> fields_line2indexes(
                                        &column_headers)
 {
   constexpr const int skip = 2;
-  std::vector<std::string> fields = split_string(fields_line,',',skip);
+  std::vector<std::string> fields = gttl_split_string(fields_line,',',skip);
   size_t column = 0;
   std::map<std::string,size_t> fields_map{};
   for (auto &&f : fields)

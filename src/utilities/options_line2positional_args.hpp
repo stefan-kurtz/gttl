@@ -11,7 +11,7 @@ static inline std::vector<std::string>
                                     const std::string &sep)
 {
   constexpr const int skip = 1;
-  std::vector<std::string> argv = split_string(options_line,' ',skip);
+  std::vector<std::string> argv = gttl_split_string(options_line,' ',skip);
   size_t idx = 0;
   for (auto &&arg : argv)
   {

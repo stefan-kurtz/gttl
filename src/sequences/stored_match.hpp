@@ -26,7 +26,7 @@ class GttlStoredMatch
                  secondary_startpos,
                  secondary_len,
                  distance;
-  const float weight;
+  const double weight;
 
   double weight_get(void) const noexcept
   {
