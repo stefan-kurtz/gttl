@@ -1,6 +1,6 @@
 #ifndef FIND_LIT_STRING_HPP
 #define FIND_LIT_STRING_HPP
-#include <array>
+#include <initializer_list>
 #include <cstddef>
 
 static inline constexpr bool gttl_compare_string_literals(size_t idx,
@@ -21,27 +21,24 @@ static inline constexpr bool gttl_compare_string_literals(const char *s,
   return gttl_compare_string_literals(0,s,t);
 }
 
-template<size_t num_values>
-using GttlLitStringArray = std::array<const char *,num_values>;
+using GttlLitStringInitializerList = std::initializer_list<const char *>;
 
-template<size_t num_values>
 static inline constexpr size_t find_lit_string_at_compile_time(
   size_t idx,
-  const GttlLitStringArray<num_values> &arr,
+  const GttlLitStringInitializerList &arr,
   const char *v)
 {
-  return idx == num_values
-           ? num_values
-           : (gttl_compare_string_literals(v,arr[idx])
+  return idx == arr.size()
+           ? idx
+           : (gttl_compare_string_literals(v,*(arr.begin() + idx))
                 ? idx
-                : find_lit_string_at_compile_time<num_values>(idx+1,arr,v));
+                : find_lit_string_at_compile_time(idx+1,arr,v));
 }
 
-template<size_t num_values>
 static inline constexpr size_t find_lit_string_at_compile_time(
-  const GttlLitStringArray<num_values> &arr,
+  const GttlLitStringInitializerList &arr,
   const char *v)
 {
-  return find_lit_string_at_compile_time<num_values>(0,arr,v);
+  return find_lit_string_at_compile_time(0,arr,v);
 }
 #endif
