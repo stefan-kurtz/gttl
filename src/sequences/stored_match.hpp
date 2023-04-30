@@ -87,24 +87,16 @@ class GttlStoredMatch
   }
 
   /* compare by weight only */
-  template<bool largest_weight_best>
   bool superior_weight (const GttlStoredMatch& other) const noexcept
   {
-    if constexpr (largest_weight_best)
-    {
-      return this->weight_get() > other.weight_get();
-    } else
-    {
-      return this->weight_get() < other.weight_get();
-    }
+    return this->weight_get() > other.weight_get();
   }
 
   /* compare weights and if a tie, compare by primary startpos */
-  template<bool largest_weight_best>
   bool superior_weight_tie_primary_startpos(const GttlStoredMatch& other)
     const noexcept
   {
-      return this->superior_weight<largest_weight_best>(other) or
+      return this->superior_weight(other) or
              (this->weight_get() == other.weight_get() and
               this->primary_startpos_get() > other.primary_startpos_get());
   }

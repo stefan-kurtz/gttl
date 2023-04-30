@@ -37,7 +37,8 @@ class GttlMultiseq
          sequences_maximum_length{0};
   uint8_t padding_char;
   bool constant_padding_char,
-       has_reverse_complement;
+       has_reverse_complement,
+       has_read_pairs;
   std::map<size_t,size_t> length_dist_map{};
   std::vector<std::pair<uint16_t,uint16_t>> short_header_cache{};
 
@@ -219,6 +220,7 @@ class GttlMultiseq
     : padding_char(_padding_char)
     , constant_padding_char(true)
     , has_reverse_complement(false)
+    , has_read_pairs(false)
   {
     std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store,false);
@@ -228,6 +230,7 @@ class GttlMultiseq
     : padding_char(_padding_char)
     , constant_padding_char(true)
     , has_reverse_complement(false)
+    , has_read_pairs(false)
   {
     std::vector<std::string> inputfiles{inputfile};
     multiseq_reader(inputfiles,store,false);
@@ -238,6 +241,7 @@ class GttlMultiseq
     : padding_char(_padding_char)
     , constant_padding_char(true)
     , has_reverse_complement(false)
+    , has_read_pairs(false)
   {
     multiseq_reader(inputfiles,store,false);
   }
@@ -248,6 +252,7 @@ class GttlMultiseq
     : padding_char(_padding_char)
     , constant_padding_char(true)
     , has_reverse_complement(false)
+    , has_read_pairs(true)
   {
     std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
     multiseq_reader(inputfiles,store,true);
@@ -257,6 +262,7 @@ class GttlMultiseq
     : padding_char(_padding_char)
     , constant_padding_char(true)
     , has_reverse_complement(false)
+    , has_read_pairs(false)
   {
     if (store)
     {
@@ -268,6 +274,7 @@ class GttlMultiseq
                const std::vector<uint8_t> &forbidden_as_padding)
     : constant_padding_char(false)
     , has_reverse_complement(false)
+    , has_read_pairs(false)
   {
     CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
     uint8_t this_padding_char = cycle_of_numbers.next();
@@ -349,6 +356,11 @@ class GttlMultiseq
   bool has_reverse_complement_is_set(void) const noexcept
   {
     return has_reverse_complement;
+  }
+
+  bool has_read_pairs_is_set(void) const noexcept
+  {
+    return has_read_pairs;
   }
 
   /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */

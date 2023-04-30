@@ -21,7 +21,11 @@ static inline std::vector<std::string>
     }
     idx++;
   }
-  assert (idx < argv.size());
+  if (idx >= argv.size())
+  {
+    throw std::string("missing separator ") + sep + " in \"" +
+          options_line + "\"";
+  }
   idx++;
   std::vector<std::string> positional_args{};
   while (idx < argv.size())

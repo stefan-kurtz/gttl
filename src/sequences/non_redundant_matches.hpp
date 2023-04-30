@@ -6,7 +6,7 @@
 #include <cassert>
 #include "utilities/multibitvector.hpp"
 
-template <typename ElementClass,bool largest_best>
+template <typename ElementClass>
 class NonRedundantMatches
 {
   class CmpIds
@@ -20,9 +20,7 @@ class NonRedundantMatches
     // comparison used to define order in BST
     bool operator ()(const uint32_t i, const uint32_t j) const noexcept
     {
-      return elements[i]
-             .template superior_weight_tie_primary_startpos<largest_best>
-                                                           (elements[j]);
+      return elements[i].superior_weight_tie_primary_startpos(elements[j]);
     }
   };
 
@@ -35,8 +33,13 @@ class NonRedundantMatches
     : good(elements.size())
   {
     if (elements.size() <= 1)
+    {
+      if (elements.size() == 1)
+      {
+        good.set(0);
+      }
       return;
-
+    }
     // BST of segment ids, ordered by their weights
     CmpIds cmp_ids(elements);
     std::set<uint32_t, CmpIds> status(cmp_ids);
@@ -97,9 +100,7 @@ class NonRedundantMatches
       auto first_id = *status.begin();
       for (auto id : status)
       {
-        if (elements[first_id].template superior_weight<largest_best>
-                                                       (elements[id]) or
-            good[id])
+        if (elements[first_id].superior_weight(elements[id]) or good[id])
         {
           break;
         }
