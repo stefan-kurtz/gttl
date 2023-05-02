@@ -23,7 +23,7 @@ static inline constexpr bool gttl_compare_string_literals(const char *s,
 
 using GttlLitStringInitializerList = std::initializer_list<const char *>;
 
-static inline constexpr size_t find_lit_string_at_compile_time(
+static inline constexpr size_t gttl_find_lit_string_at_compile_time(
   size_t idx,
   const GttlLitStringInitializerList &arr,
   const char *v)
@@ -32,13 +32,13 @@ static inline constexpr size_t find_lit_string_at_compile_time(
            ? idx
            : (gttl_compare_string_literals(v,*(arr.begin() + idx))
                 ? idx
-                : find_lit_string_at_compile_time(idx+1,arr,v));
+                : gttl_find_lit_string_at_compile_time(idx+1,arr,v));
 }
 
-static inline constexpr size_t find_lit_string_at_compile_time(
+static inline constexpr size_t gttl_find_lit_string_at_compile_time(
   const GttlLitStringInitializerList &arr,
   const char *v)
 {
-  return find_lit_string_at_compile_time(0,arr,v);
+  return gttl_find_lit_string_at_compile_time(0,arr,v);
 }
 #endif
