@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
   GttlMultiseq *multiseq = nullptr;
-  RunTimeClass rt = RunTimeClass();
+  RunTimeClass rt{};
   const std::vector<std::string> &inputfiles = options.inputfiles_get();
   try
   {
