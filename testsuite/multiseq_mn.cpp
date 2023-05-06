@@ -62,6 +62,10 @@ class MultiseqOptions
       } else
       {
         const std::vector<std::string>& unmatched_args = result.unmatched();
+        if (unmatched_args.size() == 0)
+        {
+          throw std::invalid_argument("at least one inputput file is required");
+        }
         for (size_t idx = 0; idx < unmatched_args.size(); idx++)
         {
           inputfiles.push_back(unmatched_args[idx]);
