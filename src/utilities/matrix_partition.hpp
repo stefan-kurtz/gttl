@@ -21,35 +21,29 @@ static size_t matrix_partition_antidiagonal(const MatrixPartitionIntervalPair
   return matrix_partition_antidiagonal(*mp);
 }
 
-static int compare_itv(const void *va,const void *vb)
-{
-  const MatrixPartitionIntervalPair *a
-    = static_cast<const MatrixPartitionIntervalPair *>(va);
-  const MatrixPartitionIntervalPair *b
-    = static_cast<const MatrixPartitionIntervalPair *>(vb);
-  size_t anti_a = matrix_partition_antidiagonal(a),
-         anti_b = matrix_partition_antidiagonal(b);
-  if (anti_a < anti_b) { return -1; }
-  if (anti_a > anti_b) { return 1; }
-  if (std::get<0>(*a) < std::get<0>(*b)) { return -1; }
-  if (std::get<0>(*a) > std::get<0>(*b)) { return +1; }
-  assert(false);
-  return 0;
-}
-
-static void sort_itv_list(std::vector<MatrixPartitionIntervalPair> &itv_list)
-{
-  qsort(itv_list.data(),itv_list.size(),sizeof(MatrixPartitionIntervalPair),
-        compare_itv);
-}
-
 class MatrixPartition
 {
-  std::vector<MatrixPartitionIntervalPair> itv_list;
+  using MatrixPartitionVector = std::vector<MatrixPartitionIntervalPair>;
+  MatrixPartitionVector itv_list;
   MatrixPartitionIntervalPair split_interval(size_t a,size_t b) const noexcept
   {
     const size_t h = b/2 + (b % 2);
     return MatrixPartitionIntervalPair{a,h,a+h,b-h};
+  }
+  static int compare_itv(const void *va,const void *vb)
+  {
+    const MatrixPartitionIntervalPair *a
+      = static_cast<const MatrixPartitionIntervalPair *>(va);
+    const MatrixPartitionIntervalPair *b
+      = static_cast<const MatrixPartitionIntervalPair *>(vb);
+    size_t anti_a = matrix_partition_antidiagonal(a),
+           anti_b = matrix_partition_antidiagonal(b);
+    if (anti_a < anti_b) { return -1; }
+    if (anti_a > anti_b) { return 1; }
+    if (std::get<0>(*a) < std::get<0>(*b)) { return -1; }
+    if (std::get<0>(*a) > std::get<0>(*b)) { return +1; }
+    assert(false);
+    return 0;
   }
 
   public:
@@ -57,7 +51,7 @@ class MatrixPartition
     : itv_list({})
   {
     assert(cutlen > 0);
-    std::vector<MatrixPartitionIntervalPair> stack{};
+    MatrixPartitionVector stack{};
     stack.push_back(MatrixPartitionIntervalPair{0,m,0,n});
     while (!stack.empty())
     {
@@ -85,7 +79,8 @@ class MatrixPartition
         }
       }
     }
-    sort_itv_list(itv_list);
+    qsort(itv_list.data(),itv_list.size(),sizeof(MatrixPartitionIntervalPair),
+          compare_itv);
   }
   MatrixPartition(size_t cutlen,size_t m)
     : itv_list({})
@@ -116,12 +111,23 @@ class MatrixPartition
                                                        itv_j[0],itv_j[1]});
       }
     }
-    sort_itv_list(itv_list);
+    qsort(itv_list.data(),itv_list.size(),sizeof(MatrixPartitionIntervalPair),
+          compare_itv);
   }
   MatrixPartitionIntervalPair operator [](size_t idx) const noexcept
   {
     assert(idx < itv_list.size());
     return itv_list[idx];
+  }
+  using ConstIterator = MatrixPartitionVector::const_iterator;
+  ConstIterator begin(void) const
+  {
+    return itv_list.cbegin();
+  }
+
+  ConstIterator end(void) const
+  {
+    return itv_list.cend();
   }
   size_t size(void) const noexcept
   {

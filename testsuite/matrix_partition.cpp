@@ -20,9 +20,8 @@ int main(int argc,char *argv[])
                                                    static_cast<size_t>(rows),
                                                    static_cast<size_t>(cols));
   size_t num_pairs = 0;
-  for (size_t idx = 0; idx < mp.size(); idx++)
+  for (auto && itv : mp)
   {
-    auto itv = mp[idx];
     std::cout << "((" << itv[0] << ", " << itv[1] << "), ";
     size_t this_pairs;
     if (itv[3] == 0)
