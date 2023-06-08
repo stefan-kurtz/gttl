@@ -450,9 +450,9 @@ class GttlMultiseq
   {
     std::vector<std::pair<size_t,size_t>> length_dist_table{};
     length_dist_table.reserve(length_dist_map.size());
-    for (auto &&element : length_dist_map)
+    for (auto const& [key, value] : length_dist_map)
     {
-      length_dist_table.push_back({std::get<0>(element),std::get<1>(element)});
+      length_dist_table.push_back(std::make_pair(key,value));
     }
     std::sort(length_dist_table.begin(),length_dist_table.end());
     return length_dist_table;
