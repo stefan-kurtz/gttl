@@ -28,10 +28,14 @@ class RunTimeClass
     start_time = end_time;
     return s;
   }
+  std::string to_string(const std::string &msg)
+  {
+    return std::string("TIME\t") + msg + std::string(" (ms):\t")
+                                 + this->to_string();
+  }
   std::string to_string(const char *msg)
   {
-    return std::string("TIME\t") + std::string(msg) + std::string(" (ms):\t")
-                                 + this->to_string();
+    return to_string(std::string(msg));
   }
   size_t show(const char *msg)
   {
