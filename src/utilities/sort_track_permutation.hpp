@@ -1,5 +1,5 @@
-#ifndef SORT_TRACK_PERMUTATION
-#define SORT_TRACK_PERMUTATION
+#ifndef SORT_TRACK_PERMUTATION_HPP
+#define SORT_TRACK_PERMUTATION_HPP
 #include <cstddef>
 
 template<typename T>

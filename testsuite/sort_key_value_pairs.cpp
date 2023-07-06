@@ -14,6 +14,13 @@
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
 
+static std::string int2byte(int i)
+{
+  assert(i <= UINT8_MAX and i >= 0);
+  const size_t leading_zeros = i < 10 ? 2 : (i < 100 ? 1 : 0);
+  return std::string(leading_zeros,'0') + std::to_string(i);
+}
+
 class KeyValuePair
 {
   double key;
@@ -33,9 +40,7 @@ class KeyValuePair
     const uint8_t *ds = reinterpret_cast<const uint8_t *>(&key);
     for (size_t idx = 0; idx < sizeof(double); idx++)
     {
-      char sbuf[3+1];
-      sprintf(sbuf,"%03d",static_cast<int>(ds[idx]));
-      s += std::string(sbuf);
+      s += int2byte(static_cast<int>(ds[idx]));
       if (idx < sizeof(double) - 1)
       {
         s += " ";
@@ -80,9 +85,7 @@ class Key2ValuePair
     std::string s{};
     for (size_t idx = 0; idx < sizeof_key; idx++)
     {
-      char sbuf[3+1];
-      sprintf(sbuf,"%03d",static_cast<int>(keys_as_bytes[idx]));
-      s += std::string(sbuf);
+      s += int2byte(static_cast<int>(keys_as_bytes[idx]));
       if (idx < sizeof_key - 1)
       {
         s += " ";

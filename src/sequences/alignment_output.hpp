@@ -211,7 +211,6 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
   size_t pos = 0,
          idx_u = 0,
          idx_v = 0,
-         alignmentlength = 0,
          top_start_pos = asi.ustart,
          low_start_pos = low_start_base;
 
@@ -270,7 +269,6 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
             top_start_pos = asi.ustart + idx_u + 1;
             low_start_pos = low_start_base + idx_v + 1;
           }
-          alignmentlength++;
           idx_u++;
           idx_v++;
         }
@@ -302,7 +300,6 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
             top_start_pos = asi.ustart + idx_u + 1;
             low_start_pos = low_start_base + idx_v + 1;
           }
-          alignmentlength++;
           idx_u++;
         }
         break;
@@ -333,7 +330,6 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
             top_start_pos = asi.ustart + idx_u + 1;
             low_start_pos = low_start_base + idx_v + 1;
           }
-          alignmentlength++;
           idx_v++;
         }
         break;
