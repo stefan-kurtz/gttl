@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, argparse, re
+import gzip
 
 def print_sequence(seq,linelength = 70):
   for startpos in range(0,len(seq),linelength):
@@ -10,25 +11,41 @@ def seq_list2sequence(seq_list):
   sequence = ' '.join(seq_list)
   return re.sub('\s','',sequence)
 
-def stream_get(filename):
-  if filename == '-':
-    return sys.stdin
-  try:
-    stream = open(filename,'r')
-  except IOError as err:
-    sys.stderr.write('{}: {}\n'
-                      .format(sys.argv[0],err))
-    exit(1)
-  return stream
+class StreamObject:
+  def __init__(self,filename):
+    self.decode = False
+    self.do_close = False
+    if filename == '-':
+      self.stream = sys.stdin
+    else:
+      try:
+        if re.search('\.gz$',filename):
+          self.stream = gzip.open(filename,'r')
+          self.decode = True
+        else:
+          self.stream = open(filename,'r')
+          self.do_close = True
+      except IOError as err:
+        sys.stderr.write('{}: {}\n'
+                          .format(sys.argv[0],err))
+        exit(1)
+  def __iter__(self):
+    for line in self.stream:
+      if self.decode:
+        yield line.decode('utf-8').rstrip()
+      else:
+        yield line.rstrip()
+  def __del__(self):
+    if self.do_close:
+      self.stream.close()
 
 def fasta_next(filename):
-  stream = stream_get(filename)
+  stream = StreamObject(filename)
   seq_list = list()
   header = None
   for line in stream:
-    line = line.rstrip()
     if not re.search(r'^(>|\s*$|\s*#)',line):
-      seq_list.append(line.rstrip())
+      seq_list.append(line)
     elif len(line) > 0 and line[0] == '>':
       if header is not None:
         yield header, seq_list2sequence(seq_list)
@@ -36,11 +53,9 @@ def fasta_next(filename):
       header = line[1:]
   if header is not None:
     yield header, seq_list2sequence(seq_list)
-  if filename != '-':
-    stream.close()
 
 def fastq_next(filename):
-  stream = stream_get(filename)
+  stream = StreamObject(filename)
   state = 0
   header = None
   for line in stream:
@@ -56,8 +71,6 @@ def fastq_next(filename):
       state += 1
     else:
       state = 0
-  if filename != '-':
-    stream.close()
 
 def reader_get(filename):
   if re.search(r'\.fq$',filename) or re.search(r'\.fastq$',filename):

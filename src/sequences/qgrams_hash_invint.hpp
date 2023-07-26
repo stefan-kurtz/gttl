@@ -111,7 +111,8 @@ class InvertibleIntegercodeTransformer20
     : msb_weight(static_cast<uint64_t>(std::pow(static_cast<size_t>(20),
                                        qgram_length-1)))
   {}
-  uint64_t first_hash_value_get(const uint8_t *sequence, size_t qgram_length)
+  uint64_t first_fwd_hash_value_get(const uint8_t *sequence,
+                                    size_t qgram_length)
     const noexcept
   {
     return first_fwd_qgram_integer_code<20>(sequence,qgram_length);
