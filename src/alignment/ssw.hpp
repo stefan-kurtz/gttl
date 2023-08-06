@@ -299,12 +299,16 @@ class SSWprofile
 };
 
 template <bool forward_strand>
-static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t> ssw_align(
-    const SSWprofile &prof, SSWresources *ssw_resources,
-    const uint8_t *original_dbseq, size_t dbseq_len, uint8_t weight_gapO,
-    uint8_t weight_gapE, bool compute_only_end)
+static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
+  ssw_align(const SSWprofile &prof,
+            SSWresources *ssw_resources,
+            const uint8_t *original_dbseq,
+            size_t dbseq_len,
+            uint8_t weight_gapO,
+            uint8_t weight_gapE,
+            bool compute_only_end)
 {
-  char use_uint_bytes = 1;
+  int use_uint_bytes = 1;
   const uint8_t undef_expected_score_uint8 = 0;
   static constexpr const bool forward_reading = true;
   SWsimdResult reverse_ec{};
@@ -313,31 +317,53 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t> ssw_align(
 #ifndef NDEBUG
   assert(ssw_check_valid_sequence(original_dbseq, dbseq_len, prof.alphasize));
 #endif
-  SWsimdResult forward_ec = sw_simd_uint8<forward_reading, forward_strand>(
-      original_dbseq, dbseq_len, dbseq_len, prof.query_len, weight_gapO,
-      weight_gapE, prof.profile_uint8.get(), undef_expected_score_uint8,
+  SWsimdResult forward_ec
+    = sw_simd_uint8<forward_reading, forward_strand>
+                   (original_dbseq,
+                    dbseq_len,
+                    dbseq_len,
+                    prof.query_len,
+                    weight_gapO,
+                    weight_gapE,
+                    prof.profile_uint8.get(),
+                    undef_expected_score_uint8,
       prof.abs_smallest_score, ssw_resources);
   // printf("result u8: %s\n", forward_ec.to_string().c_str());
   if (forward_ec.opt_loc_alignment_score == UINT8_MAX)
   {
     const uint16_t undef_expected_score_uint16 = 0;
 
-    forward_ec = sw_simd_uint16<forward_reading, forward_strand>(
-        original_dbseq, dbseq_len, dbseq_len, prof.query_len, weight_gapO,
-        weight_gapE, prof.profile_uint16.get(), undef_expected_score_uint16,
-        prof.abs_smallest_score, ssw_resources);
+    forward_ec = sw_simd_uint16<forward_reading, forward_strand>
+                               (original_dbseq,
+                                dbseq_len,
+                                dbseq_len,
+                                prof.query_len,
+                                weight_gapO,
+                                weight_gapE,
+                                prof.profile_uint16.get(),
+                                undef_expected_score_uint16,
+                                prof.abs_smallest_score,
+                                ssw_resources);
     // printf("result u16: %s\n", forward_ec.to_string().c_str());
     use_uint_bytes = 2;
     if (forward_ec.opt_loc_alignment_score == INT16_MAX)
     {
       const uint16_t undef_expected_score_uint32 = 0;
 
-      forward_ec = sw_simd_uint32<forward_reading, forward_strand>(
-          original_dbseq, dbseq_len, dbseq_len, prof.query_len, weight_gapO,
-          weight_gapE, prof.profile_uint32.get(), undef_expected_score_uint32,
-          prof.abs_smallest_score, ssw_resources);
+      forward_ec = sw_simd_uint32<forward_reading, forward_strand>
+                                 (original_dbseq,
+                                  dbseq_len,
+                                  dbseq_len,
+                                  prof.query_len,
+                                  weight_gapO,
+                                  weight_gapE,
+                                  prof.profile_uint32.get(),
+                                  undef_expected_score_uint32,
+                                  prof.abs_smallest_score,
+                                  ssw_resources);
       // printf("result u32: %s\n", forward_ec.to_string().c_str());
       use_uint_bytes = 4;
+      printf("# resort to 32-bit values\n");
       assert(forward_ec.opt_loc_alignment_score < INT32_MAX);
     }
   }
@@ -352,37 +378,65 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t> ssw_align(
   {
     if (use_uint_bytes == 1)
     {
-      SimdIntVector vP = ssw_seq_profile<uint8_t, sequence_index_backward>(
-          prof.score_vector, prof.abs_smallest_score, prof.alphasize,
-          prof.query, forward_ec.on_query + 1);
-      reverse_ec = sw_simd_uint8<!forward_reading, forward_strand>(
-          original_dbseq, dbseq_len, forward_ec.on_dbseq + 1,
-          forward_ec.on_query + 1, weight_gapO, weight_gapE, vP.get(),
-          static_cast<uint8_t>(forward_ec.opt_loc_alignment_score),
-          prof.abs_smallest_score, ssw_resources);
-    } else if (use_uint_bytes == 2)
-    {
-      SimdIntVector vP = ssw_seq_profile<uint16_t, sequence_index_backward>(
-          prof.score_vector, prof.abs_smallest_score, prof.alphasize,
-          prof.query, forward_ec.on_query + 1);
-      reverse_ec = sw_simd_uint16<!forward_reading, forward_strand>(
-          original_dbseq, dbseq_len, forward_ec.on_dbseq + 1,
-          forward_ec.on_query + 1, weight_gapO, weight_gapE, vP.get(),
-          forward_ec.opt_loc_alignment_score, prof.abs_smallest_score,
-          ssw_resources);
-    } else if (use_uint_bytes == 4)
-    {
-      SimdIntVector vP = ssw_seq_profile<uint32_t, sequence_index_backward>(
-          prof.score_vector, prof.abs_smallest_score, prof.alphasize,
-          prof.query, forward_ec.on_query + 1);
-      reverse_ec = sw_simd_uint32<!forward_reading, forward_strand>(
-          original_dbseq, dbseq_len, forward_ec.on_dbseq + 1,
-          forward_ec.on_query + 1, weight_gapO, weight_gapE, vP.get(),
-          forward_ec.opt_loc_alignment_score, prof.abs_smallest_score,
-          ssw_resources);
+      SimdIntVector vP = ssw_seq_profile<uint8_t, sequence_index_backward>
+                                        (prof.score_vector,
+                                         prof.abs_smallest_score,
+                                         prof.alphasize,
+                                         prof.query, forward_ec.on_query + 1);
+      reverse_ec = sw_simd_uint8<!forward_reading, forward_strand>
+                                (original_dbseq,
+                                 dbseq_len,
+                                 forward_ec.on_dbseq + 1,
+                                 forward_ec.on_query + 1,
+                                 weight_gapO,
+                                 weight_gapE,
+                                 vP.get(),
+                                 static_cast<uint8_t>
+                                           (forward_ec.opt_loc_alignment_score),
+                                 prof.abs_smallest_score,
+                                 ssw_resources);
     } else
     {
-      assert(false);
+      if (use_uint_bytes == 2)
+      {
+        SimdIntVector vP = ssw_seq_profile<uint16_t, sequence_index_backward>
+                                          (prof.score_vector,
+                                           prof.abs_smallest_score,
+                                           prof.alphasize,
+                                           prof.query,
+                                           forward_ec.on_query + 1);
+        reverse_ec = sw_simd_uint16<!forward_reading, forward_strand>
+                                   (original_dbseq,
+                                    dbseq_len,
+                                    forward_ec.on_dbseq + 1,
+                                    forward_ec.on_query + 1,
+                                    weight_gapO,
+                                    weight_gapE,
+                                    vP.get(),
+                                    forward_ec.opt_loc_alignment_score,
+                                    prof.abs_smallest_score,
+                                    ssw_resources);
+        } else
+        {
+          assert(use_uint_bytes == 4);
+          SimdIntVector vP = ssw_seq_profile<uint32_t, sequence_index_backward>
+                                            (prof.score_vector,
+                                             prof.abs_smallest_score,
+                                             prof.alphasize,
+                                             prof.query,
+                                             forward_ec.on_query + 1);
+          reverse_ec = sw_simd_uint32<!forward_reading, forward_strand>
+                                    (original_dbseq,
+                                     dbseq_len,
+                                     forward_ec.on_dbseq + 1,
+                                     forward_ec.on_query + 1,
+                                     weight_gapO,
+                                     weight_gapE,
+                                     vP.get(),
+                                     forward_ec.opt_loc_alignment_score,
+                                     prof.abs_smallest_score,
+                                     ssw_resources);
+      }
     }
     assert(forward_ec.on_query >= reverse_ec.on_query);
     ustart = forward_ec.on_query - reverse_ec.on_query;
@@ -391,7 +445,10 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t> ssw_align(
     assert(forward_ec.on_dbseq >= reverse_ec.on_dbseq);
     vsubstringlength = 1 + forward_ec.on_dbseq - reverse_ec.on_dbseq;
   }
-  return {static_cast<uint32_t>(forward_ec.opt_loc_alignment_score), ustart,
-          usubstringlength, vstart, vsubstringlength};
+  return {static_cast<uint32_t>(forward_ec.opt_loc_alignment_score),
+          ustart,
+          usubstringlength,
+          vstart,
+          vsubstringlength};
 }
 #endif
