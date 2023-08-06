@@ -24,6 +24,7 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
   bool own_resources;
   const simd_int vZero = simdi32_set(0), vGapO = simdi16_set(weight_gapO),
                  vGapE = simdi16_set(weight_gapE);
+  print_simd_int<uint16_t>("vGapO: ", vGapO);
   simd_int vTemp;
   uint32_t cmp;
 
@@ -73,13 +74,17 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
       current_char = original_dbseq[original_dbseq_len - 1 - dbseq_pos];
       current_char = complement_uint8(current_char);
     }
+    // printf("Current_char %d\n", current_char);
     size_t segment_pos;
     simd_int e, *pv, vF = vZero, vMaxColumn = vZero,
                      vH = pvHStore[segment_len - 1];
     const simd_int *vP =
         vProfile + segment_len * static_cast<size_t>(current_char);
 
+    print_simd_int<uint16_t>("Initial vH: ", vH);
     vH = simdi8_shiftl2(vH); /* Shift the value in vH left by 2 byte. */
+
+    print_simd_int<uint16_t>("vH shifted: ", vH);
 
     /* Swap the 2 H buffers. */
     pv = pvHLoad;
@@ -91,12 +96,16 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
          ++segment_pos)
     {
       vH = simdi16_adds(vH, simdi_load(vP + segment_pos));
+      print_simd_int<uint16_t>("for loop 1 vH: ", vH);
 
       /* Get max from vH, vE and vF. */
       e = simdi_load(pvE + segment_pos);
       vH = simdi16_max(vH, e);
       vH = simdi16_max(vH, vF);
       vMaxColumn = simdi16_max(vMaxColumn, vH);
+
+      print_simd_int<uint16_t>("for loop 2 vH: ", vH);
+      print_simd_int<uint16_t>("for loop 2 vMaxColumn: ", vMaxColumn);
 
       /* Save vH values. */
       simdi_store(pvHStore + segment_pos, vH);
@@ -118,6 +127,43 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
 
     /* Lazy_F loop: has been revised to disallow adjacent insertion and
        then deletion, so do not update E(i, segment_pos), learn from SWPS3 */
+#if 8 == 16
+
+    /* reset pointers to the start of the saved data */
+    vH = simdi_load(pvHStore);
+
+    /* the computed vF value is for the given column.  since */
+    /* we are at the end, we need to shift the vF value over */
+    /* to the next column. */
+    vF = simdi8_shiftl1(vF);
+    vTemp = simdui8_subs(vH, vGapO);
+    vTemp = simdui8_subs(vF, vTemp);
+    vTemp = simdi8_eq(vTemp, vZero);
+
+#ifndef AVX2
+#define SSW_MAX_CMP_VALUE UINT16_MAX
+#else
+#define SSW_MAX_CMP_VALUE UINT32_MAX
+#endif /* AVX2 */
+    for (cmp = simdi8_movemask(vTemp), segment_pos = 0;
+         cmp != SSW_MAX_CMP_VALUE; cmp = simdi8_movemask(vTemp))
+    {
+      vH = simdui8_max(vH, vF);
+      vMaxColumn = simdui8_max(vMaxColumn, vH);
+      simdi_store(pvHStore + segment_pos, vH);
+      vF = simdui8_subs(vF, vGapE);
+      segment_pos++;
+      if (segment_pos >= segment_len)
+      {
+        segment_pos = 0;
+        vF = simdi8_shiftl1(vF);
+      }
+      vH = simdi_load(pvHStore + segment_pos);
+      vTemp = simdui8_subs(vH, vGapO);
+      vTemp = simdui8_subs(vF, vTemp);
+      vTemp = simdi8_eq(vTemp, vZero);
+    }
+#else
     for (size_t k = 0; GTTL_IS_LIKELY(k < simd_size); ++k)
     {
       vF = simdi8_shiftl2(vF);
@@ -141,9 +187,13 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
         break;
       }
     }
+#endif
 
     simd_int vMaxScore = vZero; /* highest score of the whole matrix. */
+    print_simd_int<uint16_t>("vMaxScore: ", vMaxScore);
+    print_simd_int<uint16_t>("vMaxColumn: ", vMaxColumn);
     vMaxScore = simdi16_max(vMaxScore, vMaxColumn);
+    print_simd_int<uint16_t>("vMaxScore: ", vMaxScore);
     simd_int vMaxMark = vZero; /* highest score until previous column. */
     vTemp = simdi16_eq(vMaxMark, vMaxScore);
     cmp = simdi8_movemask(vTemp);
