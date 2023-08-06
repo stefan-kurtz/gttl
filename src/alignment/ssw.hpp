@@ -49,6 +49,7 @@ class SimdIntVector
   simd_int *get(void) const noexcept { return ptr; }
   void reset(size_t segment_len)
   {
+    assert(ptr != NULL);
     memset(ptr, 0, 4 * segment_len * sizeof *ptr);
   }
   size_t size_in_bytes(void) const noexcept
@@ -91,19 +92,18 @@ class SSWresources
 #endif
  public:
   SSWresources(int which, size_t _maximum_seq_len)
-      : vectors8(SimdIntVector(
-            which == 8 || which == 24
-                ? 4 * ssw_len2segment_len<uint8_t>(_maximum_seq_len)
-                : 0)),
-        vectors16(SimdIntVector(
-            which == 16 || which == 24
-                ? 4 * ssw_len2segment_len<uint16_t>(_maximum_seq_len)
-                : 0)),
-        vectors32(
-            SimdIntVector(4 * ssw_len2segment_len<uint32_t>(_maximum_seq_len)))
+    : vectors8(SimdIntVector(
+                  which == 8 || which == 24
+                    ? 4 * ssw_len2segment_len<uint8_t>(_maximum_seq_len)
+                    : 0))
+    , vectors16(SimdIntVector(
+                  which == 16 || which == 24
+                    ? 4 * ssw_len2segment_len<uint16_t>(_maximum_seq_len)
+                    : 0))
+    , vectors32(SimdIntVector(4 *
+                              ssw_len2segment_len<uint32_t>(_maximum_seq_len)))
 #ifndef NDEBUG
-        ,
-        maximum_seq_len(_maximum_seq_len)
+    , maximum_seq_len(_maximum_seq_len)
 #endif
   {
   }
