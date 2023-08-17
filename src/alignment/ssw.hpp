@@ -16,7 +16,8 @@
 #include "alignment/simd.hpp"
 
 template<typename basetype, bool do_print = false>
-static void print_simd_int(const char *tag,const simd_int &vec)
+static void print_simd_int(GTTL_UNUSED const char *tag,
+                           GTTL_UNUSED const simd_int &vec)
 {
   if constexpr (do_print)
   {
