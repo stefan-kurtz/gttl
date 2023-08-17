@@ -4,10 +4,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
-#include <cstring>
 #include <cassert>
 #include <cmath>
-#include <cstdbool>
 #include <string>
 #include <tuple>
 #include <climits>
@@ -43,14 +41,21 @@ class SimdIntVector
   SimdIntVector(size_t _num_elements)
       : ptr(_num_elements == 0 ? nullptr : new simd_int[_num_elements]),
         num_elements(_num_elements)
+  {}
+
+  ~SimdIntVector(void)
   {
+    delete[] ptr;
   }
-  ~SimdIntVector(void) { delete[] ptr; }
-  simd_int *get(void) const noexcept { return ptr; }
+
+  simd_int *get(void) const noexcept
+  {
+    return ptr;
+  }
   void reset(size_t segment_len)
   {
-    assert(ptr != NULL);
-    memset(ptr, 0, 4 * segment_len * sizeof *ptr);
+    assert(ptr != nullptr);
+    std::memset(ptr, 0, 4 * segment_len * sizeof *ptr);
   }
   size_t size_in_bytes(void) const noexcept
   {
@@ -79,8 +84,8 @@ class SimdIntVector
 template <typename Basetype>
 static inline size_t ssw_len2segment_len(size_t len)
 {
-  static constexpr const size_t simd_size =
-      SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
+  static constexpr const size_t simd_size
+    = SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
   return (len + simd_size - 1) / simd_size;
 }
 
@@ -105,8 +110,7 @@ class SSWresources
 #ifndef NDEBUG
     , maximum_seq_len(_maximum_seq_len)
 #endif
-  {
-  }
+  {}
 #ifndef NDEBUG
   size_t maximum_seq_len_get(void) const noexcept { return maximum_seq_len; }
 #endif
@@ -121,16 +125,20 @@ class SSWresources
 struct SWsimdResult
 {
   size_t on_dbseq, /* alignment ending position on database */
-      on_query;    /* alignment ending position on query */
+         on_query; /* alignment ending position on query */
   uint32_t opt_loc_alignment_score;
-  SWsimdResult(void) : on_dbseq(0), on_query(0), opt_loc_alignment_score(0) {}
+  SWsimdResult(void)
+    : on_dbseq(0)
+    , on_query(0)
+    , opt_loc_alignment_score(0)
+  {}
 
   SWsimdResult(size_t _on_dbseq, size_t _on_query, uint32_t max_value)
-      : on_dbseq(_on_dbseq),
-        on_query(_on_query),
-        opt_loc_alignment_score(max_value)
-  {
-  }
+    : on_dbseq(_on_dbseq)
+    , on_query(_on_query)
+    , opt_loc_alignment_score(max_value)
+  {}
+
   std::string to_string(void) const noexcept
   {
     return "on_db_seq=" + std::to_string(on_dbseq) +
@@ -145,25 +153,24 @@ struct SWsimdResult
 #include "sw_simd_uint32.hpp"
 
 template <typename Basetype, size_t (&sequence_index)(size_t, size_t)>
-static inline SimdIntVector ssw_seq_profile(
-    const int8_t *score_vector,
-    /* this is not used for
-       sizeof(Basetype) == 2 */
-    GTTL_UNUSED uint8_t abs_smallest_score, size_t alphasize,
-    const uint8_t *seq, size_t seq_len)
+static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
+                                            /* this is not used for
+                                               sizeof(Basetype) == 2 */
+                                            GTTL_UNUSED
+                                              uint8_t abs_smallest_score,
+                                            size_t alphasize,
+                                            const uint8_t *seq,
+                                            size_t seq_len)
 {
   static_assert(sizeof(Basetype) == 1 || sizeof(Basetype) == 2 ||
                 sizeof(Basetype) == 4);
-  static constexpr const size_t simd_size =
-      SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
+  static constexpr const size_t simd_size
+    = SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
   const size_t segment_len = ssw_len2segment_len<Basetype>(seq_len);
   SimdIntVector vProfile(alphasize * segment_len);
   Basetype *ptr = reinterpret_cast<Basetype *>(vProfile.get());
   const int8_t *score_vector_end = score_vector + alphasize * alphasize;
 
-  // printf("seq_len: %ld\nsegment_len: %ld\n", seq_len, segment_len);
-
-  // printf("basesize %ld\n", sizeof(Basetype));
   //  loop over each score row
   for (const int8_t *score_row = score_vector;
        GTTL_IS_LIKELY(score_row < score_vector_end); score_row += alphasize)
@@ -176,8 +183,8 @@ static inline SimdIntVector ssw_seq_profile(
       // loop over each element of a single simd vector
       for (size_t seg_num = 0; GTTL_IS_LIKELY(seg_num < simd_size); seg_num++)
       {
-        const int8_t this_score =
-            seq_pos < seq_len ? score_row[seq[sequence_index(seq_len, seq_pos)]]
+        const int8_t this_score
+          = seq_pos < seq_len ? score_row[seq[sequence_index(seq_len, seq_pos)]]
                               : 0;
         Basetype t;
         if constexpr (sizeof(Basetype) == 1)
@@ -189,8 +196,6 @@ static inline SimdIntVector ssw_seq_profile(
           t = this_score;
         }
 
-        // printf("%ld, %d, %lu\n", (long) t, this_score, seq_pos);
-
         *ptr++ = t;
         seq_pos += segment_len;
       }
@@ -199,6 +204,7 @@ static inline SimdIntVector ssw_seq_profile(
   return vProfile;
 }
 
+#ifndef NDEBUG
 static inline bool ssw_check_valid_sequence(const uint8_t *seq, size_t seq_len,
                                             size_t alphasize)
 {
@@ -211,6 +217,7 @@ static inline bool ssw_check_valid_sequence(const uint8_t *seq, size_t seq_len,
   }
   return true;
 }
+#endif
 
 static inline size_t sequence_index_forward(GTTL_UNUSED size_t seq_len,
                                             size_t seq_pos)
@@ -223,6 +230,33 @@ static inline size_t sequence_index_backward(size_t seq_len, size_t seq_pos)
   return seq_len - 1 - seq_pos;
 }
 
+#undef PRINT_SSW_PROFILE
+#ifdef PRINT_SSW_PROFILE
+template<typename T>
+static void print_ssw_profile(const SimdIntVector &profile)
+{
+  constexpr const size_t bits = sizeof(T) * CHAR_BIT;
+  printf("Starting to print profile for u%lu.\n#!-",bits);
+  for (size_t i = 0; i < profile.size_in_bytes(); i++)
+  {
+    printf("%d ", reinterpret_cast<T *>(profile.get())[i]);
+    constexpr const size_t divisor = size_t(128)/bits;
+    if (i % divisor == (divisor - 1))
+    {
+      printf("\n#!-");
+    }
+  }
+  printf("\n");
+}
+
+#define PRINT_ALL_SSW_PROFILES\
+        print_profile<uint8_t>(profile_uint8);\
+        print_profile<uint16_t>(profile_uint16);\
+        print_profile<uint32_t>(profile_uint32)
+#else
+#define PRINT_ALL_SSW_PROFILES /* Nothing */
+#endif
+
 class SSWprofile
 {
  public:
@@ -231,69 +265,40 @@ class SSWprofile
   uint8_t abs_smallest_score;
   const uint8_t *query;
   size_t query_len;
-  SimdIntVector profile_uint8,        /* 0: none */
-      profile_uint16, profile_uint32; /* 0: none */
+  SimdIntVector profile_uint8,
+                profile_uint16,
+                profile_uint32; /* 0: none */
 
-  SSWprofile(size_t _alphasize, const int8_t *_score_vector,
-             int8_t _smallest_score, const uint8_t *_query, size_t _query_len)
-      : alphasize(_alphasize),
-        score_vector(_score_vector),
-        abs_smallest_score(static_cast<uint8_t>(abs(_smallest_score))),
-        query(_query),
-        query_len(_query_len),
-        profile_uint8(ssw_seq_profile<uint8_t, sequence_index_forward>(
-            score_vector, abs_smallest_score, alphasize, query, query_len)),
-        profile_uint16(ssw_seq_profile<uint16_t, sequence_index_forward>(
-            score_vector, abs_smallest_score, alphasize, query, query_len)),
-        profile_uint32(ssw_seq_profile<uint32_t, sequence_index_forward>(
-            score_vector, abs_smallest_score, alphasize, query, query_len))
+  SSWprofile(size_t _alphasize,
+             const int8_t *_score_vector,
+             int8_t _smallest_score,
+             const uint8_t *_query,
+             size_t _query_len)
+    : alphasize(_alphasize)
+    , score_vector(_score_vector)
+    , abs_smallest_score(static_cast<uint8_t>(abs(_smallest_score)))
+    , query(_query)
+    , query_len(_query_len)
+    , profile_uint8(ssw_seq_profile<uint8_t, sequence_index_forward>
+                                   (score_vector, abs_smallest_score,
+                                    alphasize, query, query_len))
+    , profile_uint16(ssw_seq_profile<uint16_t, sequence_index_forward>
+                                    (score_vector, abs_smallest_score,
+                                     alphasize, query, query_len))
+    , profile_uint32(ssw_seq_profile<uint32_t, sequence_index_forward>
+                                    (score_vector, abs_smallest_score,
+                                     alphasize, query, query_len))
   {
 #ifndef NDEBUG
     assert(ssw_check_valid_sequence(query, query_len, alphasize));
 #endif
-    /*
-        printf("Starting to print profile for u8.\n#!-");
-        for (size_t i = 0; i < profile_uint8.size_in_bytes(); i++)
-        {
-          printf("%d ", ((int8_t *) profile_uint8.get())[i]);
-
-          if (i % 16 == 15)
-          {
-            printf("\n#!-");
-          }
-        }
-        printf("\n");
-
-        printf("Starting to print profile for u16.\n#!-");
-        for (size_t i = 0; i < profile_uint16.size_in_bytes() / 2; i++)
-        {
-          printf("%d ", ((int16_t *) profile_uint16.get())[i]);
-
-          if (i % 8 == 7)
-          {
-            printf("\n#!-");
-          }
-        }
-        printf("\n");
-
-        printf("Starting to print profile for u32.\n#!-");
-        for (size_t i = 0; i < profile_uint32.size_in_bytes() / 4; i++)
-        {
-          printf("%d ", ((int32_t *) profile_uint32.get())[i]);
-
-          if (i % 4 == 3)
-          {
-            printf("\n#!-");
-          }
-        }
-        printf("\n");
-
-      */
+    PRINT_ALL_SSW_PROFILES;
   }
   ~SSWprofile(void) {}
-  size_t size_in_bytes(void) noexcept
+  size_t size_in_bytes(void) const noexcept
   {
-    return profile_uint8.size_in_bytes() + profile_uint16.size_in_bytes() +
+    return profile_uint8.size_in_bytes() +
+           profile_uint16.size_in_bytes() +
            profile_uint32.size_in_bytes();
   }
 };
@@ -308,17 +313,15 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
             uint8_t weight_gapE,
             bool compute_only_end)
 {
-  int use_uint_bytes = 1;
   const uint8_t undef_expected_score_uint8 = 0;
   static constexpr const bool forward_reading = true;
   SWsimdResult reverse_ec{};
-  size_t ustart, usubstringlength, vstart, vsubstringlength;
 
 #ifndef NDEBUG
   assert(ssw_check_valid_sequence(original_dbseq, dbseq_len, prof.alphasize));
 #endif
-  SWsimdResult forward_ec
-    = sw_simd_uint8<forward_reading, forward_strand>
+  SWsimdResult forward_ec{
+    sw_simd_uint8<forward_reading, forward_strand>
                    (original_dbseq,
                     dbseq_len,
                     dbseq_len,
@@ -327,8 +330,9 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                     weight_gapE,
                     prof.profile_uint8.get(),
                     undef_expected_score_uint8,
-      prof.abs_smallest_score, ssw_resources);
-  // printf("result u8: %s\n", forward_ec.to_string().c_str());
+                    prof.abs_smallest_score,
+                    ssw_resources)};
+  int used_uint_bytes = 1;
   if (forward_ec.opt_loc_alignment_score == UINT8_MAX)
   {
     const uint16_t undef_expected_score_uint16 = 0;
@@ -344,8 +348,7 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                                 undef_expected_score_uint16,
                                 prof.abs_smallest_score,
                                 ssw_resources);
-    // printf("result u16: %s\n", forward_ec.to_string().c_str());
-    use_uint_bytes = 2;
+    used_uint_bytes = 2;
     if (forward_ec.opt_loc_alignment_score == INT16_MAX)
     {
       const uint16_t undef_expected_score_uint32 = 0;
@@ -361,13 +364,12 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                                   undef_expected_score_uint32,
                                   prof.abs_smallest_score,
                                   ssw_resources);
-      // printf("result u32: %s\n", forward_ec.to_string().c_str());
-      use_uint_bytes = 4;
-      printf("# resort to 32-bit values\n");
+      used_uint_bytes = 4;
       assert(forward_ec.opt_loc_alignment_score < INT32_MAX);
     }
   }
   /* Find the beginning position of the best alignment. */
+  size_t ustart, usubstringlength, vstart, vsubstringlength;
   if (compute_only_end)
   {
     ustart = forward_ec.on_query;
@@ -376,13 +378,14 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
     vsubstringlength = 0;
   } else
   {
-    if (use_uint_bytes == 1)
+    if (used_uint_bytes == 1)
     {
       SimdIntVector vP = ssw_seq_profile<uint8_t, sequence_index_backward>
                                         (prof.score_vector,
                                          prof.abs_smallest_score,
                                          prof.alphasize,
-                                         prof.query, forward_ec.on_query + 1);
+                                         prof.query,
+                                         forward_ec.on_query + 1);
       reverse_ec = sw_simd_uint8<!forward_reading, forward_strand>
                                 (original_dbseq,
                                  dbseq_len,
@@ -397,7 +400,7 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                                  ssw_resources);
     } else
     {
-      if (use_uint_bytes == 2)
+      if (used_uint_bytes == 2)
       {
         SimdIntVector vP = ssw_seq_profile<uint16_t, sequence_index_backward>
                                           (prof.score_vector,
@@ -418,7 +421,7 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                                     ssw_resources);
         } else
         {
-          assert(use_uint_bytes == 4);
+          assert(used_uint_bytes == 4);
           SimdIntVector vP = ssw_seq_profile<uint32_t, sequence_index_backward>
                                             (prof.score_vector,
                                              prof.abs_smallest_score,
