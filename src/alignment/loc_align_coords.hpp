@@ -15,6 +15,7 @@ struct LocalAlignmentCoordinates
                               in <vseq> */
   uint32_t raw_score; /* score of local alignment */
   bool forward_strand;
+  LocalAlignmentCoordinates(void) {};
   void show(FILE *fpout,bool dna_alphabet,const GttlMultiseq *multiseq,
             size_t seqnum) const noexcept
   {
@@ -41,12 +42,11 @@ struct LocalAlignmentCoordinates
       fprintf(fpout,"\t%c",forward_strand ? '+' : '-');
     }
   }
-  bool better(const LocalAlignmentCoordinates &other,
-              bool compute_only_end) const noexcept
+  bool operator > (const LocalAlignmentCoordinates &other) const noexcept
   {
-    return raw_score > other.raw_score ||
-           (not compute_only_end &&
-            raw_score == other.raw_score &&
+    return raw_score > other.raw_score or
+           (usubstringlength + vsubstringlength > 0 and
+            raw_score == other.raw_score and
             usubstringlength + vsubstringlength >
             other.usubstringlength + other.vsubstringlength);
   }
