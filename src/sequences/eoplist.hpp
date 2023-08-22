@@ -493,42 +493,47 @@ class Eoplist
                            const int8_t * const *scorematrix2D) const
   {
     size_t idx_u = 0,
-	   idx_v = 0;
+           idx_v = 0;
     ScoreType sum_score = 0;
+#ifndef NDEBUG
     bool last_was_indel = false;
+#endif
 
     for (const CigarOperator &co : *this)
     {
       assert(co.iteration > 0);
       if (co.edit_operation == MatchOp || co.edit_operation == MismatchOp)
       {
-	for (size_t j = 0; j < co.iteration; j++)
-	{
-	  assert(idx_u < useq.size());
-	  assert(idx_v < vseq.size());
-	  const uint8_t cc_a = useq[idx_u];
-	  const uint8_t cc_b = vseq[idx_v];
-	  sum_score += scorematrix2D[cc_a][cc_b];
-	  idx_u++;
-	  idx_v++;
-	}
-	last_was_indel = false;
+        for (size_t j = 0; j < co.iteration; j++)
+        {
+          assert(idx_u < useq.size());
+          assert(idx_v < vseq.size());
+          const uint8_t cc_a = useq[idx_u];
+          const uint8_t cc_b = vseq[idx_v];
+          sum_score += scorematrix2D[cc_a][cc_b];
+          idx_u++;
+          idx_v++;
+        }
+#ifndef NDEBUG
+        last_was_indel = false;
+#endif
       } else
       {
-	assert (co.edit_operation == DeletionOp ||
-		co.edit_operation == InsertionOp);
-	assert(!last_was_indel);
-	sum_score -= (static_cast<ScoreType>(gap_open_penalty) +
-		      static_cast<ScoreType>(co.iteration) *
-		      static_cast<ScoreType>(gap_extension_penalty));
-	last_was_indel = true;
-	if (co.edit_operation == DeletionOp)
-	{
-	  idx_u += co.iteration;
-	} else
-	{
-	  idx_v += co.iteration;
-	}
+        assert ((co.edit_operation == DeletionOp ||
+                 co.edit_operation == InsertionOp) and not last_was_indel);
+        sum_score -= (static_cast<ScoreType>(gap_open_penalty) +
+                      static_cast<ScoreType>(co.iteration) *
+                      static_cast<ScoreType>(gap_extension_penalty));
+#ifndef NDEBUG
+        last_was_indel = true;
+#endif
+        if (co.edit_operation == DeletionOp)
+        {
+          idx_u += co.iteration;
+        } else
+        {
+          idx_v += co.iteration;
+        }
       }
     }
     assert(idx_u == useq.size() && idx_v == vseq.size());
