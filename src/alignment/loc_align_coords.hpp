@@ -19,24 +19,26 @@ struct LocalAlignmentCoordinates
   void show(FILE *fpout,bool dna_alphabet,const GttlMultiseq *multiseq,
             size_t seqnum) const noexcept
   {
-    size_t vstart_out;
-    if (forward_strand)
+    if (usubstringlength + vsubstringlength == 0)
     {
-      vstart_out = vstart;
+      fprintf(fpout,"%lu\t%lu\t%u",
+              ustart,
+              vstart,
+              raw_score);
     } else
     {
-      const size_t vlen
-        = forward_strand ? 0
-                         : multiseq->sequence_length_get(seqnum);
-      assert(vlen >= vstart + vsubstringlength);
-      vstart_out = vlen - vstart - vsubstringlength;
+      const size_t vstart_out
+        = forward_strand ? vstart
+                         : (multiseq->sequence_length_get(seqnum)
+                              - vstart
+                              - vsubstringlength);
+      fprintf(fpout,"%lu\t%lu\t%lu\t%lu\t%u",
+              ustart,
+              usubstringlength,
+              vstart_out,
+              vsubstringlength,
+              raw_score);
     }
-    fprintf(fpout,"%lu\t%lu\t%lu\t%lu\t%u",
-            ustart,
-            usubstringlength,
-            vstart_out,
-            vsubstringlength,
-            raw_score);
     if (dna_alphabet)
     {
       fprintf(fpout,"\t%c",forward_strand ? '+' : '-');
