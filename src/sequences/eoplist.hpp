@@ -432,7 +432,9 @@ class Eoplist
   }
   /* A constructor to create an Eoplist from a cigar string encoding as
      used in SAM */
-  Eoplist(bool _distinguish_mismatch_match,const char *useq,const char *vseq,
+  template<typename CharType>
+  Eoplist(bool _distinguish_mismatch_match,
+          const CharType *useq, const CharType *vseq,
           const std::vector<uint32_t> &cigar_string_encoding)
     : eoplist({})
     , counter_for_matches(0)
