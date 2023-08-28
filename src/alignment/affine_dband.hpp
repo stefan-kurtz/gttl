@@ -9,6 +9,7 @@
 #include <cassert>
 #include <climits>
 #include <algorithm>
+#include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"
 #include "sequences/gttl_substring.hpp"
 
@@ -206,6 +207,7 @@ class GttlAffineDPbanded
   template<bool keep_columns,typename CharType>
   ScoreType affine_diagonalband_fillDPtab_scores(
                                       GTTL_DEBUG_USED size_t alphasize,
+                                      GTTL_UNUSED /* if not keep_columns */
                                       AffineAlignScoreTriple **dpmatrix,
                                       int8_t gap_opening, /* >= 0 */
                                       int8_t gap_extension, /* > 0 */
@@ -219,7 +221,7 @@ class GttlAffineDPbanded
                                       int64_t right_dist)
   {
     const ScoreType start_penalty = gap_opening + gap_extension;
-    AffineAlignScoreTriple *colptr = nullptr;
+    GTTL_UNUSED AffineAlignScoreTriple *colptr;
   #ifndef NDEBUG
     const size_t band_width = static_cast<size_t>(right_dist - left_dist + 1);
     const int64_t lendiff = static_cast<int64_t>(vsubstring.size()) -
@@ -255,6 +257,9 @@ class GttlAffineDPbanded
       colptr = dpmatrix[0];
       memcpy(colptr,columnspace,width * sizeof *columnspace);
       colptr += width;
+    } else
+    {
+      colptr = nullptr;
     }
     CharType *usubstring_cache = new CharType [usubstring.size()];
     for (size_t idx = 0; idx < usubstring.size(); idx++)
@@ -403,6 +408,7 @@ class GttlAffineDPbanded
   template<typename CharType,bool (&match_method)(CharType,CharType)>
   void affine_global_alignment_traceback_scores(
                                       Eoplist *eoplist,
+                                      GTTL_UNUSED /* if not keep_columns */
                                       const AffineAlignScoreTriple *
                                         const *dpmatrix,
                                       int8_t gap_opening, /* > 0 */
