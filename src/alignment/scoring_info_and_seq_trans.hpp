@@ -11,7 +11,7 @@
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
 
-std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
+static std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
     const char *score_matrix_id, const ScoreMatrixName &score_matrix_name,
     bool dna_alphabet, GttlMultiseq *db_multiseq, GttlMultiseq *query_multiseq)
 {
