@@ -11,13 +11,22 @@ static inline void compare_pairs_in_range(bool triangle,
                                           const ContainerClass &queries,
                                           size_t start_query,size_t end_query)
 {
+#undef SHOW_COMPARISON_RANGES
+#ifdef SHOW_COMPARISON_RANGES
+  std::cerr << "# compare db=[" << start_ref << "," << end_ref
+            << "] vs query=[" << start_query << "," << end_query
+            << "]" << std::endl;
+#endif
   for (size_t i = start_ref; i < end_ref; i++)
   {
     const size_t this_start_query = triangle ? i + 1 : start_query;
     pw_comparator->preprocess(i,references[i]);
     for (size_t j = this_start_query; j < end_query; j++)
     {
-      pw_comparator->compare(i,j,queries[j]);
+      if (pw_comparator->compare(i,j,queries[j]))
+      {
+        break;
+      }
     }
   }
 }
