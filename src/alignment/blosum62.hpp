@@ -61,5 +61,6 @@
       /* * */ {-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,
                -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 1}};
   static constexpr const int8_t smallest_score = -4;
+  static constexpr const int8_t highest_score = 11;
 };
 #endif

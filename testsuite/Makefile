@@ -8,6 +8,11 @@ AT1MB=../testdata/at1MB.fna
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 
+ifeq ($(prof),yes)
+  CFLAGS += -pg
+  LDFLAGS += -pg
+endif
+
 ifeq ($(debug),yes)
   CFLAGS += -g
   LDFLAGS += -g

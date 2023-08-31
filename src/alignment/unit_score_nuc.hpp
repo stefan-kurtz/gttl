@@ -15,5 +15,6 @@ struct Unit_score_nuc
       /* T */ {-1, -1, -1, 2, -1},
       /* N */ {-1, -1, -1, -1, -1}};
   static constexpr const int8_t smallest_score = -1;
+  static constexpr const int8_t highest_score = 2;
 };
 #endif

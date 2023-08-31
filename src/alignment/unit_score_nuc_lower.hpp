@@ -9,9 +9,13 @@ struct Unit_score_nuc_lower
   static constexpr size_t num_of_chars = size_t(5);
   static constexpr const char character_spec[] = "a|c|g|t|n";
   static constexpr const int8_t score_matrix[5][5] = {
-      /* a  c  g  t  n */ /* a */ {2, -1, -1, -1, -1},
-      /* c */ {-1, 2, -1, -1, -1}, /* g */ {-1, -1, 2, -1, -1},
-      /* t */ {-1, -1, -1, 2, -1}, /* n */ {-1, -1, -1, -1, -1}};
+      /* a  c  g  t  n */
+      /* a */ {2, -1, -1, -1, -1},
+      /* c */ {-1, 2, -1, -1, -1},
+      /* g */ {-1, -1, 2, -1, -1},
+      /* t */ {-1, -1, -1, 2, -1},
+      /* n */ {-1, -1, -1, -1, -1}};
   static constexpr const int8_t smallest_score = -1;
+  static constexpr const int8_t highest_score = 2;
 };
 #endif
