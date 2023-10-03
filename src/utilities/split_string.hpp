@@ -2,6 +2,9 @@
 #define SPLIT_STRING_HPP
 #include <string>
 #include <cstdbool>
+#include <cassert>
+#include <algorithm>
+#include <vector>
 
 template<typename T,T convert(size_t,const std::string &)>
 static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
@@ -13,10 +16,16 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
   while (true)
   {
     auto next = std::find(previous, str.cend(),sep);
-    std::string this_string = std::string(previous,next);
-    result.push_back(convert(result.size(),this_string));
-    if ((next < str.cend() and *next == '\n') or next == str.cend())
+    if (next < str.cend())
     {
+      assert(*next == sep);
+      std::string this_string = std::string(previous,next);
+      result.push_back(convert(this_string));
+    } else
+    {
+      assert (next == str.cend() && *(next-1) == '\n');
+      std::string this_string = std::string(previous,next - 1);
+      result.push_back(convert(this_string));
       break;
     }
     previous = next + skip;
@@ -38,10 +47,16 @@ static inline std::vector<std::string> gttl_split_string(const std::string &str,
   while (true)
   {
     auto next = std::find(previous, str.cend(),sep);
-    std::string this_string = std::string(previous,next);
-    result.push_back(this_string);
-    if ((next < str.cend() and *next == '\n') or next == str.cend())
+    if (next < str.cend())
     {
+      assert(*next == sep);
+      std::string this_string = std::string(previous,next);
+      result.push_back(this_string);
+    } else
+    {
+      assert(next == str.cend() && *(next-1) == '\n');
+      std::string this_string = std::string(previous,next - 1);
+      result.push_back(this_string);
       break;
     }
     previous = next + skip;

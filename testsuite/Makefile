@@ -61,7 +61,8 @@ test:test_alphabet \
      test_line_iterator_mapped \
      test_nt_minimizer_count \
      test_guess_if_protein_seq \
-     test_fs_prio_store
+     test_fs_prio_store \
+     test_split_string
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -243,6 +244,18 @@ test_fs_prio_store:./fs_prio_store_mn.x
 	@./fs_prio_store_mn.x 1000 1000 1000 100
 	@./fs_prio_store_mn.x 1000 1000 1000 10000
 	@./fs_prio_store_mn.x 1000 2000 10000000 1000
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_split_string
+test_split_string:split_string_mn.x
+	@$(eval TMPFILE := $(shell mktemp))
+	@echo "A" > ${TMPFILE}
+	@./split_string_mn.x '	' ${TMPFILE}
+	@echo "A\tB" > ${TMPFILE}
+	@./split_string_mn.x '	' ${TMPFILE}
+	@echo "A\tB\nC" > ${TMPFILE}
+	@./split_string_mn.x '	' ${TMPFILE}
+	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
