@@ -7,12 +7,118 @@
 #include <iostream>
 #include <type_traits>
 #include <algorithm>
+#include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/is_big_endian.hpp"
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
+
+static void usage(const cxxopts::Options &options)
+{
+  std::cerr << options.help() << std::endl;
+}
+
+class SortKeyValuePairsOptions
+{
+ private:
+  size_t number_of_values;
+  bool help_option;
+  char data_type_option, sort_mode_option;
+
+ public:
+  SortKeyValuePairsOptions()
+    : number_of_values(0)
+    , data_type_option('i')
+    , sort_mode_option('r')
+  {}
+
+  void parse(int argc, char **argv)
+  {
+    cxxopts::Options options(argv[0],"run sorting methods for different "
+                                     "kinds of data");
+    options.set_width(80);
+    options.custom_help(std::string("[options] number_of_values"));
+    options.set_tab_expansion();
+    options.add_options()
+       ("d,data_type",
+        "specify the data type to be sorted: i means integers, "
+        "p means pairs of integers (where the first integer is considered "
+        "the key), t means triples of integers (where the first two integers "
+        "are considered the key)",
+        cxxopts::value<char>(data_type_option)->default_value("i"))
+       ("m,sort_mode",
+        "specify the method to use for sorting, "
+        "r means lsb-radix sort, s means std::sort",
+        cxxopts::value<char>(sort_mode_option)->default_value("r"))
+       ("h,help", "print usage");
+    try
+    {
+      auto result = options.parse(argc, argv);
+      if (result.count("help") > 0)
+      {
+        help_option = true;
+        usage(options);
+      }
+      const std::vector<std::string>& unmatched_args = result.unmatched();
+      if (unmatched_args.size() < 1)
+      {
+        throw std::invalid_argument("missing positional number_of_values "
+                                    "argument");
+      } else
+      {
+        if (unmatched_args.size() > 1)
+        {
+          throw std::invalid_argument("superfluous positional argument");
+        } else
+        {
+          long read_long;
+          if (std::sscanf(unmatched_args[0].c_str(),"%ld",&read_long) != 1 or
+              read_long < 0)
+          {
+            throw std::invalid_argument("positional argument must be positive "
+                                        "integer specifying the number of "
+                                        "values to sort");
+          }
+          number_of_values = static_cast<size_t>(read_long);
+        }
+      }
+      if (data_type_option != 'i' and data_type_option != 'p' and
+          data_type_option != 't')
+      {
+        throw std::invalid_argument("argument to option -d/--data_type must be "
+                                    "i, p, or t");
+      }
+      if (sort_mode_option != 'r' and sort_mode_option != 's')
+      {
+        throw std::invalid_argument("argument to option -m/--sort_mode must be "
+                                    "r or s");
+      }
+    }
+    catch (const cxxopts::OptionException &e)
+    {
+      usage(options);
+      throw std::invalid_argument(e.what());
+    }
+  }
+  size_t number_of_values_get(void) const noexcept
+  {
+    return number_of_values;
+  }
+  char data_type_option_get(void) const noexcept
+  {
+    return data_type_option;
+  }
+  char sort_mode_option_get(void) const noexcept
+  {
+    return sort_mode_option;
+  }
+  bool help_option_is_set(void) const noexcept
+  {
+    return help_option;
+  }
+};
 
 static std::string int2byte(int i)
 {
@@ -232,48 +338,48 @@ static void sort_values(unsigned int seed,
 int main(int argc, char *argv[])
 {
   static_assert(sizeof(KeyValuePair) == 2 * sizeof(void *));
-  long readlong;
 
-  if (argc != 4 ||
-      (strcmp(argv[1],"p") != 0 && strcmp(argv[1],"i") != 0 &&
-       strcmp(argv[1],"t") != 0) ||
-      (strcmp(argv[2],"rad") != 0 && strcmp(argv[2],"std") != 0) ||
-       sscanf(argv[3], "%ld", &readlong) != 1 || readlong <= 0)
+  SortKeyValuePairsOptions options;
+  try
   {
-    std::cerr << "Usage: " << argv[0] << " p|i rad|std <number of values>"
-              << std::endl << "i     create array of integers"
-              << std::endl << "p     create array of pairs"
-              << std::endl << "t     create array of triples (fst 2 are keys)"
-              << std::endl << "rad   use radix sort"
-              << std::endl << "std   use std::sort"
-              << std::endl;
+    options.parse(argc,argv);
+  }
+  catch (std::invalid_argument &e) /* check_err.py */
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-  const bool use_radix_sort = strcmp(argv[2],"rad") == 0 ? true : false;
-  const size_t number_of_values = static_cast<size_t>(readlong);
+  if (options.help_option_is_set())
+  {
+    return EXIT_SUCCESS;
+  }
+  const bool use_radix_sort = options.sort_mode_option_get() == 'r';
   const bool show = false;
   unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
-  if (strcmp(argv[1],"p") == 0)
+  if (options.data_type_option_get() == 'p')
   {
     static constexpr const int num_sort_bits
       = static_cast<int>(CHAR_BIT * sizeof(double));
-    sort_values<KeyValuePair>(seed,argv[0],show,use_radix_sort,number_of_values,
+    sort_values<KeyValuePair>(seed,argv[0],show,use_radix_sort,
+                              options.number_of_values_get(),
                               DBL_MAX,num_sort_bits);
   } else
   {
-    if (strcmp(argv[1],"t") == 0)
+    if (options.data_type_option_get() == 't')
     {
       static constexpr const int num_sort_bits
         = static_cast<int>(CHAR_BIT * 2 * sizeof(uint64_t));
       sort_values<Key2ValuePair>(seed,argv[0],show,use_radix_sort,
-                                 number_of_values,
+                                 options.number_of_values_get(),
                                  DBL_MAX,num_sort_bits);
     } else
     {
+      assert(options.data_type_option_get() == 'p');
       //gttl_required_bits<size_t>(number_of_values);
       const int num_sort_bits = 64;
-      sort_values<size_t>(seed,argv[0],show,use_radix_sort,number_of_values,
-                          static_cast<double>(number_of_values),
+      sort_values<size_t>(seed,argv[0],show,use_radix_sort,
+                          options.number_of_values_get(),
+                          static_cast<double>(options.number_of_values_get()),
                           num_sort_bits);
     }
   }
