@@ -7,6 +7,7 @@
 #include <iostream>
 #include <type_traits>
 #include <algorithm>
+#include <iterator>
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
@@ -14,6 +15,7 @@
 #include "utilities/is_big_endian.hpp"
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
+#include "utilities/merge_sort.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -25,13 +27,16 @@ class SortKeyValuePairsOptions
  private:
   size_t number_of_values;
   bool help_option;
-  char data_type_option, sort_mode_option;
+  char data_type_option;
+  int sort_mode;
+  std::string sort_mode_option;
 
  public:
   SortKeyValuePairsOptions()
     : number_of_values(0)
     , data_type_option('i')
-    , sort_mode_option('r')
+    , sort_mode(0)
+    , sort_mode_option("lsb-radix")
   {}
 
   void parse(int argc, char **argv)
@@ -50,8 +55,8 @@ class SortKeyValuePairsOptions
         cxxopts::value<char>(data_type_option)->default_value("i"))
        ("m,sort_mode",
         "specify the method to use for sorting, "
-        "r means lsb-radix sort, s means std::sort",
-        cxxopts::value<char>(sort_mode_option)->default_value("r"))
+        "possible are: lsb-radix, mergesort or stdsort",
+        cxxopts::value<std::string>(sort_mode_option)->default_value("r"))
        ("h,help", "print usage");
     try
     {
@@ -90,10 +95,26 @@ class SortKeyValuePairsOptions
         throw std::invalid_argument("argument to option -d/--data_type must be "
                                     "i, p, or t");
       }
-      if (sort_mode_option != 'r' and sort_mode_option != 's')
+      if (sort_mode_option == std::string("lsb-radix"))
       {
-        throw std::invalid_argument("argument to option -m/--sort_mode must be "
-                                    "r or s");
+        sort_mode = 0;
+      } else
+      {
+        if (sort_mode_option == std::string("mergesort"))
+        {
+          sort_mode = 1;
+        } else
+        {
+          if (sort_mode_option == std::string("stdsort"))
+          {
+            sort_mode = 2;
+          } else
+          {
+            throw std::invalid_argument("argument to option -m/--sort_mode "
+                                        "must be lsb-radix or mergesort or "
+                                        "stdsort");
+          }
+        }
       }
     }
     catch (const cxxopts::OptionException &e)
@@ -110,9 +131,9 @@ class SortKeyValuePairsOptions
   {
     return data_type_option;
   }
-  char sort_mode_option_get(void) const noexcept
+  int sort_mode_get(void) const noexcept
   {
-    return sort_mode_option;
+    return sort_mode;
   }
   bool help_option_is_set(void) const noexcept
   {
@@ -210,7 +231,7 @@ template<class T>
 static void sort_values(unsigned int seed,
                         const char *progname,
                         bool show,
-                        bool use_radix_sort,
+                        int sort_mode,
                         size_t number_of_values,
                         double max_random,
                         int num_sort_bits)
@@ -256,7 +277,7 @@ static void sort_values(unsigned int seed,
       tag = "integers";
     }
   }
-  if (use_radix_sort)
+  if (sort_mode == 0)
   {
     if constexpr (std::is_same_v<T, KeyValuePair>)
     {
@@ -294,9 +315,19 @@ static void sort_values(unsigned int seed,
     rt_sorting.show(msg.str());
   } else
   {
-    std::sort(values.begin(),values.end());
-    StrFormat msg("sort %lu %s with std::sort",values.size(),tag);
-    rt_sorting.show(msg.str());
+    if (sort_mode == 1)
+    {
+      const unsigned int n_threads = 1;
+      merge_sort<decltype(values.begin())>(values.begin(),values.end(),
+                                           n_threads);
+      StrFormat msg("sort %lu %s with mergesort",values.size(),tag);
+      rt_sorting.show(msg.str());
+    } else
+    {
+      std::sort(values.begin(),values.end());
+      StrFormat msg("sort %lu %s with std::sort",values.size(),tag);
+      rt_sorting.show(msg.str());
+    }
   }
   if (show)
   {
@@ -353,14 +384,14 @@ int main(int argc, char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  const bool use_radix_sort = options.sort_mode_option_get() == 'r';
   const bool show = false;
+  const int sort_mode = options.sort_mode_get();
   unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
   if (options.data_type_option_get() == 'p')
   {
     static constexpr const int num_sort_bits
       = static_cast<int>(CHAR_BIT * sizeof(double));
-    sort_values<KeyValuePair>(seed,argv[0],show,use_radix_sort,
+    sort_values<KeyValuePair>(seed,argv[0],show,sort_mode,
                               options.number_of_values_get(),
                               DBL_MAX,num_sort_bits);
   } else
@@ -369,7 +400,7 @@ int main(int argc, char *argv[])
     {
       static constexpr const int num_sort_bits
         = static_cast<int>(CHAR_BIT * 2 * sizeof(uint64_t));
-      sort_values<Key2ValuePair>(seed,argv[0],show,use_radix_sort,
+      sort_values<Key2ValuePair>(seed,argv[0],show,sort_mode,
                                  options.number_of_values_get(),
                                  DBL_MAX,num_sort_bits);
     } else
@@ -377,7 +408,7 @@ int main(int argc, char *argv[])
       assert(options.data_type_option_get() == 'p');
       //gttl_required_bits<size_t>(number_of_values);
       const int num_sort_bits = 64;
-      sort_values<size_t>(seed,argv[0],show,use_radix_sort,
+      sort_values<size_t>(seed,argv[0],show,sort_mode,
                           options.number_of_values_get(),
                           static_cast<double>(options.number_of_values_get()),
                           num_sort_bits);
