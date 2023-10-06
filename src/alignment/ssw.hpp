@@ -40,8 +40,8 @@ class SimdIntVector
 
  public:
   SimdIntVector(size_t _num_elements)
-      : ptr(_num_elements == 0 ? nullptr : new simd_int[_num_elements]),
-        num_elements(_num_elements)
+      : ptr(_num_elements == 0 ? nullptr : new simd_int[_num_elements])
+      , num_elements(_num_elements)
   {}
 
   ~SimdIntVector(void)
@@ -115,9 +115,9 @@ class SSWresources
 #ifndef NDEBUG
   size_t maximum_seq_len_get(void) const noexcept { return maximum_seq_len; }
 #endif
-  simd_int *vectors8_get(void) { return vectors8.get(); }
-  simd_int *vectors16_get(void) { return vectors16.get(); }
-  simd_int *vectors32_get(void) { return vectors32.get(); }
+  simd_int *vectors8_get(void) const noexcept { return vectors8.get(); }
+  simd_int *vectors16_get(void) const noexcept { return vectors16.get(); }
+  simd_int *vectors32_get(void) const noexcept { return vectors32.get(); }
   void reset8(size_t segment_len) { vectors8.reset(segment_len); }
   void reset16(size_t segment_len) { vectors16.reset(segment_len); }
   void reset32(size_t segment_len) { vectors32.reset(segment_len); }
@@ -187,17 +187,14 @@ static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
         const int8_t this_score
           = seq_pos < seq_len ? score_row[seq[sequence_index(seq_len, seq_pos)]]
                               : 0;
-        Basetype t;
         if constexpr (sizeof(Basetype) == 1)
         {
           // offset score to ensure it is positive
-          t = abs_smallest_score + this_score;
+          *ptr++ = static_cast<Basetype>(abs_smallest_score + this_score);
         } else
         {
-          t = this_score;
+          *ptr++ = this_score;
         }
-
-        *ptr++ = t;
         seq_pos += segment_len;
       }
     }
@@ -323,16 +320,16 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
 #endif
   SWsimdResult forward_ec{
     sw_simd_uint8<forward_reading, forward_strand>
-                   (original_dbseq,
-                    dbseq_len,
-                    dbseq_len,
-                    prof.query_len,
-                    weight_gapO,
-                    weight_gapE,
-                    prof.profile_uint8.get(),
-                    undef_expected_score_uint8,
-                    prof.abs_smallest_score,
-                    ssw_resources)};
+                 (original_dbseq,
+                  dbseq_len,
+                  dbseq_len,
+                  prof.query_len,
+                  weight_gapO,
+                  weight_gapE,
+                  prof.profile_uint8.get(),
+                  undef_expected_score_uint8,
+                  prof.abs_smallest_score,
+                  ssw_resources)};
   int used_uint_bytes = 1;
   if (forward_ec.opt_loc_alignment_score == UINT8_MAX)
   {
@@ -430,16 +427,16 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
                                              prof.query,
                                              forward_ec.on_query + 1);
           reverse_ec = sw_simd_uint32<!forward_reading, forward_strand>
-                                    (original_dbseq,
-                                     dbseq_len,
-                                     forward_ec.on_dbseq + 1,
-                                     forward_ec.on_query + 1,
-                                     weight_gapO,
-                                     weight_gapE,
-                                     vP.get(),
-                                     forward_ec.opt_loc_alignment_score,
-                                     prof.abs_smallest_score,
-                                     ssw_resources);
+                                     (original_dbseq,
+                                      dbseq_len,
+                                      forward_ec.on_dbseq + 1,
+                                      forward_ec.on_query + 1,
+                                      weight_gapO,
+                                      weight_gapE,
+                                      vP.get(),
+                                      forward_ec.opt_loc_alignment_score,
+                                      prof.abs_smallest_score,
+                                      ssw_resources);
       }
     }
     assert(forward_ec.on_query >= reverse_ec.on_query);
