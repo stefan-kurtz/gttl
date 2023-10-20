@@ -247,8 +247,6 @@ static std::pair<size_t,bool> append_minimizers(
   }
   if constexpr (HashIterator::handle_both_strands)
   {
-    std::cout << "# add " << palindromic_vector.size() << " " << qgram_length
-              << "-mer DNA-palindromes to minimizer_vector" << std::endl;
     for (auto && pq : palindromic_vector)
     {
       minimizer_vector->emplace_back(pq);
