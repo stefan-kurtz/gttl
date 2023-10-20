@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
   {
     size_t line_count, column_count;
     std::tie(line_count,column_count) = process_inputfile(inputfile,argv[1][0]);
-    std::cout << "processed " << column_count << " columns in " << line_count 
+    std::cout << "processed " << column_count << " columns in " << line_count
               << " lines" << std::endl;
   }
   catch (const std::string &msg)
