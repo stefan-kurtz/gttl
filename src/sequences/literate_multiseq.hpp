@@ -84,7 +84,7 @@ class LiterateMultiseq
     std::memcpy(rdc, rank_dist.data(), rank_dist.size() * sizeof *rdc);
     return rdc;
   }
-  const std::array<size_t,alpha.size()+1> &rank_dist_get(void)
+  const std::array<size_t,alpha.size()+1> &rank_dist_get(void) const
   {
     return rank_dist;
   }
