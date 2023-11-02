@@ -430,6 +430,63 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
 template<int sizeof_unit,class HashIterator>
 class HashedQgramsGeneric
 {
+  struct Iterator
+  {
+    struct DecodedHashedQgram
+    {
+      uint64_t hash_value;
+      size_t sequence_number,
+             startpos;
+      DecodedHashedQgram(uint64_t _hash_value,
+                     size_t _sequence_number,
+                     size_t _startpos)
+       : hash_value(_hash_value)
+       , sequence_number(_sequence_number)
+       , startpos(_startpos)
+      {}
+      bool operator == (const DecodedHashedQgram &other) const noexcept
+      {
+        return hash_value == other.hash_value;
+      }
+      bool operator < (const DecodedHashedQgram &other) const noexcept
+      {
+        return hash_value < other.hash_value;
+      }
+    };
+    const HashedQgramVector<sizeof_unit> &hashed_qgram_vector;
+    const GttlBitPacker<sizeof_unit,3> &hashed_qgram_packer;
+    size_t current_idx;
+    Iterator(const HashedQgramVector<sizeof_unit> &_hashed_qgram_vector,
+             const GttlBitPacker<sizeof_unit,3> &_hashed_qgram_packer,
+             size_t _current_idx)
+     : hashed_qgram_vector(_hashed_qgram_vector)
+     , hashed_qgram_packer(_hashed_qgram_packer)
+     , current_idx(_current_idx)
+    {}
+    public:
+    const DecodedHashedQgram operator*(void) const noexcept
+    {
+      assert(current_idx < hashed_qgram_vector.size());
+      return DecodedHashedQgram(hashed_qgram_vector[current_idx].
+                                  template decode_at<0>(hashed_qgram_packer),
+                                static_cast<size_t>(
+                                  hashed_qgram_vector[current_idx].
+                                    template decode_at<1>(hashed_qgram_packer)),
+                                static_cast<size_t>(
+                                  hashed_qgram_vector[current_idx].
+                                    template decode_at<2>(hashed_qgram_packer))
+                               );
+    }
+    auto& operator++() /* prefix increment*/
+    {
+      current_idx++;
+      return *this;
+    }
+    bool operator != (const Iterator& other) const noexcept
+    {
+      return current_idx != other.current_idx;
+    }
+  };
   public:
   static constexpr int sizeof_unit_const = sizeof_unit;
   static constexpr bool handle_both_strands = HashIterator::handle_both_strands;
@@ -614,6 +671,15 @@ class HashedQgramsGeneric
       printf("%lu\t%lu\t%lu\n",static_cast<unsigned long>(hash_value),
              sequence_number + offset,startpos);
     }
+  }
+  Iterator begin(void) const noexcept
+  {
+    return Iterator (hashed_qgram_vector,hashed_qgram_packer,0);
+  }
+  Iterator end(void) const noexcept
+  {
+    return Iterator (hashed_qgram_vector,hashed_qgram_packer,
+                     hashed_qgram_vector.size());
   }
 };
 #endif

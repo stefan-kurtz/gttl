@@ -46,6 +46,10 @@ void MinimizerOptions::parse(int argc, char **argv)
     ("b,hash_bits", "specify number of bits used for hashing, if undefined "
                    "(i.e. -1), then it is set to 2 * kmer_length",
      cxxopts::value<int>(hash_bits)->default_value("-1"))
+    ("m,show_mode", "specify if or how to show the minimizer: 0 means no show, "
+                    "1 means to use .show() of HashedQgram-Class and "
+                    "2 means to use the iterator of the HashedQgram Class",
+     cxxopts::value<int>(show_mode)->default_value("0"))
     ("c,canonical", "use canonical minimizers",
      cxxopts::value<bool>(canonical_option)->default_value("false"))
     ("d,constant_distance", "compute hashed_qgrams at constant distance",
@@ -85,6 +89,12 @@ void MinimizerOptions::parse(int argc, char **argv)
                         "not possible",hash_bits,2 * qgram_length);
           throw cxxopts::OptionException(msg.str());
         }
+      }
+      if (show_mode != 0 and show_mode != 1 and show_mode != 2)
+      {
+        throw cxxopts::OptionException(std::string("option -m,--show_mode must "
+                                                   "be used with argument "
+                                                   "0, 1  or 2"));
       }
     }
   }
@@ -134,6 +144,11 @@ bool MinimizerOptions::at_constant_distance_option_is_set(void) const noexcept
 bool MinimizerOptions::sort_by_hash_value_option_is_set(void) const noexcept
 {
   return sort_by_hash_value_option;;
+}
+
+int MinimizerOptions::show_mode_get(void) const noexcept
+{
+  return show_mode;
 }
 
 bool MinimizerOptions::help_option_is_set(void) const noexcept

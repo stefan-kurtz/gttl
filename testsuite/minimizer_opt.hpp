@@ -7,15 +7,16 @@
 class MinimizerOptions
 {
  private:
-  std::vector<std::string> inputfiles;
-  size_t qgram_length,
-         window_size,
-         number_of_threads;
-  int hash_bits;
-  bool canonical_option,
-       at_constant_distance_option,
-       sort_by_hash_value_option,
-       help_option;
+  std::vector<std::string> inputfiles{};
+  size_t qgram_length = 0,
+         window_size = 1,
+         number_of_threads = 1;
+  int hash_bits = -1;
+  bool canonical_option = false,
+       at_constant_distance_option = false,
+       sort_by_hash_value_option = false,
+       help_option = false;
+  int show_mode = 0;
   public:
   MinimizerOptions(void);
   void parse(int argc, char **argv);
@@ -27,6 +28,7 @@ class MinimizerOptions
   bool canonical_option_is_set(void) const noexcept;
   bool at_constant_distance_option_is_set(void) const noexcept;
   bool sort_by_hash_value_option_is_set(void) const noexcept;
+  int show_mode_get(void) const noexcept;
   bool help_option_is_set(void) const noexcept;
 };
 #endif

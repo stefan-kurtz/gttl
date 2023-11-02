@@ -235,6 +235,8 @@ test_minimizer_count:minimizer.x
 	@echo "# number of hashed kmers	37577" > ${TMPFILE}
 	@./minimizer.x -w 30 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@./minimizer.x -w 30 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 --show_mode 1 ${AT} > ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 --show_mode 2 ${AT} | diff -I '^#' - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 

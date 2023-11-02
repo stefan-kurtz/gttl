@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <cassert>
+#include <cinttypes>
 #include <cstdlib>
 #include <cstdint>
 #include <string>
@@ -123,10 +124,26 @@ void run_nt_minimizer(const MinimizerOptions &options)
                           options.sort_by_hash_value_option_is_set(),
                           options.at_constant_distance_option_is_set(),
                           &log_vector);
-        RunTimeClass rt_output_hashed_qgrams{};
-        hqg.show();
-        log_vector.push_back(rt_output_hashed_qgrams
-                             .to_string("output of hashed kmers"));
+        if (options.show_mode_get() != 0)
+        {
+          RunTimeClass rt_output_hashed_qgrams{};
+          if (options.show_mode_get() == 1)
+          {
+            hqg.show();
+          } else
+          {
+            assert(options.show_mode_get() == 2);
+            for (auto &&dhqg : hqg)
+            {
+              printf("%" PRIu64 "\t%lu\t%lu\n",
+                     dhqg.hash_value,
+                     dhqg.sequence_number,
+                     dhqg.startpos);
+            }
+          }
+          log_vector.push_back(rt_output_hashed_qgrams
+                               .to_string("output of hashed kmers"));
+        }
       }
       for (auto &msg : log_vector)
       {
