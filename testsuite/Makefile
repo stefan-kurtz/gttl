@@ -59,7 +59,7 @@ test:test_alphabet \
      test_eoplist \
      test_invint \
      test_line_iterator_mapped \
-     test_nt_minimizer_count \
+     test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
      test_split_string
@@ -225,16 +225,16 @@ test_line_iterator_mapped:line_iterator_mapped.x
 	@./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
 
-.PHONY:test_nt_minimizer_count
-test_nt_minimizer_count:nt_minimizer.x
-	@./check_err.py ./nt_minimizer.x
+.PHONY:test_minimizer_count
+test_minimizer_count:minimizer.x
+	@./check_err.py ./minimizer.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
-	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./nt_minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@echo "# number of hashed kmers	37577" > ${TMPFILE}
-	@./nt_minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./nt_minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
@@ -264,6 +264,9 @@ test_split_string:split_string_mn.x
 
 fastq_mn.x:fastq_mn.o fastq_opt.o
 	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
+
+minimizer.x:minimizer_opt.o minimizer_mn.o
+	$(CXX) ${LDFLAGS} minimizer_opt.o minimizer_mn.o -o $@ ${LDLIBS}
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@
