@@ -227,6 +227,7 @@ test_line_iterator_mapped:line_iterator_mapped.x
 
 .PHONY:test_nt_minimizer_count
 test_nt_minimizer_count:nt_minimizer.x
+	@./check_err.py ./nt_minimizer.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
 	@./nt_minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}

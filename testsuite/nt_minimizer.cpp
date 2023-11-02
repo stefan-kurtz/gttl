@@ -175,27 +175,10 @@ class NtMinimizerOptions
   }
 };
 
-int main(int argc, char *argv[])
+void run_nt_minimizer(const NtMinimizerOptions &options)
 {
-  RunTimeClass rt_total{};
-  NtMinimizerOptions options{};
-
-  try
-  {
-    options.parse(argc, argv);
-  }
-  catch (std::invalid_argument &e) /* check_err.py */
-  {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-  if (options.help_option_is_set())
-  {
-    return EXIT_SUCCESS;
-  }
   RunTimeClass rt_create_multiseq{};
   GttlMultiseq *multiseq = nullptr;
-  bool has_err = false;
   try
   {
     constexpr const bool store_sequences = true;
@@ -215,97 +198,120 @@ int main(int argc, char *argv[])
   }
   catch (std::string &msg) /* check_err.py */
   {
-    std::cerr << argv[0] << ": file \"" << options.inputfiles_get()[0] << "\""
-              << msg << std::endl;
-    has_err = true;
+    delete multiseq;
+    throw msg;
   }
-  if (!has_err)
+  rt_create_multiseq.show("reading input files and creating multiseq");
+  int hashbits;
+  int var_sizeof_unit_hashed_qgram;
+  assert(options.hashbits_get() != -1);
+  for (auto &log : multiseq->statistics())
   {
-    rt_create_multiseq.show("reading input files and creating multiseq");
-    int hashbits;
-    int var_sizeof_unit_hashed_qgram;
-    assert(options.hashbits_get() != -1);
-    for (auto &log : multiseq->statistics())
+    std::cout << "# " << log << std::endl;
+  }
+  if (multiseq->sequences_bits_get() + options.hashbits_get() <= 64)
+  {
+    hashbits = 64 - multiseq->sequences_bits_get();
+    var_sizeof_unit_hashed_qgram = 8;
+  } else
+  {
+    if (multiseq->sequences_bits_get() + options.hashbits_get() <= 72)
     {
-      std::cout << "# " << log << std::endl;
-    }
-    if (multiseq->sequences_bits_get() + options.hashbits_get() <= 64)
-    {
-      hashbits = 64 - multiseq->sequences_bits_get();
-      var_sizeof_unit_hashed_qgram = 8;
+      hashbits = 72 - multiseq->sequences_bits_get();
+      var_sizeof_unit_hashed_qgram = 9;
     } else
     {
-      if (multiseq->sequences_bits_get() + options.hashbits_get() <= 72)
+      StrFormat msg(": file \"%s\", cannot handle "
+                    "hashbits + sequence_bits = %d + %d > 72",
+                    options.inputfiles_get()[0].c_str(),
+                    options.hashbits_get(),
+                    multiseq->sequences_bits_get());
+      delete multiseq;
+      throw msg;
+    }
+  }
+  assert(var_sizeof_unit_hashed_qgram == 8 or
+         var_sizeof_unit_hashed_qgram == 9);
+  constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
+  {
+    if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
+    {
+      std::vector<std::string> log_vector{};
+      if (options.canonical_option_is_set())
       {
-        hashbits = 72 - multiseq->sequences_bits_get();
-        var_sizeof_unit_hashed_qgram = 9;
+        using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                 QgramNtHashIterator4>;
+
+        HashedQgrams hqg (*multiseq,
+                          options.number_of_threads_get(),
+                          options.qgram_length_get(),
+                          options.window_size_get(),
+                          hashbits,
+                          options.sort_by_hash_value_option_is_set(),
+                          options.at_constant_distance_option_is_set(),
+                          &log_vector);
+        RunTimeClass rt_output_hashed_qgrams{};
+        hqg.show();
+        log_vector.push_back(rt_output_hashed_qgrams
+                             .to_string("output of hashed kmers"));
       } else
       {
-        std::cerr << argv[0] << ": file \"" << options.inputfiles_get()[0]
-                  << "\", cannot handle hashbits + sequence_bits = "
-                  << options.hashbits_get() << " + "
-                  << multiseq->sequences_bits_get()
-                  << " > 72" << std::endl;
-        has_err = true;
+        using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                 QgramNtHashFwdIterator4>;
+        HashedQgrams hqg (*multiseq,
+                          options.number_of_threads_get(),
+                          options.qgram_length_get(),
+                          options.window_size_get(),
+                          hashbits,
+                          options.sort_by_hash_value_option_is_set(),
+                          options.at_constant_distance_option_is_set(),
+                          &log_vector);
+        RunTimeClass rt_output_hashed_qgrams{};
+        hqg.show();
+        log_vector.push_back(rt_output_hashed_qgrams
+                             .to_string("output of hashed kmers"));
+      }
+      for (auto &msg : log_vector)
+      {
+        std::cout << "# " << msg << std::endl;
       }
     }
-    if (!has_err)
-    {
-      assert(options.canonical_option_is_set() == true ||
-             options.canonical_option_is_set() == false);
-      assert(var_sizeof_unit_hashed_qgram == 8 ||
-             var_sizeof_unit_hashed_qgram == 9);
-      constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
-      {
-        if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
-        {
-          std::vector<std::string> log_vector{};
-          if (options.canonical_option_is_set())
-          {
-            using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
-                                                     QgramNtHashIterator4>;
-
-            HashedQgrams hqg (*multiseq,
-                              options.number_of_threads_get(),
-                              options.qgram_length_get(),
-                              options.window_size_get(),
-                              hashbits,
-                              options.sort_by_hash_value_option_is_set(),
-                              options.at_constant_distance_option_is_set(),
-                              &log_vector);
-            RunTimeClass rt_output_hashed_qgrams{};
-            hqg.show();
-            log_vector.push_back(rt_output_hashed_qgrams
-                                 .to_string("output of hashed kmers"));
-          } else
-          {
-            using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
-                                                     QgramNtHashFwdIterator4>;
-            HashedQgrams hqg (*multiseq,
-                              options.number_of_threads_get(),
-                              options.qgram_length_get(),
-                              options.window_size_get(),
-                              hashbits,
-                              options.sort_by_hash_value_option_is_set(),
-                              options.at_constant_distance_option_is_set(),
-                              &log_vector);
-            RunTimeClass rt_output_hashed_qgrams{};
-            hqg.show();
-            log_vector.push_back(rt_output_hashed_qgrams
-                                 .to_string("output of hashed kmers"));
-          }
-          for (auto &msg : log_vector)
-          {
-            std::cout << "# " << msg << std::endl;
-          }
-        }
-      });
-    }
-  }
+  });
   delete multiseq;
-  if (!has_err)
+}
+
+int main(int argc, char *argv[])
+{
+  RunTimeClass rt_total{};
+  NtMinimizerOptions options{};
+
+  try
   {
-    rt_total.show("overall");
+    options.parse(argc, argv);
   }
-  return has_err ? EXIT_FAILURE : EXIT_SUCCESS;
+  catch (std::invalid_argument &e) /* check_err.py */
+  {
+    std::cerr << argv[0] << ": file " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (options.help_option_is_set())
+  {
+    return EXIT_SUCCESS;
+  }
+  RunTimeClass rt_create_multiseq{};
+  try
+  {
+    run_nt_minimizer(options);
+  }
+  catch (const std::string &msg)
+  {
+    for (auto &&inputfile : options.inputfiles_get())
+    {
+      std::cerr << argv[0] << ": file \"" << inputfile << "\""
+                << msg << std::endl;
+    }
+    return EXIT_FAILURE;
+  }
+  rt_total.show("overall");
+  return EXIT_SUCCESS;
 }
