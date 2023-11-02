@@ -70,13 +70,13 @@ void run_nt_minimizer(const MinimizerOptions &options)
     throw msg;
   }
   rt_create_multiseq.show("reading input files and creating multiseq");
-  int hash_bits = -1,
-      var_sizeof_unit_hashed_qgram;
-  assert(options.hash_bits_get() != -1);
   for (auto &log : multiseq->statistics())
   {
     std::cout << "# " << log << std::endl;
   }
+  int hash_bits = -1,
+      var_sizeof_unit_hashed_qgram;
+  assert(options.hash_bits_get() != -1);
   try
   {
     std::tie(hash_bits,var_sizeof_unit_hashed_qgram)
@@ -99,7 +99,6 @@ void run_nt_minimizer(const MinimizerOptions &options)
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashIterator4>;
-
         HashedQgrams hqg (*multiseq,
                           options.number_of_threads_get(),
                           options.qgram_length_get(),
@@ -156,7 +155,6 @@ int main(int argc, char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  RunTimeClass rt_create_multiseq{};
   try
   {
     run_nt_minimizer(options);
