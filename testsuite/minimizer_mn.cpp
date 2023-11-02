@@ -16,12 +16,10 @@
 */
 #include <cassert>
 #include <cstdlib>
-#include <cstdbool>
 #include <cstdint>
 #include <string>
 #include <algorithm>
 
-#include "utilities/cxxopts.hpp"
 #include "sequences/complement_plain.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_multiseq.hpp"

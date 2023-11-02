@@ -230,11 +230,11 @@ test_minimizer_count:minimizer.x
 	@./check_err.py ./minimizer.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
-	@./minimizer.x -l 47 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./minimizer.x -l 47 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@echo "# number of hashed kmers	37577" > ${TMPFILE}
-	@./minimizer.x -l 47 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./minimizer.x -l 47 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer.x -w 30 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 

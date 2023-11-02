@@ -9,7 +9,7 @@ class MinimizerOptions
  private:
   std::vector<std::string> inputfiles;
   size_t qgram_length,
-         minimum_mem_length,
+         window_size,
          number_of_threads;
   int hash_bits;
   bool canonical_option,

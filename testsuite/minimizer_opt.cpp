@@ -15,7 +15,7 @@ static void usage(const cxxopts::Options &options)
 MinimizerOptions::MinimizerOptions(void)
   : inputfiles({})
   , qgram_length(0)
-  , minimum_mem_length(0)
+  , window_size(1)
   , number_of_threads(1)
   , hash_bits(-1)
   , canonical_option(false)
@@ -26,7 +26,7 @@ MinimizerOptions::MinimizerOptions(void)
 
 void MinimizerOptions::parse(int argc, char **argv)
 {
-  const std::string default_minimum_mem_length = "30",
+  const std::string default_window_size = "1",
                     default_qgram_length = "18";
 
   cxxopts::Options options(argv[0],"generate minimizers of DNA sequences "
@@ -38,9 +38,9 @@ void MinimizerOptions::parse(int argc, char **argv)
     ("k,kmer_length", "specify k-mer length",
      cxxopts::value<size_t>(qgram_length)
                     ->default_value(default_qgram_length))
-    ("l,minimum_mem_length", "minimum length of maximal exact match (MEM)",
-     cxxopts::value<size_t>(minimum_mem_length)
-                 ->default_value(default_minimum_mem_length))
+    ("w,window_size", "number of qgrams in window",
+     cxxopts::value<size_t>(window_size)
+                 ->default_value(default_window_size))
     ("t,number_of_threads", "specify number of threads",
      cxxopts::value<size_t>(number_of_threads)->default_value("1"))
     ("b,hash_bits", "specify number of bits used for hashing, if undefined "
@@ -86,13 +86,6 @@ void MinimizerOptions::parse(int argc, char **argv)
           throw cxxopts::OptionException(msg.str());
         }
       }
-      if (minimum_mem_length < qgram_length)
-      {
-        StrFormat msg("minimum_mem_length = %lu, but it must be larger "
-                      "than kmer_length = %lu",
-                      minimum_mem_length,qgram_length);
-        throw cxxopts::OptionException(msg.str());
-      }
     }
   }
   catch (const cxxopts::OptionException &e)
@@ -115,8 +108,7 @@ size_t MinimizerOptions::qgram_length_get(void) const noexcept
 
 size_t MinimizerOptions::window_size_get(void) const noexcept
 {
-  assert(minimum_mem_length >= qgram_length_get());
-  return minimum_mem_length - qgram_length_get() + 1;
+  return window_size;
 }
 
 size_t MinimizerOptions::number_of_threads_get(void) const noexcept
