@@ -39,7 +39,7 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
       return std::make_pair(bits - sequences_bits,bytes);
     }
   }
-  StrFormat msg("cannot handle hash_bits + sequence_bits = %d + %d > 72",
+  StrFormat msg("cannot handle sequences_bits + hash_bits = %d + %d > 72",
                 sequences_bits,requested_hash_bits);
   throw msg;
 }
@@ -133,6 +133,12 @@ void run_nt_minimizer(const MinimizerOptions &options)
           } else
           {
             assert(options.show_mode_get() == 2);
+#ifdef ITERATOR_LONG_VERSION
+            for (auto it = hqg.begin(); it != hqq.end(); ++it)
+            {
+              dqhg = *it;
+            }
+#endif
             for (auto &&dhqg : hqg)
             {
               printf("%" PRIu64 "\t%lu\t%lu\n",
