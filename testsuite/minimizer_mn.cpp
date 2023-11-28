@@ -133,15 +133,8 @@ void run_nt_minimizer(const MinimizerOptions &options)
           } else
           {
             assert(options.show_mode_get() == 2);
-#define ITERATOR_LONG_VERSION
-#ifdef ITERATOR_LONG_VERSION
-            for (auto it = hqg.begin(); it != hqg.end(); ++it)
-            {
-              auto dhqg = *it;
-#else
             for (auto &&dhqg : hqg)
             {
-#endif
               printf("%" PRIu64 "\t%lu\t%lu\n",
                      dhqg.hash_value,
                      dhqg.sequence_number,
