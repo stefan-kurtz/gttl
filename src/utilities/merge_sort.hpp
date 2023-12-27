@@ -1,3 +1,5 @@
+#ifndef MERGE_SORT_HPP
+#define MERGE_SORT_HPP
 /****
 DIAMOND protein aligner
 Copyright (C) 2013-2017 Benjamin Buchfink <buchfink@gmail.com>
@@ -53,3 +55,4 @@ void merge_sort(It begin, It end, unsigned int n_threads,
   delete right;
   std::inplace_merge(begin, mid, end, cmp);
 }
+#endif

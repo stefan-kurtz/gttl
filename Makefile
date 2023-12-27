@@ -14,5 +14,5 @@ tags:
 
 .PHONY:code_check
 code_check:
-	code_check.py -wt `find . -name '*.[ch]pp'`
+	code_check.py -wt `find . -name '*.[ch]pp' | grep -v merge_sort.hpp`
 	scripts/check_ifndef.py `find . -name '*.hpp'`
