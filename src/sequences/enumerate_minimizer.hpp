@@ -8,15 +8,14 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 
-template<class HashIterator,class MinimizerProcessor>
-static std::pair<size_t,bool> enumerate_minimizer(
-                                       size_t qgram_length,
-                                       size_t window_size,
-                                       uint64_t hash_mask,
-                                       MinimizerProcessor *minimizer_processor,
-                                       const char *sequence,
-                                       size_t seqlen,
-                                       size_t seqnum)
+template<class HashIterator,class MinimizerProcessor,class MinimizerValueClass>
+void inline enumerate_minimizer(size_t qgram_length,
+                                size_t window_size,
+                                uint64_t hash_mask,
+                                MinimizerProcessor *minimizer_processor,
+                                const char *sequence,
+                                size_t seqlen,
+                                size_t seqnum)
 {
   static constexpr const char_finder::NucleotideFinder unw_nucleotide_finder{};
   if constexpr (HashIterator::handle_both_strands)
@@ -25,21 +24,17 @@ static std::pair<size_t,bool> enumerate_minimizer(
                             we skip every second sequence, as the
                             minimizers come from the original sequence */
     {
-      return std::make_pair(0, false);
+      return;
     }
   }
   const size_t minseqlen_to_process = window_size + qgram_length - 1;
-  using MinimizerValue = std::tuple<uint64_t,size_t,size_t>;
-  std::deque<MinimizerValue> window_deque{};
-  size_t count_all_qgrams = 0;
-  bool has_wildcards = false;
+  std::deque<MinimizerValueClass> window_deque{};
   GttlCharRange<char_finder::NucleotideFinder,unw_nucleotide_finder,
                 true, false> ranger(sequence,seqlen);
-  std::vector<MinimizerValue> palindromic_vector{};
+  std::vector<MinimizerValueClass> palindromic_vector{};
   for (auto const &&range : ranger)
   {
     const size_t this_length = std::get<1>(range);
-    has_wildcards = has_wildcards or this_length < seqlen;
     if (this_length < minseqlen_to_process)
     {
       continue;
@@ -47,7 +42,6 @@ static std::pair<size_t,bool> enumerate_minimizer(
     size_t seqpos = std::get<0>(range);
     const char *seqptr = sequence + seqpos;
     HashIterator qgiter(qgram_length, seqptr, this_length);
-    count_all_qgrams += (this_length - qgram_length - 1);
 
     bool front_was_moved = false;
     for (auto const &&code_pair : qgiter)
@@ -69,7 +63,7 @@ static std::pair<size_t,bool> enumerate_minimizer(
           {
             /* also add the coordinates for the reverse complement
                as it would otherwise be neglected */
-            MinimizerValue
+            MinimizerValueClass
               palindromic_hashed_qgram_rc({this_hash,
                                            static_cast<uint64_t>(seqnum+1),
                                            static_cast<uint64_t>(seqlen -
@@ -77,7 +71,7 @@ static std::pair<size_t,bool> enumerate_minimizer(
                                                                   qgram_length))
                                           });
             palindromic_vector.emplace_back(palindromic_hashed_qgram_rc);
-            MinimizerValue
+            MinimizerValueClass
               palindromic_hashed_qgram_fwd({this_hash,
                                             static_cast<uint64_t>(seqnum),
                                             static_cast<uint64_t>(seqpos)});
@@ -105,7 +99,7 @@ static std::pair<size_t,bool> enumerate_minimizer(
         }
         window_deque.pop_back();
       }
-      MinimizerValue current_hashed_qgram({this_hash,
+      MinimizerValueClass current_hashed_qgram({this_hash,
                                            static_cast<uint64_t>(stored_seqnum),
                                            static_cast<uint64_t>(stored_seqpos)}
                                           );
@@ -137,8 +131,7 @@ static std::pair<size_t,bool> enumerate_minimizer(
            not moved yet */
         if (not front_was_moved)
         {
-          minimizer_processor->template apply<MinimizerValue>
-                                             (window_deque.front());
+          minimizer_processor->apply(window_deque.front());
           front_was_moved = true; /* we moved front element and do not
                                      want to do it again */
         }
@@ -147,8 +140,7 @@ static std::pair<size_t,bool> enumerate_minimizer(
         // add minimizer of first window
         if (seqpos == window_size - 1)
         {
-          minimizer_processor->template apply<MinimizerValue>
-                                             (window_deque.front());
+          minimizer_processor->apply(window_deque.front());
           front_was_moved = true;
         }
       }
@@ -163,6 +155,5 @@ static std::pair<size_t,bool> enumerate_minimizer(
       minimizer_processor->apply(pq);
     }
   }
-  return std::make_pair(count_all_qgrams, has_wildcards);
 }
 #endif
