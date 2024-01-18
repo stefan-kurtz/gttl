@@ -288,7 +288,9 @@ class GttlLineIterator
       , more_files(false)
       , file_index(0)
       , line_number(0)
-  { }
+  {
+    static_assert(buf_size == 0);
+  }
   bool next(LineIteratorSubstring *current_line)
   {
     endofunit = false;

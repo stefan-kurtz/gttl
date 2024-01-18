@@ -116,6 +116,12 @@ class GttlSeqIterator
     {
       gttl_li.separator_set('>');
     }
+    GttlSeqIterator(const std::string_view &multi_fasta_part)
+      : gttl_li(GttlLineIterator<0>(multi_fasta_part.data(),
+                                    multi_fasta_part.size()))
+    {
+      gttl_li.separator_set('>');
+    }
     size_t line_number(void) const noexcept
     {
       return gttl_li.line_number_get();
