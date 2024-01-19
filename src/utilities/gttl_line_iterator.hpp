@@ -90,7 +90,10 @@ class GttlLineIterator
       {
         bufptr = buffer;
         bufend = buffer + fill;
-        *bufend = '\0';
+        if constexpr (buf_size > 0)
+        {
+          *bufend = '\0';
+        }
 #ifndef QLI_WITHOUT_ZLIB
         file_exhausted = static_cast<bool>(fill < buf_size);
 #else
