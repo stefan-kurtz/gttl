@@ -59,6 +59,7 @@ class GttlSeqIterator
               }
               current_line.pop_back(); /* remove \n */
               current_string->append(current_line.data(),current_line.size());
+              current_line.clear();
             } else
             {
               if (not gttl_li.next(current_string))
