@@ -26,6 +26,7 @@ class GttlSeqIterator
     private:
       SequenceEntry sequence_entry;
       std::string *current_string;
+      LineIteratorSubstring current_line;
       GttlLineIterator<buf_size> &gttl_li;
       bool last_seq_was_processed,
            input_exhausted;
@@ -34,6 +35,7 @@ class GttlSeqIterator
                bool _input_exhausted)
         : sequence_entry({})
         , current_string(&sequence_entry.header)
+        , current_line({})
         , gttl_li(_gttl_li)
         , last_seq_was_processed(false)
         , input_exhausted(_input_exhausted)
@@ -47,9 +49,24 @@ class GttlSeqIterator
           sequence_entry.sequence.clear();
           current_string = &sequence_entry.header;
           bool found_end = false;
-          while (gttl_li.next(current_string))
+          while (true)
           {
-            current_string->pop_back(); /* remove \n */
+            if constexpr (buf_size == 0)
+            {
+              if (not gttl_li.next(&current_line))
+              {
+                break;
+              }
+              current_line.pop_back(); /* remove \n */
+              current_string->append(current_line.data(),current_line.size());
+            } else
+            {
+              if (not gttl_li.next(current_string))
+              {
+                break;
+              }
+              current_string->pop_back(); /* remove \n */
+            }
             if (current_string == &sequence_entry.header)
             {
               current_string = &sequence_entry.sequence;
@@ -104,22 +121,26 @@ class GttlSeqIterator
     GttlSeqIterator(GttlFpType _in_fp) :
         gttl_li(GttlLineIterator<buf_size>(_in_fp))
     {
+      static_assert(buf_size > 0);
       gttl_li.separator_set('>');
     }
     GttlSeqIterator(const char *inputfile) :
         gttl_li(GttlLineIterator<buf_size>(inputfile))
     {
+      static_assert(buf_size > 0);
       gttl_li.separator_set('>');
     }
     GttlSeqIterator(const std::vector<std::string> *inputfiles) :
       gttl_li(GttlLineIterator<buf_size>(inputfiles))
     {
+      static_assert(buf_size > 0);
       gttl_li.separator_set('>');
     }
     GttlSeqIterator(const std::string_view &multi_fasta_part)
       : gttl_li(GttlLineIterator<0>(multi_fasta_part.data(),
                                     multi_fasta_part.size()))
     {
+      static_assert(buf_size == 0);
       gttl_li.separator_set('>');
     }
     size_t line_number(void) const noexcept

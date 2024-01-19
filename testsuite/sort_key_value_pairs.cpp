@@ -405,7 +405,7 @@ int main(int argc, char *argv[])
                                  DBL_MAX,num_sort_bits);
     } else
     {
-      assert(options.data_type_option_get() == 'p');
+      assert(options.data_type_option_get() == 'i');
       //gttl_required_bits<size_t>(number_of_values);
       const int num_sort_bits = 64;
       sort_values<size_t>(seed,argv[0],show,sort_mode,
