@@ -303,7 +303,7 @@ class GttlLineIterator
     }
     const size_t remain = static_cast<size_t>(end_input_string - suffix);
     const char *next_separator = reinterpret_cast<const char *>
-                                 (memchr(suffix,separator,remain));
+                                 (memchr(suffix,'\n',remain));
     if (next_separator != nullptr)
     {
       const size_t view_len = static_cast<size_t>(next_separator - suffix + 1);
@@ -316,6 +316,10 @@ class GttlLineIterator
         {
           endofunit = true;
         }
+      } else
+      {
+        assert(suffix == end_input_string);
+        endofunit = true;
       }
       line_number++;
       return true;

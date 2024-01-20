@@ -233,7 +233,7 @@ static void parallel_char_distribution(
 
 int main(int argc,char *argv[])
 {
-  SeqReaderOptions options{};
+  SeqReaderOptions options{2,true};
 
   try
   {

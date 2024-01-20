@@ -59,9 +59,6 @@ static void verify_hashvalues_for_file(const char *inputfilename,
     size_t ranges_total_length = 0,
            hash_value_sum = 0,
            compl_hash_value_sum = 0;
-#ifndef NDEBUG
-    size_t seqnum = 0;
-#endif
     for (auto &&si : gttl_si)
     {
       auto sequence = si.sequence_get();
@@ -84,9 +81,6 @@ static void verify_hashvalues_for_file(const char *inputfilename,
         }
         ranges_total_length += this_length;
       }
-#ifndef NDEBUG
-      seqnum++;
-#endif
     }
     std::cout << "# ranges_total_length\t" << ranges_total_length << std::endl;
     std::cout << "# hash_value_sum\t" << hash_value_sum << std::endl;

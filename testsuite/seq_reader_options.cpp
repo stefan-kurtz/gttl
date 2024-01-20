@@ -27,7 +27,10 @@ static void usage(const cxxopts::Options &options)
   std::cerr << options.help() << std::endl;
 }
 
-SeqReaderOptions::SeqReaderOptions(void) {};
+SeqReaderOptions::SeqReaderOptions(size_t _max_input_files, bool _for_fastq)
+  : max_input_files(_max_input_files)
+  , for_fastq(_for_fastq)
+{}
 
 void SeqReaderOptions::parse(int argc, char **argv)
 {
@@ -35,25 +38,39 @@ void SeqReaderOptions::parse(int argc, char **argv)
                                    "statistics, echo in the input or show "
                                    "sequences in fasta file");
   options.set_width(80);
-  options.custom_help(std::string("[options] filename0 [filename1]"));
+  if (max_input_files == 0)
+  {
+    options.custom_help(std::string("[options] filename0 [filename1 ...]"));
+  } else
+  {
+    options.custom_help(std::string("[options] filename0 [filename1]"));
+  }
   options.set_tab_expansion();
   options.add_options()
-     ("s,statistics", "output statistics",
-      cxxopts::value<bool>(statistics_option)->default_value("false"))
-     ("e,echo", "available only for single file",
-      cxxopts::value<bool>(echo_option)->default_value("false"))
      ("m,mapped", "use fastq reader which works on mapped file",
       cxxopts::value<bool>(mapped_option)->default_value("false"))
-     ("split_size", "specify number of sequences for each split",
-      cxxopts::value<size_t>(split_size)->default_value("0"))
-     ("t,threads", "specify number of threads for parallel reading",
-      cxxopts::value<size_t>(num_threads)->default_value("0"))
-     ("f,fasta_output", "output sequences in fasta format; when two files "
-                        "are specified, the sequences are zipped, i.e. "
-                        "sequences at even indexes (when counting from 0) "
-                        "are from the first file and sequences at odd "
-                        "indexes are from the second file",
-      cxxopts::value<bool>(fasta_output_option)->default_value("false"))
+     ("s,statistics", "output statistics",
+      cxxopts::value<bool>(statistics_option)->default_value("false"));
+  if (for_fastq)
+  {
+    options.add_options()
+       ("e,echo", "output the contents of the files read; "
+                  "available only for single file",
+        cxxopts::value<bool>(echo_option)->default_value("false"))
+       ("split_size", "specify number of sequences for each split",
+        cxxopts::value<size_t>(split_size)->default_value("0"))
+       ("t,threads", "specify number of threads for parallel reading",
+        cxxopts::value<size_t>(num_threads)->default_value("0"))
+       ("f,fasta_output", "output sequences in fasta format; when two files "
+                          "are specified, the sequences are zipped, i.e. "
+                          "sequences at even indexes (when counting from 0) "
+                          "are from the first file and sequences at odd "
+                          "indexes are from the second file",
+      cxxopts::value<bool>(fasta_output_option)->default_value("false"));
+  }
+  options.add_options()
+     ("w,width", "specify line width for output of sequences in fasta format",
+      cxxopts::value<size_t>(line_width)->default_value("0"))
      ("h,help", "print usage");
   try
   {
@@ -72,7 +89,7 @@ void SeqReaderOptions::parse(int argc, char **argv)
     {
       throw cxxopts::OptionException("not enough input files");
     }
-    if (inputfiles.size() > 2)
+    if (max_input_files > 0 and inputfiles.size() > max_input_files)
     {
       throw cxxopts::OptionException("superfluous input files");
     }
@@ -140,6 +157,11 @@ size_t SeqReaderOptions::split_size_get(void) const noexcept
 size_t SeqReaderOptions::num_threads_get(void) const noexcept
 {
   return num_threads;
+}
+
+size_t SeqReaderOptions::line_width_get(void) const noexcept
+{
+  return line_width;
 }
 
 const std::vector<std::string> &SeqReaderOptions::inputfiles_get(void)

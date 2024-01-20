@@ -14,10 +14,14 @@ class SeqReaderOptions
        echo_option = false,
        fasta_output_option = false,
        mapped_option = false;
-  size_t num_threads = 0, split_size = 0;
+  size_t num_threads = 0,
+         split_size = 0,
+         line_width = 0,
+         max_input_files;
+  bool for_fastq;
 
  public:
-  SeqReaderOptions(void);
+  SeqReaderOptions(size_t,bool);
 
   void parse(int argc, char **argv);
   bool help_option_is_set(void) const noexcept;
@@ -27,6 +31,7 @@ class SeqReaderOptions
   bool mapped_option_is_set(void) const noexcept;
   size_t split_size_get(void) const noexcept;
   size_t num_threads_get(void) const noexcept;
+  size_t line_width_get(void) const noexcept;
   const std::vector<std::string> &inputfiles_get(void) const noexcept;
 };
 #endif

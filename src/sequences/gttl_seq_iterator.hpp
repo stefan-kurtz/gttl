@@ -58,7 +58,7 @@ class GttlSeqIterator
                 break;
               }
               current_line.pop_back(); /* remove \n */
-              this_mutex.lock();
+#ifdef NEWCODE
               std::cout << "current_string i.e. "
                         << (current_string == &sequence_entry.header ?
                             "header" : "sequence")
@@ -69,11 +69,13 @@ class GttlSeqIterator
                         << current_line.size()
                         << " to current_string "
                         << std::endl;
+#endif
               current_string->append(current_line.data(),current_line.size());
+#ifdef NEWCODE
               std::cout << "current_string now has length "
                         << current_string->size()
                         << std::endl;
-              this_mutex.lock();
+#endif
               current_line.clear();
             } else
             {
@@ -158,8 +160,6 @@ class GttlSeqIterator
     {
       static_assert(buf_size == 0);
       gttl_li.separator_set('>');
-      std::cout << "GttlSeqIterator, length=" <<  multi_fasta_part.size()
-                << "content=" << multi_fasta_part << std::endl;
     }
     size_t line_number(void) const noexcept
     {

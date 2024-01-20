@@ -5,6 +5,9 @@ LD=${CXX}
 LDLIBS=-lm -lz -lpthread -lstdc++
 CXXFLAGS=-std=c++17
 AT1MB=../testdata/at1MB.fna
+SW175=../testdata/sw175.fna
+Y3=../testdata/ychrIII.fna
+VAC=../testdata/vaccg.fna
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 
@@ -51,6 +54,7 @@ test:test_alphabet \
      test_non_wc_ranges \
      test_line_iterator \
      test_fastq_iterator \
+     test_fasta_iterator \
      test_multiseq \
      test_thread_pool \
      test_sort_kvt \
@@ -128,8 +132,8 @@ test_nthash_wc_palindrome:enum_nthash.x
 test_multiseq:./multiseq_mn.x
 	@./check_err.py ./multiseq_mn.x
 	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
-	@./multiseq_mn.x -w 60 ../testdata/sw175.fna | diff -I '^#' - ../testdata/sw175.fna
-	@./multiseq_mn.x -r -p ../testdata/sw175.fna | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
+	@./multiseq_mn.x -w 60 ${SW175} | diff -I '^#' - ${SW175}
+	@./multiseq_mn.x -r -p ${SW175} | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
 	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
 	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
@@ -172,6 +176,16 @@ test_fastq_iterator:./fastq_mn.x
 	done
 	@./test_fastq_iterator.sh
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_fasta_iterator
+test_fasta_iterator:./fasta_mn.x
+	@for input_mode in "" --mapped; do \
+	  ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff - ${AT1MB};\
+	  ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff - ${SW175};\
+	  ./fasta_mn.x $${input_mode} --width 61 ${Y3} | diff - ${Y3};\
+	  ./fasta_mn.x $${input_mode} --width 61 ${VAC} | diff - ${VAC};\
+	done
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_thread_pool
@@ -266,6 +280,9 @@ test_split_string:split_string_mn.x
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
+
+fasta_mn.x:fasta_mn.o seq_reader_options.o
+	$(CXX) ${LDFLAGS} fasta_mn.o seq_reader_options.o -o $@ ${LDLIBS}
 
 minimizer.x:minimizer_opt.o minimizer_mn.o
 	$(CXX) ${LDFLAGS} minimizer_opt.o minimizer_mn.o -o $@ ${LDLIBS}
