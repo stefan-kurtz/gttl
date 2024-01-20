@@ -58,7 +58,22 @@ class GttlSeqIterator
                 break;
               }
               current_line.pop_back(); /* remove \n */
+              this_mutex.lock();
+              std::cout << "current_string i.e. "
+                        << (current_string == &sequence_entry.header ?
+                            "header" : "sequence")
+                        << " has length "
+                        << current_string->size()
+                        << std::endl;
+              std::cout << "append string of length "
+                        << current_line.size()
+                        << " to current_string "
+                        << std::endl;
               current_string->append(current_line.data(),current_line.size());
+              std::cout << "current_string now has length "
+                        << current_string->size()
+                        << std::endl;
+              this_mutex.lock();
               current_line.clear();
             } else
             {
@@ -143,6 +158,8 @@ class GttlSeqIterator
     {
       static_assert(buf_size == 0);
       gttl_li.separator_set('>');
+      std::cout << "GttlSeqIterator, length=" <<  multi_fasta_part.size()
+                << "content=" << multi_fasta_part << std::endl;
     }
     size_t line_number(void) const noexcept
     {

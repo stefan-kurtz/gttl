@@ -20,16 +20,16 @@
 #include <cassert>
 #include <algorithm>
 #include "utilities/cxxopts.hpp"
-#include "fastq_opt.hpp"
+#include "seq_reader_options.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
   std::cerr << options.help() << std::endl;
 }
 
-FastQReaderOptions::FastQReaderOptions(void) {};
+SeqReaderOptions::SeqReaderOptions(void) {};
 
-void FastQReaderOptions::parse(int argc, char **argv)
+void SeqReaderOptions::parse(int argc, char **argv)
 {
   cxxopts::Options options(argv[0],"process fastq files, optionally output "
                                    "statistics, echo in the input or show "
@@ -107,42 +107,42 @@ void FastQReaderOptions::parse(int argc, char **argv)
   }
 }
 
-bool FastQReaderOptions::help_option_is_set(void) const noexcept
+bool SeqReaderOptions::help_option_is_set(void) const noexcept
 {
   return help_option;
 }
 
-bool FastQReaderOptions::statistics_option_is_set(void) const noexcept
+bool SeqReaderOptions::statistics_option_is_set(void) const noexcept
 {
   return statistics_option;
 }
 
-bool FastQReaderOptions::echo_option_is_set(void) const noexcept
+bool SeqReaderOptions::echo_option_is_set(void) const noexcept
 {
   return echo_option;
 }
 
-bool FastQReaderOptions::fasta_output_option_is_set(void) const noexcept
+bool SeqReaderOptions::fasta_output_option_is_set(void) const noexcept
 {
   return fasta_output_option;
 }
 
-bool FastQReaderOptions::mapped_option_is_set(void) const noexcept
+bool SeqReaderOptions::mapped_option_is_set(void) const noexcept
 {
   return mapped_option;
 }
 
-size_t FastQReaderOptions::split_size_get(void) const noexcept
+size_t SeqReaderOptions::split_size_get(void) const noexcept
 {
   return split_size;
 }
 
-size_t FastQReaderOptions::num_threads_get(void) const noexcept
+size_t SeqReaderOptions::num_threads_get(void) const noexcept
 {
   return num_threads;
 }
 
-const std::vector<std::string> &FastQReaderOptions::inputfiles_get(void)
+const std::vector<std::string> &SeqReaderOptions::inputfiles_get(void)
       const noexcept
 {
   return inputfiles;

@@ -1,11 +1,11 @@
-#ifndef FASTQ_OPT_HPP
-#define FASTQ_OPT_HPP
+#ifndef SEQ_READER_OPTIONS_HPP
+#define SEQ_READER_OPTIONS_HPP
 #include <cstddef>
 #include <cstdbool>
 #include <string>
 #include <vector>
 
-class FastQReaderOptions
+class SeqReaderOptions
 {
  private:
   std::vector<std::string> inputfiles{};
@@ -17,7 +17,7 @@ class FastQReaderOptions
   size_t num_threads = 0, split_size = 0;
 
  public:
-  FastQReaderOptions(void);
+  SeqReaderOptions(void);
 
   void parse(int argc, char **argv);
   bool help_option_is_set(void) const noexcept;

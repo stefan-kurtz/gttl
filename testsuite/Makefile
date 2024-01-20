@@ -264,8 +264,8 @@ test_split_string:split_string_mn.x
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
-fastq_mn.x:fastq_mn.o fastq_opt.o
-	$(CXX) ${LDFLAGS} fastq_mn.o fastq_opt.o -o $@ ${LDLIBS}
+fastq_mn.x:fastq_mn.o seq_reader_options.o
+	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
 
 minimizer.x:minimizer_opt.o minimizer_mn.o
 	$(CXX) ${LDFLAGS} minimizer_opt.o minimizer_mn.o -o $@ ${LDLIBS}

@@ -28,7 +28,7 @@
 #include "utilities/gttl_mmap.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/fastq_parts.hpp"
-#include "fastq_opt.hpp"
+#include "seq_reader_options.hpp"
 
 static void fastq_split_writer(size_t split_size,
                                const std::string &inputfilename)
@@ -233,7 +233,7 @@ static void parallel_char_distribution(
 
 int main(int argc,char *argv[])
 {
-  FastQReaderOptions options{};
+  SeqReaderOptions options{};
 
   try
   {
