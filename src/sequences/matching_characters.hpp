@@ -24,6 +24,11 @@ static inline bool matching_characters(char a,char b)
   return a == b;
 }
 
+static inline bool matching_ranks(uint8_t a,uint8_t b)
+{
+  return a == b;
+}
+
 template<bool wildcards>
 static inline bool matching_characters_template(char a, char b)
 {

@@ -131,7 +131,7 @@ void inline enumerate_minimizer(size_t qgram_length,
            not moved yet */
         if (not front_was_moved)
         {
-          minimizer_processor->apply(window_deque.front());
+          minimizer_processor->apply(sequence,window_deque.front());
           front_was_moved = true; /* we moved front element and do not
                                      want to do it again */
         }
@@ -140,7 +140,7 @@ void inline enumerate_minimizer(size_t qgram_length,
         // add minimizer of first window
         if (seqpos == window_size - 1)
         {
-          minimizer_processor->apply(window_deque.front());
+          minimizer_processor->apply(sequence,window_deque.front());
           front_was_moved = true;
         }
       }
@@ -152,7 +152,7 @@ void inline enumerate_minimizer(size_t qgram_length,
   {
     for (auto && pq : palindromic_vector)
     {
-      minimizer_processor->apply(pq);
+      minimizer_processor->apply(sequence,pq);
     }
   }
 }
