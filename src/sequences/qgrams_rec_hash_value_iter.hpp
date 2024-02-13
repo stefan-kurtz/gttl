@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cassert>
 #include <cmath>
+#include <tuple>
 #include "sequences/alphabet.hpp"
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/max_qgram_length.hpp"
