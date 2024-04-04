@@ -66,7 +66,12 @@ void SeqReaderOptions::parse(int argc, char **argv)
                           "sequences at even indexes (when counting from 0) "
                           "are from the first file and sequences at odd "
                           "indexes are from the second file",
-      cxxopts::value<bool>(fasta_output_option)->default_value("false"));
+        cxxopts::value<bool>(fasta_output_option)->default_value("false"))
+       ("hash", "compute hash values of all sequences using the method "
+                "provided as parameter; possible values wy (for wyhash) "
+                "and xx (for xxhash); default: \"\"",
+        cxxopts::value<std::string>(hash_method)->default_value(""))
+      ;
   }
   options.add_options()
      ("w,width", "specify line width for output of sequences in fasta format",
@@ -168,4 +173,21 @@ const std::vector<std::string> &SeqReaderOptions::inputfiles_get(void)
       const noexcept
 {
   return inputfiles;
+}
+
+hash_mode_type SeqReaderOptions::hash_mode_get(void) const
+{
+  if (hash_method.size() == 0)
+  {
+    return hash_mode_none;
+  }
+  if (hash_method == "wy")
+  {
+    return hash_mode_wy;
+  }
+  if (hash_method == "xx")
+  {
+    return hash_mode_xx;
+  }
+  throw "illegal hash mode " + hash_method;
 }

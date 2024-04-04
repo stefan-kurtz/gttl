@@ -26,6 +26,9 @@
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
+#include "utilities/wyhash.hpp"
+#define XXH_INLINE_ALL
+#include "utilities/xxhash.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/fastq_parts.hpp"
 #include "seq_reader_options.hpp"
@@ -73,27 +76,55 @@ template<class FastQIterator>
 static void process_fastq_iter(bool statistics,
                                bool echo,
                                bool fasta_output,
+                               hash_mode_type hash_mode,
                                FastQIterator &fastq_it)
 {
   size_t seqnum = 0, total_length = 0;
+  uint64_t hash_value_sum = 0;
   for (auto &&fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry.sequence_get();
-    if (echo)
+    if (hash_mode == hash_mode_wy)
     {
-      const std::string_view &header = fastq_entry.header_get();
-      const std::string_view &quality = fastq_entry.quality_get();
-      std::cout << header << std::endl
-                << sequence << std::endl
-                << "+" << std::endl
-                << quality << std::endl;
+      const uint64_t hash_value = wyhash(sequence.data(), sequence.size(),0);
+      if (echo)
+      {
+        std::cout << hash_value << "\t" << sequence << std::endl;
+      } else
+      {
+        hash_value_sum += hash_value;
+      }
     } else
     {
-      if (fasta_output)
+      if (hash_mode == hash_mode_xx)
       {
-        const std::string_view &header = fastq_entry.header_get();
-        std::cout << ">" << header.substr(1) << std::endl
-                  << sequence << std::endl;
+        const uint64_t hash_value = XXH64(sequence.data(),sequence.size(),0);
+        if (echo)
+        {
+          std::cout << hash_value << "\t" << sequence << std::endl;
+        } else
+        {
+          hash_value_sum += hash_value;
+        }
+      } else
+      {
+        if (echo)
+        {
+          const std::string_view &header = fastq_entry.header_get();
+          const std::string_view &quality = fastq_entry.quality_get();
+          std::cout << header << std::endl
+                    << sequence << std::endl
+                    << "+" << std::endl
+                    << quality << std::endl;
+        } else
+        {
+          if (fasta_output)
+          {
+            const std::string_view &header = fastq_entry.header_get();
+            std::cout << ">" << header.substr(1) << std::endl
+                      << sequence << std::endl;
+          }
+        }
       }
     }
     total_length += sequence.size();
@@ -105,23 +136,30 @@ static void process_fastq_iter(bool statistics,
     std::cout << "# total length\t" << total_length << std::endl;
     std::cout << "# mean length\t" << total_length/seqnum << std::endl;
   }
+  if (hash_mode != hash_mode_none)
+  {
+    std::cout << "# hash_value_sum\t" << hash_value_sum << std::endl;
+  }
 }
 
 static void process_single_file_streamed(bool statistics,
                                          bool echo,
                                          bool fasta_output,
+                                         hash_mode_type hash_mode,
                                          const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
   GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
   using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
   FastQIterator fastq_it(line_iterator);
-  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,fastq_it);
+  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
+                                    fastq_it);
 }
 
 static void process_single_file_mapped(bool statistics,
                                        bool echo,
                                        bool fasta_output,
+                                       hash_mode_type hash_mode,
                                        const std::string &inputfilename)
 {
   constexpr const int buf_size = 0;
@@ -130,7 +168,8 @@ static void process_single_file_mapped(bool statistics,
                                            mapped_file.size());
   using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
   FastQIterator fastq_it(line_iterator);
-  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,fastq_it);
+  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
+                                    fastq_it);
 }
 
 static void process_paired_files(bool statistics,
@@ -253,6 +292,7 @@ int main(int argc,char *argv[])
     const bool statistics = options.statistics_option_is_set();
     const bool echo = options.echo_option_is_set();
     const bool fasta_output = options.fasta_output_option_is_set();
+    const hash_mode_type hash_mode = options.hash_mode_get();
     const size_t split_size = options.split_size_get();
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
     if (inputfiles.size() == 1)
@@ -273,11 +313,11 @@ int main(int argc,char *argv[])
           if (options.mapped_option_is_set())
           {
             process_single_file_mapped(statistics,echo,fasta_output,
-                                       inputfiles[0]);
+                                       hash_mode,inputfiles[0]);
           } else
           {
             process_single_file_streamed(statistics,echo,fasta_output,
-                                         inputfiles[0]);
+                                         hash_mode,inputfiles[0]);
           }
         }
       }

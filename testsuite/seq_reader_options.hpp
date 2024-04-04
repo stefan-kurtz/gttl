@@ -5,6 +5,13 @@
 #include <string>
 #include <vector>
 
+enum hash_mode_type
+{
+  hash_mode_none,
+  hash_mode_wy,
+  hash_mode_xx
+};
+
 class SeqReaderOptions
 {
  private:
@@ -19,6 +26,7 @@ class SeqReaderOptions
          line_width = 0,
          max_input_files;
   bool for_fastq;
+  std::string hash_method{};
 
  public:
   SeqReaderOptions(size_t,bool);
@@ -33,5 +41,6 @@ class SeqReaderOptions
   size_t num_threads_get(void) const noexcept;
   size_t line_width_get(void) const noexcept;
   const std::vector<std::string> &inputfiles_get(void) const noexcept;
+  hash_mode_type hash_mode_get(void) const;
 };
 #endif
