@@ -27,8 +27,10 @@
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
+#ifdef WITH_XXHASH
 #define XXH_INLINE_ALL
 #include "utilities/xxhash.hpp"
+#endif
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/fastq_parts.hpp"
 #include "seq_reader_options.hpp"
@@ -77,6 +79,7 @@ static void process_fastq_iter(bool statistics,
                                bool echo,
                                bool fasta_output,
                                hash_mode_type hash_mode,
+                               const std::string &inputfilename,
                                FastQIterator &fastq_it)
 {
   size_t seqnum = 0, total_length = 0;
@@ -98,7 +101,11 @@ static void process_fastq_iter(bool statistics,
     {
       if (hash_mode == hash_mode_xx)
       {
+#ifdef WITH_XXHASH
         const uint64_t hash_value = XXH64(sequence.data(),sequence.size(),0);
+#else
+        const uint64_t hash_value = 0;
+#endif
         if (echo)
         {
           std::cout << hash_value << "\t" << sequence << std::endl;
@@ -138,7 +145,7 @@ static void process_fastq_iter(bool statistics,
   }
   if (hash_mode != hash_mode_none)
   {
-    std::cout << "# hash_value_sum\t" << hash_value_sum << std::endl;
+    std::cout << inputfilename << "\t" << hash_value_sum << std::endl;
   }
 }
 
@@ -153,7 +160,7 @@ static void process_single_file_streamed(bool statistics,
   using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
   FastQIterator fastq_it(line_iterator);
   process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
-                                    fastq_it);
+                                    inputfilename,fastq_it);
 }
 
 static void process_single_file_mapped(bool statistics,
@@ -169,7 +176,7 @@ static void process_single_file_mapped(bool statistics,
   using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
   FastQIterator fastq_it(line_iterator);
   process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
-                                    fastq_it);
+                                    inputfilename,fastq_it);
 }
 
 static void process_paired_files(bool statistics,

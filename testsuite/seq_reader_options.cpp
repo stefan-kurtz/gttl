@@ -68,8 +68,12 @@ void SeqReaderOptions::parse(int argc, char **argv)
                           "indexes are from the second file",
         cxxopts::value<bool>(fasta_output_option)->default_value("false"))
        ("hash", "compute hash values of all sequences using the method "
-                "provided as parameter; possible values wy (for wyhash) "
-                "and xx (for xxhash); default: \"\"",
+                "provided as parameter; possible values wy (for wyhash)"
+#ifdef WITH_XXHASH
+                " and xx (for xxhash)"
+#else
+#endif
+                "; default: \"\"",
         cxxopts::value<std::string>(hash_method)->default_value(""))
       ;
   }
@@ -185,9 +189,11 @@ hash_mode_type SeqReaderOptions::hash_mode_get(void) const
   {
     return hash_mode_wy;
   }
+#ifdef WITH_XXHASH
   if (hash_method == "xx")
   {
     return hash_mode_xx;
   }
+#endif
   throw "illegal hash mode " + hash_method;
 }
