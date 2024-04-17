@@ -35,6 +35,10 @@ class Bitvector
   {
     return static_cast<bool>(value & the_bit(idx));
   }
+  void operator |=(const Bitvector &other) noexcept
+  {
+    value |= other.value;
+  }
   size_t count(void) const noexcept
   {
     return popcount_uint64_t(value);

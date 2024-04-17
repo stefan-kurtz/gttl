@@ -79,6 +79,14 @@ class Multibitvector
   {
     return bits;
   }
+  void operator |=(const MultiBitvector &other) noexcept
+  {
+    static_assert(not track_count);
+    for (size_t idx = 0; idx < num_bitvectors; idx++)
+    {
+      multibitvector[idx] |= other.multibitvector[idx];
+    }
+  }
   size_t count(void) const noexcept
   {
     if constexpr (track_count)
