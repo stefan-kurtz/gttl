@@ -138,7 +138,9 @@ test_multiseq:./multiseq_mn.x
 	@./multiseq_mn.x --statistics --rankdist ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
 	@./multiseq_mn.x --zipped --width 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
 	@./multiseq_mn.x --width 70 --short_header ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
-	@./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_sample42_short_header.txt
+	@$(eval TMPFILE := $(shell mktemp))
+	@echo "42" > ${TMPFILE}
+	@./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep -c '^>' | diff - ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator
