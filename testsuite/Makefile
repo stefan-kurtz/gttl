@@ -131,13 +131,13 @@ test_nthash_wc_palindrome:enum_nthash.x
 .PHONY:test_multiseq
 test_multiseq:./multiseq_mn.x
 	@./check_err.py ./multiseq_mn.x
-	@./multiseq_mn.x -w 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
-	@./multiseq_mn.x -w 60 ${SW175} | diff -I '^#' - ${SW175}
-	@./multiseq_mn.x -r -p ${SW175} | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
-	@./multiseq_mn.x -w 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
-	@./multiseq_mn.x -r ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
-	@./multiseq_mn.x -z -w 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
-	@./multiseq_mn.x -w 70 -s ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
+	@./multiseq_mn.x --width 0 ../testdata/small.fna | diff -I '^#' - ../testdata/small.fna
+	@./multiseq_mn.x --width 60 ${SW175} | diff -I '^#' - ${SW175}
+	@./multiseq_mn.x --statistics --rankdist --protein ${SW175} | grep -v '^# TIME' | diff - ../testdata/sw175_stat.tsv
+	@./multiseq_mn.x --width 70 ${AT1MB} | diff -I '^#' - ${AT1MB}
+	@./multiseq_mn.x --statistics --rankdist ${AT1MB} | grep -v '^# TIME' | diff - ../testdata/at1MB_stat.tsv
+	@./multiseq_mn.x --zipped --width 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff - ../testdata/varlen_paired_both.fasta
+	@./multiseq_mn.x --width 70 --short_header ${AT1MB} | grep '^>' | diff - ../testdata/at1MB_short_header.txt
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator

@@ -1,9 +1,11 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include <vector>
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "sequences/literate_multiseq.hpp"
+#include "utilities/random_sample.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -18,8 +20,10 @@ class MultiseqOptions
        protein_option,
        zipped_option,
        rankdist_option,
-       short_header_option;
+       short_header_option,
+       statistics_option;
   size_t sample_size;
+  unsigned int seed;
   int width_arg = -1;
 
  public:
@@ -30,7 +34,9 @@ class MultiseqOptions
    , zipped_option(false)
    , rankdist_option(false)
    , short_header_option(false)
+   , statistics_option(false)
    , sample_size(0)
+   , seed(0)
  {}
 
   void parse(int argc, char **argv)
@@ -44,6 +50,9 @@ class MultiseqOptions
         cxxopts::value<bool>(protein_option)->default_value("false"))
        ("sample", "extract random sample of the specified number of sequences",
         cxxopts::value<size_t>(sample_size)->default_value("0"))
+       ("seed", "specify seed for generating random sample (default is 0, so "
+                "that each call uses a differnt seed)",
+        cxxopts::value<unsigned int>(seed)->default_value("0"))
        ("z,zipped", "expect two fastq  files with the same "
                     "number of sequences; show them "
                     "in zipped order, i.e. the "
@@ -55,6 +64,8 @@ class MultiseqOptions
        ("r,rankdist", "output distribution of ranks of "
                       "transformed sequences",
         cxxopts::value<bool>(rankdist_option)->default_value("false"))
+       ("statistics", "output statistics about the sequences",
+        cxxopts::value<bool>(statistics_option)->default_value("false"))
        ("s,short_header", "show header up to and excluding the first blank",
         cxxopts::value<bool>(short_header_option)->default_value("false"))
        ("w,width", "output headers and sequences; "
@@ -114,6 +125,10 @@ class MultiseqOptions
   {
     return short_header_option;
   }
+  bool statistics_option_is_set(void) const noexcept
+  {
+    return statistics_option;
+  }
   int width_option_get(void) const noexcept
   {
     return width_arg;
@@ -125,6 +140,10 @@ class MultiseqOptions
   size_t sample_size_get(void) const noexcept
   {
     return sample_size;
+  }
+  unsigned int seed_get(void) const noexcept
+  {
+    return seed;
   }
 };
 
@@ -148,7 +167,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
   GttlMultiseq *multiseq = nullptr;
-  RunTimeClass rt{};
+  RunTimeClass rt_multiseq{}, rt_total{};
   const std::vector<std::string> &inputfiles = options.inputfiles_get();
   try
   {
@@ -179,19 +198,57 @@ int main(int argc, char *argv[])
   {
     multiseq->short_header_cache_create();
   }
-  rt.show("create GttlMultiseq");
+  rt_multiseq.show("create GttlMultiseq");
+  bool has_err = false;
   if (options.width_option_get() >= 0)
   {
-    multiseq->show(static_cast<size_t>(options.width_option_get()),
-                                       options.short_header_option_is_set());
+    if (options.sample_size_get() > 0)
+    {
+      if (options.sample_size_get() > multiseq->sequences_number_get())
+      {
+        std::cerr << argv[0] << " you cannot sample "
+                  << options.sample_size_get()
+                  << " sequences from a set of "
+                  << multiseq->sequences_number_get()
+                  << " elements" << std::endl;
+        has_err = true;
+      } else
+      {
+        RunTimeClass rt_sample{};
+        std::vector<size_t> sample
+          = gttl_random_sample<size_t>(multiseq->sequences_number_get(),
+                                       options.sample_size_get(),
+                                       options.seed_get());
+        for (auto &seqnum : sample)
+        {
+          multiseq->show_single_sequence(
+                      static_cast<size_t>(options.width_option_get()),
+                      options.short_header_option_is_set(),
+                      seqnum);
+        }
+        StrFormat msg("create a sample of %lu (%.2f%%) from %lu sequences",
+                      options.sample_size_get(),
+                      100.0 * options.sample_size_get()/
+                              multiseq->sequences_number_get(),
+                      multiseq->sequences_number_get());
+        rt_sample.show(msg.str());
+      }
+    } else
+    {
+      multiseq->show(static_cast<size_t>(options.width_option_get()),
+                     options.short_header_option_is_set());
+    }
   }
-  for (auto &&inputfile : inputfiles)
+  if (options.statistics_option_is_set())
   {
-    std::cout << "# filename\t" << inputfile << std::endl;
-  }
-  for (auto &msg : multiseq->statistics())
-  {
-    std::cout << "# " << msg << std::endl;
+    for (auto &&inputfile : inputfiles)
+    {
+      std::cout << "# filename\t" << inputfile << std::endl;
+    }
+    for (auto &msg : multiseq->statistics())
+    {
+      std::cout << "# " << msg << std::endl;
+    }
   }
   if (options.rankdist_option_is_set())
   {
@@ -209,4 +266,6 @@ int main(int argc, char *argv[])
     }
   }
   delete multiseq;
+  rt_total.show("total");
+  return has_err ? EXIT_FAILURE : EXIT_SUCCESS;
 }
