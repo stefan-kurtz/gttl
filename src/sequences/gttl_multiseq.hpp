@@ -470,6 +470,40 @@ class GttlMultiseq
     }
     return total;
   }
+  void show_single_sequence(size_t width, bool short_header, size_t seqnum)
+       const noexcept
+  {
+    printf(">");
+    const std::string_view header = header_get(seqnum);
+    size_t header_offset, header_len;
+    if (short_header)
+    {
+      std::tie(header_offset,header_len) = short_header_get(seqnum);
+    } else
+    {
+      header_offset = 0;
+      header_len = header.size();
+    }
+    std::fwrite(header.data() + header_offset, sizeof (char),header_len,stdout);
+    printf("\n");
+    const char *currentseq = this->sequence_ptr_get(seqnum);
+    size_t currentlength = this->sequence_length_get(seqnum);
+    size_t line_width = 0;
+    for (size_t idx = 0; idx < currentlength; idx++)
+    {
+      printf("%c",currentseq[idx]);
+      line_width++;
+      if (line_width == width)
+      {
+        printf("\n");
+        line_width = 0;
+      }
+    }
+    if (width == 0 || line_width > 0)
+    {
+      printf("\n");
+    }
+  }
   /* Prints out the header and sequence infos to stdout
    - width gives the maximum line size, width 0
      prints prints out sequences in just one line
@@ -487,35 +521,7 @@ class GttlMultiseq
 #endif
     for (seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      std::cout.put('>');
-      const std::string_view header = header_get(seqnum);
-      if (short_header)
-      {
-        size_t sh_offset, sh_len;
-        std::tie(sh_offset,sh_len) = short_header_get(seqnum);
-        std::fwrite(header.data() + sh_offset,sizeof(char),sh_len,stdout);
-      } else
-      {
-        std::cout << header;
-      }
-      std::cout << std::endl;
-      const char *currentseq = this->sequence_ptr_get(seqnum);
-      size_t currentlength = this->sequence_length_get(seqnum);
-      size_t line_width = 0;
-      for (size_t idx = 0; idx < currentlength; idx++)
-      {
-        std::cout << currentseq[idx];
-        line_width++;
-        if (line_width == width)
-        {
-          std::cout << std::endl;
-          line_width = 0;
-        }
-      }
-      if (width == 0 || line_width > 0)
-      {
-        std::cout << std::endl;
-      }
+      show_single_sequence(width,short_header,seqnum);
 #ifndef NDEBUG
       assert(currentlength >= sequences_minimum_length);
       if (currentlength == sequences_minimum_length)

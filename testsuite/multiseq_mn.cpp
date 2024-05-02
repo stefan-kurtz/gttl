@@ -13,16 +13,25 @@ static void usage(const cxxopts::Options &options)
 class MultiseqOptions
 {
  private:
-  std::vector<std::string> inputfiles{};
-  bool help_option = false,
-       protein_option = false,
-       zipped_option = false,
-       rankdist_option = false,
-       short_header_option = false;
+  std::vector<std::string> inputfiles;
+  bool help_option,
+       protein_option,
+       zipped_option,
+       rankdist_option,
+       short_header_option;
+  size_t sample_size;
   int width_arg = -1;
 
  public:
-  MultiseqOptions() {};
+  MultiseqOptions(void)
+   : inputfiles({})
+   , help_option(false)
+   , protein_option(false)
+   , zipped_option(false)
+   , rankdist_option(false)
+   , short_header_option(false)
+   , sample_size(0)
+ {}
 
   void parse(int argc, char **argv)
   {
@@ -33,6 +42,8 @@ class MultiseqOptions
     options.add_options()
        ("p,protein", "handle protein sequences",
         cxxopts::value<bool>(protein_option)->default_value("false"))
+       ("sample", "extract random sample of the specified number of sequences",
+        cxxopts::value<size_t>(sample_size)->default_value("0"))
        ("z,zipped", "expect two fastq  files with the same "
                     "number of sequences; show them "
                     "in zipped order, i.e. the "
@@ -48,7 +59,7 @@ class MultiseqOptions
         cxxopts::value<bool>(short_header_option)->default_value("false"))
        ("w,width", "output headers and sequences; "
                    "width specifies the linewidth of the"
-                   "sequence output; 0 means to output\n"
+                   "sequence output; 0 means to output "
                    "a sequence in a single line",
         cxxopts::value<int>(width_arg)->default_value("-1"))
        ("h,help", "print usage");
@@ -110,6 +121,10 @@ class MultiseqOptions
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
     return inputfiles;
+  }
+  size_t sample_size_get(void) const noexcept
+  {
+    return sample_size;
   }
 };
 
