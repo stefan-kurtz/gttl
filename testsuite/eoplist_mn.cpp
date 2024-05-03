@@ -78,7 +78,9 @@ static void display_alignment(const Eoplist &eoplist)
   assert(j == vlen);
   const std::string ustring(useq,ulen),
                     vstring(vseq,vlen);
-  AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0);
+  AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0,
+                                                      ulen,vlen);
+  static constexpr const bool forward_strand = true;
   alignment_output<std::string,std::string,char,
                    simple_matching_characters,to_char_identity>
                   (asi,
@@ -87,6 +89,8 @@ static void display_alignment(const Eoplist &eoplist)
                    true,
                    true,
                    60,
+                   forward_strand,
+                   vlen,
                    stdout);
   delete[] useq;
   delete[] vseq;

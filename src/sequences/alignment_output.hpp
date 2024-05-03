@@ -13,23 +13,29 @@ template<class SeqClass_u,class SeqClass_v>
 struct AlignmentSequenceInfo
 {
   const SeqClass_u *useq;
+  size_t ustart;
   const SeqClass_v *vseq;
-  size_t ustart, vstart;
+  size_t vstart;
+  size_t max_length;
   AlignmentSequenceInfo (void)
     : useq(nullptr)
-    , vseq(nullptr)
     , ustart(0)
+    , vseq(nullptr)
     , vstart(0)
+    , max_length(0)
   {}
 
   AlignmentSequenceInfo(const SeqClass_u *_useq,
                         size_t _ustart,
                         const SeqClass_v *_vseq,
-                        size_t _vstart)
+                        size_t _vstart,
+                        size_t umax_length,
+                        size_t vmax_length)
     : useq(_useq)
-    , vseq(_vseq)
     , ustart(_ustart)
+    , vseq(_vseq)
     , vstart(_vstart)
+    , max_length(std::max(umax_length,vmax_length))
   {}
   void set(const SeqClass_u *_useq,
            size_t _ustart,
@@ -43,9 +49,8 @@ struct AlignmentSequenceInfo
   }
   int width_of_numbers_get(void) const
   {
-    assert(ustart + useq->size() > 0 || vstart + vseq->size() > 0);
-    size_t maximum_position = std::max(ustart + useq->size(),
-                                       vstart + vseq->size()) - 1;
+    assert(max_length > 0);
+    const size_t maximum_position = max_length-1;
     if (maximum_position < 10)
     {
       return 1;
@@ -83,12 +88,14 @@ static void alignment_output_write_lines(size_t one_off,
                                          bool subject_first,
                                          int width_of_numbers,
                                          size_t width_alignment,
+                                         bool forward_strand,
                                          const char *subject_buf,
                                          size_t subject_seqlength,
                                          size_t subject_start_pos,
                                          size_t subject_end_pos,
                                          const char *midbuf,
                                          const char *query_buf,
+                                         size_t query_seqlength,
                                          size_t query_start_pos,
                                          size_t query_end_pos,
                                          FILE *fp)
@@ -104,12 +111,17 @@ static void alignment_output_write_lines(size_t one_off,
                                  subject_end_pos + one_off,
                                  fp);
     alignment_output_middle_line(width_of_numbers,width_alignment,midbuf,fp);
+    const size_t show_query_start = forward_strand ? query_start_pos
+                                                   : (query_seqlength -
+                                                      query_end_pos - 1);
     alignment_output_single_line("Query",
                                  width_of_numbers,
                                  width_alignment,
                                  query_buf,
-                                 query_start_pos + one_off,
-                                 query_end_pos + one_off,fp);
+                                 one_off + show_query_start,
+                                 one_off + show_query_start +
+                                   (query_end_pos - query_start_pos),
+                                 fp);
   } else
   {
     alignment_output_single_line("Query",
@@ -154,12 +166,14 @@ static inline size_t alignment_output_show_advance(size_t one_off,
                                             int width_of_numbers,
                                             size_t pos,
                                             size_t width_alignment,
+                                            size_t forward_strand,
                                             const char *topbuf,
                                             size_t top_seqlength,
                                             size_t top_start_pos,
                                             size_t top_end_pos,
                                             const char *midbuf,
                                             const char *lowbuf,
+                                            size_t low_seq_length,
                                             size_t low_start_pos,
                                             size_t low_end_pos,
                                             FILE *fp)
@@ -174,12 +188,14 @@ static inline size_t alignment_output_show_advance(size_t one_off,
                                subject_first,
                                width_of_numbers,
                                width_alignment,
+                               forward_strand,
                                topbuf,
                                top_seqlength,
                                top_start_pos,
                                top_end_pos,
                                midbuf,
                                lowbuf,
+                               low_seq_length,
                                low_start_pos,
                                low_end_pos,
                                fp);
@@ -200,6 +216,8 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                              bool subject_first,
                              GTTL_UNUSED bool distinguish_mismatch_match,
                              size_t width_alignment,
+                             bool forward_strand,
+                             size_t low_seq_length,
                              FILE *fp)
 {
   static constexpr const char alignment_output_matchsymbol = '|';
@@ -255,12 +273,14 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                                               width_of_numbers,
                                               pos,
                                               width_alignment,
+                                              forward_strand,
                                               topbuf,
                                               top_seqlength,
                                               top_start_pos,
                                               asi.ustart + idx_u,
                                               midbuf,
                                               lowbuf,
+                                              low_seq_length,
                                               low_start_pos,
                                               low_start_base + idx_v,
                                               fp);
@@ -286,12 +306,14 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                                               width_of_numbers,
                                               pos,
                                               width_alignment,
+                                              forward_strand,
                                               topbuf,
                                               top_seqlength,
                                               top_start_pos,
                                               asi.ustart + idx_u,
                                               midbuf,
                                               lowbuf,
+                                              low_seq_length,
                                               low_start_pos,
                                               low_start_base + idx_v,
                                               fp);
@@ -316,12 +338,14 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                                               width_of_numbers,
                                               pos,
                                               width_alignment,
+                                              forward_strand,
                                               topbuf,
                                               top_seqlength,
                                               top_start_pos,
                                               asi.ustart + idx_u,
                                               midbuf,
                                               lowbuf,
+                                              low_seq_length,
                                               low_start_pos,
                                               low_start_base + idx_v,
                                               fp);
@@ -343,12 +367,14 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                                  subject_first,
                                  width_of_numbers,
                                  pos,
+                                 forward_strand,
                                  topbuf,
                                  top_seqlength,
                                  top_start_pos,
                                  asi.ustart + std::min(idx_u,useq.size() - 1),
                                  midbuf,
                                  lowbuf,
+                                 low_seq_length,
                                  low_start_pos,
                                  low_start_base + std::min(idx_v,
                                                            vseq.size() - 1),
