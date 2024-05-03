@@ -26,7 +26,7 @@ for filepath in args.inputfiles:
   found_define = False
   for line in stream:
     line = line.rstrip()
-    mo = re.search('^#ifndef\s+(.*)$',line)
+    mo = re.search(r'^#ifndef\s+(.*)$',line)
     if mo:
       found_ifndef = True
       tag = mo.group(1)
@@ -37,7 +37,7 @@ for filepath in args.inputfiles:
         exit(1)
       found_ifndef = True
     else:
-      mo = re.search('^#define\s+(.*)$',line)
+      mo = re.search(r'^#define\s+(.*)$',line)
       if mo:
         if not found_ifndef:
           sys.stderr.write('{}: file {}: illegal line {}\n'
