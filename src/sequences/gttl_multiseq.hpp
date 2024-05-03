@@ -487,7 +487,7 @@ class GttlMultiseq
     std::fwrite(header.data() + header_offset, sizeof (char),header_len,stdout);
     printf("\n");
     const char *currentseq = this->sequence_ptr_get(seqnum);
-    size_t currentlength = this->sequence_length_get(seqnum);
+    const size_t currentlength = this->sequence_length_get(seqnum);
     size_t line_width = 0;
     for (size_t idx = 0; idx < currentlength; idx++)
     {
@@ -523,6 +523,7 @@ class GttlMultiseq
     {
       show_single_sequence(width,short_header,seqnum);
 #ifndef NDEBUG
+      const size_t currentlength = this->sequence_length_get(seqnum);
       assert(currentlength >= sequences_minimum_length);
       if (currentlength == sequences_minimum_length)
       {

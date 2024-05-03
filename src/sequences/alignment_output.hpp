@@ -40,12 +40,15 @@ struct AlignmentSequenceInfo
   void set(const SeqClass_u *_useq,
            size_t _ustart,
            const SeqClass_v *_vseq,
-           size_t _vstart)
+           size_t _vstart,
+           size_t ulen,
+           size_t vlen)
   {
     useq = _useq;
     vseq = _vseq;
     ustart = _ustart;
     vstart = _vstart;
+    max_length = std::max(ulen,vlen);
   }
   int width_of_numbers_get(void) const
   {
