@@ -80,16 +80,24 @@ static void display_alignment(const Eoplist &eoplist)
                     vstring(vseq,vlen);
   AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0,
                                                       ulen,vlen);
+  static constexpr const size_t top_seqlength = 0,
+                                low_reference = 0,
+                                one_off = 0;
+  static constexpr const bool subject_first = true,
+                              distinguish_mismatch_match = true;
   static constexpr const bool forward_strand = true;
   alignment_output<std::string,std::string,char,
                    simple_matching_characters,to_char_identity>
                   (asi,
                    eoplist,
-                   0,0,0,
-                   true,
-                   true,
+                   top_seqlength,
+                   low_reference,
+                   one_off,
+                   subject_first,
+                   distinguish_mismatch_match,
                    60,
                    forward_strand,
+                   vlen,
                    vlen,
                    stdout);
   delete[] useq;
