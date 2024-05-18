@@ -343,26 +343,28 @@ static void sort_values(unsigned int seed,
       }
     }
   }
-  T previous;
-  bool previous_defined = false;
-  for (auto v : values)
+  if (values.size() > 1)
   {
-    if (previous_defined && v < previous)
+    T previous = values[0];
+    for (size_t idx = 1; idx < values.size(); idx++)
     {
-      if constexpr (std::is_same_v<T, KeyValuePair> ||
-                    std::is_same_v<T, Key2ValuePair>)
+      T v = values[idx];
+      if (v < previous)
       {
-        std::cerr << progname << ": previous=" << previous.to_string()
-                  << " > " << v.to_string() << "=next" << std::endl;
-      } else
-      {
-        std::cerr << progname << ": previous=" << previous
-                  << " > " << v << "=next" << std::endl;
+        if constexpr (std::is_same_v<T, KeyValuePair> ||
+                      std::is_same_v<T, Key2ValuePair>)
+        {
+          std::cerr << progname << ": previous=" << previous.to_string()
+                    << " > " << v.to_string() << "=next" << std::endl;
+        } else
+        {
+          std::cerr << progname << ": previous=" << previous
+                    << " > " << v << "=next" << std::endl;
+        }
+        exit(EXIT_FAILURE);
       }
-      exit(EXIT_FAILURE);
+      previous = v;
     }
-    previous = v;
-    previous_defined = true;
   }
 }
 
