@@ -27,6 +27,7 @@
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
+#include "utilities/safe_queue.hpp"
 #ifdef WITH_XXHASH
 #define XXH_INLINE_ALL
 #include "utilities/xxhash.hpp"
@@ -251,6 +252,84 @@ static void char_distribution_seq(const std::string &inputfilename)
   }
 }
 
+template<class FastQIterClass>
+static void fill_queue_with_sequences(SafeQueue<std::string *> &sequence_queue,
+                                      FastQIterClass &fastq_it)
+{
+  size_t count_entries = 0;
+  for (auto &&fastq_entry : fastq_it)
+  {
+    count_entries++;
+    const std::string_view &sequence = fastq_entry.sequence_get();
+    std::cout << "push sequence of length " << sequence.size() << std::endl;
+    sequence_queue.enqueue(new std::string(sequence));
+  }
+  std::cout << "# total_count_entries\t" << count_entries << std::endl;
+}
+
+static void digest_queue_with_sequences(SafeQueue<std::string *> 
+                                          &sequence_queue,
+                                        size_t *local_dist)
+{
+  const std::string *sequence = sequence_queue.dequeue();
+  for (auto cc : *sequence)
+  {
+    local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+  }
+  delete sequence;
+}
+
+static void char_distribution_thd_gz(size_t num_threads,
+                                     const std::string &inputfilename)
+{
+  assert(num_threads >= 2);
+  GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
+  if (in_fp == nullptr)
+  {
+    throw std::string(": cannot open file");
+    /* check_err.py checked */
+  }
+  size_t *dist = static_cast<size_t *>(calloc(4 * (num_threads-1),
+                                              sizeof *dist));
+  constexpr const int buf_size = 1 << 14;
+  GttlLineIterator<buf_size> line_iterator(in_fp);
+  using BufferedFastQIter = GttlFastQIterator<GttlLineIterator<buf_size>>;
+  BufferedFastQIter fastq_it(line_iterator);
+
+  std::vector<std::thread> threads{};
+  SafeQueue<std::string *> sequence_queue;
+  for (size_t thd_num = 0; thd_num < num_threads; thd_num++)
+  {
+    threads.push_back(std::thread([&sequence_queue, &fastq_it, dist, thd_num]
+    {
+      if (thd_num == 0)
+      {
+        fill_queue_with_sequences<BufferedFastQIter>(sequence_queue,
+                                                     fastq_it);
+      } else
+      {
+        size_t *local_dist = dist + 4 * (thd_num-1);
+        digest_queue_with_sequences(sequence_queue,local_dist);
+      }
+    }));
+  }
+  gttl_fp_type_close(in_fp);
+  for (auto &th : threads)
+  {
+    th.join();
+  }
+  for (int char_idx = 0; char_idx < 4; char_idx++)
+  {
+    size_t total_cc_count = 0;
+    for (size_t thd_num = 1; thd_num < num_threads; thd_num++)
+    {
+      total_cc_count += dist[4 * (thd_num-1) + char_idx];
+    }
+    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << std::endl;
+  }
+  free(dist);
+}
+
 static void char_distribution_thd(const SequencesSplit &sequences_split)
 {
   size_t *count_entries = static_cast<size_t *>(calloc(sequences_split.size(),
@@ -336,12 +415,27 @@ int main(int argc,char *argv[])
           char_distribution_seq(inputfiles[0]);
         } else
         {
-          const bool fasta_format = false;
-          SequencesSplit sequences_split(options.num_threads_get(),
-                                         inputfiles[0],
-                                         fasta_format);
-          sequences_split.show();
-          char_distribution_thd(sequences_split);
+          if (gttl_has_suffix(inputfiles[0],std::string(".gz")))
+          {
+            try
+            {
+              char_distribution_thd_gz(options.num_threads_get(),
+                                       inputfiles[0]);
+            }
+            catch (std::string &msg)
+            {
+              std::cerr << argv[0] << ": " << msg << std::endl;
+              return EXIT_FAILURE;
+            }
+          } else
+          {
+            const bool fasta_format = false;
+            SequencesSplit sequences_split(options.num_threads_get(),
+                                           inputfiles[0],
+                                           fasta_format);
+            sequences_split.show();
+            char_distribution_thd(sequences_split);
+          }
         }
       } else
       {
