@@ -8,7 +8,7 @@ bool inline gttl_has_prefix(const std::string &s,const std::string &prefix)
 
 bool inline gttl_has_suffix(const std::string &s,const std::string &suffix)
 {
-  return s.size() >= suffix.size() and 
+  return s.size() >= suffix.size() and
          s.substr(s.size() - suffix.size()) == suffix;
 }
 #endif

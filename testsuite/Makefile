@@ -175,7 +175,7 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 .PHONY:test_fastq_iterator
 test_fastq_iterator:./fastq_mn.x
 	@for num_threads in 1 2 3 4 5; do \
-	  ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep '^#' | diff -I '^# variance' - ../testdata/70x_161nt_phred64_dist.tsv;\
+	  ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | egrep '# char|# total_count_entries' | diff - ../testdata/70x_161nt_phred64_dist.tsv;\
 	done
 	@./test_fastq_iterator.sh
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq

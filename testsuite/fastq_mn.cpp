@@ -221,7 +221,37 @@ static void process_paired_files(bool statistics,
   }
 }
 
-static void parallel_char_distribution(const SequencesSplit &sequences_split)
+static void char_distribution_seq(const std::string &inputfilename)
+{
+  GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
+  if (in_fp == nullptr)
+  {
+    throw std::string(": cannot open file");
+    /* check_err.py checked */
+  }
+  constexpr const int buf_size = 1 << 14;
+  GttlLineIterator<buf_size> line_iterator(in_fp);
+  GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+  size_t dist[4] = {0};
+  size_t count_entries = 0;
+  for (auto &&fastq_entry : fastq_it)
+  {
+    count_entries++;
+    const std::string_view &sequence = fastq_entry.sequence_get();
+    for (auto &&cc : sequence)
+    {
+      dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+    }
+  }
+  gttl_fp_type_close(in_fp);
+  std::cout << "# total_count_entries\t" << count_entries << std::endl;
+  for (int char_idx = 0; char_idx < 4; char_idx++)
+  {
+    std::cout << "# char\t" << char_idx << "\t" << dist[char_idx] << std::endl;
+  }
+}
+
+static void char_distribution_thd(const SequencesSplit &sequences_split)
 {
   size_t *count_entries = static_cast<size_t *>(calloc(sequences_split.size(),
                                                        sizeof *count_entries)),
@@ -301,11 +331,18 @@ int main(int argc,char *argv[])
     {
       if (options.num_threads_get() > 0)
       {
-        const bool fasta_format = false;
-        SequencesSplit sequences_split(options.num_threads_get(),inputfiles[0],
-                                       fasta_format);
-        sequences_split.show();
-        parallel_char_distribution(sequences_split);
+        if (options.num_threads_get() == 1)
+        {
+          char_distribution_seq(inputfiles[0]);
+        } else
+        {
+          const bool fasta_format = false;
+          SequencesSplit sequences_split(options.num_threads_get(),
+                                         inputfiles[0],
+                                         fasta_format);
+          sequences_split.show();
+          char_distribution_thd(sequences_split);
+        }
       } else
       {
         if (split_size > 0)
