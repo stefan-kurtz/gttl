@@ -1,31 +1,26 @@
 #ifndef FASTQ_PARTS_HPP
 #define FASTQ_PARTS_HPP
-#include <string>
-#include <iostream>
-#include <algorithm>
+#include <cstring>
 #include <string_view>
 #include <stdexcept>
 #include "utilities/gttl_mmap.hpp"
 
-/* The follwing function was contributed by Florian Jochens and
-   slightly modified by Stefan Kurtz. */
-
-template<typename MappedBaseType>
-static inline const MappedBaseType *fastq_next_read_start(
-  const MappedBaseType *guess,
-  const MappedBaseType *end_of_string)
+static inline size_t fastq_next_read_start(const char *file_contents,
+                                           size_t total_size,
+                                           size_t current)
 {
-  for (const MappedBaseType *ptr = guess; ptr < end_of_string; ptr++)
+  const char *end_of_string = file_contents + total_size;
+  for (size_t idx = current; idx < total_size; idx++)
   {
-    if (*ptr == '@')
+    if (file_contents[idx] == '@')
     {
-      const MappedBaseType *find_plus = ptr;
+      const char *find_plus = file_contents + idx;
       /* now check that the current line is the header line. This is verified
          by reading the next two occurrences of \n and checking that the
          next char is +, that is the next but one line is the third line of
          a fastq entry */
       /* find first EOL */
-      for (/* Nothing */; find_plus < end_of_string && *find_plus != '\n';
+      for (/* Nothing */; find_plus < end_of_string and *find_plus != '\n';
            find_plus++)
            /* Nothing */ ;
       /* find next EOL */
@@ -35,21 +30,22 @@ static inline const MappedBaseType *fastq_next_read_start(
            /* Nothing */ ;
       if (find_plus + 1 < end_of_string && find_plus[1] == '+')
       {
-        return ptr;
+        return idx;
       }
     }
   }
-  return nullptr;
+  return total_size;
 }
 
 class FastQParts
 {
-  using MappedBaseType = char;
-  Gttlmmap<MappedBaseType> mapped_file;
-  const MappedBaseType *file_contents;
+  Gttlmmap<char> mapped_file;
+  const char *file_contents;
   std::vector<std::string_view> intervals;
+
   public:
-  FastQParts(size_t num_parts,const std::string &inputfilename)
+  FastQParts(size_t num_parts, const std::string &inputfilename,
+             bool fasta_format)
     : mapped_file(inputfilename.c_str())
     , file_contents(mapped_file.ptr())
     , intervals({})
@@ -65,41 +61,57 @@ class FastQParts
       intervals.push_back(std::string_view(file_contents, mapped_file.size()));
       return;
     }
-    const size_t part_size = mapped_file.size()/num_parts;
-    const MappedBaseType *end_of_mapped_string
-      = file_contents + mapped_file.size();
-    const MappedBaseType *guess = file_contents + part_size;
-    size_t previous_start = 0;
-    while(true)
+    const size_t part_size = mapped_file.size() / num_parts;
+    size_t current_start = 0;
+    for (size_t idx = 1; idx < num_parts and current_start < mapped_file.size();
+         idx++)
     {
-      const MappedBaseType *read_start
-        = fastq_next_read_start<MappedBaseType>(guess,
-                                                end_of_mapped_string);
-      if (read_start == nullptr)
+      size_t current = std::max(part_size * idx, current_start);
+      if (fasta_format)
       {
-        intervals.push_back(std::string_view(file_contents + previous_start,
-                                             mapped_file.size() -
-                                               previous_start));
-        break;
+        while (current < mapped_file.size() and file_contents[current] != '>')
+        {
+          current++;
+        }
+      } else
+      {
+        current = fastq_next_read_start(file_contents,mapped_file.size(),
+                                        current);
       }
-      const size_t this_start
-        = static_cast<size_t>(read_start - file_contents);
-      intervals.push_back(std::string_view(file_contents + previous_start,
-                                           this_start - previous_start));
-      previous_start = this_start;
-      guess = read_start + part_size;
+      assert(current_start < current);
+      intervals.push_back(std::string_view(file_contents + current_start,
+                                           current - current_start));
+      current_start = current;
     }
+    if (current_start < mapped_file.size())
+    {
+      intervals.push_back(std::string_view(file_contents + current_start,
+                                           mapped_file.size() - current_start));
+    }
+  }
+  double variance(void) const
+  {
+    double v = 0.0;
+    const double mean = static_cast<double>(total_size())/intervals.size();
+    for (auto &&sw : intervals)
+    {
+      double diff = sw.size() - mean;
+      v += (diff * diff);
+    }
+    return v;
   }
   void show(void) const noexcept
   {
-    std::cout << "# fields: interval_start, interval_size" << std::endl;
+    printf("# Fields: interval_start, interval_size\n");
     for (auto &&sw : intervals)
     {
-      std::cout << static_cast<size_t>(sw.data() - file_contents)
-                << "\t" << sw.size() << std::endl;
+      printf("%lu\t%lu\n",static_cast<size_t>(sw.data() - file_contents),
+                          sw.size());
     }
+    printf("# variance\t%.0e\n",variance());
   }
   using ConstIterator = std::vector<std::string_view>::const_iterator;
+
   ConstIterator begin(void) const
   {
     return intervals.cbegin();

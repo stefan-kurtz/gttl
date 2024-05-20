@@ -301,7 +301,9 @@ int main(int argc,char *argv[])
     {
       if (options.num_threads_get() > 0)
       {
-        FastQParts fastq_parts(options.num_threads_get(),inputfiles[0]);
+        const bool fasta_format = false;
+        FastQParts fastq_parts(options.num_threads_get(),inputfiles[0],
+                               fasta_format);
         fastq_parts.show();
         parallel_char_distribution(fastq_parts);
       } else
