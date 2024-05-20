@@ -23,11 +23,12 @@
 #include <algorithm>
 #include <thread>
 #include <cstdio>
+#include <chrono>
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
-#include "utilities/safe_queue.hpp"
+#include "threading/threadsafe_queue.hpp"
 #ifdef WITH_XXHASH
 #define XXH_INLINE_ALL
 #include "utilities/xxhash.hpp"
@@ -252,33 +253,6 @@ static void char_distribution_seq(const std::string &inputfilename)
   }
 }
 
-template<class FastQIterClass>
-static void fill_queue_with_sequences(SafeQueue<std::string *> &sequence_queue,
-                                      FastQIterClass &fastq_it)
-{
-  size_t count_entries = 0;
-  for (auto &&fastq_entry : fastq_it)
-  {
-    count_entries++;
-    const std::string_view &sequence = fastq_entry.sequence_get();
-    std::cout << "push sequence of length " << sequence.size() << std::endl;
-    sequence_queue.enqueue(new std::string(sequence));
-  }
-  std::cout << "# total_count_entries\t" << count_entries << std::endl;
-}
-
-static void digest_queue_with_sequences(SafeQueue<std::string *> 
-                                          &sequence_queue,
-                                        size_t *local_dist)
-{
-  const std::string *sequence = sequence_queue.dequeue();
-  for (auto cc : *sequence)
-  {
-    local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
-  }
-  delete sequence;
-}
-
 static void char_distribution_thd_gz(size_t num_threads,
                                      const std::string &inputfilename)
 {
@@ -289,35 +263,68 @@ static void char_distribution_thd_gz(size_t num_threads,
     throw std::string(": cannot open file");
     /* check_err.py checked */
   }
-  size_t *dist = static_cast<size_t *>(calloc(4 * (num_threads-1),
-                                              sizeof *dist));
-  constexpr const int buf_size = 1 << 14;
+  constexpr const int buf_size = 1 << 12;
   GttlLineIterator<buf_size> line_iterator(in_fp);
   using BufferedFastQIter = GttlFastQIterator<GttlLineIterator<buf_size>>;
   BufferedFastQIter fastq_it(line_iterator);
-
+  size_t *dist = static_cast<size_t *>(calloc(4 * (num_threads-1),
+                                              sizeof *dist));
   std::vector<std::thread> threads{};
-  SafeQueue<std::string *> sequence_queue;
-  for (size_t thd_num = 0; thd_num < num_threads; thd_num++)
+  ThreadsafeQueue<std::string> sequence_queue;
+  threads.push_back(std::thread([&sequence_queue, &fastq_it]
   {
-    threads.push_back(std::thread([&sequence_queue, &fastq_it, dist, thd_num]
+    size_t count_entries = 0;
+    for (auto &&fastq_entry : fastq_it)
     {
-      if (thd_num == 0)
+      count_entries++;
+      const std::string_view &seq_view = fastq_entry.sequence_get();
+      sequence_queue.enqueue(std::string(seq_view.begin(),seq_view.end()));
+    }
+    std::cout << "# total_count_entries\t" << count_entries << std::endl;
+  }));
+  for (size_t thd_num = 1; thd_num < num_threads; thd_num++)
+  {
+    threads.push_back(std::thread([&sequence_queue, &dist, thd_num]
+    {
+      size_t *local_dist = dist + 4 * (thd_num-1);
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(400ms);
+      while (true)
       {
-        fill_queue_with_sequences<BufferedFastQIter>(sequence_queue,
-                                                     fastq_it);
-      } else
-      {
-        size_t *local_dist = dist + 4 * (thd_num-1);
-        digest_queue_with_sequences(sequence_queue,local_dist);
+        std::optional<std::string> opt_sequence = sequence_queue.dequeue();
+        if (not opt_sequence)
+        {
+          break;
+        }
+        auto sequence = opt_sequence.value();
+        for (auto cc : sequence)
+        {
+          local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+        }
       }
     }));
   }
-  gttl_fp_type_close(in_fp);
   for (auto &th : threads)
   {
     th.join();
   }
+  gttl_fp_type_close(in_fp);
+  size_t flushed_sequences = 0;
+  while (true)
+  {
+    std::optional<std::string> opt_sequence = sequence_queue.dequeue();
+    if (not opt_sequence)
+    {
+      break;
+    }
+    auto sequence = opt_sequence.value();
+    for (auto cc : sequence)
+    {
+      dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
+    }
+    flushed_sequences++;
+  }
+  std::cout << "# flushed_sequences\t" << flushed_sequences << std::endl;
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
     size_t total_cc_count = 0;
