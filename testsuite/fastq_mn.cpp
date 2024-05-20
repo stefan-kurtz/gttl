@@ -221,23 +221,19 @@ static void process_paired_files(bool statistics,
   }
 }
 
-static void parallel_char_distribution(
-      const char *file_contents,
-      const std::vector<std::pair<size_t,size_t>> &intervals)
+static void parallel_char_distribution(const FastQParts &fastq_parts)
 {
-  size_t *count_entries = static_cast<size_t *>(calloc(intervals.size(),
+  size_t *count_entries = static_cast<size_t *>(calloc(fastq_parts.size(),
                                                        sizeof *count_entries)),
-         *dist = static_cast<size_t *>(calloc(4 * intervals.size(),
+         *dist = static_cast<size_t *>(calloc(4 * fastq_parts.size(),
                                               sizeof *dist));
   std::vector<std::thread> threads{};
-  size_t thd_num = 0;
-  for (auto &&itv : intervals)
+  for (size_t thd_num = 0; thd_num < fastq_parts.size(); thd_num++)
   {
-    threads.push_back(std::thread([file_contents,&itv,count_entries,dist,
-                                   thd_num]
+    threads.push_back(std::thread([&fastq_parts, count_entries,dist,thd_num]
     {
-      GttlLineIterator<0> line_iterator(file_contents + std::get<0>(itv),
-                                        std::get<1>(itv));
+      const std::string_view &this_view = fastq_parts[thd_num];
+      GttlLineIterator<0> line_iterator(this_view.data(),this_view.size());
       GttlFastQIterator<GttlLineIterator<0>> fastq_it(line_iterator);
       size_t local_count_entries = 0;
       size_t *local_dist = dist + 4 * thd_num;
@@ -252,14 +248,13 @@ static void parallel_char_distribution(
       }
       count_entries[thd_num] = local_count_entries;
     }));
-    thd_num++;
   }
   for (auto &th : threads)
   {
     th.join();
   }
   size_t total_count_entries = 0;
-  for (size_t thd_num = 0; thd_num < intervals.size(); thd_num++)
+  for (size_t thd_num = 0; thd_num < fastq_parts.size(); thd_num++)
   {
     total_count_entries += count_entries[thd_num];
   }
@@ -268,7 +263,7 @@ static void parallel_char_distribution(
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
     size_t total_cc_count = 0;
-    for (size_t thd_num = 0; thd_num < intervals.size(); thd_num++)
+    for (size_t thd_num = 0; thd_num < fastq_parts.size(); thd_num++)
     {
       total_cc_count += dist[4 * thd_num + char_idx];
     }
@@ -308,8 +303,7 @@ int main(int argc,char *argv[])
       {
         FastQParts fastq_parts(options.num_threads_get(),inputfiles[0]);
         fastq_parts.show();
-        parallel_char_distribution(fastq_parts.file_contents,
-                                   fastq_parts.intervals);
+        parallel_char_distribution(fastq_parts);
       } else
       {
         if (split_size > 0)
