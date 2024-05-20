@@ -1,8 +1,9 @@
-#ifndef FASTQ_PARTS_HPP
-#define FASTQ_PARTS_HPP
+#ifndef SPLIT_HPP
+#define SPLIT_HPP
 #include <cstring>
 #include <string_view>
 #include <stdexcept>
+#include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/gttl_mmap.hpp"
 
 static inline size_t fastq_next_read_start(const char *file_contents,
@@ -37,21 +38,20 @@ static inline size_t fastq_next_read_start(const char *file_contents,
   return total_size;
 }
 
-class FastQParts
+class SequencesSplit
 {
   Gttlmmap<char> mapped_file;
   const char *file_contents;
   std::vector<std::string_view> intervals;
 
   public:
-  FastQParts(size_t num_parts, const std::string &inputfilename,
-             bool fasta_format)
+  SequencesSplit(size_t num_parts, const std::string &inputfilename,
+                 bool fasta_format)
     : mapped_file(inputfilename.c_str())
     , file_contents(mapped_file.ptr())
     , intervals({})
   {
-    if (inputfilename.size() >= 3 and
-        inputfilename.substr(inputfilename.size() - 3) == std::string(".gz"))
+    if (gttl_has_suffix(inputfilename,std::string(".gz")))
     {
       throw std::string("cannot process .gz file with multiple threads");
     }
