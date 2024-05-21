@@ -1,3 +1,7 @@
 # number of sequences	4
 # total length	306
-# mean length	76
+# mean sequence length	76
+# minimum sequence length	48
+# maximum sequence length	140
+# original size of file ../testdata/varlen_paired.fastq (MB)	0
+# expected size of sequences in RAM (MB)	0

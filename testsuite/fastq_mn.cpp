@@ -24,10 +24,13 @@
 #include <thread>
 #include <cstdio>
 #include <chrono>
+#include <limits>
+#include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
+#include "utilities/file_size.hpp"
 #include "threading/threadsafe_queue.hpp"
 #ifdef WITH_XXHASH
 #define XXH_INLINE_ALL
@@ -84,11 +87,16 @@ static void process_fastq_iter(bool statistics,
                                const std::string &inputfilename,
                                FastQIterator &fastq_it)
 {
-  size_t seqnum = 0, total_length = 0;
+  size_t seqnum = 0,
+         total_length = 0,
+         min_length = std::numeric_limits<size_t>::max(),
+         max_length = 0;;
   uint64_t hash_value_sum = 0;
   for (auto &&fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry.sequence_get();
+    min_length = std::min(min_length,sequence.size());
+    max_length = std::max(max_length,sequence.size());
     if (hash_mode == hash_mode_wy)
     {
       const uint64_t hash_value = wyhash(sequence.data(), sequence.size(),0);
@@ -143,7 +151,15 @@ static void process_fastq_iter(bool statistics,
   {
     std::cout << "# number of sequences\t" << seqnum << std::endl;
     std::cout << "# total length\t" << total_length << std::endl;
-    std::cout << "# mean length\t" << total_length/seqnum << std::endl;
+    std::cout << "# mean sequence length\t" << total_length/seqnum << std::endl;
+    std::cout << "# minimum sequence length\t" << min_length << std::endl;
+    std::cout << "# maximum sequence length\t" << max_length << std::endl;
+    std::cout << "# original size of file " << inputfilename << " (MB)\t"
+              << static_cast<size_t>(mega_bytes(gttl_file_size(inputfilename)))
+              << std::endl;
+    std::cout << "# expected size of sequences in RAM (MB)\t"
+              << static_cast<size_t>(mega_bytes(total_length / 4))
+              << std::endl;
   }
   if (hash_mode != hash_mode_none)
   {
