@@ -57,6 +57,8 @@ void SeqReaderOptions::parse(int argc, char **argv)
        ("e,echo", "output the contents of the files read; "
                   "available only for single file",
         cxxopts::value<bool>(echo_option)->default_value("false"))
+       ("encoding", "compute encoding of all sequences (of the same length)",
+        cxxopts::value<bool>(encoding_option)->default_value("false"))
        ("split_size", "specify number of sequences for each split",
         cxxopts::value<size_t>(split_size)->default_value("0"))
        ("t,threads", "specify number of threads for parallel reading",
@@ -156,6 +158,11 @@ bool SeqReaderOptions::fasta_output_option_is_set(void) const noexcept
 bool SeqReaderOptions::mapped_option_is_set(void) const noexcept
 {
   return mapped_option;
+}
+
+bool SeqReaderOptions::encoding_option_is_set(void) const noexcept
+{
+  return encoding_option;
 }
 
 size_t SeqReaderOptions::split_size_get(void) const noexcept

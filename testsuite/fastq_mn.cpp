@@ -28,12 +28,14 @@
 #include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
+#include "utilities/mathsupport.hpp"
 #include "threading/threadsafe_queue.hpp"
 #ifdef WITH_XXHASH
 #define XXH_INLINE_ALL
 #include "utilities/xxhash.hpp"
 #endif
 #include "sequences/gttl_fastq_iterator.hpp"
+#include "sequences/dna_seq_byte_encoder.hpp"
 #include "sequences/split.hpp"
 #include "seq_reader_options.hpp"
 
@@ -451,14 +453,32 @@ int main(int argc,char *argv[])
           fastq_split_writer(split_size,inputfiles[0]);
         } else
         {
-          if (options.mapped_option_is_set())
+          if (options.encoding_option_is_set())
           {
-            process_single_file_mapped(statistics,echo,fasta_output,
-                                       hash_mode,inputfiles[0]);
+            ByteEncoding byte_encoding(inputfiles[0]);
+            std::cout << "# length of sequences\t"
+                      << byte_encoding.sequence_length_get() << std::endl;
+            std::cout << "# size of unit (bytes)\t"
+                      << byte_encoding.size_of_unit_get()
+                      << std::endl;
+            std::cout << "# number of sequences\t"
+                      << byte_encoding.number_of_units_get() << std::endl;
+            std::cout << "# total size (MB)\t"
+                      << static_cast<size_t>(
+                           mega_bytes(byte_encoding.number_of_units_get() *
+                                      byte_encoding.size_of_unit_get()))
+                      << std::endl;
           } else
           {
-            process_single_file_streamed(statistics,echo,fasta_output,
+            if (options.mapped_option_is_set())
+            {
+              process_single_file_mapped(statistics,echo,fasta_output,
                                          hash_mode,inputfiles[0]);
+            } else
+            {
+              process_single_file_streamed(statistics,echo,fasta_output,
+                                           hash_mode,inputfiles[0]);
+            }
           }
         }
       }
