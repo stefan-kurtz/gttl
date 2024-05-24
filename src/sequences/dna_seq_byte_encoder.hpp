@@ -29,13 +29,15 @@
 /* Wildcards are transformed to rank 0 */
 static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
 
+template<typename StoreUnitType>
 class DNASeqByteEncoder
 {
   private:
-  using StoreUnitType = uint8_t;
   /* Number of bits which can be stored in a unit */
-  static constexpr const int bits_in_store_unit = sizeof(StoreUnitType) * CHAR_BIT;
-  /* Number of character which can be stored in a unit: we need two bits per character */
+  static constexpr const int bits_in_store_unit
+    = sizeof(StoreUnitType) * CHAR_BIT;
+  /* Number of character which can be stored in a unit:
+     we need two bits per character */
   static constexpr const int characters_per_unit = bits_in_store_unit/2;
   const size_t prefix_length;
   const int additional_bits;
@@ -48,7 +50,8 @@ class DNASeqByteEncoder
   const StoreUnitType end_mask;
   StoreUnitType end_mask_get(void) const noexcept
   {
-    const size_t endbits = bits_in_store_unit - 2 * (prefix_length % characters_per_unit);
+    const size_t endbits = bits_in_store_unit -
+                           2 * (prefix_length % characters_per_unit);
     assert(endbits > 0);
     return (static_cast<StoreUnitType>(1) << endbits) - 1;
   }
@@ -70,7 +73,7 @@ class DNASeqByteEncoder
     }
   }
   public:
-  DNASeqByteEncoder(size_t _prefix_length,int _additional_bits)
+  DNASeqByteEncoder(size_t _prefix_length,int _additional_bits = 0)
     : prefix_length(_prefix_length)
     , additional_bits(_additional_bits)
 #ifndef NDEBUG
@@ -81,9 +84,12 @@ class DNASeqByteEncoder
     , additional_shift(additional_shift_get())
     , end_mask(end_mask_get())
   {
-    assert(additional_bits < static_cast<int>(sizeof(size_t) * bits_in_store_unit));
+    std::cout << "num_bits=" << num_bits << std::endl;
+    std::cout << "num_units=" << num_units << std::endl;
+    assert(additional_bits
+             < static_cast<int>(sizeof(size_t) * bits_in_store_unit));
   }
-  void encode(uint8_t *encoding, const char *char_seq, size_t a_val = 0)
+  void encode(StoreUnitType *encoding, const char *char_seq, size_t a_val = 0)
        const noexcept
   {
     assert(a_val <= additional_value_max);
@@ -97,7 +103,9 @@ class DNASeqByteEncoder
         StoreUnitType value = 0;
         for (size_t idx = 0; idx < characters_per_unit; idx++)
         {
-          value |= (dna_alphabet.char_to_rank(char_seq[char_idx+idx]) << shift);
+          value |= static_cast<StoreUnitType>
+                              (dna_alphabet.char_to_rank(char_seq[char_idx+idx])
+                               << shift);
           shift -= 2;
         }
         assert(encoding_index < num_units);
@@ -112,7 +120,9 @@ class DNASeqByteEncoder
       StoreUnitType value = 0;
       for(size_t idx = 0; idx < prefix_length % characters_per_unit; idx++)
       {
-        value |= (dna_alphabet.char_to_rank(char_seq[char_idx+idx]) << shift);
+        value |= static_cast<StoreUnitType>
+                            (dna_alphabet.char_to_rank(char_seq[char_idx+idx])
+                             << shift);
         shift -= 2;
       }
       assert(encoding_index < num_units);
@@ -130,20 +140,22 @@ class DNASeqByteEncoder
     {
       assert(remaining_additional_bits < bits_in_store_unit);
       encoding[encoding_index++]
-        = static_cast<StoreUnitType>(a_val << (bits_in_store_unit - remaining_additional_bits));
+        = static_cast<StoreUnitType>(a_val << (bits_in_store_unit -
+                                               remaining_additional_bits));
     }
   }
 #ifndef NDEBUG
-  void sequence_encoding_verify(const StoreUnitType *encoding,const char *char_seq)
+  void sequence_encoding_verify(const StoreUnitType *encoding,
+                                const char *char_seq)
        const noexcept
   {
     size_t encoding_index = 0;
-    int shift = 6;
+    int shift = bits_in_store_unit - 2;
     for (size_t char_idx = 0; char_idx < prefix_length; char_idx++)
     {
-      uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx]);
-      uint8_t er = static_cast<uint8_t>((encoding[encoding_index] >> shift)
-                                        & uint8_t(3));
+      const uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx]),
+                   er = static_cast<uint8_t>((encoding[encoding_index] >> shift)
+                                             & uint8_t(3));
       if (r != er)
       {
         std::cerr << "r = " << static_cast<int>(r) << " != "
@@ -156,14 +168,13 @@ class DNASeqByteEncoder
       } else
       {
         assert(shift == 0);
-        shift = 6;
+        shift = bits_in_store_unit - 2;
         encoding_index++;
       }
     }
-    std::cout << "successfull decoding" << std::endl;
   }
 #endif
-  size_t decode_additional_value(const uint8_t *encoding) const noexcept
+  size_t decode_additional_value(const StoreUnitType *encoding) const noexcept
   {
     size_t additional_value;
     if (additional_shift < additional_bits)
@@ -188,7 +199,8 @@ class DNASeqByteEncoder
     {
       assert(remaining_bits < bits_in_store_unit && decoding_index < num_units);
       additional_value |= static_cast<size_t>(encoding[decoding_index]
-                                              >> (bits_in_store_unit - remaining_bits));
+                                              >> (bits_in_store_unit -
+                                                  remaining_bits));
     }
     return additional_value;
   }
@@ -202,18 +214,20 @@ class DNASeqByteEncoder
   }
 };
 
+template<typename StoreUnitType>
 class ByteEncoding
 {
   size_t constant_sequence_length, num_units, allocated, nextfree;
-  uint8_t *bytes;
-  uint8_t *append_ptr(size_t factor)
+  StoreUnitType *bytes;
+  StoreUnitType *append_ptr(size_t factor)
   {
     if (nextfree + num_units >= allocated)
     {
       allocated += num_units * factor;
-      bytes = static_cast<uint8_t *>(realloc(bytes,allocated * sizeof *bytes));
+      bytes = static_cast<StoreUnitType *>
+                         (realloc(bytes,allocated * sizeof *bytes));
     }
-    uint8_t *ptr = bytes + nextfree;
+    StoreUnitType *ptr = bytes + nextfree;
     nextfree += num_units;
     return ptr;
   }
@@ -231,10 +245,11 @@ class ByteEncoding
     auto fastq_entry = fastq_it.begin();
     const std::string_view &first_sequence = (*fastq_entry).sequence_get();
     constant_sequence_length = first_sequence.size();
-    DNASeqByteEncoder dna_seq_byte_encoder(constant_sequence_length,0);
+    DNASeqByteEncoder<StoreUnitType>
+      dna_seq_byte_encoder(constant_sequence_length);
     num_units = dna_seq_byte_encoder.num_units_get();
     const size_t space_factor = 1000;
-    uint8_t *ptr = append_ptr(space_factor);
+    StoreUnitType *ptr = append_ptr(space_factor);
     dna_seq_byte_encoder.encode(ptr,first_sequence.data());
 #ifndef NDEBUG
     dna_seq_byte_encoder.sequence_encoding_verify(ptr,first_sequence.data());
@@ -284,7 +299,21 @@ class ByteEncoding
   }
   size_t sizeof_unit_get() const
   {
-    return sizeof(uint8_t);
+    return sizeof(StoreUnitType);
+  }
+  void statistics(void) const
+  {
+    std::cout << "# number of sequences\t"
+              << number_of_sequences_get() << std::endl;
+    std::cout << "# length of sequences\t"
+              << sequence_length_get() << std::endl;
+    std::cout << "# units per sequence\t"
+              << num_units_get() << std::endl;
+    std::cout << "# total size (MB)\t"
+              << static_cast<size_t>(mega_bytes(number_of_sequences_get() *
+                                                num_units_get() *
+                                                sizeof_unit_get()))
+              << std::endl;
   }
 };
 #endif

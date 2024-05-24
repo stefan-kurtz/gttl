@@ -58,7 +58,7 @@ void SeqReaderOptions::parse(int argc, char **argv)
                   "available only for single file",
         cxxopts::value<bool>(echo_option)->default_value("false"))
        ("encoding", "compute encoding of all sequences (of the same length)",
-        cxxopts::value<bool>(encoding_option)->default_value("false"))
+        cxxopts::value<std::string>(encoding_type)->default_value(""))
        ("split_size", "specify number of sequences for each split",
         cxxopts::value<size_t>(split_size)->default_value("0"))
        ("t,threads", "specify number of threads for parallel reading",
@@ -160,9 +160,9 @@ bool SeqReaderOptions::mapped_option_is_set(void) const noexcept
   return mapped_option;
 }
 
-bool SeqReaderOptions::encoding_option_is_set(void) const noexcept
+std::string SeqReaderOptions::encoding_type_get(void) const noexcept
 {
-  return encoding_option;
+  return encoding_type;
 }
 
 size_t SeqReaderOptions::split_size_get(void) const noexcept

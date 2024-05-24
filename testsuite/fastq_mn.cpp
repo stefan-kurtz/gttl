@@ -453,21 +453,41 @@ int main(int argc,char *argv[])
           fastq_split_writer(split_size,inputfiles[0]);
         } else
         {
-          if (options.encoding_option_is_set())
+          if (options.encoding_type_get() != std::string(""))
           {
-            ByteEncoding byte_encoding(inputfiles[0]);
-            std::cout << "# number of sequences\t"
-                      << byte_encoding.number_of_sequences_get() << std::endl;
-            std::cout << "# length of sequences\t"
-                      << byte_encoding.sequence_length_get() << std::endl;
-            std::cout << "# units per sequence\t"
-                      << byte_encoding.num_units_get() << std::endl;
-            std::cout << "# total size (MB)\t"
-                      << static_cast<size_t>(
-                           mega_bytes(byte_encoding.number_of_sequences_get() *
-                                      byte_encoding.num_units_get() *
-                                      byte_encoding.sizeof_unit_get()))
-                      << std::endl;
+            if (options.encoding_type_get() == std::string("uint8_t"))
+            {
+              ByteEncoding<uint8_t> byte_encoding(inputfiles[0]);
+              byte_encoding.statistics();
+            } else
+            {
+              if (options.encoding_type_get() == std::string("uint16_t"))
+              {
+                ByteEncoding<uint16_t> byte_encoding(inputfiles[0]);
+                byte_encoding.statistics();
+              } else
+              {
+                if (options.encoding_type_get() == std::string("uint32_t"))
+                {
+                  ByteEncoding<uint32_t> byte_encoding(inputfiles[0]);
+                  byte_encoding.statistics();
+                } else
+                {
+                  if (options.encoding_type_get() == std::string("uint64_t"))
+                  {
+                    ByteEncoding<uint64_t> byte_encoding(inputfiles[0]);
+                    byte_encoding.statistics();
+                  } else
+                  {
+                    std::cerr << argv[0]
+                              << ": argument of --encoding must be one of the"
+                              << " strings uint8_t, uint16_t, uint32_t, "
+                              << "uint64_t" << std::endl;
+                    return EXIT_FAILURE;
+                  }
+                }
+              }
+            }
           } else
           {
             if (options.mapped_option_is_set())
