@@ -456,17 +456,17 @@ int main(int argc,char *argv[])
           if (options.encoding_option_is_set())
           {
             ByteEncoding byte_encoding(inputfiles[0]);
+            std::cout << "# number of sequences\t"
+                      << byte_encoding.number_of_sequences_get() << std::endl;
             std::cout << "# length of sequences\t"
                       << byte_encoding.sequence_length_get() << std::endl;
-            std::cout << "# size of unit (bytes)\t"
-                      << byte_encoding.size_of_unit_get()
-                      << std::endl;
-            std::cout << "# number of sequences\t"
-                      << byte_encoding.number_of_units_get() << std::endl;
+            std::cout << "# units per sequence\t"
+                      << byte_encoding.num_units_get() << std::endl;
             std::cout << "# total size (MB)\t"
                       << static_cast<size_t>(
-                           mega_bytes(byte_encoding.number_of_units_get() *
-                                      byte_encoding.size_of_unit_get()))
+                           mega_bytes(byte_encoding.number_of_sequences_get() *
+                                      byte_encoding.num_units_get() *
+                                      byte_encoding.sizeof_unit_get()))
                       << std::endl;
           } else
           {
