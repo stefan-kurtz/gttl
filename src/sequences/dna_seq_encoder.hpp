@@ -235,6 +235,11 @@ class DNASeqEncoder
   {
     return num_units;
   }
+  size_t num_sequence_bytes_get(void) const noexcept
+  {
+    const size_t num_sequence_bits(std::max(size_t(64),2 * prefix_length));
+    return (num_sequence_bits + bits_in_store_unit - 1)/bits_in_store_unit;
+  }
 };
 
 template<typename StoreUnitType>
