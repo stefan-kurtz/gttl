@@ -35,7 +35,7 @@
 #include "utilities/xxhash.hpp"
 #endif
 #include "sequences/gttl_fastq_iterator.hpp"
-#include "sequences/dna_seq_byte_encoder.hpp"
+#include "sequences/dna_seq_encoder.hpp"
 #include "sequences/split.hpp"
 #include "seq_reader_options.hpp"
 
@@ -457,25 +457,25 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("uint8_t"))
             {
-              ByteEncoding<uint8_t> byte_encoding(inputfiles[0]);
+              DNAEncoding<uint8_t> byte_encoding(inputfiles[0]);
               byte_encoding.statistics();
             } else
             {
               if (options.encoding_type_get() == std::string("uint16_t"))
               {
-                ByteEncoding<uint16_t> byte_encoding(inputfiles[0]);
+                DNAEncoding<uint16_t> byte_encoding(inputfiles[0]);
                 byte_encoding.statistics();
               } else
               {
                 if (options.encoding_type_get() == std::string("uint32_t"))
                 {
-                  ByteEncoding<uint32_t> byte_encoding(inputfiles[0]);
+                  DNAEncoding<uint32_t> byte_encoding(inputfiles[0]);
                   byte_encoding.statistics();
                 } else
                 {
                   if (options.encoding_type_get() == std::string("uint64_t"))
                   {
-                    ByteEncoding<uint64_t> byte_encoding(inputfiles[0]);
+                    DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
                     byte_encoding.statistics();
                   } else
                   {

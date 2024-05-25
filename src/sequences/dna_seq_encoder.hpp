@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DNA_SEQ_BYTE_ENCODER_HPP
-#define DNA_SEQ_BYTE_ENCODER_HPP
+#ifndef DNA_SEQ_ENCODER_HPP
+#define DNA_SEQ_ENCODER_HPP
 
 #include <cassert>
 #include <cstdlib>
@@ -30,7 +30,7 @@
 static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
 
 template<typename StoreUnitType>
-class DNASeqByteEncoder
+class DNASeqEncoder
 {
   private:
   /* Number of bits which can be stored in a unit */
@@ -73,7 +73,7 @@ class DNASeqByteEncoder
     }
   }
   public:
-  DNASeqByteEncoder(size_t _prefix_length,int _additional_bits = 0)
+  DNASeqEncoder(size_t _prefix_length,int _additional_bits = 0)
     : prefix_length(_prefix_length)
     , additional_bits(_additional_bits)
 #ifndef NDEBUG
@@ -238,29 +238,29 @@ class DNASeqByteEncoder
 };
 
 template<typename StoreUnitType>
-class ByteEncoding
+class DNAEncoding
 {
   size_t constant_sequence_length, num_units, allocated, nextfree;
-  StoreUnitType *bytes;
+  StoreUnitType *units;
   StoreUnitType *append_ptr(size_t factor)
   {
     if (nextfree + num_units >= allocated)
     {
       allocated += num_units * factor;
-      bytes = static_cast<StoreUnitType *>
-                         (realloc(bytes,allocated * sizeof *bytes));
+      units = static_cast<StoreUnitType *>
+                         (realloc(units,allocated * sizeof *units));
     }
-    StoreUnitType *ptr = bytes + nextfree;
+    StoreUnitType *ptr = units + nextfree;
     nextfree += num_units;
     return ptr;
   }
   public:
-  ByteEncoding(const std::string &inputfilename)
+  DNAEncoding(const std::string &inputfilename)
     : constant_sequence_length(0)
     , num_units(0)
     , allocated(0)
     , nextfree(0)
-    , bytes(nullptr)
+    , units(nullptr)
   {
     constexpr const int buf_size = 1 << 14;
     GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
@@ -268,14 +268,13 @@ class ByteEncoding
     auto fastq_entry = fastq_it.begin();
     const std::string_view &first_sequence = (*fastq_entry).sequence_get();
     constant_sequence_length = first_sequence.size();
-    DNASeqByteEncoder<StoreUnitType>
-      dna_seq_byte_encoder(constant_sequence_length);
-    num_units = dna_seq_byte_encoder.num_units_get();
+    DNASeqEncoder<StoreUnitType> dna_seq_encoder(constant_sequence_length);
+    num_units = dna_seq_encoder.num_units_get();
     const size_t space_factor = 1000;
     StoreUnitType *ptr = append_ptr(space_factor);
-    dna_seq_byte_encoder.encode(ptr,first_sequence.data());
+    dna_seq_encoder.encode(ptr,first_sequence.data());
 #ifndef NDEBUG
-    dna_seq_byte_encoder.sequence_encoding_verify(ptr,first_sequence.data());
+    dna_seq_encoder.sequence_encoding_verify(ptr,first_sequence.data());
 #endif
     ++fastq_entry;
     while (fastq_entry != fastq_it.end())
@@ -290,21 +289,21 @@ class ByteEncoding
               std::to_string(sequence.size());
       }
       ptr = append_ptr(space_factor);
-      dna_seq_byte_encoder.encode(ptr,sequence.data());
+      dna_seq_encoder.encode(ptr,sequence.data());
 #ifndef NDEBUG
-      dna_seq_byte_encoder.sequence_encoding_verify(ptr,sequence.data());
+      dna_seq_encoder.sequence_encoding_verify(ptr,sequence.data());
 #endif
       ++fastq_entry;
     }
   }
-  ~ByteEncoding(void)
+  ~DNAEncoding(void)
   {
-    free(bytes);
+    free(units);
   }
   void reset(void)
   {
-    free(bytes);
-    bytes = nullptr;
+    free(units);
+    units = nullptr;
     nextfree = allocated = num_units = 0;
   }
   size_t num_units_get(void) const
