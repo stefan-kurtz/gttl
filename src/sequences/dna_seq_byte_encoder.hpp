@@ -88,6 +88,10 @@ class DNASeqByteEncoder
     std::cout << "num_units=" << num_units << std::endl;
     assert(additional_bits
              < static_cast<int>(sizeof(size_t) * bits_in_store_unit));
+    std::cout << "additional_bits=" << additional_bits << std::endl;
+    std::cout << "bits_in_store_unit=" << bits_in_store_unit << std::endl;
+    std::cout << "prefix_length=" << prefix_length << std::endl;
+    std::cout << "characters_per_unit=" << characters_per_unit << std::endl;
   }
   void encode(StoreUnitType *encoding, const char *char_seq, size_t a_val = 0)
        const noexcept
@@ -103,9 +107,8 @@ class DNASeqByteEncoder
         StoreUnitType value = 0;
         for (size_t idx = 0; idx < characters_per_unit; idx++)
         {
-          value |= static_cast<StoreUnitType>
-                              (dna_alphabet.char_to_rank(char_seq[char_idx+idx])
-                               << shift);
+          const uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx+idx]);
+          value |= (static_cast<StoreUnitType>(r)) << shift;
           shift -= 2;
         }
         assert(encoding_index < num_units);
@@ -120,9 +123,8 @@ class DNASeqByteEncoder
       StoreUnitType value = 0;
       for(size_t idx = 0; idx < prefix_length % characters_per_unit; idx++)
       {
-        value |= static_cast<StoreUnitType>
-                            (dna_alphabet.char_to_rank(char_seq[char_idx+idx])
-                             << shift);
+        const uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx+idx]);
+        value |= (static_cast<StoreUnitType>(r)) << shift;
         shift -= 2;
       }
       assert(encoding_index < num_units);
@@ -172,6 +174,27 @@ class DNASeqByteEncoder
         encoding_index++;
       }
     }
+  }
+  std::string decode(const StoreUnitType *encoding) const noexcept
+  {
+    std::string s;
+    for (size_t idx = 0; idx < num_units; idx++)
+    {
+      for (int shift = bits_in_store_unit - 8; shift >= 0; shift -= 8)
+      {
+        s += std::to_string((encoding[idx] >> shift) &
+                            static_cast<StoreUnitType>(UINT8_MAX));
+        if (shift > 0)
+        {
+          s += std::string(" ");
+        }
+      }
+      if (idx < num_units-1)
+      {
+        s += std::string(" ");
+      }
+    }
+    return s;
   }
 #endif
   size_t decode_additional_value(const StoreUnitType *encoding) const noexcept
