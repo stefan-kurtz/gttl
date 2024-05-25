@@ -245,6 +245,68 @@ class DNASeqEncoder
 template<typename StoreUnitType>
 class DNAEncoding
 {
+  class Iterator
+  {
+    const StoreUnitType *units;
+    const size_t num_units, number_of_sequences, qgram_length;
+    const int q_shift;
+    size_t offset, current_seqnum, idx_of_unit;
+    int shift_first, shift_second;
+    public:
+    Iterator(size_t _current_seqnum,
+             const StoreUnitType *_units, size_t _num_units,
+             size_t _qgram_length)
+      : units(_units)
+      , num_units(_num_units)
+      , qgram_length(_qgram_length)
+      , q_shift(sizeof(StoreUnitType) * CHAR_BIT - 2 * qgram_length)
+      , offset(0)
+      , current_seqnum(_current_seqnum)
+      , idx_of_unit(0)
+      , shift_first(0)
+      , shift_second(64)
+    {
+      assert(qgram_length <= 32);
+      assert(sizeof(StoreUnitType) == 8);
+    }
+    uint64_t operator*()
+    {
+      uint64_t integer = (units[offset + idx_of_unit] << shift_first);
+      if (idx_of_unit < num_units - 1)
+      {
+        integer |= (units[offset + idx_of_unit + 1] >> shift_second);
+      }
+      return integer;
+    }
+    Iterator& operator++() /* prefix increment*/
+    {
+      assert(shift_first + shift_second == 64);
+      if (shift_first == 62)
+      {
+        assert(shift_second == 2);
+        shift_first = 0;
+        shift_second = 64;
+        if (idx_of_unit < num_units - 1)
+        {
+          idx_of_unit++;
+        } else
+        {
+          idx_of_unit = 0;
+          offset += num_units;
+          current_seqnum++;
+        }
+      } else
+      {
+        shift_first += 2;
+        shift_second -= 2;
+      }
+      return *this;
+    }
+    bool operator != (const Iterator& other) const
+    {
+      return current_seqnum != other.current_seqnum;
+    }
+  };
   size_t constant_sequence_length, num_units, allocated, nextfree;
   StoreUnitType *units;
   StoreUnitType *append_ptr(size_t factor)
@@ -342,5 +404,13 @@ class DNAEncoding
                                                 sizeof_unit_get()))
               << std::endl;
   }
+  /*Iterator begin()
+  {
+    return Iterator(0,units,num_units,32);
+  }
+  Iterator begin()
+  {
+    return Iterator(number_of_sequences_get(),units,num_units,32);
+  }*/
 };
 #endif
