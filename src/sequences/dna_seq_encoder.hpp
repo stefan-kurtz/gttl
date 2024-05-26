@@ -248,7 +248,7 @@ class DNAEncoding
   class Iterator
   {
     const StoreUnitType *units;
-    const size_t num_units, number_of_sequences, qgram_length;
+    const size_t num_units, qgram_length;
     const int q_shift;
     size_t offset, current_seqnum, idx_of_unit;
     int shift_first, shift_second;
@@ -272,7 +272,7 @@ class DNAEncoding
     uint64_t operator*()
     {
       uint64_t integer = (units[offset + idx_of_unit] << shift_first);
-      if (idx_of_unit < num_units - 1)
+      if (shift_second < 64 and idx_of_unit < num_units - 1)
       {
         integer |= (units[offset + idx_of_unit + 1] >> shift_second);
       }
@@ -404,13 +404,13 @@ class DNAEncoding
                                                 sizeof_unit_get()))
               << std::endl;
   }
-  /*Iterator begin()
+  Iterator begin() const
   {
     return Iterator(0,units,num_units,32);
   }
-  Iterator begin()
+  Iterator end() const
   {
-    return Iterator(number_of_sequences_get(),units,num_units,32);
-  }*/
+    return Iterator(number_of_sequences_get(),nullptr,0,0);
+  }
 };
 #endif

@@ -9,7 +9,7 @@ def print_sequence(seq,linelength = 70):
 
 def seq_list2sequence(seq_list):
   sequence = ' '.join(seq_list)
-  return re.sub('\s','',sequence)
+  return re.sub(r'\s','',sequence)
 
 class StreamObject:
   def __init__(self,filename):
@@ -19,7 +19,7 @@ class StreamObject:
       self.stream = sys.stdin
     else:
       try:
-        if re.search('\.gz$',filename):
+        if re.search(r'\.gz$',filename):
           self.stream = gzip.open(filename,'r')
           self.decode = True
         else:

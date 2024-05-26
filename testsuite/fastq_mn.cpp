@@ -406,6 +406,18 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   free(dist);
 }
 
+static std::string qgram_decode(uint64_t code,size_t qgram_length)
+{
+  static const std::array<char,4> dna_letters{'A','C','G','T'};
+  std::string s(qgram_length,' ');
+  for (int idx = qgram_length - 1; idx >= 0; idx--)
+  {
+    s[idx] = dna_letters[code & uint64_t(3)];
+    code >>= 2;
+  }
+  return s;
+}
+
 int main(int argc,char *argv[])
 {
   SeqReaderOptions options{2,true};
@@ -491,8 +503,35 @@ int main(int argc,char *argv[])
                 {
                   if (options.encoding_type_get() == std::string("uint64_t"))
                   {
+                    const size_t prefix_length = 32;
                     DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
                     byte_encoding.statistics();
+                    std::string previous_qgram;
+                    for (auto const qgram_code : byte_encoding)
+                    {
+                      if (qgram_code == 0)
+                      {
+                        break;
+                      }
+                      std::string qgram
+                        = qgram_decode(qgram_code,prefix_length);
+                      if (previous_qgram.size() > 0)
+                      {
+                        for (size_t idx = 0; idx < prefix_length-1; idx++)
+                        {
+                          const char p_cc = previous_qgram[idx+1],
+                                       cc = qgram[idx];
+                          if (p_cc != cc)
+                          {
+                            std::cerr << "p_cc = " << p_cc << " != " << cc
+                                      << std::endl;
+                            exit(EXIT_FAILURE);
+                          }
+                        }
+                      }
+                      //std::cout << qgram_code << "\t" << qgram << std::endl;
+                      previous_qgram = qgram;
+                    }
                   } else
                   {
                     std::cerr << argv[0]
