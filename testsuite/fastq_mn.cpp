@@ -406,6 +406,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   free(dist);
 }
 
+#ifdef NEWCODE
 static std::string qgram_decode(uint64_t code,size_t qgram_length)
 {
   static const std::array<char,4> dna_letters{'A','C','G','T'};
@@ -417,6 +418,7 @@ static std::string qgram_decode(uint64_t code,size_t qgram_length)
   }
   return s;
 }
+#endif
 
 int main(int argc,char *argv[])
 {
@@ -505,6 +507,7 @@ int main(int argc,char *argv[])
                   {
                     DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
                     byte_encoding.statistics();
+#ifdef NEWCODE
                     const size_t sequence_length = byte_encoding
                                                      .sequence_length_get();
                     const size_t qgram_length = 32;
@@ -518,14 +521,18 @@ int main(int argc,char *argv[])
                       {
                         const uint64_t *sub_unit_ptr = units +
                                                        seqnum * num_units;
-                        DNAQgramDecoder dna_qgram_decoder(sub_unit_ptr,
+                        DNAQgramDecoder dna_qgram_decoder(static_cast<int>
+                                                              (qgram_length),
                                                           sequence_length -
-                                                            qgram_length);
+                                                            qgram_length + 1,
+                                                          sub_unit_ptr);
                         std::string previous_qgram;
                         for (auto const qgram_code : dna_qgram_decoder)
                         {
                           std::string qgram
                             = qgram_decode(qgram_code,qgram_length);
+                          std::cout << qgram_code << "\t"
+                                    << qgram << std::endl;
                           if (previous_qgram.size() > 0)
                           {
                             for (size_t idx = 0; idx < qgram_length-1; idx++)
@@ -540,12 +547,11 @@ int main(int argc,char *argv[])
                               }
                             }
                           }
-                          //std::cout << qgram_code << "\t"
-                          //          << qgram << std::endl;
                           previous_qgram = qgram;
                         }
                       }
                     }
+#endif
                   } else
                   {
                     std::cerr << argv[0]

@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstdint>
+#include <cinttypes>
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -350,26 +351,40 @@ class DNAEncoding
 
 class DNAQgramDecoder
 {
-  static constexpr const size_t qgram_length = 32;
   class Iterator
   {
-    const uint64_t *sub_unit_ptr;
+    const int qgram_length;
+    uint64_t mask_first;
     size_t current_qgram_idx, idx_of_unit;
+    const uint64_t *sub_unit_ptr;
     int shift_first;
     public:
-    Iterator(size_t _current_qgram_idx,
+    Iterator(int _qgram_length,
+             size_t _current_qgram_idx,
              const uint64_t *_sub_unit_ptr)
-      : sub_unit_ptr(_sub_unit_ptr)
+      : qgram_length(_qgram_length)
+      , mask_first(qgram_length == 32
+                     ? ~uint64_t(0)
+                     : ((uint64_t(1) << (2 * qgram_length)) - 1))
       , current_qgram_idx(_current_qgram_idx)
       , idx_of_unit(0)
-      , shift_first(0)
+      , sub_unit_ptr(_sub_unit_ptr)
+      , shift_first(64 - 2 * qgram_length)
     { }
     uint64_t operator*() const
     {
-      uint64_t integer = (sub_unit_ptr[idx_of_unit] << shift_first);
-      if (shift_first > 0)
+      uint64_t integer = sub_unit_ptr[idx_of_unit] & mask_first;
+      printf("integer=%" PRIu64 "\n",integer);
+      if (shift_first > 64 - 2 * qgram_length)
       {
-        integer |= (sub_unit_ptr[idx_of_unit + 1] >> (64 - shift_first));
+        const int missing = shift_first - (64 - 2 * qgram_length);
+        printf("missing=%d\n",missing);
+        assert(missing > 0);
+        integer = (integer << missing);
+        printf("integer=%" PRIu64 "\n",integer);
+        printf("add %" PRIu64 "\n",sub_unit_ptr[idx_of_unit + 1] >>
+                                   (64 - missing));
+        integer |= (sub_unit_ptr[idx_of_unit + 1] >> (64 - missing));
       }
       return integer;
     }
@@ -378,9 +393,14 @@ class DNAQgramDecoder
       if (shift_first < 62)
       {
         shift_first += 2;
+        mask_first >>= 2;
       } else
       {
-        shift_first = 0;
+        assert(shift_first == 62);
+        shift_first = 64 - 2 * qgram_length;
+        mask_first = qgram_length == 32
+                       ? ~uint64_t(0)
+                       : ((uint64_t(1) << (2 * qgram_length)) - 1);
         idx_of_unit++;
       }
       current_qgram_idx++;
@@ -391,21 +411,24 @@ class DNAQgramDecoder
       return current_qgram_idx != other.current_qgram_idx;
     }
   };
-  const uint64_t *sub_unit_ptr;
+  const int qgram_length;
   const size_t number_of_qgrams;
+  const uint64_t *sub_unit_ptr;
   public:
-  DNAQgramDecoder(const uint64_t *_sub_unit_ptr,
-                  size_t _number_of_qgrams)
-    : sub_unit_ptr(_sub_unit_ptr)
+  DNAQgramDecoder(int _qgram_length,
+                  size_t _number_of_qgrams,
+                  const uint64_t *_sub_unit_ptr)
+    : qgram_length(_qgram_length)
     , number_of_qgrams(_number_of_qgrams)
+    , sub_unit_ptr(_sub_unit_ptr)
   {}
   Iterator begin() const
   {
-    return Iterator(0,sub_unit_ptr);
+    return Iterator(qgram_length,0,sub_unit_ptr);
   }
   Iterator end() const
   {
-    return Iterator(number_of_qgrams,nullptr);
+    return Iterator(0,number_of_qgrams,nullptr);
   }
 };
 #endif
