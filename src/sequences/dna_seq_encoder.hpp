@@ -25,6 +25,8 @@
 #ifndef NDEBUG
 #include <iostream>
 #endif
+#include "utilities/mathsupport.hpp"
+#include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 
 /* Wildcards are transformed to rank 0 */
