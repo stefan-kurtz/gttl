@@ -353,54 +353,39 @@ class DNAQgramDecoder
 {
   class Iterator
   {
-    const int qgram_length;
-    uint64_t mask_first;
-    size_t current_qgram_idx, idx_of_unit;
+    const uint64_t mask;
     const uint64_t *sub_unit_ptr;
-    int shift_first;
+    size_t current_qgram_idx, idx_of_unit;
+    int shift_last;
+    uint64_t integer;
     public:
-    Iterator(int _qgram_length,
+    Iterator(int qgram_length,
              size_t _current_qgram_idx,
              const uint64_t *_sub_unit_ptr)
-      : qgram_length(_qgram_length)
-      , mask_first(qgram_length == 32
-                     ? ~uint64_t(0)
-                     : ((uint64_t(1) << (2 * qgram_length)) - 1))
-      , current_qgram_idx(_current_qgram_idx)
-      , idx_of_unit(0)
+      : mask(((uint64_t(1) << (2 * (qgram_length-1))) - 1) << 2)
       , sub_unit_ptr(_sub_unit_ptr)
-      , shift_first(64 - 2 * qgram_length)
+      , current_qgram_idx(_current_qgram_idx)
+      , idx_of_unit(_current_qgram_idx + qgram_length < 32 ? 0 : size_t(1))
+      , shift_last(qgram_length == 32 ? 62 : (64 - (2 * qgram_length)))
+      , integer(sub_unit_ptr[0] >> (64 - 2 * qgram_length))
     { }
     uint64_t operator*() const
     {
-      uint64_t integer = sub_unit_ptr[idx_of_unit] & mask_first;
-      printf("integer=%" PRIu64 "\n",integer);
-      if (shift_first > 64 - 2 * qgram_length)
-      {
-        const int missing = shift_first - (64 - 2 * qgram_length);
-        printf("missing=%d\n",missing);
-        assert(missing > 0);
-        integer = (integer << missing);
-        printf("integer=%" PRIu64 "\n",integer);
-        printf("add %" PRIu64 "\n",sub_unit_ptr[idx_of_unit + 1] >>
-                                   (64 - missing));
-        integer |= (sub_unit_ptr[idx_of_unit + 1] >> (64 - missing));
-      }
       return integer;
     }
     Iterator& operator++() /* prefix increment*/
     {
-      if (shift_first < 62)
+      integer = (integer << 2) & mask;
+      assert((integer & uint64_t(3)) == 0);
+      const uint64_t new_char = (sub_unit_ptr[idx_of_unit] >> shift_last) 
+                                & uint64_t(3);
+      integer |= new_char;
+      if (shift_last > 0)
       {
-        shift_first += 2;
-        mask_first >>= 2;
+        shift_last -= 2;
       } else
       {
-        assert(shift_first == 62);
-        shift_first = 64 - 2 * qgram_length;
-        mask_first = qgram_length == 32
-                       ? ~uint64_t(0)
-                       : ((uint64_t(1) << (2 * qgram_length)) - 1);
+        shift_last = 62;
         idx_of_unit++;
       }
       current_qgram_idx++;

@@ -406,7 +406,6 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   free(dist);
 }
 
-#ifdef NEWCODE
 static std::string qgram_decode(uint64_t code,size_t qgram_length)
 {
   static const std::array<char,4> dna_letters{'A','C','G','T'};
@@ -418,7 +417,6 @@ static std::string qgram_decode(uint64_t code,size_t qgram_length)
   }
   return s;
 }
-#endif
 
 int main(int argc,char *argv[])
 {
@@ -485,80 +483,81 @@ int main(int argc,char *argv[])
         {
           if (options.encoding_type_get() != std::string(""))
           {
-            if (options.encoding_type_get() == std::string("uint8_t"))
+            if (options.encoding_type_get() == std::string("8"))
             {
               DNAEncoding<uint8_t> byte_encoding(inputfiles[0]);
               byte_encoding.statistics();
             } else
             {
-              if (options.encoding_type_get() == std::string("uint16_t"))
+              if (options.encoding_type_get() == std::string("16"))
               {
                 DNAEncoding<uint16_t> byte_encoding(inputfiles[0]);
                 byte_encoding.statistics();
               } else
               {
-                if (options.encoding_type_get() == std::string("uint32_t"))
+                if (options.encoding_type_get() == std::string("32"))
                 {
                   DNAEncoding<uint32_t> byte_encoding(inputfiles[0]);
                   byte_encoding.statistics();
                 } else
                 {
-                  if (options.encoding_type_get() == std::string("uint64_t"))
-                  {
-                    DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
-                    byte_encoding.statistics();
-#ifdef NEWCODE
-                    const size_t sequence_length = byte_encoding
-                                                     .sequence_length_get();
-                    const size_t qgram_length = 32;
-                    if (sequence_length >= qgram_length)
-                    {
-                      const uint64_t *units = byte_encoding.units_get();
-                      const size_t num_units = byte_encoding.num_units_get();
-                      for (size_t seqnum = 0;
-                           seqnum < byte_encoding.number_of_sequences_get();
-                           seqnum++)
-                      {
-                        const uint64_t *sub_unit_ptr = units +
-                                                       seqnum * num_units;
-                        DNAQgramDecoder dna_qgram_decoder(static_cast<int>
-                                                              (qgram_length),
-                                                          sequence_length -
-                                                            qgram_length + 1,
-                                                          sub_unit_ptr);
-                        std::string previous_qgram;
-                        for (auto const qgram_code : dna_qgram_decoder)
-                        {
-                          std::string qgram
-                            = qgram_decode(qgram_code,qgram_length);
-                          std::cout << qgram_code << "\t"
-                                    << qgram << std::endl;
-                          if (previous_qgram.size() > 0)
-                          {
-                            for (size_t idx = 0; idx < qgram_length-1; idx++)
-                            {
-                              const char p_cc = previous_qgram[idx+1],
-                                           cc = qgram[idx];
-                              if (p_cc != cc)
-                              {
-                                std::cerr << "p_cc = " << p_cc << " != " << cc
-                                          << std::endl;
-                                exit(EXIT_FAILURE);
-                              }
-                            }
-                          }
-                          previous_qgram = qgram;
-                        }
-                      }
-                    }
-#endif
-                  } else
+                  int bits, r_qgram_length;
+                  if (std::sscanf(options.encoding_type_get().c_str(),"%d,%d",
+                                  &bits,&r_qgram_length) != 2
+                      or bits != 64
+                      or r_qgram_length < 2
+                      or r_qgram_length > 32)
                   {
                     std::cerr << argv[0]
-                              << ": argument of --encoding must be one of the"
-                              << " strings uint8_t, uint16_t, uint32_t, "
-                              << "uint64_t" << std::endl;
+                              << ": argument of --encoding must be one of"
+                              << " 8, 16, 32, 64,<qgram_length>"
+                              << std::endl;
                     return EXIT_FAILURE;
+                  }
+                  const size_t qgram_length
+                    = static_cast<size_t>(r_qgram_length);
+                  DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
+                  byte_encoding.statistics();
+                  const size_t sequence_length = byte_encoding
+                                                   .sequence_length_get();
+                  if (sequence_length >= qgram_length)
+                  {
+                    const uint64_t *units = byte_encoding.units_get();
+                    const size_t num_units = byte_encoding.num_units_get();
+                    for (size_t seqnum = 0;
+                         seqnum < byte_encoding.number_of_sequences_get();
+                         seqnum++)
+                    {
+                      const uint64_t *sub_unit_ptr = units +
+                                                     seqnum * num_units;
+                      DNAQgramDecoder
+                        dna_qgram_decoder(static_cast<int>(qgram_length),
+                                          sequence_length + 1 - qgram_length,
+                                          sub_unit_ptr);
+                      std::string previous_qgram;
+                      for (auto const qgram_code : dna_qgram_decoder)
+                      {
+                        std::string qgram
+                          = qgram_decode(qgram_code,qgram_length);
+                        //std::cout << qgram_code << "\t"
+                                  //<< qgram << std::endl;
+                        if (previous_qgram.size() > 0)
+                        {
+                          for (size_t idx = 0; idx < qgram_length-1; idx++)
+                          {
+                            const char p_cc = previous_qgram[idx+1],
+                                         cc = qgram[idx];
+                            if (p_cc != cc)
+                            {
+                              std::cerr << "p_cc = " << p_cc << " != " << cc
+                                        << std::endl;
+                              exit(EXIT_FAILURE);
+                            }
+                          }
+                        }
+                        previous_qgram = qgram;
+                      }
+                    }
                   }
                 }
               }

@@ -4,9 +4,15 @@ set -e -x
 
 for fastqfile in 70x_161nt_phred64.fastq SRR19536726_1_1000.fastq.gz
 do
-  for bits in 8 16 32 64
+  for bits in 8 16 32
   do
-    ./fastq_mn.x --encoding uint${bits}_t ../testdata/${fastqfile}
+    ./fastq_mn.x --encoding ${bits} ../testdata/${fastqfile}
+  done
+  qgram_length=2
+  while test ${qgram_length} -lt 32
+  do
+    ./fastq_mn.x --encoding 64,${qgram_length} ../testdata/${fastqfile}
+    qgram_length=`expr ${qgram_length} + 1`
   done
 done
 
