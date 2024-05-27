@@ -485,20 +485,20 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncoding<uint8_t> byte_encoding(inputfiles[0]);
-              byte_encoding.statistics();
+              DNAEncoding<uint8_t> dna_encoding(inputfiles[0]);
+              dna_encoding.statistics();
             } else
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncoding<uint16_t> byte_encoding(inputfiles[0]);
-                byte_encoding.statistics();
+                DNAEncoding<uint16_t> dna_encoding(inputfiles[0]);
+                dna_encoding.statistics();
               } else
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncoding<uint32_t> byte_encoding(inputfiles[0]);
-                  byte_encoding.statistics();
+                  DNAEncoding<uint32_t> dna_encoding(inputfiles[0]);
+                  dna_encoding.statistics();
                 } else
                 {
                   int bits, r_qgram_length;
@@ -516,16 +516,16 @@ int main(int argc,char *argv[])
                   }
                   const size_t qgram_length
                     = static_cast<size_t>(r_qgram_length);
-                  DNAEncoding<uint64_t> byte_encoding(inputfiles[0]);
-                  byte_encoding.statistics();
-                  const size_t sequence_length = byte_encoding
+                  DNAEncoding<uint64_t> dna_encoding(inputfiles[0]);
+                  dna_encoding.statistics();
+                  const size_t sequence_length = dna_encoding
                                                    .sequence_length_get();
                   if (sequence_length >= qgram_length)
                   {
-                    const uint64_t *units = byte_encoding.units_get();
-                    const size_t num_units = byte_encoding.num_units_get();
+                    const uint64_t *units = dna_encoding.units_get();
+                    const size_t num_units = dna_encoding.num_units_get();
                     for (size_t seqnum = 0;
-                         seqnum < byte_encoding.number_of_sequences_get();
+                         seqnum < dna_encoding.number_of_sequences_get();
                          seqnum++)
                     {
                       const uint64_t *sub_unit_ptr = units +
