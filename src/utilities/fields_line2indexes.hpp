@@ -1,6 +1,9 @@
 #ifndef FIELDS_LINE2INDEXES_HPP
 #define FIELDS_LINE2INDEXES_HPP
+#include <cstddef>
 #include <map>
+#include <string>
+#include <vector>
 #include "utilities/split_string.hpp"
 
 static inline std::vector<size_t> fields_line2indexes(
