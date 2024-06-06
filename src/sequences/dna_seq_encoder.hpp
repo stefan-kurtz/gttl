@@ -87,14 +87,14 @@ class DNASeqEncoder
     , additional_shift(additional_shift_get())
     , end_mask(end_mask_get())
   {
-    std::cout << "num_bits=" << num_bits << std::endl;
-    std::cout << "num_units=" << num_units << std::endl;
+    std::cout << "# num_bits=" << num_bits << std::endl;
+    std::cout << "# num_units=" << num_units << std::endl;
     assert(additional_bits
              < static_cast<int>(sizeof(size_t) * bits_in_store_unit));
-    std::cout << "additional_bits=" << additional_bits << std::endl;
-    std::cout << "bits_in_store_unit=" << bits_in_store_unit << std::endl;
-    std::cout << "prefix_length=" << prefix_length << std::endl;
-    std::cout << "characters_per_unit=" << characters_per_unit << std::endl;
+    std::cout << "# additional_bits=" << additional_bits << std::endl;
+    std::cout << "# bits_in_store_unit=" << bits_in_store_unit << std::endl;
+    std::cout << "# prefix_length=" << prefix_length << std::endl;
+    std::cout << "# characters_per_unit=" << characters_per_unit << std::endl;
   }
   void encode(StoreUnitType *encoding, const char *char_seq, size_t a_val = 0)
        const noexcept
@@ -349,6 +349,31 @@ class DNAEncoding
                                                 sizeof_unit_get()))
               << std::endl;
   }
+  std::string to_string(void) const
+  {
+    static const std::array<char,4> dna_letters{'A','C','G','T'};
+    static constexpr const int bits_in_store_unit
+      = sizeof(StoreUnitType) * CHAR_BIT;
+    int shift = bits_in_store_unit - 2;
+    std::string s;
+    size_t unit_num = 0;
+    for (size_t idx = 0; idx < this->sequence_length_get(); idx++)
+    {
+      const size_t char_idx = static_cast<size_t>(units[unit_num] >> shift)
+                              & static_cast<size_t>(3);
+      s += dna_letters[char_idx];
+      if (shift > 0)
+      {
+        assert(shift > 1);
+        shift -= 2;
+      } else
+      {
+        unit_num++;
+        shift = bits_in_store_unit - 2;
+      }
+    }
+    return s;
+  }
 };
 
 class DNAQgramDecoder
@@ -368,7 +393,7 @@ class DNAQgramDecoder
       , sub_unit_ptr(_sub_unit_ptr)
       , current_qgram_idx(_current_qgram_idx)
       , idx_of_unit(_current_qgram_idx + qgram_length < 32 ? 0 : size_t(1))
-      , shift_last(qgram_length == 32 ? 62 : (64 - (2 * qgram_length)))
+      , shift_last(qgram_length == 32 ? 62 : (62 - (2 * qgram_length)))
       , integer(sub_unit_ptr[0] >> (64 - 2 * qgram_length))
     { }
     uint64_t operator*() const
@@ -379,7 +404,7 @@ class DNAQgramDecoder
     {
       integer = (integer << 2) & mask;
       assert((integer & uint64_t(3)) == 0);
-      const uint64_t new_char = (sub_unit_ptr[idx_of_unit] >> shift_last) 
+      const uint64_t new_char = (sub_unit_ptr[idx_of_unit] >> shift_last)
                                 & uint64_t(3);
       integer |= new_char;
       if (shift_last > 0)
@@ -409,13 +434,13 @@ class DNAQgramDecoder
     , number_of_qgrams(_number_of_qgrams)
     , sub_unit_ptr(_sub_unit_ptr)
   {}
-  Iterator begin() const
+  Iterator begin(void) const
   {
     return Iterator(qgram_length,0,sub_unit_ptr);
   }
-  Iterator end() const
+  Iterator end(void) const
   {
-    return Iterator(0,number_of_qgrams,nullptr);
+    return Iterator(qgram_length,number_of_qgrams,sub_unit_ptr);
   }
 };
 #endif

@@ -6,16 +6,6 @@
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/gttl_mmap.hpp"
 
-inline bool gttl_likely_fasta_format(const std::string &inputfilename)
-{
-  if (gttl_has_suffix(inputfilename,std::string(".fq")) or
-      gttl_has_suffix(inputfilename,std::string(".fastq")))
-  {
-    return false;
-  }
-  return true;
-}
-
 static inline size_t fastq_next_read_start(const char *file_contents,
                                            size_t total_size,
                                            size_t current)

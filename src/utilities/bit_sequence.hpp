@@ -21,6 +21,29 @@ static inline std::string bit_sequence2string(Basetype bs)
 }
 
 template<typename Basetype>
+static inline std::string bit_sequence2string(Basetype bs,size_t group_size)
+{
+  static constexpr const unsigned int bits = CHAR_BIT * sizeof(Basetype);
+  Basetype mask;
+  std::string buffer{};
+  buffer.reserve(bits + bits/group_size - 1);
+  size_t gs = 0;
+  for (mask = (static_cast<Basetype>(1) << (bits - 1)); mask > 0; mask >>= 1)
+  {
+    if (gs < group_size)
+    {
+      gs++;
+    } else
+    {
+      buffer += ' ';
+      gs = 1;
+    }
+    buffer += (bs & mask) ? '1' : '0';
+  }
+  return buffer;
+}
+
+template<typename Basetype>
 static inline std::vector<std::string>
    bit_sequence2string_vector(const Basetype *encoding,size_t num_bytes)
 {
