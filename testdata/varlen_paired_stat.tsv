@@ -3,5 +3,11 @@
 # mean sequence length	76
 # minimum sequence length	48
 # maximum sequence length	140
+# length, counts
+# 48	1	25.0000
+# 58	1	25.0000
+# 60	1	25.0000
+# 140	1	25.0000
 # original size of file ../testdata/varlen_paired.fastq (MB)	0
 # expected size of sequences in RAM (MB)	0
+# expected size of DNAencoding in RAM (MB)	0

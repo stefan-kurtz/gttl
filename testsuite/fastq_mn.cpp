@@ -16,15 +16,13 @@
 */
 #include <cstddef>
 #include <iostream>
-#include <fstream>
-#include <cstdbool>
+#include <iomanip>
 #include <typeinfo>
 #include <cassert>
 #include <algorithm>
 #include <thread>
-#include <cstdio>
-#include <chrono>
 #include <limits>
+#include <map>
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
@@ -94,11 +92,16 @@ static void process_fastq_iter(bool statistics,
          min_length = std::numeric_limits<size_t>::max(),
          max_length = 0;;
   uint64_t hash_value_sum = 0;
+  std::map<size_t,size_t> length_dist_map{};
   for (auto &&fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry.sequence_get();
-    min_length = std::min(min_length,sequence.size());
-    max_length = std::max(max_length,sequence.size());
+    if (statistics)
+    {
+      min_length = std::min(min_length,sequence.size());
+      max_length = std::max(max_length,sequence.size());
+      length_dist_map[sequence.size()]++;
+    }
     if (hash_mode == hash_mode_wy)
     {
       const uint64_t hash_value = wyhash(sequence.data(), sequence.size(),0);
@@ -156,11 +159,22 @@ static void process_fastq_iter(bool statistics,
     std::cout << "# mean sequence length\t" << total_length/seqnum << std::endl;
     std::cout << "# minimum sequence length\t" << min_length << std::endl;
     std::cout << "# maximum sequence length\t" << max_length << std::endl;
+    std::cout << "# length, counts" << std::endl;
+    for (auto const& [key, value] : length_dist_map)
+    {
+      std::cout << "# " << key << "\t" << value << "\t"
+                << std::fixed << std::setprecision(4)
+                << (100.0 * static_cast<double>(value)/seqnum) << std::endl;
+    }
     std::cout << "# original size of file " << inputfilename << " (MB)\t"
               << static_cast<size_t>(mega_bytes(gttl_file_size(inputfilename)))
               << std::endl;
     std::cout << "# expected size of sequences in RAM (MB)\t"
               << static_cast<size_t>(mega_bytes(total_length / 4))
+              << std::endl;
+    const size_t uint64_t_units = ((max_length * 2) + 63)/64;
+    std::cout << "# expected size of DNAencoding in RAM (MB)\t"
+              << static_cast<size_t>(mega_bytes(seqnum * 8 * uint64_t_units))
               << std::endl;
   }
   if (hash_mode != hash_mode_none)
