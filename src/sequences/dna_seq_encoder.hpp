@@ -248,15 +248,17 @@ class DNASeqEncoder
 template<typename StoreUnitType>
 class DNAEncoding
 {
-  size_t constant_sequence_length, num_units, allocated, nextfree;
+  size_t constant_sequence_length, num_units, allocated, nextfree,
+         add_factor;
   StoreUnitType *units;
-  StoreUnitType *append_ptr(size_t factor)
+  StoreUnitType *append_ptr(void)
   {
     if (nextfree + num_units >= allocated)
     {
-      allocated += num_units * factor;
+      allocated += num_units * add_factor;
       units = static_cast<StoreUnitType *>
                          (realloc(units,allocated * sizeof *units));
+      add_factor *= 1.1;
     }
     StoreUnitType *ptr = units + nextfree;
     nextfree += num_units;
@@ -268,6 +270,7 @@ class DNAEncoding
     , num_units(0)
     , allocated(0)
     , nextfree(0)
+    , add_factor(1000000)
     , units(nullptr)
   {
     constexpr const int buf_size = 1 << 14;
@@ -278,8 +281,7 @@ class DNAEncoding
     constant_sequence_length = first_sequence.size();
     DNASeqEncoder<StoreUnitType> dna_seq_encoder(constant_sequence_length);
     num_units = dna_seq_encoder.num_units_get();
-    const size_t space_factor = 1000;
-    StoreUnitType *ptr = append_ptr(space_factor);
+    StoreUnitType *ptr = append_ptr();
     dna_seq_encoder.encode(ptr,first_sequence.data());
 #ifndef NDEBUG
     dna_seq_encoder.sequence_encoding_verify(ptr,first_sequence.data());
@@ -296,13 +298,16 @@ class DNAEncoding
               std::string(" while this sequence has length ") +
               std::to_string(sequence.size());
       }
-      ptr = append_ptr(space_factor);
+      ptr = append_ptr();
       dna_seq_encoder.encode(ptr,sequence.data());
 #ifndef NDEBUG
       dna_seq_encoder.sequence_encoding_verify(ptr,sequence.data());
 #endif
       ++fastq_entry;
     }
+    units = static_cast<StoreUnitType *>
+                       (realloc(units,nextfree * sizeof *units));
+    allocated = nextfree;
   }
   ~DNAEncoding(void)
   {
@@ -339,6 +344,9 @@ class DNAEncoding
   {
     std::cout << "# number of sequences\t"
               << number_of_sequences_get() << std::endl;
+    assert(allocated % num_units == 0);
+    std::cout << "# allocated number of sequences\t"
+              << (allocated/num_units) << std::endl;
     std::cout << "# length of sequences\t"
               << sequence_length_get() << std::endl;
     std::cout << "# units per sequence\t"
