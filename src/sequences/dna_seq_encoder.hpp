@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cinttypes>
+#include <algorithm>
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -242,6 +243,170 @@ class DNASeqEncoder
   {
     const size_t num_sequence_bits(std::max(size_t(64),2 * prefix_length));
     return (num_sequence_bits + bits_in_store_unit - 1)/bits_in_store_unit;
+  }
+};
+
+template<typename StoreUnitType>
+class DNAEncodingForLength
+{
+  const DNASeqEncoder<StoreUnitType> dna_seq_encoder;
+  const size_t constant_sequence_length, num_units;
+  size_t allocated, nextfree, add_factor;
+  StoreUnitType *units;
+  StoreUnitType *append_ptr(void)
+  {
+    if (nextfree + num_units >= allocated)
+    {
+      allocated += num_units * add_factor;
+      units = static_cast<StoreUnitType *>
+                         (realloc(units,allocated * sizeof *units));
+      add_factor *= 1.8;
+    }
+    StoreUnitType *ptr = units + nextfree;
+    nextfree += num_units;
+    return ptr;
+  }
+  public:
+  DNAEncodingForLength(size_t _constant_sequence_length)
+    : dna_seq_encoder(_constant_sequence_length)
+    , constant_sequence_length(_constant_sequence_length)
+    , num_units(dna_seq_encoder.num_units_get())
+    , allocated(0)
+    , nextfree(0)
+    , add_factor(1000)
+    , units(nullptr)
+  {
+  }
+  ~DNAEncodingForLength(void)
+  {
+    free(units);
+  }
+  void add(const std::string_view &sequence)
+  {
+    StoreUnitType *ptr = append_ptr();
+    dna_seq_encoder.encode(ptr,sequence.data());
+#ifndef NDEBUG
+    dna_seq_encoder.sequence_encoding_verify(ptr,sequence.data());
+#endif
+  }
+  void final_resize(void)
+  {
+    units = static_cast<StoreUnitType *>
+                       (realloc(units,nextfree * sizeof *units));
+    allocated = nextfree;
+  }
+  size_t num_units_get(void) const
+  {
+    return num_units;
+  }
+  size_t number_of_sequences_get(void) const
+  {
+    assert(nextfree % num_units == 0);
+    return nextfree / num_units;
+  }
+  size_t sequence_length_get(void) const
+  {
+    return constant_sequence_length;
+  }
+  const StoreUnitType *units_get(void) const
+  {
+    return units;
+  }
+  void statistics(void) const
+  {
+    std::cout << "# number of sequences\t"
+              << number_of_sequences_get() << std::endl;
+    assert(allocated % num_units == 0);
+    std::cout << "# allocated number of sequences\t"
+              << (allocated/num_units) << std::endl;
+    std::cout << "# length of sequences\t"
+              << sequence_length_get() << std::endl;
+    std::cout << "# units per sequence\t"
+              << num_units_get() << std::endl;
+    std::cout << "# total size (MB)\t"
+              << static_cast<size_t>(mega_bytes(number_of_sequences_get() *
+                                                num_units_get() *
+                                                sizeof(StoreUnitType)))
+              << std::endl;
+  }
+  std::string to_string(void) const
+  {
+    static const std::array<char,4> dna_letters{'A','C','G','T'};
+    static constexpr const int bits_in_store_unit
+      = sizeof(StoreUnitType) * CHAR_BIT;
+    int shift = bits_in_store_unit - 2;
+    std::string s;
+    size_t unit_num = 0;
+    for (size_t idx = 0; idx < this->sequence_length_get(); idx++)
+    {
+      const size_t char_idx = static_cast<size_t>(units[unit_num] >> shift)
+                              & static_cast<size_t>(3);
+      s += dna_letters[char_idx];
+      if (shift > 0)
+      {
+        assert(shift > 1);
+        shift -= 2;
+      } else
+      {
+        unit_num++;
+        shift = bits_in_store_unit - 2;
+      }
+    }
+    return s;
+  }
+};
+
+template<typename StoreUnitType>
+class DNAEncodingMultiLength
+{
+  using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
+  std::vector<ThisDNAEncodingForLength *> enc_vec;
+  public:
+  DNAEncodingMultiLength(const std::string &inputfilename)
+  {
+    constexpr const int buf_size = 1 << 14;
+    GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
+    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+    for (auto &fastq_entry : fastq_it)
+    {
+      const std::string_view &sequence = fastq_entry.sequence_get();
+      if (sequence.size() >= enc_vec.size())
+      {
+        const size_t previous_size = enc_vec.size();
+        enc_vec.reserve(sequence.size() + 1);
+        for (size_t idx = previous_size; idx < sequence.size(); idx++)
+        {
+          enc_vec[idx] = nullptr;
+        }
+        ThisDNAEncodingForLength *enc_ptr
+          = new ThisDNAEncodingForLength(sequence.size());
+        enc_ptr->add(sequence);
+        enc_vec[sequence.size()] = enc_ptr;
+      }
+      enc_vec[sequence.size()]->add(sequence);
+    }
+    for (auto &dna_encoding : enc_vec)
+    {
+      dna_encoding->final_resize();
+    }
+  }
+  ~DNAEncodingMultiLength(void)
+  {
+    for (auto &dna_encoding : enc_vec)
+    {
+      delete dna_encoding;
+    }
+  }
+  void statistics(void) const
+  {
+    for (size_t idx = 0; idx < enc_vec.size(); idx++)
+    {
+      if (enc_vec[idx] != nullptr)
+      {
+        std::cout << "length\t" << idx << std::endl;
+        enc_vec[idx]->statistics();
+      }
+    }
   }
 };
 

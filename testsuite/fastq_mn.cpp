@@ -517,7 +517,8 @@ int main(int argc,char *argv[])
                 {
                   if (options.encoding_type_get() == std::string("64"))
                   {
-                    DNAEncoding<uint32_t> dna_encoding(inputfiles[0]);
+                    DNAEncodingMultiLength<uint64_t>
+                      dna_encoding(inputfiles[0]);
                     dna_encoding.statistics();
                   } else
                   {
