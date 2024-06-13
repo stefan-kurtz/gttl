@@ -313,12 +313,6 @@ class DNAEncoding
   {
     free(units);
   }
-  void reset(void)
-  {
-    free(units);
-    units = nullptr;
-    nextfree = allocated = num_units = 0;
-  }
   size_t num_units_get(void) const
   {
     return num_units;
@@ -336,10 +330,6 @@ class DNAEncoding
   {
     return units;
   }
-  size_t sizeof_unit_get() const
-  {
-    return sizeof(StoreUnitType);
-  }
   void statistics(void) const
   {
     std::cout << "# number of sequences\t"
@@ -354,7 +344,7 @@ class DNAEncoding
     std::cout << "# total size (MB)\t"
               << static_cast<size_t>(mega_bytes(number_of_sequences_get() *
                                                 num_units_get() *
-                                                sizeof_unit_get()))
+                                                sizeof(StoreUnitType)))
               << std::endl;
   }
   std::string to_string(void) const
