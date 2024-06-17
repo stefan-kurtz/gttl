@@ -392,13 +392,17 @@ class DNAEncodingMultiLength
       enc_ptr->add(sequence);
       enc_vec[sequence.size()] = enc_ptr;
     }
-    for (auto &dna_encoding : enc_vec)
+    size_t w_idx = 0;
+    for (size_t idx = 0; idx < enc_vec.size(); idx++)
     {
-      if (dna_encoding != nullptr)
+      if (enc_vec[idx] != nullptr)
       {
-        dna_encoding->final_resize();
+        enc_vec[idx]->final_resize();
+        assert(w_idx < idx);
+        enc_vec[w_idx++] = enc_vec[idx];
       }
     }
+    enc_vec.resize(w_idx+1);
   }
   ~DNAEncodingMultiLength(void)
   {
@@ -411,10 +415,8 @@ class DNAEncodingMultiLength
   {
     for (size_t idx = 0; idx < enc_vec.size(); idx++)
     {
-      if (enc_vec[idx] != nullptr)
-      {
-        enc_vec[idx]->statistics();
-      }
+      assert(enc_vec[idx] != nullptr);
+      enc_vec[idx]->statistics();
     }
   }
 };

@@ -2,12 +2,16 @@
 
 set -e -x
 
-for fastqfile in 70x_161nt_phred64.fastq SRR19536726_1_1000.fastq.gz
+for fastqfile in 70x_161nt_phred64.fastq SRR19536726_1_1000.fastq.gz varlen_paired_2.fastq varlen_paired_2.fastq
 do
   for bits in 8 16 32 64
   do
     ./fastq_mn.x --encoding ${bits} ../testdata/${fastqfile}
   done
+done
+
+for fastqfile in 70x_161nt_phred64.fastq SRR19536726_1_1000.fastq.gz
+do
   qgram_length=2
   while test ${qgram_length} -lt 32
   do
