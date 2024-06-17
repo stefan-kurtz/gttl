@@ -301,8 +301,8 @@ class DNAEncodingForLength
   }
   size_t number_of_sequences_get(void) const
   {
-    assert(nextfree % num_units == 0);
-    return nextfree / num_units;
+    assert(nextfree % num_units == 0 and nextfree / num_units > 0);
+    return nextfree / num_units - 1;
   }
   size_t sequence_length_get(void) const
   {
@@ -372,22 +372,24 @@ class DNAEncodingMultiLength
       const std::string_view &sequence = fastq_entry.sequence_get();
       if (sequence.size() >= enc_vec.size())
       {
-        const size_t previous_size = enc_vec.size();
-        enc_vec.reserve(sequence.size() + 1);
-        for (size_t idx = previous_size; idx < sequence.size(); idx++)
+        for (size_t idx = enc_vec.size(); idx < sequence.size(); idx++)
         {
-          enc_vec[idx] = nullptr;
+          enc_vec.push_back(nullptr);
         }
         ThisDNAEncodingForLength *enc_ptr
           = new ThisDNAEncodingForLength(sequence.size());
         enc_ptr->add(sequence);
-        enc_vec[sequence.size()] = enc_ptr;
+        enc_vec.push_back(enc_ptr);
+        assert(sequence.size() < enc_vec.size());
       }
       enc_vec[sequence.size()]->add(sequence);
     }
     for (auto &dna_encoding : enc_vec)
     {
-      dna_encoding->final_resize();
+      if (dna_encoding != nullptr)
+      {
+        dna_encoding->final_resize();
+      }
     }
   }
   ~DNAEncodingMultiLength(void)
