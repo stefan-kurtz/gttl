@@ -395,6 +395,7 @@ class DNAEncodingMultiLength
         enc_vec[w_idx++] = enc_vec[idx];
       }
     }
+    assert(w_idx > 0);
     enc_vec.resize(w_idx);
   }
   ~DNAEncodingMultiLength(void)
@@ -412,6 +413,63 @@ class DNAEncodingMultiLength
       assert(dna_encoding != nullptr);
       dna_encoding->statistics();
     }
+  }
+  class Iterator
+  {
+    const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
+    size_t current_enc_vec_idx,
+           current_seqnum;
+    bool exhausted;
+    public:
+    Iterator(const std::vector<ThisDNAEncodingForLength *> &_enc_vec_ref,
+             bool _exhausted)
+      : enc_vec_ref(_enc_vec_ref)
+      , current_enc_vec_idx(0)
+      , current_seqnum(0)
+      , exhausted(_exhausted)
+    { }
+    std::pair<const uint64_t *,size_t> operator *(void) const
+    {
+      const uint64_t *units
+        = enc_vec_ref[current_enc_vec_idx]->units_get();
+      const size_t num_units = enc_vec_ref[current_enc_vec_idx]
+                                 ->num_units_get();
+      return std::make_pair(units + current_seqnum * num_units,
+                            enc_vec_ref[current_enc_vec_idx]
+                              ->sequence_length_get());
+    }
+    bool operator != (const Iterator& other) const noexcept
+    {
+      return exhausted != other.exhausted;
+    }
+    Iterator& operator++() /* prefix increment*/
+    {
+      assert(not exhausted);
+      if (current_seqnum + 1 <
+          enc_vec_ref[current_enc_vec_idx]->number_of_sequences_get())
+      {
+        current_seqnum++;
+      } else
+      {
+        current_seqnum = 0;
+        if (current_enc_vec_idx + 1 < enc_vec_ref.size())
+        {
+          current_enc_vec_idx++;
+        } else
+        {
+          exhausted = true;
+        }
+      }
+      return *this;
+    }
+  };
+  Iterator begin() const
+  {
+    return Iterator(enc_vec,false);
+  }
+  Iterator end() const
+  {
+    return Iterator(enc_vec,true);
   }
 };
 
