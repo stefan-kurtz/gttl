@@ -88,6 +88,7 @@ class DNASeqEncoder
     , additional_shift(additional_shift_get())
     , end_mask(end_mask_get())
   {
+#ifndef NDEBUG
     std::cout << "# num_bits=" << num_bits << std::endl;
     std::cout << "# num_units=" << num_units << std::endl;
     assert(additional_bits
@@ -96,6 +97,7 @@ class DNASeqEncoder
     std::cout << "# bits_in_store_unit=" << bits_in_store_unit << std::endl;
     std::cout << "# prefix_length=" << prefix_length << std::endl;
     std::cout << "# characters_per_unit=" << characters_per_unit << std::endl;
+#endif
   }
   void encode(StoreUnitType *encoding, const char *char_seq, size_t a_val = 0)
        const noexcept
@@ -301,8 +303,8 @@ class DNAEncodingForLength
   }
   size_t number_of_sequences_get(void) const
   {
-    assert(nextfree % num_units == 0 and nextfree / num_units > 0);
-    return nextfree / num_units - 1;
+    assert(nextfree % num_units == 0);
+    return nextfree / num_units;
   }
   size_t sequence_length_get(void) const
   {
@@ -314,13 +316,10 @@ class DNAEncodingForLength
   }
   void statistics(void) const
   {
-    std::cout << "# number of sequences\t"
-              << number_of_sequences_get() << std::endl;
-    assert(allocated % num_units == 0);
-    std::cout << "# allocated number of sequences\t"
-              << (allocated/num_units) << std::endl;
     std::cout << "# length of sequences\t"
               << sequence_length_get() << std::endl;
+    std::cout << "# number of sequences\t"
+              << number_of_sequences_get() << std::endl;
     std::cout << "# units per sequence\t"
               << num_units_get() << std::endl;
     std::cout << "# total size (MB)\t"
@@ -370,19 +369,28 @@ class DNAEncodingMultiLength
     for (auto &fastq_entry : fastq_it)
     {
       const std::string_view &sequence = fastq_entry.sequence_get();
+      ThisDNAEncodingForLength *enc_ptr;
       if (sequence.size() >= enc_vec.size())
       {
-        for (size_t idx = enc_vec.size(); idx < sequence.size(); idx++)
+        for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
         {
           enc_vec.push_back(nullptr);
         }
-        ThisDNAEncodingForLength *enc_ptr
-          = new ThisDNAEncodingForLength(sequence.size());
-        enc_ptr->add(sequence);
-        enc_vec.push_back(enc_ptr);
+        enc_ptr = new ThisDNAEncodingForLength(sequence.size());
+      } else
+      {
         assert(sequence.size() < enc_vec.size());
+        if (enc_vec[sequence.size()] == nullptr)
+        {
+          enc_ptr = new ThisDNAEncodingForLength(sequence.size());
+        } else
+        {
+          enc_ptr = enc_vec[sequence.size()];
+        }
       }
-      enc_vec[sequence.size()]->add(sequence);
+      assert(sequence.size() < enc_vec.size());
+      enc_ptr->add(sequence);
+      enc_vec[sequence.size()] = enc_ptr;
     }
     for (auto &dna_encoding : enc_vec)
     {
@@ -405,7 +413,6 @@ class DNAEncodingMultiLength
     {
       if (enc_vec[idx] != nullptr)
       {
-        std::cout << "length\t" << idx << std::endl;
         enc_vec[idx]->statistics();
       }
     }
@@ -499,13 +506,10 @@ class DNAEncoding
   }
   void statistics(void) const
   {
-    std::cout << "# number of sequences\t"
-              << number_of_sequences_get() << std::endl;
-    assert(allocated % num_units == 0);
-    std::cout << "# allocated number of sequences\t"
-              << (allocated/num_units) << std::endl;
     std::cout << "# length of sequences\t"
               << sequence_length_get() << std::endl;
+    std::cout << "# number of sequences\t"
+              << number_of_sequences_get() << std::endl;
     std::cout << "# units per sequence\t"
               << num_units_get() << std::endl;
     std::cout << "# total size (MB)\t"

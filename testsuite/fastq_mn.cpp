@@ -500,26 +500,38 @@ int main(int argc,char *argv[])
             if (options.encoding_type_get() == std::string("8"))
             {
               DNAEncoding<uint8_t> dna_encoding(inputfiles[0]);
-              dna_encoding.statistics();
+              if (statistics)
+              {
+                dna_encoding.statistics();
+              }
             } else
             {
               if (options.encoding_type_get() == std::string("16"))
               {
                 DNAEncoding<uint16_t> dna_encoding(inputfiles[0]);
-                dna_encoding.statistics();
+                if (statistics)
+                {
+                  dna_encoding.statistics();
+                }
               } else
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
                   DNAEncoding<uint32_t> dna_encoding(inputfiles[0]);
-                  dna_encoding.statistics();
+                  if (statistics)
+                  {
+                    dna_encoding.statistics();
+                  }
                 } else
                 {
                   if (options.encoding_type_get() == std::string("64"))
                   {
                     DNAEncodingMultiLength<uint64_t>
                       dna_encoding(inputfiles[0]);
-                    dna_encoding.statistics();
+                    if (statistics)
+                    {
+                      dna_encoding.statistics();
+                    }
                   } else
                   {
                     int bits, r_qgram_length;
