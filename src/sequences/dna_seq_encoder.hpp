@@ -369,26 +369,19 @@ class DNAEncodingMultiLength
     for (auto &fastq_entry : fastq_it)
     {
       const std::string_view &sequence = fastq_entry.sequence_get();
-      ThisDNAEncodingForLength *enc_ptr;
-      if (sequence.size() >= enc_vec.size())
+      for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
       {
-        for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
-        {
-          enc_vec.push_back(nullptr);
-        }
-        enc_ptr = new ThisDNAEncodingForLength(sequence.size());
+        enc_vec.push_back(nullptr);
+      }
+      ThisDNAEncodingForLength *enc_ptr;
+      assert(sequence.size() < enc_vec.size());
+      if (enc_vec[sequence.size()] != nullptr)
+      {
+        enc_ptr = enc_vec[sequence.size()];
       } else
       {
-        assert(sequence.size() < enc_vec.size());
-        if (enc_vec[sequence.size()] == nullptr)
-        {
-          enc_ptr = new ThisDNAEncodingForLength(sequence.size());
-        } else
-        {
-          enc_ptr = enc_vec[sequence.size()];
-        }
+        enc_ptr = new ThisDNAEncodingForLength(sequence.size());
       }
-      assert(sequence.size() < enc_vec.size());
       enc_ptr->add(sequence);
       enc_vec[sequence.size()] = enc_ptr;
     }
@@ -402,21 +395,22 @@ class DNAEncodingMultiLength
         enc_vec[w_idx++] = enc_vec[idx];
       }
     }
-    enc_vec.resize(w_idx+1);
+    enc_vec.resize(w_idx);
   }
   ~DNAEncodingMultiLength(void)
   {
     for (auto &dna_encoding : enc_vec)
     {
+      assert(dna_encoding != nullptr);
       delete dna_encoding;
     }
   }
   void statistics(void) const
   {
-    for (size_t idx = 0; idx < enc_vec.size(); idx++)
+    for (auto &dna_encoding : enc_vec)
     {
-      assert(enc_vec[idx] != nullptr);
-      enc_vec[idx]->statistics();
+      assert(dna_encoding != nullptr);
+      dna_encoding->statistics();
     }
   }
 };
