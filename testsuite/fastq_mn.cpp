@@ -499,7 +499,7 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncoding<uint8_t> dna_encoding(inputfiles[0]);
+              DNAEncodingMultiLength<uint8_t> dna_encoding(inputfiles[0]);
               if (statistics)
               {
                 dna_encoding.statistics();
@@ -508,7 +508,7 @@ int main(int argc,char *argv[])
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncoding<uint16_t> dna_encoding(inputfiles[0]);
+                DNAEncodingMultiLength<uint16_t> dna_encoding(inputfiles[0]);
                 if (statistics)
                 {
                   dna_encoding.statistics();
@@ -517,7 +517,7 @@ int main(int argc,char *argv[])
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncoding<uint32_t> dna_encoding(inputfiles[0]);
+                  DNAEncodingMultiLength<uint32_t> dna_encoding(inputfiles[0]);
                   if (statistics)
                   {
                     dna_encoding.statistics();

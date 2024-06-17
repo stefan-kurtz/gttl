@@ -4,7 +4,7 @@ set -e -x
 
 for fastqfile in 70x_161nt_phred64.fastq SRR19536726_1_1000.fastq.gz
 do
-  for bits in 8 16 32
+  for bits in 8 16 32 64
   do
     ./fastq_mn.x --encoding ${bits} ../testdata/${fastqfile}
   done
