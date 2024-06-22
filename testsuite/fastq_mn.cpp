@@ -499,11 +499,15 @@ static void verify_decoding_multilength(bool statistics,
   {
     dna_encoding.statistics();
   }
+  size_t seqcount = 0;
   for (auto [sub_unit_ptr, sequence_length] : dna_encoding)
   {
     assert(sub_unit_ptr != nullptr);
     verify_consecutive_qgrams(sub_unit_ptr,qgram_length,sequence_length);
+    seqcount++;
   }
+  std::cout << "# verified " << qgram_length << "-mers in " << seqcount
+            << " sequences" << std::endl;
 }
 
 int main(int argc,char *argv[])
