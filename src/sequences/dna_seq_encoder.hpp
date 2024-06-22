@@ -606,18 +606,21 @@ class DNAQgramDecoder
     const uint64_t mask;
     const uint64_t *sub_unit_ptr;
     size_t current_qgram_idx, idx_of_unit;
-    int shift_last;
+    size_t shift_last;
     uint64_t integer;
     public:
-    Iterator(int qgram_length,
+    Iterator(size_t qgram_length,
              size_t _current_qgram_idx,
              const uint64_t *_sub_unit_ptr)
-      : mask(((uint64_t(1) << (2 * (qgram_length-1))) - 1) << 2)
+      : mask(((uint64_t(1) << (2 * (qgram_length - 1))) - 1) << 2)
       , sub_unit_ptr(_sub_unit_ptr)
       , current_qgram_idx(_current_qgram_idx)
-      , idx_of_unit(_current_qgram_idx + qgram_length < 32 ? 0 : size_t(1))
-      , shift_last(qgram_length == 32 ? 62 : (62 - (2 * qgram_length)))
-      , integer(sub_unit_ptr[0] >> (64 - 2 * qgram_length))
+      , idx_of_unit(_current_qgram_idx + qgram_length < size_t(32) ? 0
+                                                                   : size_t(1))
+      , shift_last(qgram_length == size_t(32) ? size_t(62)
+                                              : (size_t(62) -
+                                                 (2 * qgram_length)))
+      , integer(sub_unit_ptr[0] >> (size_t(64) - 2 * qgram_length))
     { }
     uint64_t operator*() const
     {
@@ -632,6 +635,7 @@ class DNAQgramDecoder
       integer |= new_char;
       if (shift_last > 0)
       {
+        assert(shift_last >= 2);
         shift_last -= 2;
       } else
       {
@@ -646,11 +650,11 @@ class DNAQgramDecoder
       return current_qgram_idx != other.current_qgram_idx;
     }
   };
-  const int qgram_length;
+  const size_t qgram_length;
   const size_t number_of_qgrams;
   const uint64_t *sub_unit_ptr;
   public:
-  DNAQgramDecoder(int _qgram_length,
+  DNAQgramDecoder(size_t _qgram_length,
                   size_t _number_of_qgrams,
                   const uint64_t *_sub_unit_ptr)
     : qgram_length(_qgram_length)
