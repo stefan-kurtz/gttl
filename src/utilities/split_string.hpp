@@ -21,10 +21,15 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
       assert(*next == sep);
       std::string this_string = std::string(previous,next);
       result.push_back(convert(this_string));
+      while (next + 1 < str.cend() and *(next+1) == sep)
+      {
+        ++next;
+      }
     } else
     {
-      assert (next == str.cend() && *(next-1) == '\n');
-      std::string this_string = std::string(previous,next - 1);
+      std::string this_string = std::string(previous, *(next-1) == '\n'
+                                                        ? (next - 1)
+                                                        : next);
       result.push_back(convert(this_string));
       break;
     }
@@ -52,10 +57,15 @@ static inline std::vector<std::string> gttl_split_string(const std::string &str,
       assert(*next == sep);
       std::string this_string = std::string(previous,next);
       result.push_back(this_string);
+      while (next + 1 < str.cend() and *(next+1) == sep)
+      {
+        ++next;
+      }
     } else
     {
-      assert(next == str.cend() && *(next-1) == '\n');
-      std::string this_string = std::string(previous,next - 1);
+      std::string this_string = std::string(previous, *(next-1) == '\n'
+                                                        ? (next - 1)
+                                                        : next);
       result.push_back(this_string);
       break;
     }
