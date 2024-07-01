@@ -6,7 +6,7 @@
 class UniformRandomDouble
 {
   std::random_device seed_gen; // generate a seed
-  std::mt19937 generator; // mersenne_twister_engine
+  std::mt19937_64 generator; // mersenne_twister_engine
   std::uniform_real_distribution<double> distribution;
 
   public:

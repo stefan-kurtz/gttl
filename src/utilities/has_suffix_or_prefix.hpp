@@ -1,6 +1,7 @@
 #ifndef HAS_SUFFIX_OR_PREFIX_HPP
 #define HAS_SUFFIX_OR_PREFIX_HPP
 #include <string>
+#include <vector>
 static bool inline gttl_has_prefix(const std::string &s,
                                    const std::string &prefix)
 {
