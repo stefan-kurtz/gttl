@@ -247,13 +247,13 @@ test_minimizer_count:minimizer_mn.x
 	@./check_err.py ./minimizer_mn.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 -s ${AT1MB} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff - ${TMPFILE}
 	@echo "# number of hashed kmers	37577" > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -c -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -c -t 2 -s ${AT} | grep 'number of hashed kmers' | diff - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 --show_mode 1 ${AT} > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 --show_mode 2 ${AT} | diff -I '^#' - ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 -c -s ${AT1MB} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 -c -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff - ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 --show_mode 1 ${AT1MB} > ${TMPFILE}
+	@./minimizer_mn.x -w 30 -k 18 --show_mode 2 ${AT1MB} | diff -I '^#' - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
