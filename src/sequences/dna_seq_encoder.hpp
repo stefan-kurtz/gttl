@@ -603,10 +603,9 @@ class DNAQgramDecoder
 {
   class Iterator
   {
-    const uint64_t mask;
-    const uint64_t *sub_unit_ptr;
-    size_t current_qgram_idx, idx_of_unit;
-    size_t shift_last;
+    const uint64_t mask,
+                   *sub_unit_ptr;
+    size_t current_qgram_idx, idx_of_unit, shift_last;
     uint64_t integer;
     public:
     Iterator(size_t qgram_length,
@@ -635,11 +634,11 @@ class DNAQgramDecoder
       integer |= new_char;
       if (shift_last > 0)
       {
-        assert(shift_last >= 2);
-        shift_last -= 2;
+        assert(shift_last >= size_t(2));
+        shift_last -= size_t(2);
       } else
       {
-        shift_last = 62;
+        shift_last = size_t(62);
         idx_of_unit++;
       }
       current_qgram_idx++;
