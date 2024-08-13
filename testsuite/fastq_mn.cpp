@@ -173,7 +173,7 @@ static void process_fastq_iter(bool statistics,
               << static_cast<size_t>(mega_bytes(total_length / 4))
               << std::endl;
     const size_t uint64_t_units = ((max_length * 2) + 63)/64;
-    std::cout << "# expected size of DNAencoding in RAM (MB)\t"
+    std::cout << "# expected size of DNAEncoding in RAM (MB)\t"
               << static_cast<size_t>(mega_bytes(seqnum * 8 * uint64_t_units))
               << std::endl;
   }

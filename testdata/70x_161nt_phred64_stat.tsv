@@ -7,4 +7,4 @@
 # 161	70	100.0000
 # original size of file ../testdata/70x_161nt_phred64.fastq (MB)	0
 # expected size of sequences in RAM (MB)	0
-# expected size of DNAencoding in RAM (MB)	0
+# expected size of DNAEncoding in RAM (MB)	0

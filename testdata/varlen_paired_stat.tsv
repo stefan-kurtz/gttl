@@ -10,4 +10,4 @@
 # 140	1	25.0000
 # original size of file ../testdata/varlen_paired.fastq (MB)	0
 # expected size of sequences in RAM (MB)	0
-# expected size of DNAencoding in RAM (MB)	0
+# expected size of DNAEncoding in RAM (MB)	0
