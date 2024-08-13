@@ -655,7 +655,12 @@ int main(int argc,char *argv[])
   }
   catch (std::string &msg)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    const std::vector<std::string> &inputfiles = options.inputfiles_get();
+    for (auto &&inputfile : inputfiles)
+    {
+      std::cerr << argv[0] << ": file \"" << inputfile << "\""
+                << msg << std::endl;
+    }
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
