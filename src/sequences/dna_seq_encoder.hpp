@@ -363,8 +363,10 @@ class DNAEncodingMultiLength
 {
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
+  size_t total_size;
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
+    : total_size(0)
   {
     constexpr const int buf_size = 1 << 14;
     GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
@@ -391,6 +393,7 @@ class DNAEncodingMultiLength
       {
         enc_vec[idx]->final_resize();
         assert(w_idx < idx);
+        total_size += enc_vec[idx]->total_size_get();
         enc_vec[w_idx++] = enc_vec[idx];
       }
     }
@@ -405,6 +408,10 @@ class DNAEncodingMultiLength
       delete dna_encoding;
     }
   }
+  size_t total_size_get(void) const
+  {
+    return total_size;
+  }
   void statistics(void) const
   {
     for (auto &dna_encoding : enc_vec)
@@ -413,14 +420,18 @@ class DNAEncodingMultiLength
       dna_encoding->statistics();
     }
   }
-  std::vector<size_t> total_size_vector_get(void) const
+  auto key_values_vector_get(void) const
   {
-    std::vector<size_t> total_sizes;
+    std::vector<std::tuple<size_t,size_t,size_t>> key_values;
     for (auto &dna_encoding : enc_vec)
     {
-      total_sizes.push_back(dna_encoding->total_size_get());
+      key_values.push_back(std::make_tuple(dna_encoding->sequence_length_get(),
+                                           dna_encoding
+                                            ->number_of_sequences_get(),
+                                           dna_encoding->num_units_get()));
     }
-    return total_sizes;
+    std::cout << "key values" << std::endl;
+    return key_values;
   }
   class Iterator
   {

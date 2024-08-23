@@ -513,59 +513,83 @@ static void verify_decoding_multilength(bool statistics,
             << " sequences" << std::endl;
 }
 
-template<class InputIt>
-static void divide_vector_evenly(InputIt first,InputIt last,size_t num_parts)
+static bool decide_append_previous(const std::vector<std::pair<size_t,size_t>>
+                                     &parts,
+                                   size_t total_size,
+                                   size_t local_sum)
 {
-  const auto s_sum = std::accumulate(first,last,size_t(0));
-  const size_t mean = s_sum/num_parts + (s_sum % num_parts == 0 ? 0 : 1);
-  if (num_parts == 2)
+  const double mean0 = static_cast<double>(total_size)/parts.size();
+  double sum_squared_difference = 0;
+  assert(parts.size() > 0);
+  for (size_t idx = 0; idx < parts.size(); idx++)
   {
-    std::cout << "# size_sum\t" << s_sum << std::endl;
+    const size_t v = std::get<1>(parts[idx]);
+    const double diff = (idx < parts.size() - 1 ? v : (v + local_sum)) - mean0;
+    sum_squared_difference += (diff * diff);
   }
-  std::cout << "# num_parts/mean\t" << num_parts << "\t" << mean << std::endl;
+  const double var0 = sum_squared_difference/parts.size();
+  const double mean1 = total_size/(parts.size() + 1);
+  sum_squared_difference = 0;
+  for (auto v : parts)
+  {
+    const double diff = std::get<1>(v) - mean1;
+    sum_squared_difference += (diff * diff);
+  }
+  sum_squared_difference += (local_sum - mean1) * (local_sum - mean1);
+  const double var1 = sum_squared_difference/(parts.size() + 1);
+  return var0 < var1;
+}
+
+template<class InputIt>
+static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
+                                 size_t num_parts,bool verbose)
+{
+  const size_t mean = (total_size + num_parts - 1)/num_parts;
+  if (verbose)
+  {
+    std::cout << "# size_sum\t" << total_size << std::endl;
+    std::cout << "# num_parts\t" << num_parts << std::endl;
+    std::cout << "# mean " << mean << std::endl;
+  }
   size_t local_sum = 0, idx = 0;
-  bool over = true;
   std::vector<std::pair<size_t,size_t>> parts;
   for (auto it = first; it != last; ++it)
   {
-    auto s = *it;
+    auto s = std::get<1>(*it) * std::get<2>(*it);
     if (local_sum + s <= mean)
     {
       local_sum += s;
     } else
     {
-      if (over)
-      {
-        parts.push_back(std::make_pair(idx + 1,local_sum + s));
-        local_sum = 0;
-        over = false;
-      } else
-      {
-        parts.push_back(std::make_pair(idx, local_sum));
-        local_sum = s;
-        over = true;
-      }
+      parts.push_back(std::make_pair(idx, local_sum));
+      local_sum = s;
     }
     idx++;
   }
   if (local_sum > 0)
   {
-    if (local_sum * 10 <= mean)
+    const size_t num_elements = last - first;
+    if (decide_append_previous(parts,total_size,local_sum))
     {
-      parts.back() = std::make_pair(last - first,
+      parts.back() = std::make_pair(num_elements,
                                     std::get<1>(parts.back()) + local_sum);
     } else
     {
-      parts.push_back(std::make_pair(last - first,local_sum));
+      parts.push_back(std::make_pair(num_elements,local_sum));
     }
   }
   size_t local_sum_sum = 0, left_idx = 0;
   for (auto &[right_idx, local_sum] : parts)
   {
-    std::cout << right_idx << "\t" << local_sum << std::endl;
-    const size_t this_sum = std::accumulate(first + left_idx,
-                                            first + right_idx,
-                                            size_t(0));
+    if (verbose)
+    {
+      std::cout << right_idx << "\t" << local_sum << std::endl;
+    }
+    size_t this_sum = 0;
+    for (auto it = first + left_idx; it != first + right_idx; ++it)
+    {
+      this_sum += std::get<1>(*it) * std::get<2>(*it);
+    }
     if (local_sum != this_sum)
     {
       std::cerr << "local_sum = " << local_sum << " != " << this_sum
@@ -575,15 +599,87 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t num_parts)
     local_sum_sum += local_sum;
     left_idx = right_idx;
   }
-  if (local_sum_sum != s_sum)
+  if (local_sum_sum != total_size)
   {
-    std::cerr << "local_sum_sum = " << local_sum_sum << " != " << s_sum
-              << std::endl;
+    std::cerr << "local_sum_sum = " << local_sum_sum << " != " << total_size
+              << "total_size" << std::endl;
     exit(EXIT_FAILURE);
   }
-  auto part_sizes = std::views::elements<1>(parts);
-  std::cout << "# stddev\t" << gttl_stddev(part_sizes.begin(),
-                                           part_sizes.end()) << std::endl;
+  const auto part_sizes = std::views::elements<1>(parts);
+  if (verbose)
+  {
+    std::cout << "# stddev\t" << gttl_stddev(part_sizes.begin(),
+                                             part_sizes.end()) << std::endl;
+  }
+}
+
+static void key_values_show(std::vector<std::tuple<size_t,size_t,size_t>>
+                              &key_values)
+{
+  size_t idx = 0;
+  for (auto &kv : key_values)
+  {
+    std::cout << idx << "\t"
+              << std::get<0>(kv) << "\t"
+              << std::get<1>(kv) << "\t"
+              << std::get<2>(kv) << "\t"
+              << (std::get<1>(kv) * std::get<2>(kv))
+              << std::endl;
+    idx++;
+  }
+}
+
+static void split_dna_encoding_multi_length(const
+                                              DNAEncodingMultiLength<uint64_t>
+                                              &dna_encoding_multi_length,
+                                            size_t num_parts,
+                                            bool verbose)
+{
+  auto kv_vec = dna_encoding_multi_length.key_values_vector_get();
+  if (verbose)
+  {
+    std::cout << "# original key values" << std::endl;
+    key_values_show(kv_vec);
+  }
+  const size_t total_size = dna_encoding_multi_length.total_size_get();
+  const size_t mean = (total_size + num_parts - 1)/num_parts;
+  if (verbose)
+  {
+    std::cout << "# num_parts\t" << num_parts << std::endl;
+    std::cout << "# mean\t" << mean << std::endl;
+  }
+  std::vector<std::tuple<size_t,size_t,size_t>> expanded_vec;
+  for (auto v : kv_vec)
+  {
+    const int size_factor = 15;
+    const size_t s = std::get<1>(v) * std::get<2>(v);
+    if (s < mean/size_factor)
+    {
+      expanded_vec.push_back(v);
+    } else
+    {
+      const size_t mean_part_seq = mean/(size_factor * std::get<2>(v));
+      size_t remain = std::get<1>(v);
+      while (remain >= mean_part_seq)
+      {
+        expanded_vec.push_back(std::make_tuple(std::get<0>(v),mean_part_seq,
+                                               std::get<2>(v)));
+        remain -= mean_part_seq;
+      }
+      if (remain > 0)
+      {
+        expanded_vec.push_back(std::make_tuple(std::get<0>(v),remain,
+                                               std::get<2>(v)));
+      }
+    }
+  }
+  if (verbose)
+  {
+    std::cout << "# expanded key values" << std::endl;
+    key_values_show(expanded_vec);
+  }
+  divide_vector_evenly(expanded_vec.begin(), expanded_vec.end(),
+                       total_size, num_parts, verbose);
 }
 
 int main(int argc,char *argv[])
@@ -690,13 +786,10 @@ int main(int argc,char *argv[])
                       dna_encoding_multi_length.statistics();
                     } else
                     {
-                      auto vec
-                        = dna_encoding_multi_length.total_size_vector_get();
                       for (size_t num_parts = 2; num_parts < 10; num_parts++)
                       {
-                        divide_vector_evenly(vec.begin(),
-                                             vec.end(),
-                                             num_parts);
+                        split_dna_encoding_multi_length(
+                          dna_encoding_multi_length,num_parts,true);
                       }
                     }
                   } else
