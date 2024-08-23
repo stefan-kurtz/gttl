@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2021 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2021 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2024 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2024 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -314,6 +314,10 @@ class DNAEncodingForLength
   {
     return units;
   }
+  size_t total_size_get(void) const
+  {
+    return number_of_sequences_get() * num_units_get();
+  }
   void statistics(void) const
   {
     std::cout << "# length of sequences\t"
@@ -323,8 +327,7 @@ class DNAEncodingForLength
     std::cout << "# units per sequence\t"
               << num_units_get() << std::endl;
     std::cout << "# total size (MB)\t"
-              << static_cast<size_t>(mega_bytes(number_of_sequences_get() *
-                                                num_units_get() *
+              << static_cast<size_t>(mega_bytes(total_size_get() *
                                                 sizeof(StoreUnitType)))
               << std::endl;
   }
@@ -409,6 +412,15 @@ class DNAEncodingMultiLength
       assert(dna_encoding != nullptr);
       dna_encoding->statistics();
     }
+  }
+  std::vector<size_t> total_size_vector_get(void) const
+  {
+    std::vector<size_t> total_sizes;
+    for (auto &dna_encoding : enc_vec)
+    {
+      total_sizes.push_back(dna_encoding->total_size_get());
+    }
+    return total_sizes;
   }
   class Iterator
   {

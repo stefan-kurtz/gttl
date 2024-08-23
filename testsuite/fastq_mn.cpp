@@ -22,7 +22,9 @@
 #include <algorithm>
 #include <thread>
 #include <limits>
+#include <numeric>
 #include <map>
+#include <cmath>
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/basename.hpp"
@@ -159,12 +161,13 @@ static void process_fastq_iter(bool statistics,
     std::cout << "# mean sequence length\t" << total_length/seqnum << std::endl;
     std::cout << "# minimum sequence length\t" << min_length << std::endl;
     std::cout << "# maximum sequence length\t" << max_length << std::endl;
-    std::cout << "# length, counts" << std::endl;
-    for (auto const& [key, value] : length_dist_map)
+    std::cout << "# length, count, count ratio" << std::endl;
+    for (auto const& [len_as_key, count_as_value] : length_dist_map)
     {
-      std::cout << "# " << key << "\t" << value << "\t"
+      std::cout << "# " << len_as_key << "\t" << count_as_value << "\t"
                 << std::fixed << std::setprecision(4)
-                << (100.0 * static_cast<double>(value)/seqnum) << std::endl;
+                << (100.0 * static_cast<double>(count_as_value)/seqnum)
+                << std::endl;
     }
     std::cout << "# original size of file " << inputfilename << " (MB)\t"
               << static_cast<size_t>(mega_bytes(gttl_file_size(inputfilename)))
@@ -494,13 +497,13 @@ static void verify_decoding_multilength(bool statistics,
                                         const std::string &inputfilename,
                                         size_t qgram_length)
 {
-  DNAEncodingMultiLength<uint64_t> dna_encoding(inputfilename);
+  DNAEncodingMultiLength<uint64_t> dna_encoding_multi_length(inputfilename);
   if (statistics)
   {
-    dna_encoding.statistics();
+    dna_encoding_multi_length.statistics();
   }
   size_t seqcount = 0;
-  for (auto [sub_unit_ptr, sequence_length] : dna_encoding)
+  for (auto [sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
   {
     assert(sub_unit_ptr != nullptr);
     verify_consecutive_qgrams(sub_unit_ptr,qgram_length,sequence_length);
@@ -508,6 +511,79 @@ static void verify_decoding_multilength(bool statistics,
   }
   std::cout << "# verified " << qgram_length << "-mers in " << seqcount
             << " sequences" << std::endl;
+}
+
+template<class InputIt>
+static void divide_vector_evenly(InputIt first,InputIt last,size_t num_parts)
+{
+  const auto s_sum = std::accumulate(first,last,size_t(0));
+  const size_t mean = s_sum/num_parts + (s_sum % num_parts == 0 ? 0 : 1);
+  if (num_parts == 2)
+  {
+    std::cout << "# size_sum\t" << s_sum << std::endl;
+  }
+  std::cout << "# num_parts/mean\t" << num_parts << "\t" << mean << std::endl;
+  size_t local_sum = 0, idx = 0;
+  bool over = true;
+  std::vector<std::pair<size_t,size_t>> parts;
+  for (auto it = first; it != last; ++it)
+  {
+    auto s = *it;
+    if (local_sum + s <= mean)
+    {
+      local_sum += s;
+    } else
+    {
+      if (over)
+      {
+        parts.push_back(std::make_pair(idx + 1,local_sum + s));
+        local_sum = 0;
+        over = false;
+      } else
+      {
+        parts.push_back(std::make_pair(idx, local_sum));
+        local_sum = s;
+        over = true;
+      }
+    }
+    idx++;
+  }
+  if (local_sum > 0)
+  {
+    if (local_sum * 10 <= mean)
+    {
+      parts.back() = std::make_pair(last - first,
+                                    std::get<1>(parts.back()) + local_sum);
+    } else
+    {
+      parts.push_back(std::make_pair(last - first,local_sum));
+    }
+  }
+  size_t local_sum_sum = 0, left_idx = 0;
+  for (auto &[right_idx, local_sum] : parts)
+  {
+    std::cout << right_idx << "\t" << local_sum << std::endl;
+    const size_t this_sum = std::accumulate(first + left_idx,
+                                            first + right_idx,
+                                            size_t(0));
+    if (local_sum != this_sum)
+    {
+      std::cerr << "local_sum = " << local_sum << " != " << this_sum
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    local_sum_sum += local_sum;
+    left_idx = right_idx;
+  }
+  if (local_sum_sum != s_sum)
+  {
+    std::cerr << "local_sum_sum = " << local_sum_sum << " != " << s_sum
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  auto part_sizes = std::views::elements<1>(parts);
+  std::cout << "# stddev\t" << gttl_stddev(part_sizes.begin(),
+                                           part_sizes.end()) << std::endl;
 }
 
 int main(int argc,char *argv[])
@@ -577,38 +653,51 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncodingMultiLength<uint8_t> dna_encoding(inputfiles[0]);
+              DNAEncodingMultiLength<uint8_t>
+                dna_encoding_multi_length(inputfiles[0]);
               if (statistics)
               {
-                dna_encoding.statistics();
+                dna_encoding_multi_length.statistics();
               }
             } else
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncodingMultiLength<uint16_t> dna_encoding(inputfiles[0]);
+                DNAEncodingMultiLength<uint16_t>
+                  dna_encoding_multi_length(inputfiles[0]);
                 if (statistics)
                 {
-                  dna_encoding.statistics();
+                  dna_encoding_multi_length.statistics();
                 }
               } else
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncodingMultiLength<uint32_t> dna_encoding(inputfiles[0]);
+                  DNAEncodingMultiLength<uint32_t>
+                    dna_encoding_multi_length(inputfiles[0]);
                   if (statistics)
                   {
-                    dna_encoding.statistics();
+                    dna_encoding_multi_length.statistics();
                   }
                 } else
                 {
                   if (options.encoding_type_get() == std::string("64"))
                   {
                     DNAEncodingMultiLength<uint64_t>
-                      dna_encoding(inputfiles[0]);
+                      dna_encoding_multi_length(inputfiles[0]);
                     if (statistics)
                     {
-                      dna_encoding.statistics();
+                      dna_encoding_multi_length.statistics();
+                    } else
+                    {
+                      auto vec
+                        = dna_encoding_multi_length.total_size_vector_get();
+                      for (size_t num_parts = 2; num_parts < 10; num_parts++)
+                      {
+                        divide_vector_evenly(vec.begin(),
+                                             vec.end(),
+                                             num_parts);
+                      }
                     }
                   } else
                   {

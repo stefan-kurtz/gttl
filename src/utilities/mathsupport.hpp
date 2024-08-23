@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <climits>
 #include <cassert>
+#include <ranges>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
@@ -121,5 +122,26 @@ inline double error_percentage_get(size_t distance,size_t aligned_len)
     return 0;
   }
   return 100.0 * static_cast<double>(distance)/(aligned_len/2.0);
+}
+
+template<class InputIt>
+double gttl_variance(InputIt first,InputIt last)
+{
+  const auto sum = std::accumulate(first,last,0);
+  const auto num_elements = last - first;
+  const double mean = static_cast<double>(sum)/num_elements;
+  double squared_difference = 0;
+  for (auto it = first; it != last; ++it)
+  {
+    const double diff = *it - mean;
+    squared_difference += (diff * diff);
+  }
+  return squared_difference / num_elements;
+}
+
+template<class InputIt>
+double gttl_stddev(InputIt first,InputIt last)
+{
+  return std::sqrt(gttl_variance(first,last));
 }
 #endif

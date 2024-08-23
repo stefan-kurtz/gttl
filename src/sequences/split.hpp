@@ -95,7 +95,7 @@ class SequencesSplit
     const double mean = static_cast<double>(total_size())/intervals.size();
     for (auto &&sw : intervals)
     {
-      double diff = sw.size() - mean;
+      const double diff = sw.size() - mean;
       v += (diff * diff);
     }
     return v;
