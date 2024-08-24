@@ -445,7 +445,7 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
     if (local_sum != this_sum)
     {
       std::cerr << "local_sum = " << local_sum << " != " << this_sum
-                << std::endl;
+                << " = this_sum" << std::endl;
       exit(EXIT_FAILURE);
     }
     local_sum_sum += local_sum;
@@ -465,41 +465,42 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
   return end_idx_vec;
 }
 
-static void key_values_show(std::vector<std::tuple<size_t,size_t,size_t>>
-                              &key_values)
-{
-  size_t idx = 0;
-  for (auto &kv : key_values)
-  {
-    std::cout << idx << "\t"
-              << std::get<0>(kv) << "\t"
-              << std::get<1>(kv) << "\t"
-              << std::get<2>(kv) << "\t"
-              << (std::get<1>(kv) * std::get<2>(kv))
-              << std::endl;
-    idx++;
-  }
-}
-
 template<typename StoreUnitType>
 class DNAEncodingMultiLength
 {
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
   size_t total_size;
-  std::vector<std::tuple<size_t,size_t,size_t>> expanded_vec;
+  using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t>>;
+  KeyValuesType expanded_vec;
   std::vector<size_t> end_idx_of_part_vec;
   auto key_values_vector_get(void) const
   {
-    std::vector<std::tuple<size_t,size_t,size_t>> key_values;
+    KeyValuesType key_values;
+    size_t enc_vec_idx = 0;
     for (auto &dna_encoding : enc_vec)
     {
-      key_values.push_back(std::make_tuple(dna_encoding->sequence_length_get(),
+      key_values.push_back(std::make_tuple(enc_vec_idx,
                                            dna_encoding
                                             ->number_of_sequences_get(),
                                            dna_encoding->num_units_get()));
+      enc_vec_idx++;
     }
     return key_values;
+  }
+  void key_values_show(const KeyValuesType &key_values) const
+  {
+    size_t idx = 0;
+    for (auto &kv : key_values)
+    {
+      std::cout << idx << "\t"
+                << enc_vec[std::get<0>(kv)]->sequence_length_get() << "\t"
+                << std::get<1>(kv) << "\t"
+                << std::get<2>(kv) << "\t"
+                << (std::get<1>(kv) * std::get<2>(kv))
+                << std::endl;
+      idx++;
+    }
   }
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
@@ -581,13 +582,15 @@ class DNAEncodingMultiLength
         size_t remain = std::get<1>(v);
         while (remain >= mean_part_seq)
         {
-          expanded_vec.push_back(std::make_tuple(std::get<0>(v),mean_part_seq,
+          expanded_vec.push_back(std::make_tuple(std::get<0>(v),
+                                                 mean_part_seq,
                                                  std::get<2>(v)));
           remain -= mean_part_seq;
         }
         if (remain > 0)
         {
-          expanded_vec.push_back(std::make_tuple(std::get<0>(v),remain,
+          expanded_vec.push_back(std::make_tuple(std::get<0>(v),
+                                                 remain,
                                                  std::get<2>(v)));
         }
       }
@@ -651,13 +654,136 @@ class DNAEncodingMultiLength
       return *this;
     }
   };
-  Iterator begin(void) const
+  auto begin(void) const
   {
     return Iterator(enc_vec,false);
   }
-  Iterator end(void) const
+  auto end(void) const
   {
     return Iterator(enc_vec,true);
+  }
+  class SplitViewIterator
+  {
+    const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
+    const KeyValuesType &expanded_vec_ref;
+    const std::vector<size_t> &end_idx_of_part_vec_ref;
+    size_t current_in_part_idx,
+           current_end_of_part,
+           current_enc_vec_idx,
+           current_number_of_sequences,
+           current_seqnum;
+    bool exhausted;
+    public:
+    SplitViewIterator(const std::vector<ThisDNAEncodingForLength *>
+                        &_enc_vec_ref,
+                      const KeyValuesType &_expanded_vec_ref,
+                      const std::vector<size_t> &_end_idx_of_part_vec_ref,
+                      size_t part_idx,
+                      bool _exhausted)
+      : enc_vec_ref(_enc_vec_ref)
+      , expanded_vec_ref(_expanded_vec_ref)
+      , end_idx_of_part_vec_ref(_end_idx_of_part_vec_ref)
+      , current_in_part_idx(
+          part_idx == 0 ? 0 : end_idx_of_part_vec_ref[part_idx - 1])
+      , current_end_of_part(end_idx_of_part_vec_ref[part_idx])
+      , current_enc_vec_idx(std::get<0>(expanded_vec_ref[current_in_part_idx]))
+      , current_number_of_sequences(std::get<1>(expanded_vec_ref
+                                                 [current_in_part_idx]))
+      , current_seqnum(0)
+      , exhausted(_exhausted)
+    {
+      assert(part_idx < end_idx_of_part_vec_ref.size());
+    }
+    std::pair<const uint64_t *,size_t> operator *(void) const
+    {
+      assert(current_enc_vec_idx < enc_vec_ref.size());
+      const uint64_t *units
+        = enc_vec_ref[current_enc_vec_idx]->units_get();
+      const size_t num_units = enc_vec_ref[current_enc_vec_idx]
+                                 ->num_units_get();
+      return std::make_pair(units + current_seqnum * num_units,
+                            enc_vec_ref[current_enc_vec_idx]
+                              ->sequence_length_get());
+    }
+    bool operator != (const SplitViewIterator& other) const noexcept
+    {
+      return exhausted != other.exhausted;
+    }
+    SplitViewIterator& operator++() /* prefix increment*/
+    {
+      assert(not exhausted);
+      if (current_seqnum + 1 < current_number_of_sequences)
+      {
+        current_seqnum++;
+      } else
+      {
+        current_seqnum = 0;
+        if (current_in_part_idx + 1 < current_end_of_part)
+        {
+          current_in_part_idx++;
+          assert(current_in_part_idx < expanded_vec_ref.size());
+          current_enc_vec_idx
+            = std::get<0>(expanded_vec_ref[current_in_part_idx]);
+          current_number_of_sequences = std::get<1>(expanded_vec_ref
+                                                      [current_in_part_idx]);
+        } else
+        {
+          exhausted = true;
+        }
+      }
+      return *this;
+    }
+  };
+  auto begin_split(size_t part_idx) const
+  {
+    return SplitViewIterator(enc_vec,
+                             expanded_vec,
+                             end_idx_of_part_vec,
+                             part_idx,
+                             false);
+  }
+  auto end_split(void) const
+  {
+    return SplitViewIterator(enc_vec,
+                             expanded_vec,
+                             end_idx_of_part_vec,
+                             0,
+                             true);
+  }
+  size_t num_parts_get(void) const
+  {
+    return end_idx_of_part_vec.size();
+  }
+  void verify_length_dist(std::map<size_t,size_t> &length_dist_map) const
+  {
+    size_t count_sum = 0;
+    for (auto const& [len_as_key, count_as_value] : length_dist_map)
+    {
+      count_sum += count_as_value;
+    }
+    size_t total_number_of_sequences = 0;
+    for (auto &&dna_encoding : enc_vec)
+    {
+      total_number_of_sequences += dna_encoding->number_of_sequences_get();
+      const size_t this_length = dna_encoding->sequence_length_get();
+      if (dna_encoding->number_of_sequences_get()
+            != length_dist_map[this_length])
+      {
+        std::cerr << "dna_encoding->number_of_sequences_get() = "
+                  << dna_encoding->number_of_sequences_get() << " != "
+                  << length_dist_map[this_length] << " = "
+                  << "length_dist_map[" << this_length << "]"
+                  << std::endl;
+        exit(EXIT_FAILURE);
+      }
+    }
+    if (count_sum != total_number_of_sequences)
+    {
+      std::cerr << "count_sum = " << count_sum << " != "
+                << total_number_of_sequences << " = total_number_of_sequences"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
 };
 

@@ -511,6 +511,23 @@ static void verify_decoding_multilength(bool statistics,
             << " sequences" << std::endl;
 }
 
+static void verify_decoding_parts_view(
+  const DNAEncodingMultiLength<uint64_t> &dna_encoding_multi_length)
+{
+  std::map<size_t,size_t> length_dist_map;
+  for (size_t part_idx = 0;
+       part_idx < dna_encoding_multi_length.num_parts_get();
+       part_idx++)
+  {
+    for(auto it = dna_encoding_multi_length.begin_split(part_idx);
+        it != dna_encoding_multi_length.end_split(); ++it)
+    {
+      length_dist_map[std::get<1>(*it)]++;
+    }
+  }
+  dna_encoding_multi_length.verify_length_dist(length_dist_map);
+}
+
 int main(int argc,char *argv[])
 {
   SeqReaderOptions options{2,true};
@@ -619,6 +636,7 @@ int main(int argc,char *argv[])
                       {
                         dna_encoding_multi_length.prepare_split_view(num_parts,
                                                                      true);
+                        verify_decoding_parts_view(dna_encoding_multi_length);
                       }
                     }
                   } else
