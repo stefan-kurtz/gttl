@@ -387,8 +387,9 @@ static bool decide_append_previous(const std::vector<size_t> &size_vec,
 }
 
 template<class InputIt>
-static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
-                                 size_t num_parts,bool verbose)
+static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
+                                                size_t total_size,
+                                                size_t num_parts,bool verbose)
 {
   const size_t mean = (total_size + num_parts - 1)/num_parts;
   if (verbose)
@@ -461,6 +462,7 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
     std::cout << "# stddev\t" << gttl_stddev(size_vec.begin(),
                                              size_vec.end()) << std::endl;
   }
+  return end_idx_vec;
 }
 
 static void key_values_show(std::vector<std::tuple<size_t,size_t,size_t>>
@@ -485,6 +487,20 @@ class DNAEncodingMultiLength
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
   size_t total_size;
+  std::vector<std::tuple<size_t,size_t,size_t>> expanded_vec;
+  std::vector<size_t> end_idx_of_part_vec;
+  auto key_values_vector_get(void) const
+  {
+    std::vector<std::tuple<size_t,size_t,size_t>> key_values;
+    for (auto &dna_encoding : enc_vec)
+    {
+      key_values.push_back(std::make_tuple(dna_encoding->sequence_length_get(),
+                                           dna_encoding
+                                            ->number_of_sequences_get(),
+                                           dna_encoding->num_units_get()));
+    }
+    return key_values;
+  }
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
     : total_size(0)
@@ -529,10 +545,6 @@ class DNAEncodingMultiLength
       delete dna_encoding;
     }
   }
-  size_t total_size_get(void) const
-  {
-    return total_size;
-  }
   void statistics(void) const
   {
     for (auto &dna_encoding : enc_vec)
@@ -541,21 +553,7 @@ class DNAEncodingMultiLength
       dna_encoding->statistics();
     }
   }
-  auto key_values_vector_get(void) const
-  {
-    std::vector<std::tuple<size_t,size_t,size_t>> key_values;
-    for (auto &dna_encoding : enc_vec)
-    {
-      key_values.push_back(std::make_tuple(dna_encoding->sequence_length_get(),
-                                           dna_encoding
-                                            ->number_of_sequences_get(),
-                                           dna_encoding->num_units_get()));
-    }
-    std::cout << "key values" << std::endl;
-    return key_values;
-  }
-
-  void split_into_parts(size_t num_parts, bool verbose)
+  void prepare_split_view(size_t num_parts, bool verbose)
   {
     auto kv_vec = key_values_vector_get();
     if (verbose)
@@ -563,14 +561,13 @@ class DNAEncodingMultiLength
       std::cout << "# original key values" << std::endl;
       key_values_show(kv_vec);
     }
-    const size_t total_size = total_size_get();
     const size_t mean = (total_size + num_parts - 1)/num_parts;
     if (verbose)
     {
       std::cout << "# num_parts\t" << num_parts << std::endl;
       std::cout << "# mean\t" << mean << std::endl;
     }
-    std::vector<std::tuple<size_t,size_t,size_t>> expanded_vec;
+    expanded_vec.clear();
     for (auto v : kv_vec)
     {
       const int size_factor = 15;
@@ -600,8 +597,9 @@ class DNAEncodingMultiLength
       std::cout << "# expanded key values" << std::endl;
       key_values_show(expanded_vec);
     }
-    divide_vector_evenly(expanded_vec.begin(), expanded_vec.end(),
-                         total_size, num_parts, verbose);
+    end_idx_of_part_vec = divide_vector_evenly(expanded_vec.begin(),
+                                               expanded_vec.end(),
+                                               total_size, num_parts, verbose);
   }
 
   class Iterator
@@ -653,11 +651,11 @@ class DNAEncodingMultiLength
       return *this;
     }
   };
-  Iterator begin() const
+  Iterator begin(void) const
   {
     return Iterator(enc_vec,false);
   }
-  Iterator end() const
+  Iterator end(void) const
   {
     return Iterator(enc_vec,true);
   }

@@ -617,8 +617,8 @@ int main(int argc,char *argv[])
                     {
                       for (size_t num_parts = 2; num_parts < 10; num_parts++)
                       {
-                        dna_encoding_multi_length.split_into_parts(num_parts,
-                                                                   true);
+                        dna_encoding_multi_length.prepare_split_view(num_parts,
+                                                                     true);
                       }
                     }
                   } else
