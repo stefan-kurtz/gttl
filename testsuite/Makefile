@@ -3,7 +3,7 @@ CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointe
 CPPFLAGS=-I ../src
 LD=${CXX}
 LDLIBS=-lm -lz -lpthread -lstdc++
-CXXFLAGS=-std=c++20
+CXXFLAGS=-std=c++17
 AT1MB=../testdata/at1MB.fna
 SW175=../testdata/sw175.fna
 Y3=../testdata/ychrIII.fna

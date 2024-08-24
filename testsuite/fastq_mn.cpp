@@ -513,30 +513,31 @@ static void verify_decoding_multilength(bool statistics,
             << " sequences" << std::endl;
 }
 
-static bool decide_append_previous(const std::vector<std::pair<size_t,size_t>>
-                                     &parts,
+static bool decide_append_previous(const std::vector<size_t> &size_vec,
                                    size_t total_size,
                                    size_t local_sum)
 {
-  const double mean0 = static_cast<double>(total_size)/parts.size();
+  assert(size_vec.size() > 0);
+  const double mean0 = static_cast<double>(total_size)/size_vec.size();
   double sum_squared_difference = 0;
-  assert(parts.size() > 0);
-  for (size_t idx = 0; idx < parts.size(); idx++)
+  for (size_t idx = 0; idx < size_vec.size(); idx++)
   {
-    const size_t v = std::get<1>(parts[idx]);
-    const double diff = (idx < parts.size() - 1 ? v : (v + local_sum)) - mean0;
+    const size_t s = size_vec[idx];
+    const double diff = (idx < size_vec.size() - 1 ? s
+                                                   : (s + local_sum)) - mean0;
     sum_squared_difference += (diff * diff);
   }
-  const double var0 = sum_squared_difference/parts.size();
-  const double mean1 = total_size/(parts.size() + 1);
+  const double var0 = sum_squared_difference/size_vec.size();
+  const double mean1 = total_size/(size_vec.size() + 1);
   sum_squared_difference = 0;
-  for (auto v : parts)
+  for (auto s : size_vec)
   {
-    const double diff = std::get<1>(v) - mean1;
+    const double diff = s - mean1;
     sum_squared_difference += (diff * diff);
   }
-  sum_squared_difference += (local_sum - mean1) * (local_sum - mean1);
-  const double var1 = sum_squared_difference/(parts.size() + 1);
+  const double diff = local_sum - mean1;
+  sum_squared_difference += diff * diff;
+  const double var1 = sum_squared_difference/(size_vec.size() + 1);
   return var0 < var1;
 }
 
@@ -552,7 +553,7 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
     std::cout << "# mean " << mean << std::endl;
   }
   size_t local_sum = 0, idx = 0;
-  std::vector<std::pair<size_t,size_t>> parts;
+  std::vector<size_t> end_idx_vec, size_vec;
   for (auto it = first; it != last; ++it)
   {
     auto s = std::get<1>(*it) * std::get<2>(*it);
@@ -561,7 +562,8 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
       local_sum += s;
     } else
     {
-      parts.push_back(std::make_pair(idx, local_sum));
+      end_idx_vec.push_back(idx);
+      size_vec.push_back(local_sum);
       local_sum = s;
     }
     idx++;
@@ -569,24 +571,28 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
   if (local_sum > 0)
   {
     const size_t num_elements = last - first;
-    if (decide_append_previous(parts,total_size,local_sum))
+    if (decide_append_previous(size_vec,total_size,local_sum))
     {
-      parts.back() = std::make_pair(num_elements,
-                                    std::get<1>(parts.back()) + local_sum);
+      end_idx_vec.back() = num_elements;
+      size_vec.back() += local_sum;
     } else
     {
-      parts.push_back(std::make_pair(num_elements,local_sum));
+      end_idx_vec.push_back(num_elements);
+      size_vec.push_back(local_sum);
     }
   }
-  size_t local_sum_sum = 0, left_idx = 0;
-  for (auto &[right_idx, local_sum] : parts)
+  size_t local_sum_sum = 0, begin_idx = 0;
+  assert(size_vec.size() == end_idx_vec.size());
+  for (size_t j = 0; j < size_vec.size(); j++)
   {
+    const size_t end_idx = end_idx_vec[j];
+    const size_t local_sum = size_vec[j];
     if (verbose)
     {
-      std::cout << right_idx << "\t" << local_sum << std::endl;
+      std::cout << end_idx << "\t" << local_sum << std::endl;
     }
     size_t this_sum = 0;
-    for (auto it = first + left_idx; it != first + right_idx; ++it)
+    for (auto it = first + begin_idx; it != first + end_idx; ++it)
     {
       this_sum += std::get<1>(*it) * std::get<2>(*it);
     }
@@ -597,7 +603,7 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
       exit(EXIT_FAILURE);
     }
     local_sum_sum += local_sum;
-    left_idx = right_idx;
+    begin_idx = end_idx;
   }
   if (local_sum_sum != total_size)
   {
@@ -605,11 +611,10 @@ static void divide_vector_evenly(InputIt first,InputIt last,size_t total_size,
               << "total_size" << std::endl;
     exit(EXIT_FAILURE);
   }
-  const auto part_sizes = std::views::elements<1>(parts);
   if (verbose)
   {
-    std::cout << "# stddev\t" << gttl_stddev(part_sizes.begin(),
-                                             part_sizes.end()) << std::endl;
+    std::cout << "# stddev\t" << gttl_stddev(size_vec.begin(),
+                                             size_vec.end()) << std::endl;
   }
 }
 
