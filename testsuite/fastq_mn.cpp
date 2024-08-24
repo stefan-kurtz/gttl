@@ -526,6 +526,12 @@ static void verify_decoding_parts_view(
     }
   }
   dna_encoding_multi_length.verify_length_dist(length_dist_map);
+  length_dist_map.clear();
+  for (auto const&[sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
+  {
+    length_dist_map[sequence_length]++;
+  }
+  dna_encoding_multi_length.verify_length_dist(length_dist_map);
 }
 
 int main(int argc,char *argv[])

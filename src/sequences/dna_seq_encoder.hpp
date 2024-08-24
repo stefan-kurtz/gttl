@@ -621,6 +621,7 @@ class DNAEncodingMultiLength
     { }
     std::pair<const uint64_t *,size_t> operator *(void) const
     {
+      assert(current_enc_vec_idx < enc_vec_ref.size());
       const uint64_t *units
         = enc_vec_ref[current_enc_vec_idx]->units_get();
       const size_t num_units = enc_vec_ref[current_enc_vec_idx]
@@ -667,8 +668,8 @@ class DNAEncodingMultiLength
     const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
     const KeyValuesType &expanded_vec_ref;
     const std::vector<size_t> &end_idx_of_part_vec_ref;
+    const size_t current_end_of_part;
     size_t current_in_part_idx,
-           current_end_of_part,
            current_enc_vec_idx,
            current_number_of_sequences,
            current_seqnum;
@@ -683,9 +684,9 @@ class DNAEncodingMultiLength
       : enc_vec_ref(_enc_vec_ref)
       , expanded_vec_ref(_expanded_vec_ref)
       , end_idx_of_part_vec_ref(_end_idx_of_part_vec_ref)
+      , current_end_of_part(end_idx_of_part_vec_ref[part_idx])
       , current_in_part_idx(
           part_idx == 0 ? 0 : end_idx_of_part_vec_ref[part_idx - 1])
-      , current_end_of_part(end_idx_of_part_vec_ref[part_idx])
       , current_enc_vec_idx(std::get<0>(expanded_vec_ref[current_in_part_idx]))
       , current_number_of_sequences(std::get<1>(expanded_vec_ref
                                                  [current_in_part_idx]))
@@ -720,12 +721,13 @@ class DNAEncodingMultiLength
         current_seqnum = 0;
         if (current_in_part_idx + 1 < current_end_of_part)
         {
+          size_t num_units;
           current_in_part_idx++;
           assert(current_in_part_idx < expanded_vec_ref.size());
-          current_enc_vec_idx
-            = std::get<0>(expanded_vec_ref[current_in_part_idx]);
-          current_number_of_sequences = std::get<1>(expanded_vec_ref
-                                                      [current_in_part_idx]);
+          std::tie(current_enc_vec_idx,
+                   current_number_of_sequences,
+                   num_units)
+            = expanded_vec_ref[current_in_part_idx];
         } else
         {
           exhausted = true;
