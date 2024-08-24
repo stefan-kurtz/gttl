@@ -387,10 +387,13 @@ static bool decide_append_previous(const std::vector<size_t> &size_vec,
 }
 
 template<class InputIt>
-static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
-                                                size_t total_size,
-                                                size_t num_parts,bool verbose)
+static void divide_vector_evenly(std::vector<size_t> *end_idx_vec,
+                                 InputIt first,InputIt last,
+                                 size_t total_size,
+                                 size_t num_parts,
+                                 bool verbose)
 {
+  assert(num_parts > 1);
   const size_t mean = (total_size + num_parts - 1)/num_parts;
   if (verbose)
   {
@@ -399,7 +402,8 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
     std::cout << "# mean " << mean << std::endl;
   }
   size_t local_sum = 0, idx = 0;
-  std::vector<size_t> end_idx_vec, size_vec;
+  std::vector<size_t> size_vec;
+  assert(end_idx_vec->size() == 0);
   for (auto it = first; it != last; ++it)
   {
     auto s = std::get<1>(*it) * std::get<2>(*it);
@@ -408,8 +412,11 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
       local_sum += s;
     } else
     {
-      end_idx_vec.push_back(idx);
-      size_vec.push_back(local_sum);
+      if (local_sum > 0)
+      {
+        end_idx_vec->push_back(idx);
+        size_vec.push_back(local_sum);
+      }
       local_sum = s;
     }
     idx++;
@@ -419,19 +426,19 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
     const size_t num_elements = last - first;
     if (decide_append_previous(size_vec,total_size,local_sum))
     {
-      end_idx_vec.back() = num_elements;
+      end_idx_vec->back() = num_elements;
       size_vec.back() += local_sum;
     } else
     {
-      end_idx_vec.push_back(num_elements);
+      end_idx_vec->push_back(num_elements);
       size_vec.push_back(local_sum);
     }
   }
   size_t local_sum_sum = 0, begin_idx = 0;
-  assert(size_vec.size() == end_idx_vec.size());
+  assert(size_vec.size() == end_idx_vec->size());
   for (size_t j = 0; j < size_vec.size(); j++)
   {
-    const size_t end_idx = end_idx_vec[j];
+    const size_t end_idx = end_idx_vec->at(j);
     const size_t local_sum = size_vec[j];
     if (verbose)
     {
@@ -462,7 +469,6 @@ static std::vector<size_t> divide_vector_evenly(InputIt first,InputIt last,
     std::cout << "# stddev\t" << gttl_stddev(size_vec.begin(),
                                              size_vec.end()) << std::endl;
   }
-  return end_idx_vec;
 }
 
 template<typename StoreUnitType>
@@ -470,7 +476,7 @@ class DNAEncodingMultiLength
 {
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
-  size_t total_size;
+  size_t total_size, total_number_of_sequences;
   using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t>>;
   KeyValuesType expanded_vec;
   std::vector<size_t> end_idx_of_part_vec;
@@ -505,6 +511,7 @@ class DNAEncodingMultiLength
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
     : total_size(0)
+    , total_number_of_sequences(0)
   {
     constexpr const int buf_size = 1 << 14;
     GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
@@ -532,6 +539,7 @@ class DNAEncodingMultiLength
         enc_vec[idx]->final_resize();
         assert(w_idx < idx);
         total_size += enc_vec[idx]->total_size_get();
+        total_number_of_sequences += enc_vec[idx]->number_of_sequences_get();
         enc_vec[w_idx++] = enc_vec[idx];
       }
     }
@@ -554,7 +562,7 @@ class DNAEncodingMultiLength
       dna_encoding->statistics();
     }
   }
-  void prepare_split_view(size_t num_parts, bool verbose)
+  void prepare_view(size_t num_parts, bool verbose)
   {
     auto kv_vec = key_values_vector_get();
     if (verbose)
@@ -562,14 +570,24 @@ class DNAEncodingMultiLength
       std::cout << "# original key values" << std::endl;
       key_values_show(kv_vec);
     }
+    expanded_vec.clear();
+    end_idx_of_part_vec.clear();
+    if (num_parts == 1)
+    {
+      for (auto v : kv_vec)
+      {
+        expanded_vec.push_back(v);
+      }
+      end_idx_of_part_vec.push_back(expanded_vec.size());
+      return;
+    }
     const size_t mean = (total_size + num_parts - 1)/num_parts;
     if (verbose)
     {
       std::cout << "# num_parts\t" << num_parts << std::endl;
       std::cout << "# mean\t" << mean << std::endl;
     }
-    expanded_vec.clear();
-    for (auto v : kv_vec)
+    for (auto &v : kv_vec)
     {
       const int size_factor = 15;
       const size_t s = std::get<1>(v) * std::get<2>(v);
@@ -578,7 +596,9 @@ class DNAEncodingMultiLength
         expanded_vec.push_back(v);
       } else
       {
-        const size_t mean_part_seq = mean/(size_factor * std::get<2>(v));
+        const size_t mean_part_seq = std::max(size_t(10),
+                                              mean/(size_factor *
+                                                    std::get<2>(v)));
         size_t remain = std::get<1>(v);
         while (remain >= mean_part_seq)
         {
@@ -600,69 +620,12 @@ class DNAEncodingMultiLength
       std::cout << "# expanded key values" << std::endl;
       key_values_show(expanded_vec);
     }
-    end_idx_of_part_vec = divide_vector_evenly(expanded_vec.begin(),
-                                               expanded_vec.end(),
-                                               total_size, num_parts, verbose);
+    divide_vector_evenly(&end_idx_of_part_vec,
+                         expanded_vec.begin(),
+                         expanded_vec.end(),
+                         total_size, num_parts, verbose);
   }
 
-  class Iterator
-  {
-    const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
-    size_t current_enc_vec_idx,
-           current_seqnum;
-    bool exhausted;
-    public:
-    Iterator(const std::vector<ThisDNAEncodingForLength *> &_enc_vec_ref,
-             bool _exhausted)
-      : enc_vec_ref(_enc_vec_ref)
-      , current_enc_vec_idx(0)
-      , current_seqnum(0)
-      , exhausted(_exhausted)
-    { }
-    std::pair<const uint64_t *,size_t> operator *(void) const
-    {
-      assert(current_enc_vec_idx < enc_vec_ref.size());
-      const uint64_t *units
-        = enc_vec_ref[current_enc_vec_idx]->units_get();
-      const size_t num_units = enc_vec_ref[current_enc_vec_idx]
-                                 ->num_units_get();
-      return std::make_pair(units + current_seqnum * num_units,
-                            enc_vec_ref[current_enc_vec_idx]
-                              ->sequence_length_get());
-    }
-    bool operator != (const Iterator& other) const noexcept
-    {
-      return exhausted != other.exhausted;
-    }
-    Iterator& operator++() /* prefix increment*/
-    {
-      assert(not exhausted);
-      if (current_seqnum + 1 <
-          enc_vec_ref[current_enc_vec_idx]->number_of_sequences_get())
-      {
-        current_seqnum++;
-      } else
-      {
-        current_seqnum = 0;
-        if (current_enc_vec_idx + 1 < enc_vec_ref.size())
-        {
-          current_enc_vec_idx++;
-        } else
-        {
-          exhausted = true;
-        }
-      }
-      return *this;
-    }
-  };
-  auto begin(void) const
-  {
-    return Iterator(enc_vec,false);
-  }
-  auto end(void) const
-  {
-    return Iterator(enc_vec,true);
-  }
   class SplitViewIterator
   {
     const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
@@ -736,15 +699,21 @@ class DNAEncodingMultiLength
       return *this;
     }
   };
-  auto begin_split(size_t part_idx) const
+
+  auto begin(size_t part_idx = 0) const
   {
+    if (expanded_vec.size() == 0 or end_idx_of_part_vec.size() == 0)
+    {
+      std::cerr << "need to call prepare_view before" << std::endl;
+      exit(EXIT_FAILURE);
+    }
     return SplitViewIterator(enc_vec,
                              expanded_vec,
                              end_idx_of_part_vec,
                              part_idx,
                              false);
   }
-  auto end_split(void) const
+  auto end(void) const
   {
     return SplitViewIterator(enc_vec,
                              expanded_vec,
@@ -756,6 +725,10 @@ class DNAEncodingMultiLength
   {
     return end_idx_of_part_vec.size();
   }
+  size_t total_number_of_sequences_get(void) const
+  {
+    return total_number_of_sequences;
+  }
   void verify_length_dist(std::map<size_t,size_t> &length_dist_map) const
   {
     size_t count_sum = 0;
@@ -763,10 +736,15 @@ class DNAEncodingMultiLength
     {
       count_sum += count_as_value;
     }
-    size_t total_number_of_sequences = 0;
+    if (count_sum != total_number_of_sequences)
+    {
+      std::cerr << "count_sum = " << count_sum << " != "
+                << total_number_of_sequences << " = total_number_of_sequences"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
     for (auto &&dna_encoding : enc_vec)
     {
-      total_number_of_sequences += dna_encoding->number_of_sequences_get();
       const size_t this_length = dna_encoding->sequence_length_get();
       if (dna_encoding->number_of_sequences_get()
             != length_dist_map[this_length])
@@ -778,13 +756,6 @@ class DNAEncodingMultiLength
                   << std::endl;
         exit(EXIT_FAILURE);
       }
-    }
-    if (count_sum != total_number_of_sequences)
-    {
-      std::cerr << "count_sum = " << count_sum << " != "
-                << total_number_of_sequences << " = total_number_of_sequences"
-                << std::endl;
-      exit(EXIT_FAILURE);
     }
   }
 };

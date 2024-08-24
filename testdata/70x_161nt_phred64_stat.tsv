@@ -3,7 +3,7 @@
 # mean sequence length	161
 # minimum sequence length	161
 # maximum sequence length	161
-# length, counts
+# length, count, count ratio
 # 161	70	100.0000
 # original size of file ../testdata/70x_161nt_phred64.fastq (MB)	0
 # expected size of sequences in RAM (MB)	0

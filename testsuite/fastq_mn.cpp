@@ -500,8 +500,9 @@ static void verify_decoding_multilength(bool statistics,
   {
     dna_encoding_multi_length.statistics();
   }
+  dna_encoding_multi_length.prepare_view(1,false);
   size_t seqcount = 0;
-  for (auto [sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
+  for (auto const &[sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
   {
     assert(sub_unit_ptr != nullptr);
     verify_consecutive_qgrams(sub_unit_ptr,qgram_length,sequence_length);
@@ -519,17 +520,11 @@ static void verify_decoding_parts_view(
        part_idx < dna_encoding_multi_length.num_parts_get();
        part_idx++)
   {
-    for(auto it = dna_encoding_multi_length.begin_split(part_idx);
-        it != dna_encoding_multi_length.end_split(); ++it)
+    for(auto it = dna_encoding_multi_length.begin(part_idx);
+        it != dna_encoding_multi_length.end(); ++it)
     {
       length_dist_map[std::get<1>(*it)]++;
     }
-  }
-  dna_encoding_multi_length.verify_length_dist(length_dist_map);
-  length_dist_map.clear();
-  for (auto const&[sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
-  {
-    length_dist_map[sequence_length]++;
   }
   dna_encoding_multi_length.verify_length_dist(length_dist_map);
 }
@@ -638,10 +633,14 @@ int main(int argc,char *argv[])
                       dna_encoding_multi_length.statistics();
                     } else
                     {
-                      for (size_t num_parts = 2; num_parts < 10; num_parts++)
+                      for (size_t num_parts = 1;
+                           num_parts < std::min(dna_encoding_multi_length.
+                                                total_number_of_sequences_get(),
+                                                size_t(10)); num_parts++)
                       {
-                        dna_encoding_multi_length.prepare_split_view(num_parts,
-                                                                     true);
+                        const bool verbose = false;
+                        dna_encoding_multi_length.prepare_view(num_parts,
+                                                               verbose);
                         verify_decoding_parts_view(dna_encoding_multi_length);
                       }
                     }
@@ -660,8 +659,6 @@ int main(int argc,char *argv[])
                                 << std::endl;
                       return EXIT_FAILURE;
                     }
-                    //verify_decoding(statistics,inputfiles[0],
-                                    //static_cast<size_t>(r_qgram_length));
                     verify_decoding_multilength(statistics,inputfiles[0],
                                                 static_cast<size_t>
                                                            (r_qgram_length));

@@ -3,7 +3,7 @@
 # mean sequence length	76
 # minimum sequence length	48
 # maximum sequence length	140
-# length, counts
+# length, count, count ratio
 # 48	1	25.0000
 # 58	1	25.0000
 # 60	1	25.0000
