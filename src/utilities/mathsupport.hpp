@@ -20,7 +20,8 @@
 #include <cstddef>
 #include <climits>
 #include <cassert>
-#include <ranges>
+#include <cmath>
+#include <numeric>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
