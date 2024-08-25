@@ -23,10 +23,12 @@
 #include <cstdint>
 #include <cinttypes>
 #include <algorithm>
+#include <map>
 #ifndef NDEBUG
 #include <iostream>
 #endif
 #include "utilities/mathsupport.hpp"
+#include "utilities/unused.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 

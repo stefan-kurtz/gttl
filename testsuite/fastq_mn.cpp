@@ -437,7 +437,7 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
                                       size_t qgram_length,
                                       size_t sequence_length)
 {
-  assert(qgram_length <= qgram_length);
+  assert(qgram_length <= sequence_length);
   DNAQgramDecoder
     dna_qgram_decoder(qgram_length,
                       sequence_length + 1 - qgram_length,

@@ -184,7 +184,7 @@ class NThashTransformer
         = (msTab31l[idx][qgram_length % 31] | msTab33r[idx][qgram_length % 33]);
     }
   }
-  uint64_t first_fwd_hash_value_get(const uint8_t *sequence,
+  uint64_t first_fwd_hash_value_get(const uint8_t *t_sequence,
                                     size_t qgram_length) const noexcept
   {
     uint64_t hVal = 0;
@@ -192,8 +192,8 @@ class NThashTransformer
     {
       hVal = rotate_left_1(hVal);
       hVal = swapbits033(hVal);
-      assert(sequence[idx] < 4);
-      hVal ^= nt_hash_seed_table[sequence[idx]];
+      assert(t_sequence[idx] < uint8_t(4));
+      hVal ^= nt_hash_seed_table[t_sequence[idx]];
     }
     return hVal;
   }
@@ -203,14 +203,14 @@ class NThashTransformer
   {
     const uint64_t fwd_code = first_fwd_hash_value_get(t_qgram,qgram_length);
     uint64_t rev_compl_code = 0;
-    for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
-         t_qgram_ptr >= t_qgram; t_qgram_ptr--)
+    for (size_t idx = qgram_length; idx > 0; /*Nothing*/)
     {
+      idx--;
       rev_compl_code = rotate_left_1(rev_compl_code);
       rev_compl_code = swapbits033(rev_compl_code);
-      assert(*t_qgram_ptr < uint8_t(4));
-      rev_compl_code
-        ^= nt_hash_seed_table[static_cast<size_t>(uint8_t(3) - *t_qgram_ptr)];
+      assert(t_qgram[idx] < uint8_t(4));
+      const uint8_t complement = uint8_t(3) - t_qgram[idx];
+      rev_compl_code ^= nt_hash_seed_table[static_cast<size_t>(complement)];
     }
     return std::make_pair(fwd_code,rev_compl_code);
   }
@@ -219,7 +219,7 @@ class NThashTransformer
   uint64_t next_hash_value_get(uint8_t charOut, uint64_t fhVal,
                                uint8_t charIn) const noexcept
   {
-    assert(charIn < 4 && charOut < 4);
+    assert(charIn < uint8_t(4) && charOut < uint8_t(4));
     uint64_t hVal = rotate_left_1(fhVal);
     hVal = swapbits033(hVal);
     hVal ^= nt_hash_seed_table[charIn];
@@ -232,7 +232,7 @@ class NThashTransformer
                                      uint8_t compl_charIn)
                                      const noexcept
   {
-    assert(compl_charIn < 4 && compl_charOut < 4);
+    assert(compl_charIn < uint8_t(4) && compl_charOut < uint8_t(4));
     uint64_t hVal = rhVal ^ msTab31l_33r_or[compl_charIn];
     hVal ^= nt_hash_seed_table[compl_charOut];
     hVal = rotate_right_1(hVal);
