@@ -631,11 +631,15 @@ class DNAEncodingMultiLength
     const std::vector<ThisDNAEncodingForLength *> &enc_vec_ref;
     const KeyValuesType &expanded_vec_ref;
     const std::vector<size_t> &end_idx_of_part_vec_ref;
-    const size_t current_end_of_part;
-    size_t current_in_part_idx,
-           current_enc_vec_idx,
-           current_number_of_sequences,
-           current_seqnum;
+    const size_t end_of_part;
+    size_t in_part_idx,
+           current_enc_vec_idx;
+    ThisDNAEncodingForLength *current_enc_vec_value;
+    const uint64_t *current_units_ptr;
+    size_t num_units,
+           sequence_length,
+           number_of_sequences;
+    const uint64_t *units_end;
     bool exhausted;
     public:
     SplitViewIterator(const std::vector<ThisDNAEncodingForLength *>
@@ -647,27 +651,22 @@ class DNAEncodingMultiLength
       : enc_vec_ref(_enc_vec_ref)
       , expanded_vec_ref(_expanded_vec_ref)
       , end_idx_of_part_vec_ref(_end_idx_of_part_vec_ref)
-      , current_end_of_part(end_idx_of_part_vec_ref[part_idx])
-      , current_in_part_idx(
-          part_idx == 0 ? 0 : end_idx_of_part_vec_ref[part_idx - 1])
-      , current_enc_vec_idx(std::get<0>(expanded_vec_ref[current_in_part_idx]))
-      , current_number_of_sequences(std::get<1>(expanded_vec_ref
-                                                 [current_in_part_idx]))
-      , current_seqnum(0)
+      , end_of_part(end_idx_of_part_vec_ref[part_idx])
+      , in_part_idx(part_idx == 0 ? 0 : end_idx_of_part_vec_ref[part_idx - 1])
+      , current_enc_vec_idx(std::get<0>(expanded_vec_ref[in_part_idx]))
+      , current_enc_vec_value(enc_vec_ref[current_enc_vec_idx])
+      , current_units_ptr(current_enc_vec_value->units_get())
+      , num_units(current_enc_vec_value->num_units_get())
+      , sequence_length(current_enc_vec_value->sequence_length_get())
+      , number_of_sequences(std::get<1>(expanded_vec_ref[in_part_idx]))
+      , units_end(current_units_ptr + number_of_sequences * num_units)
       , exhausted(_exhausted)
     {
       assert(part_idx < end_idx_of_part_vec_ref.size());
     }
     std::pair<const uint64_t *,size_t> operator *(void) const
     {
-      assert(current_enc_vec_idx < enc_vec_ref.size());
-      const uint64_t *units
-        = enc_vec_ref[current_enc_vec_idx]->units_get();
-      const size_t num_units = enc_vec_ref[current_enc_vec_idx]
-                                 ->num_units_get();
-      return std::make_pair(units + current_seqnum * num_units,
-                            enc_vec_ref[current_enc_vec_idx]
-                              ->sequence_length_get());
+      return std::make_pair(current_units_ptr, sequence_length);
     }
     bool operator != (const SplitViewIterator& other) const noexcept
     {
@@ -676,21 +675,23 @@ class DNAEncodingMultiLength
     SplitViewIterator& operator++() /* prefix increment*/
     {
       assert(not exhausted);
-      if (current_seqnum + 1 < current_number_of_sequences)
+      if (current_units_ptr + num_units < units_end)
       {
-        current_seqnum++;
+        current_units_ptr += num_units;
       } else
       {
-        current_seqnum = 0;
-        if (current_in_part_idx + 1 < current_end_of_part)
+        if (in_part_idx + 1 < end_of_part)
         {
-          size_t num_units;
-          current_in_part_idx++;
-          assert(current_in_part_idx < expanded_vec_ref.size());
-          std::tie(current_enc_vec_idx,
-                   current_number_of_sequences,
-                   num_units)
-            = expanded_vec_ref[current_in_part_idx];
+          in_part_idx++;
+          assert(in_part_idx < expanded_vec_ref.size());
+          current_enc_vec_idx = std::get<0>(expanded_vec_ref[in_part_idx]);
+          number_of_sequences = std::get<1>(expanded_vec_ref[in_part_idx]);
+          assert(current_enc_vec_idx < enc_vec_ref.size());
+          current_enc_vec_value = enc_vec_ref[current_enc_vec_idx];
+          current_units_ptr = current_enc_vec_value->units_get();
+          num_units = current_enc_vec_value->num_units_get();
+          sequence_length = current_enc_vec_value->sequence_length_get();
+          units_end = current_units_ptr + number_of_sequences * num_units;
         } else
         {
           exhausted = true;
