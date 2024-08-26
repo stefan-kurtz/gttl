@@ -38,6 +38,7 @@
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
+#include "sequences/dna_seq_decoder.hpp"
 #include "seq_reader_options.hpp"
 
 static void fastq_split_writer(size_t split_size,

@@ -20,8 +20,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cmath>
-#include "sequences/alphabet.hpp"
 #include "utilities/cyclic_buffer.hpp"
+#include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"
 
 /* Implementation of iterator class follows concept described in
@@ -84,7 +84,7 @@ class QgramRecHashValueFwdIterator
       {}
       std::pair<uint64_t,uint8_t> operator*()
       {
-        if (!last_qgram_was_processed)
+        if (not last_qgram_was_processed)
         {
           const uint8_t new_rank = alphabet.char_to_rank(*next_char_ptr);
           wildcards_in_qgram
@@ -96,7 +96,7 @@ class QgramRecHashValueFwdIterator
                                                              hash_value,
                                                              new_rank);
         }
-        return {hash_value,wildcards_in_qgram};
+        return std::make_pair(hash_value,wildcards_in_qgram);
       }
       Iterator& operator++() /* prefix increment*/
       {
@@ -134,7 +134,7 @@ class QgramRecHashValueFwdIterator
                            : std::pow(alpha_size,_qgram_length) - 1;
       current_window.initialize(_qgram_length);
     }
-    Iterator begin()
+    Iterator begin(void)
     {
       uint64_t this_hash_value;
       uint8_t wc;
@@ -160,10 +160,9 @@ class QgramRecHashValueFwdIterator
       return Iterator(qgram_length,current_window,sequence,
                       qgram_transformer,this_hash_value,wc);
     }
-    Iterator end()
+    Iterator end(void)
     {
-      return Iterator(current_window,sequence + seqlen,
-                      qgram_transformer);
+      return Iterator(current_window, sequence + seqlen, qgram_transformer);
     }
     /* The following functions are for qgram integer codes only */
     std::pair<uint64_t,uint8_t> qgram_encode(const SequenceBaseType *qgram)
@@ -179,7 +178,7 @@ class QgramRecHashValueFwdIterator
         code += mult * static_cast<uint64_t>(rank);
         mult *= alpha_size;
       }
-      return {code, wc};
+      return std::make_pair(code, wc);
     }
 #ifndef NDEBUG
     const uint8_t *qgram_decode(uint64_t code)

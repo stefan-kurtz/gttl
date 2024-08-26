@@ -479,7 +479,7 @@ class DNAEncodingMultiLength
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
   size_t total_size, total_number_of_sequences;
-  using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t>>;
+  using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t,size_t>>;
   KeyValuesType expanded_vec;
   std::vector<size_t> end_idx_of_part_vec;
   auto key_values_vector_get(void) const
@@ -490,8 +490,9 @@ class DNAEncodingMultiLength
     {
       key_values.push_back(std::make_tuple(enc_vec_idx,
                                            dna_encoding
-                                            ->number_of_sequences_get(),
-                                           dna_encoding->num_units_get()));
+                                             ->number_of_sequences_get(),
+                                           dna_encoding->num_units_get(),
+                                           0));
       enc_vec_idx++;
     }
     return key_values;
@@ -505,6 +506,7 @@ class DNAEncodingMultiLength
                 << enc_vec[std::get<0>(kv)]->sequence_length_get() << "\t"
                 << std::get<1>(kv) << "\t"
                 << std::get<2>(kv) << "\t"
+                << std::get<3>(kv) << "\t"
                 << (std::get<1>(kv) * std::get<2>(kv))
                 << std::endl;
       idx++;
@@ -602,18 +604,22 @@ class DNAEncodingMultiLength
                                               mean/(size_factor *
                                                     std::get<2>(v)));
         size_t remain = std::get<1>(v);
+        size_t sequence_number_offset = 0;
         while (remain >= mean_part_seq)
         {
           expanded_vec.push_back(std::make_tuple(std::get<0>(v),
                                                  mean_part_seq,
-                                                 std::get<2>(v)));
+                                                 std::get<2>(v),
+                                                 sequence_number_offset));
           remain -= mean_part_seq;
+          sequence_number_offset += mean_part_seq;
         }
         if (remain > 0)
         {
           expanded_vec.push_back(std::make_tuple(std::get<0>(v),
                                                  remain,
-                                                 std::get<2>(v)));
+                                                 std::get<2>(v),
+                                                 sequence_number_offset));
         }
       }
     }
@@ -637,9 +643,10 @@ class DNAEncodingMultiLength
     size_t in_part_idx,
            current_enc_vec_idx;
     ThisDNAEncodingForLength *current_enc_vec_value;
-    const uint64_t *current_units_ptr;
     size_t num_units,
-           sequence_length,
+           sequence_number_offset;
+    const uint64_t *current_units_ptr;
+    size_t sequence_length,
            number_of_sequences;
     const uint64_t *units_end;
     bool exhausted;
@@ -657,8 +664,10 @@ class DNAEncodingMultiLength
       , in_part_idx(part_idx == 0 ? 0 : end_idx_of_part_vec_ref[part_idx - 1])
       , current_enc_vec_idx(std::get<0>(expanded_vec_ref[in_part_idx]))
       , current_enc_vec_value(enc_vec_ref[current_enc_vec_idx])
-      , current_units_ptr(current_enc_vec_value->units_get())
       , num_units(current_enc_vec_value->num_units_get())
+      , sequence_number_offset(std::get<3>(expanded_vec_ref[in_part_idx]))
+      , current_units_ptr(current_enc_vec_value->units_get() +
+                          sequence_number_offset * num_units)
       , sequence_length(current_enc_vec_value->sequence_length_get())
       , number_of_sequences(std::get<1>(expanded_vec_ref[in_part_idx]))
       , units_end(current_units_ptr + number_of_sequences * num_units)
@@ -686,12 +695,14 @@ class DNAEncodingMultiLength
         {
           in_part_idx++;
           assert(in_part_idx < expanded_vec_ref.size());
-          current_enc_vec_idx = std::get<0>(expanded_vec_ref[in_part_idx]);
           number_of_sequences = std::get<1>(expanded_vec_ref[in_part_idx]);
+          current_enc_vec_idx = std::get<0>(expanded_vec_ref[in_part_idx]);
           assert(current_enc_vec_idx < enc_vec_ref.size());
           current_enc_vec_value = enc_vec_ref[current_enc_vec_idx];
-          current_units_ptr = current_enc_vec_value->units_get();
           num_units = current_enc_vec_value->num_units_get();
+          sequence_number_offset = std::get<3>(expanded_vec_ref[in_part_idx]);
+          current_units_ptr = current_enc_vec_value->units_get()
+                               + sequence_number_offset * num_units;
           sequence_length = current_enc_vec_value->sequence_length_get();
           units_end = current_units_ptr + number_of_sequences * num_units;
         } else
@@ -886,77 +897,6 @@ class DNAEncoding
       }
     }
     return s;
-  }
-};
-
-class DNAQgramDecoder
-{
-  class Iterator
-  {
-    const uint64_t mask,
-                   *sub_unit_ptr;
-    size_t current_qgram_idx, idx_of_unit, shift_last;
-    uint64_t integer;
-    public:
-    Iterator(size_t qgram_length,
-             size_t _current_qgram_idx,
-             const uint64_t *_sub_unit_ptr)
-      : mask(((uint64_t(1) << (2 * (qgram_length - 1))) - 1) << 2)
-      , sub_unit_ptr(_sub_unit_ptr)
-      , current_qgram_idx(_current_qgram_idx)
-      , idx_of_unit(_current_qgram_idx + qgram_length < size_t(32) ? 0
-                                                                   : size_t(1))
-      , shift_last(qgram_length == size_t(32) ? size_t(62)
-                                              : (size_t(62) -
-                                                 (2 * qgram_length)))
-      , integer(sub_unit_ptr[0] >> (size_t(64) - 2 * qgram_length))
-    { }
-    uint64_t operator*() const
-    {
-      return integer;
-    }
-    Iterator& operator++() /* prefix increment*/
-    {
-      integer = (integer << 2) & mask;
-      assert((integer & uint64_t(3)) == 0);
-      const uint64_t new_char = (sub_unit_ptr[idx_of_unit] >> shift_last)
-                                & uint64_t(3);
-      integer |= new_char;
-      if (shift_last > 0)
-      {
-        assert(shift_last >= size_t(2));
-        shift_last -= size_t(2);
-      } else
-      {
-        shift_last = size_t(62);
-        idx_of_unit++;
-      }
-      current_qgram_idx++;
-      return *this;
-    }
-    bool operator != (const Iterator& other) const
-    {
-      return current_qgram_idx != other.current_qgram_idx;
-    }
-  };
-  const size_t qgram_length;
-  const size_t number_of_qgrams;
-  const uint64_t *sub_unit_ptr;
-  public:
-  DNAQgramDecoder(size_t _qgram_length,
-                  size_t _number_of_qgrams,
-                  const uint64_t *_sub_unit_ptr)
-    : qgram_length(_qgram_length)
-    , number_of_qgrams(_number_of_qgrams)
-    , sub_unit_ptr(_sub_unit_ptr)
-  {}
-  Iterator begin(void) const
-  {
-    return Iterator(qgram_length,0,sub_unit_ptr);
-  }
-  Iterator end(void) const
-  {
-    return Iterator(qgram_length,number_of_qgrams,sub_unit_ptr);
   }
 };
 #endif
