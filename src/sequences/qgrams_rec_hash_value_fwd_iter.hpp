@@ -29,7 +29,8 @@
 
 template<const char *_char_spec,
          uint8_t _undefined_rank,
-         class QgramTransformer>
+         class QgramTransformer,
+         typename SequenceBaseType>
 class QgramRecHashValueFwdIterator
 {
   public:
@@ -39,7 +40,6 @@ class QgramRecHashValueFwdIterator
   static constexpr const bool handle_both_strands = false;
   private:
   static constexpr uint64_t alpha_size = static_cast<uint64_t>(alphabet.size());
-  using SequenceBaseType = char;
   using CyclicBuffer_uint8 = CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH>;
 
   struct Iterator
@@ -86,12 +86,21 @@ class QgramRecHashValueFwdIterator
       {
         if (not last_qgram_was_processed)
         {
-          const uint8_t new_rank = alphabet.char_to_rank(*next_char_ptr);
-          wildcards_in_qgram
-            += static_cast<uint8_t>(new_rank == alphabet.undefined_rank());
-          const uint8_t old_rank = current_window.shift(new_rank);
-          wildcards_in_qgram
-            -= static_cast<uint8_t>(old_rank == alphabet.undefined_rank());
+          uint8_t new_rank,  old_rank;;
+          if constexpr (std::is_same_v<SequenceBaseType,char>)
+          {
+            new_rank = alphabet.char_to_rank(*next_char_ptr);
+            wildcards_in_qgram
+              += static_cast<uint8_t>(new_rank == alphabet.undefined_rank());
+            old_rank = current_window.shift(new_rank);
+            wildcards_in_qgram
+              -= static_cast<uint8_t>(old_rank == alphabet.undefined_rank());
+          } else
+          {
+            static_assert(std::is_same_v<SequenceBaseType,uint8_t>);
+            new_rank = *next_char_ptr;
+            old_rank = current_window.shift(new_rank);
+          }
           hash_value = qgram_transformer.next_hash_value_get(old_rank,
                                                              hash_value,
                                                              new_rank);
@@ -144,9 +153,15 @@ class QgramRecHashValueFwdIterator
         for (const SequenceBaseType *qgram_ptr = sequence + qgram_length - 1;
              qgram_ptr >= sequence; qgram_ptr--)
         {
-          const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
-          wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
-          current_window.prepend(rank);
+          if constexpr (std::is_same_v<SequenceBaseType,char>)
+          {
+            const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
+            wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
+            current_window.prepend(rank);
+          } else
+          {
+            current_window.prepend(*qgram_ptr);
+          }
         }
         this_hash_value = qgram_transformer.first_fwd_hash_value_get(
                                               current_window.pointer_to_array(),
@@ -172,8 +187,15 @@ class QgramRecHashValueFwdIterator
       for (const SequenceBaseType *qgram_ptr = qgram + qgram_length - 1;
            qgram_ptr >= qgram; qgram_ptr--)
       {
-        const uint8_t rank = alphabet.char_to_rank(*qgram_ptr);
-        wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
+        uint8_t rank;
+        if constexpr (std::is_same_v<SequenceBaseType,char>)
+        {
+          rank = alphabet.char_to_rank(*qgram_ptr);
+          wc += static_cast<uint8_t>(rank == alphabet.undefined_rank());
+        } else
+        {
+          rank = *qgram_ptr;
+        }
         current_window.prepend(rank);
         code += mult * static_cast<uint64_t>(rank);
         mult *= alpha_size;
@@ -198,8 +220,15 @@ class QgramRecHashValueFwdIterator
     {
       for (size_t idx = 0; idx < qgram_length; idx++)
       {
-        uint8_t rank = alphabet.char_to_rank(orig_qgram[idx]);
-        assert(rank != alphabet.undefined_rank() && rank == mapped_qgram[idx]);
+        if constexpr (std::is_same_v<SequenceBaseType,char>)
+        {
+          const uint8_t rank = alphabet.char_to_rank(orig_qgram[idx]);
+          assert(rank != alphabet.undefined_rank() and
+                 rank == mapped_qgram[idx]);
+        } else
+        {
+          assert(orig_qgram[idx] == mapped_qgram[idx]);
+        }
       }
     }
 #endif

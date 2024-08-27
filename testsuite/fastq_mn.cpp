@@ -471,7 +471,7 @@ void verify_decoding(bool statistics,
                             const std::string &inputfilename,
                             size_t qgram_length)
 {
-  DNAEncoding<uint64_t> dna_encoding(inputfilename);
+  DNAEncoding<uint64_t,false> dna_encoding(inputfilename);
   if (statistics)
   {
     dna_encoding.statistics();
@@ -496,12 +496,13 @@ static void verify_decoding_multilength(bool statistics,
                                         const std::string &inputfilename,
                                         size_t qgram_length)
 {
-  DNAEncodingMultiLength<uint64_t> dna_encoding_multi_length(inputfilename);
+  DNAEncodingMultiLength<uint64_t,false>
+    dna_encoding_multi_length(inputfilename);
   if (statistics)
   {
     dna_encoding_multi_length.statistics();
   }
-  dna_encoding_multi_length.prepare_view(1,false);
+  dna_encoding_multi_length.prepare_view(1);
   size_t seqcount = 0;
   for (auto const &[sub_unit_ptr, sequence_length] : dna_encoding_multi_length)
   {
@@ -514,7 +515,7 @@ static void verify_decoding_multilength(bool statistics,
 }
 
 static void verify_decoding_parts_view(
-  const DNAEncodingMultiLength<uint64_t> &dna_encoding_multi_length)
+  const DNAEncodingMultiLength<uint64_t,false> &dna_encoding_multi_length)
 {
   std::map<size_t,size_t> length_dist_map;
   for (size_t part_idx = 0;
@@ -597,7 +598,7 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncodingMultiLength<uint8_t>
+              DNAEncodingMultiLength<uint8_t,false>
                 dna_encoding_multi_length(inputfiles[0]);
               if (statistics)
               {
@@ -607,7 +608,7 @@ int main(int argc,char *argv[])
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncodingMultiLength<uint16_t>
+                DNAEncodingMultiLength<uint16_t,false>
                   dna_encoding_multi_length(inputfiles[0]);
                 if (statistics)
                 {
@@ -617,7 +618,7 @@ int main(int argc,char *argv[])
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncodingMultiLength<uint32_t>
+                  DNAEncodingMultiLength<uint32_t,false>
                     dna_encoding_multi_length(inputfiles[0]);
                   if (statistics)
                   {
@@ -627,7 +628,7 @@ int main(int argc,char *argv[])
                 {
                   if (options.encoding_type_get() == std::string("64"))
                   {
-                    DNAEncodingMultiLength<uint64_t>
+                    DNAEncodingMultiLength<uint64_t,false>
                       dna_encoding_multi_length(inputfiles[0]);
                     if (statistics)
                     {
@@ -639,9 +640,7 @@ int main(int argc,char *argv[])
                                                 total_number_of_sequences_get(),
                                                 size_t(10)); num_parts++)
                       {
-                        const bool verbose = false;
-                        dna_encoding_multi_length.prepare_view(num_parts,
-                                                               verbose);
+                        dna_encoding_multi_length.prepare_view(num_parts);
                         verify_decoding_parts_view(dna_encoding_multi_length);
                       }
                     }

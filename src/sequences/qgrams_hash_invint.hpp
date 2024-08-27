@@ -90,12 +90,14 @@ class InvertibleIntegercodeTransformer4
 using InvertibleIntegercodeIterator4
   = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
                                  4,
-                                 InvertibleIntegercodeTransformer4>;
+                                 InvertibleIntegercodeTransformer4,
+                                 char>;
 
 using InvertibleIntegercodeIterator4_Wildcard2_a
   = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
                                  0,
-                                 InvertibleIntegercodeTransformer4>;
+                                 InvertibleIntegercodeTransformer4,
+                                 char>;
 
 using InvertibleIntegercode2Iterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
@@ -131,6 +133,6 @@ class InvertibleIntegercodeTransformer20
 using InvertibleIntegercodeIterator20
   = QgramRecHashValueFwdIterator<alphabet::amino_acids,
                                  20,
-                                 InvertibleIntegercodeTransformer20>;
-
+                                 InvertibleIntegercodeTransformer20,
+                                 char>;
 #endif
