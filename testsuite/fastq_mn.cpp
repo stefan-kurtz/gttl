@@ -467,31 +467,6 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
   }
 }
 
-void verify_decoding(bool statistics,
-                            const std::string &inputfilename,
-                            size_t qgram_length)
-{
-  DNAEncoding<uint64_t,false> dna_encoding(inputfilename);
-  if (statistics)
-  {
-    dna_encoding.statistics();
-  }
-  const size_t sequence_length = dna_encoding.sequence_length_get();
-  if (sequence_length >= qgram_length)
-  {
-    const uint64_t *units = dna_encoding.units_get();
-    const size_t num_units = dna_encoding.num_units_get();
-    for (size_t seqnum = 0;
-         seqnum < dna_encoding.number_of_sequences_get();
-         seqnum++)
-    {
-      const uint64_t *sub_unit_ptr = units +
-                                     seqnum * num_units;
-      verify_consecutive_qgrams(sub_unit_ptr,qgram_length,sequence_length);
-    }
-  }
-}
-
 static void verify_decoding_multilength(bool statistics,
                                         const std::string &inputfilename,
                                         size_t qgram_length)
