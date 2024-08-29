@@ -8,63 +8,65 @@
 #include <cassert>
 
 template <uint8_t undef,const char *str>
-static constexpr uint8_t find_index(char cc,std::size_t i,std::size_t j)
+static constexpr uint8_t gttl_find_index(char cc,size_t i,size_t j)
 {
   return str[i] == '\0'
            ? undef
            : (str[i] == cc ? static_cast<uint8_t>(j)
-                           : (str[i] == '|' ? find_index<undef,str>(cc,i+1,j+1)
-                                            : find_index<undef,str>(cc,i+1,j)));
+                           : (str[i] == '|'
+                                ? gttl_find_index<undef,str>(cc,i+1,j+1)
+                                : gttl_find_index<undef,str>(cc,i+1,j)));
 }
 
 template <uint8_t undef,const char *str>
-static constexpr uint8_t find_index (char cc)
+static constexpr uint8_t gttl_find_index (char cc)
 {
-  return find_index<undef,str>(cc,0,0);
+  return gttl_find_index<undef,str>(cc,0,0);
 }
 
 template <const char *str>
-static constexpr size_t find_size(std::size_t i,std::size_t j)
+static constexpr size_t gttl_find_size(size_t i,size_t j)
 {
-  return str[i] == '\0' ? j : (str[i] == '|' ? find_size<str>(i+1,j+1)
-                                             : find_size<str>(i+1,j));
+  return str[i] == '\0' ? j : (str[i] == '|' ? gttl_find_size<str>(i+1,j+1)
+                                             : gttl_find_size<str>(i+1,j));
 }
 
 template <const char *str>
-static constexpr size_t find_size(void)
+static constexpr size_t gttl_find_size(void)
 {
-  return 1 + find_size<str>(0,0);
+  return 1 + gttl_find_size<str>(0,0);
 }
 
 template <size_t _size,const char *str>
-static constexpr void fill_characters (std::array<char,_size> &_chars,
-                                       std::size_t i,std::size_t j,
-                                       std::size_t k)
+static constexpr void gttl_fill_characters (std::array<char,_size> &_chars,
+                                            size_t i,
+                                            size_t j,
+                                            size_t k)
 {
   if (str[i] != '\0')
   {
     if (j == 0)
     {
       _chars[k] = str[i];
-      fill_characters<_size,str> (_chars,i+1,j+1,k+1);
+      gttl_fill_characters<_size,str> (_chars,i+1,j+1,k+1);
     } else
     {
       if (str[i] == '|')
       {
-        fill_characters<_size,str> (_chars,i+1,0,k);
+        gttl_fill_characters<_size,str> (_chars,i+1,0,k);
       } else
       {
-        fill_characters<_size,str> (_chars,i+1,j+1,k);
+        gttl_fill_characters<_size,str> (_chars,i+1,j+1,k);
       }
     }
   }
 }
 
 template <size_t _size,const char *str>
-static constexpr std::array<char,_size> fill_characters (void)
+static constexpr std::array<char,_size> gttl_fill_characters (void)
 {
   std::array<char,_size> _chars{};
-  fill_characters<_size,str> (_chars,0,0,0);
+  gttl_fill_characters<_size,str> (_chars,0,0,0);
   return _chars;
 }
 
@@ -106,100 +108,100 @@ class GttlAlphabet
     /* 30 */ _undefined_rank,
     /* 31 */ _undefined_rank,
     /* 32 */ _undefined_rank,
-    /* 33 */ find_index<_undefined_rank,char_spec>(33),
-    /* 34 */ find_index<_undefined_rank,char_spec>(34),
-    /* 35 */ find_index<_undefined_rank,char_spec>(35),
-    /* 36 */ find_index<_undefined_rank,char_spec>(36),
-    /* 37 */ find_index<_undefined_rank,char_spec>(37),
-    /* 38 */ find_index<_undefined_rank,char_spec>(38),
-    /* 39 */ find_index<_undefined_rank,char_spec>(39),
-    /* 40 */ find_index<_undefined_rank,char_spec>(40),
-    /* 41 */ find_index<_undefined_rank,char_spec>(41),
-    /* 42 */ find_index<_undefined_rank,char_spec>(42),
-    /* 43 */ find_index<_undefined_rank,char_spec>(43),
-    /* 44 */ find_index<_undefined_rank,char_spec>(44),
-    /* 45 */ find_index<_undefined_rank,char_spec>(45),
-    /* 46 */ find_index<_undefined_rank,char_spec>(46),
-    /* 47 */ find_index<_undefined_rank,char_spec>(47),
-    /* 48 */ find_index<_undefined_rank,char_spec>(48),
-    /* 49 */ find_index<_undefined_rank,char_spec>(49),
-    /* 50 */ find_index<_undefined_rank,char_spec>(50),
-    /* 51 */ find_index<_undefined_rank,char_spec>(51),
-    /* 52 */ find_index<_undefined_rank,char_spec>(52),
-    /* 53 */ find_index<_undefined_rank,char_spec>(53),
-    /* 54 */ find_index<_undefined_rank,char_spec>(54),
-    /* 55 */ find_index<_undefined_rank,char_spec>(55),
-    /* 56 */ find_index<_undefined_rank,char_spec>(56),
-    /* 57 */ find_index<_undefined_rank,char_spec>(57),
-    /* 58 */ find_index<_undefined_rank,char_spec>(58),
-    /* 59 */ find_index<_undefined_rank,char_spec>(59),
-    /* 60 */ find_index<_undefined_rank,char_spec>(60),
-    /* 61 */ find_index<_undefined_rank,char_spec>(61),
-    /* 62 */ find_index<_undefined_rank,char_spec>(62),
-    /* 63 */ find_index<_undefined_rank,char_spec>(63),
-    /* 64 */ find_index<_undefined_rank,char_spec>(64),
-    /* 65 */ find_index<_undefined_rank,char_spec>(65),
-    /* 66 */ find_index<_undefined_rank,char_spec>(66),
-    /* 67 */ find_index<_undefined_rank,char_spec>(67),
-    /* 68 */ find_index<_undefined_rank,char_spec>(68),
-    /* 69 */ find_index<_undefined_rank,char_spec>(69),
-    /* 70 */ find_index<_undefined_rank,char_spec>(70),
-    /* 71 */ find_index<_undefined_rank,char_spec>(71),
-    /* 72 */ find_index<_undefined_rank,char_spec>(72),
-    /* 73 */ find_index<_undefined_rank,char_spec>(73),
-    /* 74 */ find_index<_undefined_rank,char_spec>(74),
-    /* 75 */ find_index<_undefined_rank,char_spec>(75),
-    /* 76 */ find_index<_undefined_rank,char_spec>(76),
-    /* 77 */ find_index<_undefined_rank,char_spec>(77),
-    /* 78 */ find_index<_undefined_rank,char_spec>(78),
-    /* 79 */ find_index<_undefined_rank,char_spec>(79),
-    /* 80 */ find_index<_undefined_rank,char_spec>(80),
-    /* 81 */ find_index<_undefined_rank,char_spec>(81),
-    /* 82 */ find_index<_undefined_rank,char_spec>(82),
-    /* 83 */ find_index<_undefined_rank,char_spec>(83),
-    /* 84 */ find_index<_undefined_rank,char_spec>(84),
-    /* 85 */ find_index<_undefined_rank,char_spec>(85),
-    /* 86 */ find_index<_undefined_rank,char_spec>(86),
-    /* 87 */ find_index<_undefined_rank,char_spec>(87),
-    /* 88 */ find_index<_undefined_rank,char_spec>(88),
-    /* 89 */ find_index<_undefined_rank,char_spec>(89),
-    /* 90 */ find_index<_undefined_rank,char_spec>(90),
-    /* 91 */ find_index<_undefined_rank,char_spec>(91),
-    /* 92 */ find_index<_undefined_rank,char_spec>(92),
-    /* 93 */ find_index<_undefined_rank,char_spec>(93),
-    /* 94 */ find_index<_undefined_rank,char_spec>(94),
-    /* 95 */ find_index<_undefined_rank,char_spec>(95),
-    /* 96 */ find_index<_undefined_rank,char_spec>(96),
-    /* 97 */ find_index<_undefined_rank,char_spec>(97),
-    /* 98 */ find_index<_undefined_rank,char_spec>(98),
-    /* 99 */ find_index<_undefined_rank,char_spec>(99),
-    /* 100 */ find_index<_undefined_rank,char_spec>(100),
-    /* 101 */ find_index<_undefined_rank,char_spec>(101),
-    /* 102 */ find_index<_undefined_rank,char_spec>(102),
-    /* 103 */ find_index<_undefined_rank,char_spec>(103),
-    /* 104 */ find_index<_undefined_rank,char_spec>(104),
-    /* 105 */ find_index<_undefined_rank,char_spec>(105),
-    /* 106 */ find_index<_undefined_rank,char_spec>(106),
-    /* 107 */ find_index<_undefined_rank,char_spec>(107),
-    /* 108 */ find_index<_undefined_rank,char_spec>(108),
-    /* 109 */ find_index<_undefined_rank,char_spec>(109),
-    /* 110 */ find_index<_undefined_rank,char_spec>(110),
-    /* 111 */ find_index<_undefined_rank,char_spec>(111),
-    /* 112 */ find_index<_undefined_rank,char_spec>(112),
-    /* 113 */ find_index<_undefined_rank,char_spec>(113),
-    /* 114 */ find_index<_undefined_rank,char_spec>(114),
-    /* 115 */ find_index<_undefined_rank,char_spec>(115),
-    /* 116 */ find_index<_undefined_rank,char_spec>(116),
-    /* 117 */ find_index<_undefined_rank,char_spec>(117),
-    /* 118 */ find_index<_undefined_rank,char_spec>(118),
-    /* 119 */ find_index<_undefined_rank,char_spec>(119),
-    /* 120 */ find_index<_undefined_rank,char_spec>(120),
-    /* 121 */ find_index<_undefined_rank,char_spec>(121),
-    /* 122 */ find_index<_undefined_rank,char_spec>(122),
-    /* 123 */ find_index<_undefined_rank,char_spec>(123),
+    /* 33 */ gttl_find_index<_undefined_rank,char_spec>(33),
+    /* 34 */ gttl_find_index<_undefined_rank,char_spec>(34),
+    /* 35 */ gttl_find_index<_undefined_rank,char_spec>(35),
+    /* 36 */ gttl_find_index<_undefined_rank,char_spec>(36),
+    /* 37 */ gttl_find_index<_undefined_rank,char_spec>(37),
+    /* 38 */ gttl_find_index<_undefined_rank,char_spec>(38),
+    /* 39 */ gttl_find_index<_undefined_rank,char_spec>(39),
+    /* 40 */ gttl_find_index<_undefined_rank,char_spec>(40),
+    /* 41 */ gttl_find_index<_undefined_rank,char_spec>(41),
+    /* 42 */ gttl_find_index<_undefined_rank,char_spec>(42),
+    /* 43 */ gttl_find_index<_undefined_rank,char_spec>(43),
+    /* 44 */ gttl_find_index<_undefined_rank,char_spec>(44),
+    /* 45 */ gttl_find_index<_undefined_rank,char_spec>(45),
+    /* 46 */ gttl_find_index<_undefined_rank,char_spec>(46),
+    /* 47 */ gttl_find_index<_undefined_rank,char_spec>(47),
+    /* 48 */ gttl_find_index<_undefined_rank,char_spec>(48),
+    /* 49 */ gttl_find_index<_undefined_rank,char_spec>(49),
+    /* 50 */ gttl_find_index<_undefined_rank,char_spec>(50),
+    /* 51 */ gttl_find_index<_undefined_rank,char_spec>(51),
+    /* 52 */ gttl_find_index<_undefined_rank,char_spec>(52),
+    /* 53 */ gttl_find_index<_undefined_rank,char_spec>(53),
+    /* 54 */ gttl_find_index<_undefined_rank,char_spec>(54),
+    /* 55 */ gttl_find_index<_undefined_rank,char_spec>(55),
+    /* 56 */ gttl_find_index<_undefined_rank,char_spec>(56),
+    /* 57 */ gttl_find_index<_undefined_rank,char_spec>(57),
+    /* 58 */ gttl_find_index<_undefined_rank,char_spec>(58),
+    /* 59 */ gttl_find_index<_undefined_rank,char_spec>(59),
+    /* 60 */ gttl_find_index<_undefined_rank,char_spec>(60),
+    /* 61 */ gttl_find_index<_undefined_rank,char_spec>(61),
+    /* 62 */ gttl_find_index<_undefined_rank,char_spec>(62),
+    /* 63 */ gttl_find_index<_undefined_rank,char_spec>(63),
+    /* 64 */ gttl_find_index<_undefined_rank,char_spec>(64),
+    /* 65 */ gttl_find_index<_undefined_rank,char_spec>(65),
+    /* 66 */ gttl_find_index<_undefined_rank,char_spec>(66),
+    /* 67 */ gttl_find_index<_undefined_rank,char_spec>(67),
+    /* 68 */ gttl_find_index<_undefined_rank,char_spec>(68),
+    /* 69 */ gttl_find_index<_undefined_rank,char_spec>(69),
+    /* 70 */ gttl_find_index<_undefined_rank,char_spec>(70),
+    /* 71 */ gttl_find_index<_undefined_rank,char_spec>(71),
+    /* 72 */ gttl_find_index<_undefined_rank,char_spec>(72),
+    /* 73 */ gttl_find_index<_undefined_rank,char_spec>(73),
+    /* 74 */ gttl_find_index<_undefined_rank,char_spec>(74),
+    /* 75 */ gttl_find_index<_undefined_rank,char_spec>(75),
+    /* 76 */ gttl_find_index<_undefined_rank,char_spec>(76),
+    /* 77 */ gttl_find_index<_undefined_rank,char_spec>(77),
+    /* 78 */ gttl_find_index<_undefined_rank,char_spec>(78),
+    /* 79 */ gttl_find_index<_undefined_rank,char_spec>(79),
+    /* 80 */ gttl_find_index<_undefined_rank,char_spec>(80),
+    /* 81 */ gttl_find_index<_undefined_rank,char_spec>(81),
+    /* 82 */ gttl_find_index<_undefined_rank,char_spec>(82),
+    /* 83 */ gttl_find_index<_undefined_rank,char_spec>(83),
+    /* 84 */ gttl_find_index<_undefined_rank,char_spec>(84),
+    /* 85 */ gttl_find_index<_undefined_rank,char_spec>(85),
+    /* 86 */ gttl_find_index<_undefined_rank,char_spec>(86),
+    /* 87 */ gttl_find_index<_undefined_rank,char_spec>(87),
+    /* 88 */ gttl_find_index<_undefined_rank,char_spec>(88),
+    /* 89 */ gttl_find_index<_undefined_rank,char_spec>(89),
+    /* 90 */ gttl_find_index<_undefined_rank,char_spec>(90),
+    /* 91 */ gttl_find_index<_undefined_rank,char_spec>(91),
+    /* 92 */ gttl_find_index<_undefined_rank,char_spec>(92),
+    /* 93 */ gttl_find_index<_undefined_rank,char_spec>(93),
+    /* 94 */ gttl_find_index<_undefined_rank,char_spec>(94),
+    /* 95 */ gttl_find_index<_undefined_rank,char_spec>(95),
+    /* 96 */ gttl_find_index<_undefined_rank,char_spec>(96),
+    /* 97 */ gttl_find_index<_undefined_rank,char_spec>(97),
+    /* 98 */ gttl_find_index<_undefined_rank,char_spec>(98),
+    /* 99 */ gttl_find_index<_undefined_rank,char_spec>(99),
+    /* 100 */ gttl_find_index<_undefined_rank,char_spec>(100),
+    /* 101 */ gttl_find_index<_undefined_rank,char_spec>(101),
+    /* 102 */ gttl_find_index<_undefined_rank,char_spec>(102),
+    /* 103 */ gttl_find_index<_undefined_rank,char_spec>(103),
+    /* 104 */ gttl_find_index<_undefined_rank,char_spec>(104),
+    /* 105 */ gttl_find_index<_undefined_rank,char_spec>(105),
+    /* 106 */ gttl_find_index<_undefined_rank,char_spec>(106),
+    /* 107 */ gttl_find_index<_undefined_rank,char_spec>(107),
+    /* 108 */ gttl_find_index<_undefined_rank,char_spec>(108),
+    /* 109 */ gttl_find_index<_undefined_rank,char_spec>(109),
+    /* 110 */ gttl_find_index<_undefined_rank,char_spec>(110),
+    /* 111 */ gttl_find_index<_undefined_rank,char_spec>(111),
+    /* 112 */ gttl_find_index<_undefined_rank,char_spec>(112),
+    /* 113 */ gttl_find_index<_undefined_rank,char_spec>(113),
+    /* 114 */ gttl_find_index<_undefined_rank,char_spec>(114),
+    /* 115 */ gttl_find_index<_undefined_rank,char_spec>(115),
+    /* 116 */ gttl_find_index<_undefined_rank,char_spec>(116),
+    /* 117 */ gttl_find_index<_undefined_rank,char_spec>(117),
+    /* 118 */ gttl_find_index<_undefined_rank,char_spec>(118),
+    /* 119 */ gttl_find_index<_undefined_rank,char_spec>(119),
+    /* 120 */ gttl_find_index<_undefined_rank,char_spec>(120),
+    /* 121 */ gttl_find_index<_undefined_rank,char_spec>(121),
+    /* 122 */ gttl_find_index<_undefined_rank,char_spec>(122),
+    /* 123 */ gttl_find_index<_undefined_rank,char_spec>(123),
     /* 124 */ _undefined_rank,
-    /* 125 */ find_index<_undefined_rank,char_spec>(125),
-    /* 126 */ find_index<_undefined_rank,char_spec>(126),
+    /* 125 */ gttl_find_index<_undefined_rank,char_spec>(125),
+    /* 126 */ gttl_find_index<_undefined_rank,char_spec>(126),
     /* 127 */ _undefined_rank,
     /* 128 */ _undefined_rank,
     /* 129 */ _undefined_rank,
@@ -330,63 +332,65 @@ class GttlAlphabet
     /* 254 */ _undefined_rank,
     /* 255 */ _undefined_rank
   };
-  static constexpr const size_t _size = find_size<char_spec>();
+  static constexpr const size_t _size = gttl_find_size<char_spec>();
   static constexpr std::array<char,_size> characters
-    = fill_characters<_size,char_spec>();
+    = gttl_fill_characters<_size,char_spec>();
   public:
-    constexpr GttlAlphabet(void) { }
-    constexpr uint8_t undefined_rank(void) const noexcept
+  constexpr GttlAlphabet(void) { }
+  constexpr uint8_t undefined_rank(void) const noexcept
+  {
+    return _undefined_rank;
+  }
+  constexpr size_t size(void) const noexcept
+  {
+    return _size;
+  }
+  constexpr uint8_t char_to_rank(char cc) const noexcept
+  {
+    assert(static_cast<uint8_t>(cc) < sizeof _symbolmap/sizeof _symbolmap[0]);
+    return _symbolmap[static_cast<uint8_t>(cc)];
+  }
+  const uint8_t *symbolmap_reference(void) const noexcept
+  {
+    return _symbolmap;
+  }
+  constexpr char rank_to_char(uint8_t r) const noexcept
+  {
+    assert(r < _size);
+    return characters[r];
+  }
+  void pretty_print(void) const noexcept
+  {
+    std::cout << "# alphabet size\t" << _size << std::endl;
+    std::cout << "# undefined_rank\t"
+              << static_cast<unsigned int>(_undefined_rank)
+              << std::endl;
+    for (const char *s = char_spec; *s != '\0'; s++)
     {
-      return _undefined_rank;
-    }
-    constexpr size_t size(void) const noexcept { return _size; }
-    constexpr uint8_t char_to_rank(char cc) const noexcept
-    {
-      assert(static_cast<uint8_t>(cc) < sizeof _symbolmap/sizeof _symbolmap[0]);
-      return _symbolmap[static_cast<uint8_t>(cc)];
-    }
-    const uint8_t *symbolmap_reference(void) const noexcept
-    {
-      return _symbolmap;
-    }
-    constexpr char rank_to_char(uint8_t r) const noexcept
-    {
-      assert(r < _size);
-      return characters[r];
-    }
-    void pretty_print(void) const noexcept
-    {
-      std::cout << "# alphabet size\t" << _size << std::endl;
-      std::cout << "# undefined_rank\t"
-                << static_cast<unsigned int>(_undefined_rank)
-                << std::endl;
-      for (const char *s = char_spec; *s != '\0'; s++)
+      if (*s != '|')
       {
-        if (*s != '|')
-        {
-          uint8_t r = this->char_to_rank(*s);
-          std::cout << *s << "\t" << static_cast<unsigned int>(r) << std::endl;
-        }
-      }
-      for (size_t idx = 0; idx < _size; idx++)
-      {
-        std::cout << idx << "\t" << rank_to_char(idx) << std::endl;
+        uint8_t r = this->char_to_rank(*s);
+        std::cout << *s << "\t" << static_cast<unsigned int>(r) << std::endl;
       }
     }
-    constexpr const char *characters_get(void) const noexcept
+    for (size_t idx = 0; idx < _size; idx++)
     {
-      return characters.data();
+      std::cout << idx << "\t" << rank_to_char(idx) << std::endl;
     }
+  }
+  constexpr const char *characters_get(void) const noexcept
+  {
+    return characters.data();
+  }
 
-    void char_to_rank_in_place(char *char_seq,size_t len) const noexcept
+  void char_to_rank_in_place(char *char_seq,size_t len) const noexcept
+  {
+    uint8_t *byte_seq = reinterpret_cast<uint8_t *>(char_seq);
+    for (size_t idx = 0; idx < len; idx++)
     {
-      uint8_t *byte_seq = reinterpret_cast<uint8_t *>(char_seq);
-      for (size_t idx = 0; idx < len; idx++)
-      {
-        byte_seq[idx] = char_to_rank(char_seq[idx]);
-      }
+      byte_seq[idx] = char_to_rank(char_seq[idx]);
     }
-
+  }
 };
 
 namespace alphabet

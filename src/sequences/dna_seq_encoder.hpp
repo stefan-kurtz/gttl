@@ -29,15 +29,17 @@
 #endif
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
+#include "sequences/char_range.hpp"
+#include "sequences/char_finder.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/alphabet.hpp"
+
+static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
 
 template<typename StoreUnitType,bool verbose>
 class DNASeqEncoder
 {
   private:
-  /* Wildcards are transformed to rank 0 */
-  static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet{};
   /* Number of bits which can be stored in a unit */
   static constexpr const int bits_in_store_unit
     = sizeof(StoreUnitType) * CHAR_BIT;
@@ -220,7 +222,7 @@ class DNASeqEncoder
       additional_value = 0;
     }
     int remaining_bits = additional_shift;
-    const size_t decoding_index = (prefix_length+3)/4;
+    size_t decoding_index = (prefix_length+3)/4;
     while (remaining_bits >= bits_in_store_unit)
     {
       remaining_bits -= bits_in_store_unit;
@@ -390,10 +392,13 @@ static bool decide_append_previous(const std::vector<size_t> &size_vec,
   return var0 < var1;
 }
 
+static constexpr const char_finder::NucleotideFinder ntcard_nucleotide_finder{};
 
-template<typename StoreUnitType,bool verbose>
+template<typename StoreUnitType,bool split_at_wildcard,bool verbose>
 class DNAEncodingMultiLength
 {
+  using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
+                                         ntcard_nucleotide_finder, true, false>;
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType,verbose>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
   size_t total_size, total_number_of_sequences;
@@ -509,6 +514,20 @@ class DNAEncodingMultiLength
                                                size_vec.end()) << std::endl;
     }
   }
+  void update_enc_vec(const std::string_view &sequence)
+  {
+    for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
+    {
+      enc_vec.push_back(nullptr);
+    }
+    assert(sequence.size() < enc_vec.size());
+    if (enc_vec[sequence.size()] == nullptr)
+    {
+      enc_vec[sequence.size()]
+        = new ThisDNAEncodingForLength(sequence.size());
+    }
+    enc_vec[sequence.size()]->add(sequence);
+  }
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
       : total_size(0)
@@ -520,17 +539,19 @@ class DNAEncodingMultiLength
     for (auto &fastq_entry : fastq_it)
     {
       const std::string_view &sequence = fastq_entry.sequence_get();
-      for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
+      if constexpr (split_at_wildcard)
       {
-        enc_vec.push_back(nullptr);
-      }
-      assert(sequence.size() < enc_vec.size());
-      if (enc_vec[sequence.size()] == nullptr)
+        NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
+        for (auto const &&range : nuc_ranger)
+        {
+          const size_t this_length = std::get<1>(range);
+          const char *substring = sequence.data() + std::get<0>(range);
+          update_enc_vec(std::string_view(substring,this_length));
+        }
+      } else
       {
-        enc_vec[sequence.size()]
-          = new ThisDNAEncodingForLength(sequence.size());
+        update_enc_vec(sequence);
       }
-      enc_vec[sequence.size()]->add(sequence);
     }
     size_t w_idx = 0;
     for (size_t idx = 0; idx < enc_vec.size(); idx++)

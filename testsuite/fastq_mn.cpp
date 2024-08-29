@@ -467,11 +467,12 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
   }
 }
 
+template<bool split_at_wildcard>
 static void verify_decoding_multilength(bool statistics,
                                         const std::string &inputfilename,
                                         size_t qgram_length)
 {
-  DNAEncodingMultiLength<uint64_t,false>
+  DNAEncodingMultiLength<uint64_t,split_at_wildcard,false>
     dna_encoding_multi_length(inputfilename);
   if (statistics)
   {
@@ -490,7 +491,7 @@ static void verify_decoding_multilength(bool statistics,
 }
 
 static void verify_decoding_parts_view(
-  const DNAEncodingMultiLength<uint64_t,false> &dna_encoding_multi_length)
+  const DNAEncodingMultiLength<uint64_t,false,false> &dna_encoding_multi_length)
 {
   std::map<size_t,size_t> length_dist_map;
   for (size_t part_idx = 0;
@@ -569,11 +570,12 @@ int main(int argc,char *argv[])
           fastq_split_writer(split_size,inputfiles[0]);
         } else
         {
+          static constexpr bool split_at_wildcard = false;
           if (options.encoding_type_get() != std::string(""))
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncodingMultiLength<uint8_t,false>
+              DNAEncodingMultiLength<uint8_t,split_at_wildcard,false>
                 dna_encoding_multi_length(inputfiles[0]);
               if (statistics)
               {
@@ -583,7 +585,7 @@ int main(int argc,char *argv[])
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncodingMultiLength<uint16_t,false>
+                DNAEncodingMultiLength<uint16_t,split_at_wildcard,false>
                   dna_encoding_multi_length(inputfiles[0]);
                 if (statistics)
                 {
@@ -593,7 +595,7 @@ int main(int argc,char *argv[])
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncodingMultiLength<uint32_t,false>
+                  DNAEncodingMultiLength<uint32_t,split_at_wildcard,false>
                     dna_encoding_multi_length(inputfiles[0]);
                   if (statistics)
                   {
@@ -603,7 +605,7 @@ int main(int argc,char *argv[])
                 {
                   if (options.encoding_type_get() == std::string("64"))
                   {
-                    DNAEncodingMultiLength<uint64_t,false>
+                    DNAEncodingMultiLength<uint64_t,split_at_wildcard,false>
                       dna_encoding_multi_length(inputfiles[0]);
                     if (statistics)
                     {
@@ -616,7 +618,8 @@ int main(int argc,char *argv[])
                                                 size_t(10)); num_parts++)
                       {
                         dna_encoding_multi_length.prepare_view(num_parts);
-                        verify_decoding_parts_view(dna_encoding_multi_length);
+                        verify_decoding_parts_view
+                           (dna_encoding_multi_length);
                       }
                     }
                   } else
@@ -634,7 +637,9 @@ int main(int argc,char *argv[])
                                 << std::endl;
                       return EXIT_FAILURE;
                     }
-                    verify_decoding_multilength(statistics,inputfiles[0],
+                    verify_decoding_multilength<split_at_wildcard>
+                                               (statistics,
+                                                inputfiles[0],
                                                 static_cast<size_t>
                                                            (r_qgram_length));
                   }
