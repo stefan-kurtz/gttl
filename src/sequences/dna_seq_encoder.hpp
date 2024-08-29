@@ -32,13 +32,12 @@
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 
-/* Wildcards are transformed to rank 0 */
-static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
-
 template<typename StoreUnitType,bool verbose>
 class DNASeqEncoder
 {
   private:
+  /* Wildcards are transformed to rank 0 */
+  static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet{};
   /* Number of bits which can be stored in a unit */
   static constexpr const int bits_in_store_unit
     = sizeof(StoreUnitType) * CHAR_BIT;
@@ -221,7 +220,7 @@ class DNASeqEncoder
       additional_value = 0;
     }
     int remaining_bits = additional_shift;
-    size_t decoding_index = (prefix_length+3)/4;
+    const size_t decoding_index = (prefix_length+3)/4;
     while (remaining_bits >= bits_in_store_unit)
     {
       remaining_bits -= bits_in_store_unit;
@@ -302,28 +301,28 @@ class DNAEncodingForLength
                        (realloc(units,nextfree * sizeof *units));
     allocated = nextfree;
   }
-  size_t num_units_get(void) const
+  size_t num_units_get(void) const noexcept
   {
     return num_units;
   }
-  size_t number_of_sequences_get(void) const
+  size_t number_of_sequences_get(void) const noexcept
   {
     assert(nextfree % num_units == 0);
     return nextfree / num_units;
   }
-  size_t sequence_length_get(void) const
+  size_t sequence_length_get(void) const noexcept
   {
     return constant_sequence_length;
   }
-  const StoreUnitType *units_get(void) const
+  const StoreUnitType *units_get(void) const noexcept
   {
     return units;
   }
-  size_t total_size_get(void) const
+  size_t total_size_get(void) const noexcept
   {
     return number_of_sequences_get() * num_units_get();
   }
-  void statistics(void) const
+  void statistics(void) const noexcept
   {
     std::cout << "# length of sequences\t"
               << sequence_length_get() << std::endl;
@@ -336,7 +335,7 @@ class DNAEncodingForLength
                                                 sizeof(StoreUnitType)))
               << std::endl;
   }
-  std::string to_string(void) const
+  std::string to_string(void) const noexcept
   {
     static const std::array<char,4> dna_letters{'A','C','G','T'};
     static constexpr const int bits_in_store_unit

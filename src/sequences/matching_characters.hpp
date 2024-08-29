@@ -134,4 +134,28 @@ static inline size_t block_wise_lcplen_fwd(const char *seq0,size_t start0,
   const int equal_right_bits = __builtin_ctzl(cmp);
   return lcplen + (equal_right_bits >> 3);
 }
+
+static inline size_t block_wise_lcslen_bwd(const char *seq0, size_t start0,
+                                           const char *seq1, size_t start1,
+                                           size_t len0, size_t len1,
+                                           GTTL_UNUSED size_t seqnum0,
+                                           GTTL_UNUSED size_t seqnum1)
+{
+  assert(start0 < len0 && start1 < len1);
+  const char *ptr0 = seq0 + len0 - 8 - start0;
+  const char *ptr1 = seq1 + len1 - 8 - start1;
+  const uint64_t *block_ptr0 = reinterpret_cast<const uint64_t *>(ptr0);
+  const uint64_t *block_ptr1 = reinterpret_cast<const uint64_t *>(ptr1);
+
+  size_t lcplen;
+  uint64_t cmp = (*block_ptr0) ^ (*block_ptr1);
+  for (lcplen = 0; __builtin_expect(!cmp, 0); lcplen += sizeof(uint64_t))
+  {
+    block_ptr0--;
+    block_ptr1--;
+    cmp = (*block_ptr0) ^ (*block_ptr1);
+  }
+  const int equal_left_bits = __builtin_clzl(cmp);
+  return lcplen + (equal_left_bits >> 3);
+}
 #endif
