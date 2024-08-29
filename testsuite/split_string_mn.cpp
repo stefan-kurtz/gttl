@@ -2,23 +2,8 @@
 #include <iostream>
 #include <string>
 #include "utilities/split_string.hpp"
+#include "utilities/concatenate_strings.hpp"
 #include "utilities/gttl_line_iterator.hpp"
-
-static std::string concatenate(const std::vector<std::string> &vec,char sep)
-{
-  std::string string_from_vec{};
-  for (auto &s : vec)
-  {
-    if (string_from_vec.size() > 0)
-    {
-      string_from_vec += sep;
-    }
-    string_from_vec += s;
-  }
-  string_from_vec += '\n';
-  return string_from_vec;
-}
-
 
 static std::pair<size_t,size_t> process_inputfile(const char *inputfile,
                                                   char sep)
@@ -33,7 +18,11 @@ static std::pair<size_t,size_t> process_inputfile(const char *inputfile,
     {
       std::vector<std::string> vec = gttl_split_string(buffer, sep);
       column_count += vec.size();
-      std::string line_from_vec = concatenate(vec,sep);
+      std::string sep_string{sep};
+      std::string line_from_vec = gttl_concatenate_strings(vec.begin(),
+                                                           vec.end(),
+                                                           sep_string);
+      line_from_vec += '\n';
       if (buffer != line_from_vec)
       {
         StrFormat msg("'%s' != '%s'",buffer.c_str(),line_from_vec.c_str());

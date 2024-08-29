@@ -289,12 +289,12 @@ class DNAEncodingForLength
   {
     free(units);
   }
-  void add(const std::string_view &sequence)
+  void add(const char *sequence)
   {
     StoreUnitType *ptr = append_ptr();
-    dna_seq_encoder.encode(ptr,sequence.data());
+    dna_seq_encoder.encode(ptr,sequence);
 #ifndef NDEBUG
-    dna_seq_encoder.sequence_encoding_verify(ptr,sequence.data());
+    dna_seq_encoder.sequence_encoding_verify(ptr,sequence);
 #endif
   }
   void final_resize(void)
@@ -514,19 +514,18 @@ class DNAEncodingMultiLength
                                                size_vec.end()) << std::endl;
     }
   }
-  void update_enc_vec(const std::string_view &sequence)
+  void update_enc_vec(const char *sequence,size_t sequence_length)
   {
-    for (size_t idx = enc_vec.size(); idx <= sequence.size(); idx++)
+    for (size_t idx = enc_vec.size(); idx <= sequence_length; idx++)
     {
       enc_vec.push_back(nullptr);
     }
-    assert(sequence.size() < enc_vec.size());
-    if (enc_vec[sequence.size()] == nullptr)
+    assert(sequence_length < enc_vec.size());
+    if (enc_vec[sequence_length] == nullptr)
     {
-      enc_vec[sequence.size()]
-        = new ThisDNAEncodingForLength(sequence.size());
+      enc_vec[sequence_length] = new ThisDNAEncodingForLength(sequence_length);
     }
-    enc_vec[sequence.size()]->add(sequence);
+    enc_vec[sequence_length]->add(sequence);
   }
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
@@ -546,11 +545,11 @@ class DNAEncodingMultiLength
         {
           const size_t this_length = std::get<1>(range);
           const char *substring = sequence.data() + std::get<0>(range);
-          update_enc_vec(std::string_view(substring,this_length));
+          update_enc_vec(substring,this_length);
         }
       } else
       {
-        update_enc_vec(sequence);
+        update_enc_vec(sequence.data(),sequence.length());
       }
     }
     size_t w_idx = 0;
