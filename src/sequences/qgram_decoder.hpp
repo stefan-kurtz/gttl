@@ -9,22 +9,14 @@ template<size_t alphabetsize,bool reverse_complement>
 class QgramDecoder
 {
   private:
-  char *characters;
+  char characters[alphabetsize];
   char *qgram_buffer;
   size_t qgram_length;
 #ifndef NDEBUG
   size_t number_of_all_qgrams;
 #endif
-  public:
-  QgramDecoder(const char *_characters,size_t _qgram_length)
-    : characters(nullptr)
-    , qgram_buffer(new char [_qgram_length + 1])
-    , qgram_length(_qgram_length)
-#ifndef NDEBUG
-    , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
-#endif
+  void fill_characters(const char *_characters)
   {
-    characters = new char [alphabetsize];
     for (size_t idx = 0; idx < alphabetsize; idx++)
     {
       if constexpr (reverse_complement)
@@ -36,9 +28,80 @@ class QgramDecoder
       }
     }
   }
+  public:
+  QgramDecoder(const char *_characters,size_t _qgram_length)
+    : qgram_buffer(new char [_qgram_length + 1])
+    , qgram_length(_qgram_length)
+#ifndef NDEBUG
+    , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
+#endif
+  {
+    fill_characters(_characters);
+  }
   ~QgramDecoder(void)
   {
-    delete[] characters;
+    delete[] qgram_buffer;
+  }
+  const char *decode(uint64_t integer_code) const noexcept
+  {
+    assert(integer_code < number_of_all_qgrams);
+    qgram_buffer[qgram_length] = '\0';
+    if constexpr (reverse_complement)
+    {
+      for (char *qgram_ptr = qgram_buffer;
+           qgram_ptr < qgram_buffer + qgram_length; qgram_ptr++)
+      {
+        *qgram_ptr = characters[integer_code % alphabetsize];
+        integer_code /= alphabetsize;
+      }
+    } else
+    {
+      for (char *qgram_ptr = qgram_buffer + qgram_length-1;
+           qgram_ptr >= qgram_buffer; qgram_ptr--)
+      {
+        *qgram_ptr = characters[integer_code % alphabetsize];
+        integer_code /= alphabetsize;
+      }
+    }
+    return qgram_buffer;
+  }
+};
+
+template <const char *str>
+static constexpr size_t gttl_strlen(size_t i)
+{
+  return str[i] == '\0' ? i
+                        : gttl_strlen<str>(i+1);
+}
+
+template <const char *str>
+static constexpr size_t gttl_strlen(void)
+{
+  return gttl_strlen<str>(0);
+}
+
+template<const char *characters,bool reverse_complement>
+class ConstQgramDecoder
+{
+  private:
+  static constexpr const size_t alphabetsize = gttl_strlen<characters>();
+  char *qgram_buffer;
+  size_t qgram_length;
+#ifndef NDEBUG
+  size_t number_of_all_qgrams;
+#endif
+  public:
+  ConstQgramDecoder(size_t _qgram_length)
+    : qgram_buffer(new char [_qgram_length + 1])
+    , qgram_length(_qgram_length)
+#ifndef NDEBUG
+    , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
+#endif
+  {
+    static_assert(not reverse_complement or alphabetsize == 4);
+  }
+  ~ConstQgramDecoder(void)
+  {
     delete[] qgram_buffer;
   }
   const char *decode(uint64_t integer_code) const noexcept
