@@ -32,6 +32,7 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
+#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 
 static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
@@ -530,17 +531,12 @@ class DNAEncodingMultiLength
     }
     enc_vec[sequence_length]->add(sequence);
   }
-  public:
-  DNAEncodingMultiLength(const std::string &inputfilename)
-      : total_size(0)
-      , total_number_of_sequences(0)
+  template<class Iterator>
+  void read_the_input(Iterator &iter)
   {
-    constexpr const int buf_size = 1 << 14;
-    GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
-    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
-    for (auto &fastq_entry : fastq_it)
+    for (auto &sequence_entry : iter)
     {
-      const std::string_view &sequence = fastq_entry.sequence_get();
+      const std::string_view &sequence = sequence_entry.sequence_get();
       if constexpr (split_at_wildcard)
       {
         NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
@@ -554,6 +550,24 @@ class DNAEncodingMultiLength
       {
         update_enc_vec(sequence.data(),sequence.length());
       }
+    }
+  }
+  public:
+  DNAEncodingMultiLength(const std::string &inputfilename)
+      : total_size(0)
+      , total_number_of_sequences(0)
+  {
+    static constexpr const int buf_size = 1 << 14;
+    const bool fasta_format = gttl_likely_fasta_format(inputfilename);
+    if (fasta_format)
+    {
+      GttlSeqIterator<buf_size> gttl_si(inputfilename.c_str());
+      read_the_input(gttl_si);
+    } else
+    {
+      GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
+      GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+      read_the_input(fastq_it);
     }
     size_t w_idx = 0;
     for (size_t idx = 0; idx < enc_vec.size(); idx++)
