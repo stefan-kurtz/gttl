@@ -13,7 +13,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   create_multiseq_pair(const char *dbfile,const char*queryfile)
 {
   GttlMultiseq *db_multiseq = NULL, *query_multiseq = NULL;
-  bool dna_alphabet = false;
+  bool is_dna_alphabet = false;
   static constexpr const bool store_sequences = true;
   assert(dbfile != NULL);
   try
@@ -51,7 +51,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     }
   } else
   {
-    dna_alphabet = true;
+    is_dna_alphabet = true;
     if (query_multiseq != db_multiseq &&
         guess_if_protein_multiseq(query_multiseq))
     {
@@ -62,7 +62,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     }
   }
   return std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
-                   (db_multiseq,query_multiseq,dna_alphabet);
+                   (db_multiseq,query_multiseq,is_dna_alphabet);
 }
 
 static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>

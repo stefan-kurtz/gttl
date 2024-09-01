@@ -35,12 +35,11 @@
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 
-static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet;
-
 template<typename StoreUnitType,bool verbose>
 class DNASeqEncoder
 {
   private:
+  static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet{};
   /* Number of bits which can be stored in a unit */
   static constexpr const int bits_in_store_unit
     = sizeof(StoreUnitType) * CHAR_BIT;
