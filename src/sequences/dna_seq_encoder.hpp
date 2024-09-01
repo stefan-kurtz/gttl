@@ -368,7 +368,10 @@ static bool decide_append_previous(const std::vector<size_t> &size_vec,
                                    size_t total_size,
                                    size_t local_sum)
 {
-  assert(size_vec.size() > 0);
+  if (size_vec.size() == 0)
+  {
+    return false;
+  }
   const double mean0 = static_cast<double>(total_size)/size_vec.size();
   double sum_squared_difference = 0;
   for (size_t idx = 0; idx < size_vec.size(); idx++)
