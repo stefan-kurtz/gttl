@@ -21,15 +21,19 @@
 #include "sequences/qgrams_rec_hash_value_fwd_iter.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
 
-using QgramNtHashFwdIterator4
+template<uint8_t undefined_rank>
+using QgramNtHashFwdIteratorGeneric
   = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
-                                 4,
+                                 undefined_rank,
                                  NThashTransformer,
                                  char>;
 
-using QgramNtHashFwdIterator4plain
+using QgramNtHashFwdIterator4 = QgramNtHashFwdIteratorGeneric<4>;
+
+template<uint8_t undefined_rank>
+using QgramNtHashFwdIteratorGenericNoTransform
   = QgramRecHashValueFwdIterator<alphabet::nucleotides_upper_lower,
-                                 4,
+                                 undefined_rank,
                                  NThashTransformer,
                                  uint8_t>;
 
