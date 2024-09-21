@@ -36,7 +36,8 @@ void qgram_enumerate_callback(size_t alpha_size,
 {
   if (qgram_length <= seqlen)
   {
-    const uint64_t multiplier = (uint64_t) std::pow(alpha_size,qgram_length-1);
+    const uint64_t multiplier
+      = static_cast<uint64_t>(std::pow(alpha_size,qgram_length-1));
     uint64_t integer_code = qgram_encode(alpha_size,sequence,qgram_length);
     process(integer_code,data);
     for (size_t idx = 0; idx < seqlen - qgram_length; idx++)

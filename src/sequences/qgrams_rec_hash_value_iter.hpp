@@ -147,6 +147,7 @@ class QgramRecHashValueIterator
       , sequence(_sequence)
       , seqlen(_seqlen)
     {
+      assert(qgram_length <= 32);
       max_integer_code = qgram_length == 32
                            ? UINT64_MAX
                            : std::pow(alpha_size,_qgram_length) - 1;
