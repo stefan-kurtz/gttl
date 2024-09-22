@@ -100,6 +100,27 @@ inline double mega_bytes(size_t bytes)
   return static_cast<double>(bytes)/(size_t(1024) * size_t(1024));
 }
 
+/* compute a**b and throw exception on overflow */
+template<typename T>
+static T gttl_safe_power(T a, T b)
+{
+  T prod = static_cast<T>(1);
+  for (T idx = 0; idx < b; idx++)
+  {
+    static constexpr const T max_value = std::numeric_limits<T>::max();
+    if (a > max_value/prod)
+    {
+      throw std::string("overflow when evaluating ")
+            + std::to_string(prod) + " * " + std::to_string(a)
+            + std::string(" to compute pow(")
+            + std::to_string(a) + std::string(", ")
+            + std::to_string(b) + std::string(")";
+    }
+    prod *= a;
+  }
+  return prod;
+}
+
 /* compute base 2 logarithm at compile time:
    use as Log2_CT<64>::VALUE; */
 

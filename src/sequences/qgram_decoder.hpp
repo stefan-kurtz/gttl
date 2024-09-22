@@ -3,7 +3,26 @@
 #include <cstddef>
 #include <cassert>
 #include <cmath>
+#include <numeric>
+#include "utilities/mathsupport.hpp"
 #include "sequences/complement_plain.hpp"
+
+#ifndef NDEBUG
+static inline size_t max_integer_code_get(size_t alphabetsize,
+                                          size_t qgram_length)
+{
+  if (alphabetsize == 4)
+  {
+    if (qgram_length < 32)
+    {
+      return std::pow(alphabetsize,qgram_length) - 1;
+    }
+    assert(qgram_length == 32);
+    return std::numeric_limits<size_t>::max();
+  }
+  return gttl_safe_power<size_t>(alphabetsize,qgram_length) - 1;
+}
+#endif
 
 template<size_t alphabetsize,bool reverse_complement>
 class QgramDecoder
@@ -11,9 +30,9 @@ class QgramDecoder
   private:
   char characters[alphabetsize];
   char *qgram_buffer;
-  size_t qgram_length;
+  const size_t qgram_length;
 #ifndef NDEBUG
-  size_t number_of_all_qgrams;
+  const size_t max_integer_code;
 #endif
   void fill_characters(const char *_characters)
   {
@@ -33,7 +52,7 @@ class QgramDecoder
     : qgram_buffer(new char [_qgram_length + 1])
     , qgram_length(_qgram_length)
 #ifndef NDEBUG
-    , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
+    , max_integer_code(max_integer_code_get(alphabetsize,_qgram_length))
 #endif
   {
     fill_characters(_characters);
@@ -44,7 +63,7 @@ class QgramDecoder
   }
   const char *decode(uint64_t integer_code) const noexcept
   {
-    assert(integer_code < number_of_all_qgrams);
+    assert(integer_code <= max_integer_code);
     qgram_buffer[qgram_length] = '\0';
     if constexpr (reverse_complement)
     {
@@ -86,16 +105,16 @@ class ConstQgramDecoder
   private:
   static constexpr const size_t alphabetsize = gttl_strlen<characters>();
   char *qgram_buffer;
-  size_t qgram_length;
+  const size_t qgram_length;
 #ifndef NDEBUG
-  size_t number_of_all_qgrams;
+  const size_t max_integer_code;
 #endif
   public:
   ConstQgramDecoder(size_t _qgram_length)
     : qgram_buffer(new char [_qgram_length + 1])
     , qgram_length(_qgram_length)
 #ifndef NDEBUG
-    , number_of_all_qgrams(std::pow(alphabetsize,_qgram_length))
+    , max_integer_code(max_integer_code_get(alphabetsize,_qgram_length))
 #endif
   {
     static_assert(not reverse_complement or alphabetsize == 4);
@@ -106,7 +125,7 @@ class ConstQgramDecoder
   }
   const char *decode(uint64_t integer_code) const noexcept
   {
-    assert(integer_code < number_of_all_qgrams);
+    assert(integer_code <= max_integer_code);
     qgram_buffer[qgram_length] = '\0';
     if constexpr (reverse_complement)
     {
