@@ -39,7 +39,8 @@ class QgramRecHashValueFwdIterator
   static constexpr const GttlAlphabet<_char_spec,_undefined_rank> alphabet{};
   static constexpr const bool handle_both_strands = false;
   private:
-  static constexpr uint64_t alpha_size = static_cast<uint64_t>(alphabet.size());
+  static constexpr const uint64_t alpha_size
+    = static_cast<uint64_t>(alphabet.size());
   using CyclicBuffer_uint8 = CyclicBuffer<uint8_t,MAX_QGRAM_LENGTH>;
 
   struct Iterator
@@ -125,8 +126,8 @@ class QgramRecHashValueFwdIterator
     const SequenceBaseType *sequence;
     size_t seqlen;
     CyclicBuffer_uint8 current_window;
-    uint64_t max_integer_code;
 #ifndef NDEBUG
+    const uint64_t max_integer_code;
     uint8_t qgram_buffer[MAX_QGRAM_LENGTH];
 #endif
   public:
@@ -137,10 +138,12 @@ class QgramRecHashValueFwdIterator
       , qgram_length(_qgram_length)
       , sequence(_sequence)
       , seqlen(_seqlen)
+#ifndef NDEBUG
+      , max_integer_code(qgram_length == 32 ? UINT64_MAX
+                                            : (std::pow(alpha_size,
+                                                        _qgram_length) - 1))
+#endif
     {
-      max_integer_code = qgram_length == 32
-                           ? UINT64_MAX
-                           : std::pow(alpha_size,_qgram_length) - 1;
       current_window.initialize(_qgram_length);
     }
     Iterator begin(void)
