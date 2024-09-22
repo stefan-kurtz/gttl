@@ -51,6 +51,14 @@ inline T gttl_bits2maxvalue(int bits)
   return (static_cast<T>(1) << bits) - 1;
 }
 
+template<typename T>
+inline T gttl_bits2maxvalue_not_full(int bits)
+{
+  static_assert(static_cast<T>(-1) >= 0);
+  assert(static_cast<size_t>(bits) < CHAR_BIT * sizeof(T));
+  return (static_cast<T>(1) << bits) - 1;
+}
+
 template<typename Numtype>
 inline int gttl_required_bits(Numtype value)
 {
