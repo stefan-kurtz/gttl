@@ -114,7 +114,7 @@ static T gttl_safe_power(T a, T b)
             + std::to_string(prod) + " * " + std::to_string(a)
             + std::string(" to compute pow(")
             + std::to_string(a) + std::string(", ")
-            + std::to_string(b) + std::string(")";
+            + std::to_string(b) + std::string(")");
     }
     prod *= a;
   }
