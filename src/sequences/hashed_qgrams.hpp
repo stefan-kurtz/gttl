@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstdbool>
+#include <cinttypes>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -590,10 +591,9 @@ class HashedQgramsGeneric
         = static_cast<double>(size())/this->count_all_qgrams_get();
       StrFormat s_density("hashed kmers density\t%.2f",density);
       log_vector->push_back(s_density.str());
-      StrFormat s_space("SPACE\thashed kmers (MB)\t%lu",
-                        static_cast<unsigned long>(std::ceil(
-                                                   mega_bytes(this->size()
-                                                              * sizeof_unit))));
+      const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
+      StrFormat s_space("SPACE\thashed kmers (MB)\t%zu",
+                        static_cast<size_t>(std::ceil(space_in_mega_bytes)));
       log_vector->push_back(s_space.str());
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }
@@ -668,8 +668,8 @@ class HashedQgramsGeneric
       const uint64_t hash_value = hash_value_get(idx);
       const size_t sequence_number = sequence_number_get(idx);
       const size_t startpos = startpos_get(idx);
-      printf("%lu\t%lu\t%lu\n",static_cast<unsigned long>(hash_value),
-             sequence_number + offset,startpos);
+      printf("%" PRIu64 "\t%zu\t%zu\n",hash_value,
+                                       sequence_number + offset,startpos);
     }
   }
   Iterator begin(void) const noexcept

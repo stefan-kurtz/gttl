@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <climits>
+#include <cinttypes>
 #include <cstdlib>
 #include <algorithm>
 
@@ -307,10 +308,8 @@ class LocalChainer
           if (ref_gap_length > 0 || query_gap_length > 0)
           {
 #ifdef SKDEBUG
-            printf("ref_gap\t%lu\n",
-                   static_cast<unsigned long>(ref_gap_length));
-            printf("query_gap\t%lu\n",
-                   static_cast<unsigned long>(query_gap_length));
+            printf("ref_gap\t%" PRIu64 "\n",ref_gap_length);
+            printf("query_gap\t%" PRIu64 "\n",query_gap_length);
 #endif
 #define DIFF_CHECK
 #ifdef DIFF_CHECK
@@ -328,7 +327,7 @@ class LocalChainer
                 = var_chain_elem_info->score_get(i) +
                   static_cast<ScoreType>(j_match_length);
 #ifdef SKDEBUG
-              printf("gap_score\t%lu\n",static_cast<unsigned long>(gap_score));
+              printf("gap_score\t%" PRIu64u "\n",gap_score);
               printf("score_get(%lu)\t%ld\n",segment_start + i,
                      static_cast<long>(var_chain_elem_info->score_get(i)));
               printf("j_match_length\t%lu\n",j_match_length);

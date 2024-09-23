@@ -22,11 +22,11 @@
 #include <cstddef>
 #include <vector>
 #define GTTL_UNALIGNED(X) (size_t(X) & (sizeof (long) - 1))
-#define GTTL_ULONG_BYTES  sizeof(unsigned long)
+#define GTTL_UINT64_BYTES  sizeof(uint64_t)
 
-static bool has_null_byte(unsigned long v)
+static bool has_null_byte(uint64_t v)
 {
-  const unsigned long mask = 0x7F7F7F7F7F7F7F7F;
+  const uint64_t mask = 0x7F7F7F7F7F7F7F7F;
   return  ~((((v & mask) + mask) | v) | mask);
 }
 
@@ -49,7 +49,7 @@ inline const void *gttl_memchr(const void *src_void,int search_char,
     src++;
   }
 
-  if (length >= GTTL_ULONG_BYTES)
+  if (length >= GTTL_UINT64_BYTES)
   {
     /* If we get this far, we know that length is large and src is
        word-aligned. */
@@ -59,18 +59,18 @@ inline const void *gttl_memchr(const void *src_void,int search_char,
        the word-sized segment with a word-sized block of the search
        character and then detecting for the presence of NUL in the
        result.  */
-    const unsigned long *asrc = reinterpret_cast<const unsigned long *>(src);
-    const unsigned long copied_byte = ~0UL/255 * search_char;
+    const uint64_t *asrc = reinterpret_cast<const uint64_t *>(src);
+    const uint64_t copied_byte = ~uint64_t(0)/255 * search_char;
     do
     {
       if (has_null_byte(*asrc ^ copied_byte))
       {
         break;
       }
-      length -= GTTL_ULONG_BYTES;
+      length -= GTTL_UINT64_BYTES;
       asrc++;
-    } while (length >= GTTL_ULONG_BYTES);
-    /* If there are fewer than GTTL_ULONG_BYTES characters left,
+    } while (length >= GTTL_UINT64_BYTES);
+    /* If there are fewer than GTTL_UINT64_BYTES characters left,
        then we resort to the bytewise loop.  */
     src = reinterpret_cast<const unsigned char *>(asrc);
   }
@@ -109,7 +109,7 @@ static const void *gttl_memcchr(const void *src_void, size_t length)
     src++;
   }
 
-  if (length >= GTTL_ULONG_BYTES)
+  if (length >= GTTL_UINT64_BYTES)
   {
     /* If we get this far, we know that length is large and src is
        word-aligned. */
@@ -119,19 +119,19 @@ static const void *gttl_memcchr(const void *src_void, size_t length)
        the word-sized segment with a word-sized block of the search
        character and then detecting for the presence of NUL in the
        result.  */
-    const unsigned long *asrc = reinterpret_cast<const unsigned long *>(src);
-    constexpr const unsigned long copied_byte
-      = ~0UL/255 * static_cast<unsigned long>(search_char);
+    const uint64_t *asrc = reinterpret_cast<const uint64_t *>(src);
+    constexpr const uint64_t copied_byte
+      = ~uint64_t(0)/255 * static_cast<uint64_t>(search_char);
     do
     {
       if (*asrc != copied_byte)
       {
         break;
       }
-      length -= GTTL_ULONG_BYTES;
+      length -= GTTL_UINT64_BYTES;
       asrc++;
-    } while (length >= GTTL_ULONG_BYTES);
-    /* If there are fewer than GTTL_ULONG_BYTES characters left,
+    } while (length >= GTTL_UINT64_BYTES);
+    /* If there are fewer than GTTL_UINT64_BYTES characters left,
        then we resort to the bytewise loop.  */
     src = reinterpret_cast<const unsigned char *>(asrc);
   }
