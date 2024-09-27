@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys, argparse, re
-import gzip
+import sys, re, argparse
+from stream_object import StreamObject
 
 def print_sequence(seq,linelength = 70):
   for startpos in range(0,len(seq),linelength):
@@ -10,34 +10,6 @@ def print_sequence(seq,linelength = 70):
 def seq_list2sequence(seq_list):
   sequence = ' '.join(seq_list)
   return re.sub(r'\s','',sequence)
-
-class StreamObject:
-  def __init__(self,filename):
-    self.decode = False
-    self.do_close = False
-    if filename == '-':
-      self.stream = sys.stdin
-    else:
-      try:
-        if re.search(r'\.gz$',filename):
-          self.stream = gzip.open(filename,'r')
-          self.decode = True
-        else:
-          self.stream = open(filename,'r')
-          self.do_close = True
-      except IOError as err:
-        sys.stderr.write('{}: {}\n'
-                          .format(sys.argv[0],err))
-        exit(1)
-  def __iter__(self):
-    for line in self.stream:
-      if self.decode:
-        yield line.decode('utf-8').rstrip()
-      else:
-        yield line.rstrip()
-  def __del__(self):
-    if self.do_close:
-      self.stream.close()
 
 def fasta_next(filename):
   stream = StreamObject(filename)
