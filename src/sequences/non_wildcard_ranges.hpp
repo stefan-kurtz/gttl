@@ -121,7 +121,7 @@ static const void *gttl_memcchr(const void *src_void, size_t length)
        result.  */
     const uint64_t *asrc = reinterpret_cast<const uint64_t *>(src);
     constexpr const uint64_t copied_byte
-      = ~uint64_t(0)/255 * static_cast<uint64_t>(search_char);
+      = ~uint64_t(0)/uint64_t(255) * static_cast<uint64_t>(search_char);
     do
     {
       if (*asrc != copied_byte)
