@@ -9,11 +9,16 @@
 #define BADARG (int)':'
 #define EMSG ""
 
-extern int opterr = 1;
-extern int optind = 1;
+extern int opterr;
+extern int optind;
 extern int optopt;
 extern int optreset;
 extern char const *optarg;
+
+int getopt(int nargc, char* nargv[], const char *ostr);
+
+int opterr = 1, optind = 1, optopt, optreset;
+char const *optarg;
 
 int getopt(int nargc, char * const nargv[], const char *ostr)
 {
