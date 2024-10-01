@@ -106,13 +106,13 @@ static void count_non_wildcard_ranges(const char *inputfilename)
     throw msg;
   }
   printf("# filename\t%s\n",inputfilename);
-  printf("# num_of_sequences\t%lu\n",num_of_sequences);
-  printf("# total_length\t%lu\n",total_length);
-  printf("# max_sequence_length\t%lu\n",max_sequence_length);
-  printf("# non_wildcard_ranges_number\t%lu\n",non_wildcard_ranges_number);
-  printf("# non_wildcard_ranges_total_length\t%lu\n",
+  printf("# num_of_sequences\t%zu\n",num_of_sequences);
+  printf("# total_length\t%zu\n",total_length);
+  printf("# max_sequence_length\t%zu\n",max_sequence_length);
+  printf("# non_wildcard_ranges_number\t%zu\n",non_wildcard_ranges_number);
+  printf("# non_wildcard_ranges_total_length\t%zu\n",
             non_wildcard_ranges_total_length);
-  printf("# non_wildcard_ranges_max_length\t%lu\n",
+  printf("# non_wildcard_ranges_max_length\t%zu\n",
             non_wildcard_ranges_max_length);
   printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(num_of_sequences));
   printf("# max_sequence_length.bits\t%d\n",

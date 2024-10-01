@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
                       options.short_header_option_is_set(),
                       seqnum);
         }
-        StrFormat msg("create a sample of %lu (%.2f%%) from %lu sequences",
+        StrFormat msg("create a sample of %zu (%.2f%%) from %zu sequences",
                       options.sample_size_get(),
                       100.0 * options.sample_size_get()/
                               multiseq->sequences_number_get(),

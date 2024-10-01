@@ -135,7 +135,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
             assert(options.show_mode_get() == 2);
             for (auto &&dhqg : hqg)
             {
-              printf("%" PRIu64 "\t%lu\t%lu\n",
+              printf("%" PRIu64 "\t%zu\t%zu\n",
                      dhqg.hash_value,
                      dhqg.sequence_number,
                      dhqg.startpos);

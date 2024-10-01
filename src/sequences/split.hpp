@@ -105,7 +105,7 @@ class SequencesSplit
     printf("# Fields: interval_start, interval_size\n");
     for (auto &&sw : intervals)
     {
-      printf("%lu\t%lu\n",static_cast<size_t>(sw.data() - file_contents),
+      printf("%zu\t%zu\n",static_cast<size_t>(sw.data() - file_contents),
                           sw.size());
     }
     printf("# variance\t%.0e\n",variance());

@@ -100,7 +100,7 @@ class GttlSeqIterator
           }
           if (current_string == &sequence_entry.sequence)
           {
-            StrFormat msg(", line %lu: corrupted sequence",
+            StrFormat msg(", line %zu: corrupted sequence",
                            gttl_li.line_number_get()+1);
             throw msg.str(); /* check_err.py checked */
           }
@@ -113,7 +113,7 @@ class GttlSeqIterator
         if (sequence_entry.sequence.size() == 0 ||
             sequence_entry.sequence[0] == '>')
         {
-          StrFormat msg(", line %lu: corrupted sequence",
+          StrFormat msg(", line %zu: corrupted sequence",
                            gttl_li.line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }

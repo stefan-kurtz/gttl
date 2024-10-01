@@ -70,9 +70,9 @@ static void alignment_output_single_line(const char *tag,
                                          size_t end_pos,
                                          FILE *fp)
 {
-  std::fprintf(fp,"%s  %-*lu  ",tag,width_of_numbers,start_pos);
+  std::fprintf(fp,"%s  %-*zu  ",tag,width_of_numbers,start_pos);
   std::fwrite(buf,sizeof *buf,width_alignment,fp);
-  std::fprintf(fp,"  %lu\n",end_pos);
+  std::fprintf(fp,"  %zu\n",end_pos);
 }
 
 static void alignment_output_middle_line(int width_of_numbers,

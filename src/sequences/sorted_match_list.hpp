@@ -312,14 +312,14 @@ class SortedMatchList
             length_stored = maximum_storable_match_length;
             if (sizeof_unit_match >= 8 || sizeof_unit_match == 9)
             {
-              StrFormat msg("cannot store match of length %lu in %d bytes, "
+              StrFormat msg("cannot store match of length %zu in %d bytes, "
                             "resort to using %d bytes of space for each MEM",
                             this_match_length,sizeof_unit_match,
                                               sizeof_unit_match+1);
               throw msg.str();
             } else
             {
-              StrFormat msg(": cannot store match of length %lu in 10 bytes, "
+              StrFormat msg(": cannot store match of length %zu in 10 bytes, "
                             "please inform the developer",
                             this_match_length);
               throw msg.str();
@@ -458,10 +458,10 @@ class SortedMatchList
   void statistics(FILE *out_fp) const noexcept
   {
     fprintf(out_fp,"# bits for sequences\t%d\n",bits_for_sequences);
-    fprintf(out_fp,"# number of seeds\t%lu\n",number_of_seeds_get());
-    fprintf(out_fp,"# number of all matches\t%lu\n",
+    fprintf(out_fp,"# number of seeds\t%zu\n",number_of_seeds_get());
+    fprintf(out_fp,"# number of all matches\t%zu\n",
             number_of_all_matches_get());
-    fprintf(out_fp,"# number of unique matches\t%lu\n",size());
+    fprintf(out_fp,"# number of unique matches\t%zu\n",size());
   }
   bool all_same_segment(void) const noexcept
   {

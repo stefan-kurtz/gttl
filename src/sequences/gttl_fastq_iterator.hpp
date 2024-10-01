@@ -68,7 +68,7 @@ class GttlFastQIterator
           }
           if (state != 3)
           {
-            StrFormat msg(", line %lu: state=%d, corrupted sequence",
+            StrFormat msg(", line %zu: state=%d, corrupted sequence",
                           line_iterator.line_number_get()+1,state);
             throw msg.str(); /* check_err.py checked */
           }
@@ -80,7 +80,7 @@ class GttlFastQIterator
         }
         if (fastq_entry.seqbufs[0].size() == 0)
         {
-          StrFormat msg(", line %lu: corrupted sequence",
+          StrFormat msg(", line %zu: corrupted sequence",
                            line_iterator.line_number_get()+1);
           throw msg.str(); /* check_err.py checked */
         }

@@ -22,7 +22,7 @@ static bool combine_suffix_prefix_extensions(
                                     + pps_prefix.longest_aligned_len_get();
 #undef SKDEBUG
 #ifdef SKDEBUG
-  printf("upper_bound_aligned_len=%lu=%lu+%lu+%lu\n",
+  printf("upper_bound_aligned_len=%zu=%zu+%zu+%zu\n",
          upper_bound_aligned_len,
          inner_match.aligned_len_get(),
          pps_suffix.longest_aligned_len_get(),
@@ -35,7 +35,7 @@ static bool combine_suffix_prefix_extensions(
         pps_suffix.smallest_unit_cost_get() +
         pps_prefix.smallest_unit_cost_get();
 #ifdef SKDEBUG
-    printf("lower_bound_distance=%lu=%lu+%lu+%lu\n",
+    printf("lower_bound_distance=%zu=%zu+%zu+%zu\n",
             lower_bound_distance,
             inner_match.distance_get(),
             pps_suffix.smallest_unit_cost_get(),
@@ -62,14 +62,14 @@ static bool combine_suffix_prefix_extensions(
                 <= maximum_error_percentage)
             {
 #ifdef SKDEBUG
-              printf("s_endpos=%lu+%lu\n",inner_match.s_endpos_get(),
+              printf("s_endpos=%zu+%zu\n",inner_match.s_endpos_get(),
                                           pp_p.row_get());
-              printf("q_endpos=%lu+%lu\n",inner_match.q_endpos_get(),
+              printf("q_endpos=%zu+%zu\n",inner_match.q_endpos_get(),
                                           pp_p.column_get());
-              printf("s_len=%lu+%lu+%lu\n",pp_s.row_get(),
+              printf("s_len=%zu+%zu+%zu\n",pp_s.row_get(),
                                            inner_match.s_len_get(),
                                            pp_p.row_get());
-              printf("q_len=%lu+%lu+%lu\n",pp_s.column_get(),
+              printf("q_len=%zu+%zu+%zu\n",pp_s.column_get(),
                                            inner_match.q_len_get(),
                                            pp_p.column_get());
 #endif
@@ -148,7 +148,7 @@ static bool polished_prefix_and_suffix_extension(
          best_polished_points_suffix.to_string().c_str());
   printf("best_polished_points_prefix\t%s\n",
          best_polished_points_prefix.to_string().c_str());
-  printf("inner_match.distance\t%lu\n",inner_match.distance_get());
+  printf("inner_match.distance\t%zu\n",inner_match.distance_get());
 #endif
   return combine_suffix_prefix_extensions<MatchClass>
                                          (extended_match,

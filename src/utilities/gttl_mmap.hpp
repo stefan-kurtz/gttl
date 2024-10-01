@@ -31,7 +31,7 @@ class Gttlmmap
   {
     if (size_of_file % sizeof(T) != 0)
     {
-      StrFormat msg("file %s contains %lu bytes which is not a multiple of %lu",
+      StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
                     filename,size_of_file,sizeof(T));
       throw msg.str();
     }
@@ -45,7 +45,7 @@ class Gttlmmap
                      filedesc, 0);
     if (memorymap == MAP_FAILED)
     {
-      StrFormat msg("cannot memory map %lu elements from file %s",
+      StrFormat msg("cannot memory map %zu elements from file %s",
                     num_values,filename);
       throw msg.str();
     }

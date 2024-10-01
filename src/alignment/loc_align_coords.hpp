@@ -21,7 +21,7 @@ struct LocalAlignmentCoordinates
   {
     if (usubstringlength + vsubstringlength == 0)
     {
-      fprintf(fpout,"%lu\t%lu\t%u",
+      fprintf(fpout,"%zu\t%zu\t%u",
               ustart,
               vstart,
               raw_score);
@@ -32,7 +32,7 @@ struct LocalAlignmentCoordinates
                          : (multiseq->sequence_length_get(seqnum)
                               - vstart
                               - vsubstringlength);
-      fprintf(fpout,"%lu\t%lu\t%lu\t%lu\t%u",
+      fprintf(fpout,"%zu\t%zu\t%zu\t%zu\t%u",
               ustart,
               usubstringlength,
               vstart_out,

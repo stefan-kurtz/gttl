@@ -69,7 +69,7 @@ static void validate_minimizers(
     }
     if (minimizer_set.count(min_hash) == 0)
     {
-      StrFormat msg("cannot find minimizer %lu",static_cast<size_t>(min_hash));
+      StrFormat msg("cannot find minimizer %zu",static_cast<size_t>(min_hash));
       throw msg.str();
     }
   }
@@ -668,8 +668,8 @@ class HashedQgramsGeneric
       const uint64_t hash_value = hash_value_get(idx);
       const size_t sequence_number = sequence_number_get(idx);
       const size_t startpos = startpos_get(idx);
-      printf("%" PRIu64 "\t%zu\t%zu\n",hash_value,
-                                       sequence_number + offset,startpos);
+      printf("%zu\t%zu\t%zu\n",static_cast<size_t>(hash_value),
+             sequence_number + offset,startpos);
     }
   }
   Iterator begin(void) const noexcept

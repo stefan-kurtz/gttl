@@ -149,7 +149,7 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
                                               (qgram_length,
                                                alphabetsize,
                                                seq_iterator);
-    StrFormat msg("count number of different %lu-grams", qgram_length);
+    StrFormat msg("count number of different %zu-grams", qgram_length);
     compute_unwords_runtime.show(msg.str());
     if (unwords->size() > 0)
     {

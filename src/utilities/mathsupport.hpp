@@ -68,7 +68,7 @@ inline int gttl_required_bits(Numtype value)
   }
 #if __has_builtin(__builtin_clz)
 #include <climits>
-  static_assert(sizeof(value) <= sizeof(unsigned long));
+  static_assert(sizeof(value) <= sizeof(unsigned long long));
   return sizeof(unsigned long) * CHAR_BIT -
          __builtin_clzl(static_cast<unsigned long>(value));
 #else

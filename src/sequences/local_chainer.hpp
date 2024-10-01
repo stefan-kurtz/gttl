@@ -308,8 +308,10 @@ class LocalChainer
           if (ref_gap_length > 0 || query_gap_length > 0)
           {
 #ifdef SKDEBUG
-            printf("ref_gap\t%" PRIu64 "\n",ref_gap_length);
-            printf("query_gap\t%" PRIu64 "\n",query_gap_length);
+            printf("ref_gap\t%zu\n",
+                   static_cast<size_t>(ref_gap_length));
+            printf("query_gap\t%zu\n",
+                   static_cast<size_t>(query_gap_length));
 #endif
 #define DIFF_CHECK
 #ifdef DIFF_CHECK
@@ -327,10 +329,10 @@ class LocalChainer
                 = var_chain_elem_info->score_get(i) +
                   static_cast<ScoreType>(j_match_length);
 #ifdef SKDEBUG
-              printf("gap_score\t%" PRIu64u "\n",gap_score);
-              printf("score_get(%lu)\t%ld\n",segment_start + i,
+              printf("gap_score\t%zu\n",static_cast<size_t>(gap_score));
+              printf("score_get(%zu)\t%ld\n",segment_start + i,
                      static_cast<long>(var_chain_elem_info->score_get(i)));
-              printf("j_match_length\t%lu\n",j_match_length);
+              printf("j_match_length\t%zu\n",j_match_length);
               printf("maxscore\t%ld\n",static_cast<long>(j_maxscore));
 #endif
               if (scorefrom_i > gap_score &&

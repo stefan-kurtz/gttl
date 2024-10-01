@@ -45,7 +45,7 @@ static void process_file(const char *filename)
                                      mapped_file.size() - mid));
   if (next_newline == NULL)
   {
-    StrFormat msg(": second part of file beginning at offset %lu "
+    StrFormat msg(": second part of file beginning at offset %zu "
                   " does not contain new line character",mid);
     throw msg.str();
   }
@@ -59,8 +59,8 @@ static void process_file(const char *filename)
   std::cout << "# lines all\t" << lines_all << std::endl;
   if (lines_all != lines1 + lines2)
   {
-    StrFormat msg(": inconsistent number of lines: lines_all = %lu != %lu = "
-                  "%lu + %lu = lines1 + lines2",lines_all,lines1+lines2,
+    StrFormat msg(": inconsistent number of lines: lines_all = %zu != %zu = "
+                  "%zu + %zu = lines1 + lines2",lines_all,lines1+lines2,
                                                 lines1,lines2);
     throw msg.str();
   }

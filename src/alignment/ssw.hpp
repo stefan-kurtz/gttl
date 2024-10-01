@@ -234,7 +234,7 @@ template<typename T>
 static void print_ssw_profile(const SimdIntVector &profile)
 {
   constexpr const size_t bits = sizeof(T) * CHAR_BIT;
-  printf("Starting to print profile for u%lu.\n#!-",bits);
+  printf("Starting to print profile for u%zu.\n#!-",bits);
   for (size_t i = 0; i < profile.size_in_bytes(); i++)
   {
     printf("%d ", reinterpret_cast<T *>(profile.get())[i]);

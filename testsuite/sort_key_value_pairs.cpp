@@ -310,7 +310,7 @@ static void sort_values(unsigned int seed,
                                        values.size());
       }
     }
-    StrFormat msg("sort %lu %s with ska_large_lsb_small_radix_sort",
+    StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort",
                   values.size(),tag);
     rt_sorting.show(msg.str());
   } else
@@ -320,12 +320,12 @@ static void sort_values(unsigned int seed,
       const unsigned int n_threads = 1;
       merge_sort<decltype(values.begin())>(values.begin(),values.end(),
                                            n_threads);
-      StrFormat msg("sort %lu %s with mergesort",values.size(),tag);
+      StrFormat msg("sort %zu %s with mergesort",values.size(),tag);
       rt_sorting.show(msg.str());
     } else
     {
       std::sort(values.begin(),values.end());
-      StrFormat msg("sort %lu %s with std::sort",values.size(),tag);
+      StrFormat msg("sort %zu %s with std::sort",values.size(),tag);
       rt_sorting.show(msg.str());
     }
   }

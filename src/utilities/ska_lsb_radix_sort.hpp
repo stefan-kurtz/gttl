@@ -479,7 +479,7 @@ static void show_non_empty_buckets(const Buckets<size_t> *buckets,
       {
         printf("%c",'\t');
       }
-      printf("bucket\t%03lu\t%lu\n",idx,bucket_width);
+      printf("bucket\t%03lu\t%zu\n",idx,bucket_width);
     }
     idx++;
   }
@@ -487,7 +487,7 @@ static void show_non_empty_buckets(const Buckets<size_t> *buckets,
   {
     printf("%c",'\t');
   }
-  printf("maximum width of buckets\t%lu\tnum_unit\t%lu\n",
+  printf("maximum width of buckets\t%zu\tnum_unit\t%zu\n",
          buckets->maximum_width_get(),num_units);
 }
 #endif

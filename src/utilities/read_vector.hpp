@@ -15,7 +15,7 @@ std::vector<T> gttl_read_vector(const char *filename)
   const size_t size_of_file = gttl_file_size(filename);
   if (size_of_file % sizeof(T) != 0)
   {
-    StrFormat msg("file %s contains %lu bytes which is not a multiple of %lu",
+    StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
                   filename,size_of_file,sizeof(T));
     throw msg.str();
   }
@@ -30,7 +30,7 @@ std::vector<T> gttl_read_vector(const char *filename)
   std::vector<T> vec(num_values);
   if (!instream.read(reinterpret_cast<char*>(vec.data()), size_of_file))
   {
-    StrFormat msg("cannot only read %lu bytes from file %s",
+    StrFormat msg("cannot only read %zu bytes from file %s",
                   instream.gcount(),filename);
     throw msg.str();
   }
