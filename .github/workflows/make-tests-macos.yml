@@ -5,18 +5,14 @@ on:
   push:
     paths:
       - '**.cpp'
-      - '**.c'
       - '**.hpp'
-      - '**.h'
       - '**Makefile'
       - '.github/workflows/make-tests-macos.yml'
 
   pull_request:
     paths:
       - '**.cpp'
-      - '**.c'
       - '**.hpp'
-      - '**.h'
       - '**Makefile'
       - '.github/workflows/make-tests-macos.yml'
 

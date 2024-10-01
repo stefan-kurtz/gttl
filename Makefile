@@ -16,3 +16,4 @@ tags:
 code_check:
 	scripts/code_check.py -wt `find . -name '*.[ch]pp' | grep -v merge_sort.hpp`
 	scripts/check_ifndef.py `find . -name '*.hpp'`
+	scripts/check_no_c_files.sh
