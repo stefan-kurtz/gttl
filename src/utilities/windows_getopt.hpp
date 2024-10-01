@@ -28,7 +28,7 @@ int getopt(int nargc, char * const nargv[], const char *ostr)
   if (optreset || !*place)
   {
     optreset = 0;
-    if (optin >= nargc || *(place = narv[optind]) != '-')
+    if (optind >= nargc || *(place = nargv[optind]) != '-')
     {
       place = EMSG;
       return -1;
