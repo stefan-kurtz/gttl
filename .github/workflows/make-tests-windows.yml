@@ -1,0 +1,40 @@
+name: "Windows CI"
+run-name: "Windows CI"
+
+on: 
+  push:
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+      - '**Makefile'
+      - '.github/workflows/make-tets-windows.yml'
+
+  pull_request:
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+      - '**Makefile'
+      - '.github/workflows/make-tets-windows.yml'
+
+  workflow_dispatch: null
+
+
+jobs:
+  test_windows_latest:
+    name: Windows Tests
+    runs-on: windows-latest
+
+    env:
+      CXX: clang++
+      CPLUS_INCLUDE_PATH: "C:\\vcpkg\\packages\\zlib_x64-windows\\include"
+
+    steps:
+    - name: Unset autocrlf
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v4
+    - name: Install ZLib
+      run: vcpkg install zlib
+    - name: make
+      run: make -j4
+
+
