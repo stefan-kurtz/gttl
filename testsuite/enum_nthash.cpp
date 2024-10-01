@@ -391,7 +391,7 @@ static void enumerate_nt_hash(const char *inputfilename,
       CALL_enumerate_nt_hash_template(9,false);
     }
   }
-  StrFormat msg("nthash\t%s\t%lu\t%d\t%d\t%d",
+  StrFormat msg("nthash\t%s\t%zu\t%d\t%d\t%d",
                 inputfilename,qgram_length,
                 hashbits,sequences_number_bits,
                 sequences_length_bits);
