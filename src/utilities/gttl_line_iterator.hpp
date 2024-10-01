@@ -77,7 +77,7 @@ class GttlLineIterator
            line_number;
     bool fill_buffer(void)
     {
-#ifndef QLI_WITHOUT_ZLIB
+#ifndef GTTL_WITHOUT_ZLIB
       const int fill = gzread(in_fp, buffer, static_cast<size_t>(buf_size));
       assert(fill >= 0);
       assert(fill <= buf_size);
@@ -94,7 +94,7 @@ class GttlLineIterator
         {
           *bufend = '\0';
         }
-#ifndef QLI_WITHOUT_ZLIB
+#ifndef GTTL_WITHOUT_ZLIB
         file_exhausted = static_cast<bool>(fill < buf_size);
 #else
         file_exhausted = static_cast<bool>(fill <
@@ -114,7 +114,7 @@ class GttlLineIterator
       endofunit = false;
       file_index = 0;
       line_number = 0;
-#ifndef QLI_WITHOUT_ZLIB
+#ifndef GTTL_WITHOUT_ZLIB
       gzrewind(in_fp);
 #else
       rewind(in_fp);
