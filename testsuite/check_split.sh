@@ -13,7 +13,7 @@ inputfile_basename=`basename ${inputfile}`
 for split_size in 13 29 42 79
 do
   ./fastq_mn.x -e --split_size ${split_size} ${inputfile}
-  cat `ls ${inputfile_basename}*` | diff - ${inputfile}
+  cat `ls ${inputfile_basename}*` | diff --strip-trailing-cr - ${inputfile}
   rm -f `ls ${inputfile_basename}*`
 done
-./fastq_mn.x -e ${inputfile} | diff - ${inputfile}
+./fastq_mn.x -e ${inputfile} | diff --strip-trailing-cr - ${inputfile}
