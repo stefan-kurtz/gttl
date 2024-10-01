@@ -60,7 +60,7 @@ int getopt(int nargc, char * const nargv[], const char *ostr)
     {
       optind++;
     }
-  }else 
+  }else
   {
     if (*place)
     {
@@ -77,7 +77,7 @@ int getopt(int nargc, char * const nargv[], const char *ostr)
         printf("option requires an argument -- %c\n", optopt);
       }
       return BADCH;
-    }else 
+    }else
     {
       optarg = nargv[optind];
     }
