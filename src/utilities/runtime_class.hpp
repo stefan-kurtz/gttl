@@ -4,6 +4,7 @@
 #include <mutex>
 #include <cassert>
 #include <chrono>
+#include <string>
 
 class RunTimeClass
 {
