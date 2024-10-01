@@ -10,10 +10,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include "utilities/file_size.hpp"
 #include "utilities/str_format.hpp"
+#ifdef _WIN32
+  #define NOMINMAX
+  #include <io.h>
+  #include "utilities/windows_mman.hpp"
+#else
+  #include <unistd.h>
+  #include <sys/mman.h>
+#endif
 
 template<typename T>
 class Gttlmmap

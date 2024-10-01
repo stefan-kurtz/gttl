@@ -4,7 +4,12 @@
 /* Use some C based functions to determine size of file in portable
    way, as g++ 7.5 and clang++ on Linux do not know <filesystem>. */
 
-#include <unistd.h>
+#ifdef _WIN32
+  #define NOMINMAX
+  #include <io.h>
+#else
+  #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <sys/types.h>  // for fstat() and open()
 #include <sys/stat.h>

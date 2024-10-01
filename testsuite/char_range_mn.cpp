@@ -29,6 +29,10 @@
 #include "sequences/char_finder.hpp"
 #include "sequences/literate_multiseq.hpp"
 
+#ifdef _WIN32
+  #include "utilities/windows_getopt.hpp"
+#endif
+
 static void usage(const cxxopts::Options &options)
 {
   std::cerr << options.help() << std::endl;
