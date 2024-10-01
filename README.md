@@ -3,3 +3,8 @@
 [![MacOS CI](https://github.com/stefan-kurtz/gttl/actions/workflows/make-tests-macos.yml/badge.svg)](https://github.com/stefan-kurtz/gttl/actions/workflows/make-tests-macos.yml)
 # gttl
 Sources of the genometools template library
+
+Note that Windows users will need to install ZLib as an additional dependency, eg. by running
+```
+vcpkg install zlib
+```
