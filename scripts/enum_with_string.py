@@ -25,7 +25,7 @@ class {classname}
   Enum{classname} value;
   public:
   {classname}(void) : value({'{}{}'.format(prefix,items[0])}) {{}}
-  std::string string_values_joined(const char *sep, size_t start_index=1)
+  std::string string_values_joined(const char *sep, size_t start_index = 1)
     const noexcept
   {{
     assert(start_index < num_values);
@@ -61,7 +61,7 @@ class {classname}
   std::string str(void) const noexcept
   {{
     assert(static_cast<size_t>(value) < num_values);
-    return string_values[(int) value];
+    return string_values[static_cast<size_t>(value)];
   }}
   std::vector<std::string> string_values_get(void) const noexcept
   {{

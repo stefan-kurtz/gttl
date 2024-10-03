@@ -65,7 +65,7 @@ class ScoreMatrixName
   std::string str(void) const noexcept
   {
     assert(static_cast<size_t>(value) < num_values);
-    return string_values[(int) value];
+    return string_values[static_cast<size_t>(value)];
   }
   std::vector<std::string> string_values_get(void) const noexcept
   {

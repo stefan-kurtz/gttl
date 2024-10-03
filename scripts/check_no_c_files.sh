@@ -12,7 +12,4 @@ if [ -n "${C_FILES}" ]; then
     >&2 echo "${c_file}"
   done
   exit 1
-else
-  echo "No C-Files were found in the repository."
-  exit 0
 fi

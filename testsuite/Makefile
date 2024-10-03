@@ -150,6 +150,7 @@ test_multiseq:./multiseq_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "42" > ${TMPFILE}
 	@./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep -c '^>' | diff --strip-trailing-cr - ${TMPFILE}
+	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator

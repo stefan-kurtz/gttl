@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
               << std::endl;
     return EXIT_FAILURE;
   }
-  const size_t num_threads = (size_t) readlong1;
-  const size_t n = (size_t) readlong2;
+  const size_t num_threads = static_cast<size_t>(readlong1);
+  const size_t n = static_cast<size_t>(readlong2);
   std::vector<size_t> thread_sums(num_threads,0);
   GttlThreadPoolVar(num_threads,10,sum_fibonacci_var,n,thread_sums.data());
   for (size_t idx = 0; idx < num_threads; idx++)

@@ -21,10 +21,11 @@ class RunTimeClass
   }
   std::string to_string(void)
   {
-    auto end_time = std::chrono::high_resolution_clock::now();
-    size_t elapsed_micro
-      = (size_t) std::chrono::duration_cast<std::chrono::microseconds>
-                      (end_time-start_time).count();
+    const auto end_time = std::chrono::high_resolution_clock::now();
+    const size_t elapsed_micro
+      = static_cast<size_t>
+                   (std::chrono::duration_cast<std::chrono::microseconds>
+                    (end_time - start_time).count());
     std::string s = std::to_string(this->to_ms(elapsed_micro));
     start_time = end_time;
     return s;

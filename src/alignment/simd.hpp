@@ -143,8 +143,8 @@ typedef poly128_t simd_int;
 //    sse-mm-movemask-epi8-equivalent-method-for-arm-neon
 static int inline simdi8_movemask_neon_i8(poly128_t x)
 {
-  uint16x8_t temp1 =
-      vreinterpretq_u16_u8(vshrq_n_u8(vreinterpretq_u8_p128(x), 7));
+  uint16x8_t temp1
+    = vreinterpretq_u16_u8(vshrq_n_u8(vreinterpretq_u8_p128(x), 7));
 
   uint32x4_t temp2 = vreinterpretq_u32_u16(vrsraq_n_u16(temp1, temp1, 7));
 
@@ -152,7 +152,8 @@ static int inline simdi8_movemask_neon_i8(poly128_t x)
 
   uint8x16_t temp4 = vreinterpretq_u8_u64(vrsraq_n_u64(temp3, temp3, 28));
 
-  return (int) vgetq_lane_u8(temp4, 0) | ((int) vgetq_lane_u8(temp4, 8)) << 8;
+  return static_cast<int>(vgetq_lane_u8(temp4, 0)) |
+         (static_cast<int>(vgetq_lane_u8(temp4, 8)) << 8);
 }
 
 #endif
@@ -526,10 +527,12 @@ inline uint16_t simd_hmax16(const __m128i buffer)
 
 inline uint8_t simd_hmax8(const __m128i buffer)
 {
-  __m128i tmp1 = _mm_subs_epu8(_mm_set1_epi8((char) UINT8_MAX), buffer);
+  __m128i tmp1 = _mm_subs_epu8(_mm_set1_epi8(static_cast<char>(UINT8_MAX)),
+                               buffer);
   __m128i tmp2 = _mm_min_epu8(tmp1, _mm_srli_epi16(tmp1, 8));
   __m128i tmp3 = _mm_minpos_epu16(tmp2);
-  return (int8_t) (UINT8_MAX - (int8_t) _mm_cvtsi128_si32(tmp3));
+  return static_cast<int8_t>(static_cast<int8_t>(UINT8_MAX) -
+                             static_cast<int8_t>(_mm_cvtsi128_si32(tmp3)));
 }
 #endif
 
@@ -537,7 +540,7 @@ inline uint8_t simd_hmax8(const __m128i buffer)
 inline uint32_t simd_hmax32_avx(const __m256i buffer)
 {
   uint32_t b[8];
-  _mm256_store_si256((__m256i*) &b, buffer);
+  _mm256_store_si256(reinterpret_cast<__m256i*>(&b), buffer);
   b[0] = b[0] > b[4] ? b[0] : b[4];
   b[1] = b[1] > b[5] ? b[1] : b[5];
   b[2] = b[2] > b[6] ? b[2] : b[6];
@@ -571,8 +574,8 @@ inline __m256i simd_i32_adds(__m256i x_buffer, __m256i y_buffer)
 {
   int32_t x[8];
   int32_t y[8];
-  _mm256_store_si256((__m256i*) &x, x_buffer);
-  _mm256_store_si256((__m256i*) &y, y_buffer);
+  _mm256_store_si256(reinterpret_cast<__m256i*>(&x), x_buffer);
+  _mm256_store_si256(reinterpret_cast<__m256i*>(&y), y_buffer);
 
   for (int i = 0; i < 8; i++)
   {
@@ -585,21 +588,21 @@ inline __m256i simd_i32_adds(__m256i x_buffer, __m256i y_buffer)
     }
   }
 
-  return _mm256_load_si256((__m256i*) &x);
+  return _mm256_load_si256(reinterpret_cast<__m256i*>(&x));
 }
 
 inline __m256i simd_ui32_subs(__m256i x_buffer, __m256i y_buffer)
 {
   uint32_t x[8];
   uint32_t y[8];
-  _mm256_store_si256((__m256i*) &x, x_buffer);
-  _mm256_store_si256((__m256i*) &y, y_buffer);
+  _mm256_store_si256(reinterpret_cast<__m256i*>(&x), x_buffer);
+  _mm256_store_si256(reinterpret_cast<__m256i*>(&y), y_buffer);
 
   for (int i = 0; i < 8; i++)
   {
     x[i] = x[i] > y[i] ? x[i] - y[i] : 0;
   }
-  return _mm256_load_si256((__m256i*) &x);
+  return _mm256_load_si256(reinterpret_cast<__m256i*>(&x));
 }
 /* unclear, why this is implemented by a switch. In case pos <= 15,
    the function is equivalent to _mm256_extract_epi16. Only if pos > 15,

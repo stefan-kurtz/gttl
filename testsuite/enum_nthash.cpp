@@ -318,12 +318,12 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   printf("# max_sequence_length.bits\t%d\n",
           gttl_required_bits<size_t>(max_sequence_length));
   printf("# count_all_qgrams\t%zu\n",count_all_qgrams);
-  printf("# sum_hash_values\t%zu\n",(size_t) sum_hash_values);
-  printf("# bytes_unit_sum\t%zu\n", (size_t) bytes_unit_sum);
+  printf("# sum_hash_values\t%" PRIu64 "\n",sum_hash_values);
+  printf("# bytes_unit_sum\t%zu\n", bytes_unit_sum);
   if constexpr (with_rc)
   {
-    printf("# sum_rc_hash_values\t%zu\n",(size_t) sum_rc_hash_values);
-    printf("# bytes_unit_sum_rc\t%zu\n", (size_t) bytes_unit_sum_rc);
+    printf("# sum_rc_hash_values\t%" PRIu64 "\n",sum_rc_hash_values);
+    printf("# bytes_unit_sum_rc\t%zu\n",bytes_unit_sum_rc);
   }
   gttl_fp_type_close(in_fp);
 }

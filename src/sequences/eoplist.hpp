@@ -387,7 +387,7 @@ class Eoplist
     {
       if (std::isdigit(cc))
       {
-        iteration = iteration * size_t(10) + (size_t) (cc - '0');
+        iteration = iteration * size_t(10) + static_cast<size_t>(cc - '0');
       } else
       {
         if (cc == CigarOperator::deletion_char)
