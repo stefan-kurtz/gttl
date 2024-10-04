@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
   }
   const bool show = false;
   const int sort_mode = options.sort_mode_get();
-  unsigned int seed = 17; /* use some fixed value > 0 for a fixed seed */
+  unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
   if (options.data_type_option_get() == 'p')
   {
     static constexpr const int num_sort_bits
@@ -416,11 +416,12 @@ int main(int argc, char *argv[])
     } else
     {
       assert(options.data_type_option_get() == 'i');
-      //gttl_required_bits<size_t>(number_of_values);
-      const int num_sort_bits = 64;
+      constexpr const int num_sort_bits = 64;
+      const double max_random
+        = static_cast<double>(options.number_of_values_get());
       sort_values<uint64_t>(seed,argv[0],show,sort_mode,
                             options.number_of_values_get(),
-                            static_cast<double>(options.number_of_values_get()),
+                            max_random,
                             num_sort_bits);
     }
   }
