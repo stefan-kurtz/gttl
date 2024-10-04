@@ -227,6 +227,24 @@ class Key2ValuePair
   }
 };
 
+template<class It>
+static inline void show_values(It begin, It end)
+{
+  for (auto it = begin; it != end; ++it)
+  {
+    auto v = *it;
+    using T = decltype(v);
+    if constexpr (std::is_same_v<T, KeyValuePair> ||
+                  std::is_same_v<T, Key2ValuePair>)
+    {
+      std::cout << v.to_string() << std::endl;
+    } else
+    {
+      std::cout << v << std::endl;
+    }
+  }
+}
+
 template<class T>
 static void sort_values(unsigned int seed,
                         const char *progname,
@@ -303,7 +321,7 @@ static void sort_values(unsigned int seed,
                                        false);
       } else
       {
-        static_assert(sizeof(T) == sizeof(void *));
+        static_assert(sizeof(T) == sizeof(uint64_t));
         ska_large_lsb_small_radix_sort(num_sort_bits,
                                        reinterpret_cast<uint64_t *>
                                                        (values.data()),
@@ -331,17 +349,7 @@ static void sort_values(unsigned int seed,
   }
   if (show)
   {
-    for (auto v : values)
-    {
-      if constexpr (std::is_same_v<T, KeyValuePair> ||
-                    std::is_same_v<T, Key2ValuePair>)
-      {
-        std::cout << v.to_string() << std::endl;
-      } else
-      {
-        std::cout << v << std::endl;
-      }
-    }
+    show_values<decltype(values.begin())>(values.begin(),values.end());
   }
   if (values.size() > 1)
   {
@@ -388,7 +396,7 @@ int main(int argc, char *argv[])
   }
   const bool show = false;
   const int sort_mode = options.sort_mode_get();
-  unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
+  unsigned int seed = 17; /* use some fixed value > 0 for a fixed seed */
   if (options.data_type_option_get() == 'p')
   {
     static constexpr const int num_sort_bits
@@ -410,10 +418,10 @@ int main(int argc, char *argv[])
       assert(options.data_type_option_get() == 'i');
       //gttl_required_bits<size_t>(number_of_values);
       const int num_sort_bits = 64;
-      sort_values<size_t>(seed,argv[0],show,sort_mode,
-                          options.number_of_values_get(),
-                          static_cast<double>(options.number_of_values_get()),
-                          num_sort_bits);
+      sort_values<uint64_t>(seed,argv[0],show,sort_mode,
+                            options.number_of_values_get(),
+                            static_cast<double>(options.number_of_values_get()),
+                            num_sort_bits);
     }
   }
   return EXIT_SUCCESS;

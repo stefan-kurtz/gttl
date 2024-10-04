@@ -41,5 +41,10 @@ public:
     {
       return ptr + num_elements;
     }
+
+    T* data(void) noexcept
+    {
+      return ptr;
+    }
 };
 #endif

@@ -17,6 +17,7 @@
 #include "utilities/unused.hpp"
 #include "utilities/buckets.hpp"
 #include "utilities/lsb_radix_sort.hpp"
+#include "utilities/span.hpp"
 
 #ifndef RADIX_SORT8_MAX_SIZEOF_UNIT
 #define RADIX_SORT8_MAX_SIZEOF_UNIT 32
@@ -41,6 +42,22 @@ struct PartitionInfo
   };
 };
 
+template<typename Counttype,int sizeof_unit,typename RT>
+static inline void swap_two_values(uint8_t *array,Counttype a,Counttype b)
+{
+  static_assert(sizeof(uint64_t) == 8);
+  uint64_t *aptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * a);
+  uint64_t *bptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * b);
+  uint64_t tmp = *aptr;
+  *aptr = *bptr;
+  *bptr = tmp;
+  RT *aptr_rest = reinterpret_cast<RT *>(array + 8 + sizeof_unit * a);
+  RT *bptr_rest = reinterpret_cast<RT *>(array + 8 + sizeof_unit * b);
+  RT tmp_rest = *aptr_rest;
+  *aptr_rest = *bptr_rest;
+  *bptr_rest = tmp_rest;
+}
+
 template <typename Counttype,typename basetype,int sizeof_unit>
 static inline void swap_unit(basetype *array,Counttype a,Counttype b)
 {
@@ -52,20 +69,31 @@ static inline void swap_unit(basetype *array,Counttype a,Counttype b)
     static_assert(sizeof_unit > 1 && sizeof(basetype) == 1);
     if constexpr (sizeof_unit == 9)
     {
-      uint64_t *aptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * a);
-      uint64_t *bptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * b);
-      uint64_t tmp = *aptr;
-      *aptr = *bptr;
-      *bptr = tmp;
-      uint8_t tmp1 = array[8 + sizeof_unit * a];
-      array[8 + sizeof_unit * a] = array[8 + sizeof_unit * b];
-      array[8 + sizeof_unit * b] = tmp1;
+      swap_two_values<Counttype,sizeof_unit,uint8_t>(array,a,b);
     } else
     {
-      uint8_t tmp[sizeof_unit];
-      memcpy(&tmp[0],&array[sizeof_unit * a],sizeof_unit);
-      memcpy(&array[sizeof_unit * a],&array[sizeof_unit * b],sizeof_unit);
-      memcpy(&array[sizeof_unit * b],&tmp[0],sizeof_unit);
+      if constexpr (sizeof_unit == 10)
+      {
+        swap_two_values<Counttype,sizeof_unit,uint16_t>(array,a,b);
+      } else
+      {
+        if constexpr (sizeof_unit == 12)
+        {
+          swap_two_values<Counttype,sizeof_unit,uint32_t>(array,a,b);
+        } else
+        {
+          if constexpr (sizeof_unit == 16)
+          {
+            swap_two_values<Counttype,sizeof_unit,uint64_t>(array,a,b);
+          } else
+          {
+            uint8_t tmp[sizeof_unit];
+            memcpy(&tmp[0],&array[sizeof_unit * a],sizeof_unit);
+            memcpy(&array[sizeof_unit * a],&array[sizeof_unit * b],sizeof_unit);
+            memcpy(&array[sizeof_unit * b],&tmp[0],sizeof_unit);
+          }
+        }
+      }
     }
   }
 }
@@ -134,9 +162,12 @@ static inline void unroll_loop_four_times(Counttype begin,
   }
 }
 
-template <typename Counttype,typename Numpartitionstype,
-          size_t num_buckets,typename basetype,
-          int sizeof_unit,uint64_t (*functor)(int,const basetype *,size_t idx)>
+template <typename Counttype,
+          typename Numpartitionstype,
+          size_t num_buckets,
+          typename basetype,
+          int sizeof_unit,
+          uint64_t (*functor)(int,const basetype *,size_t idx)>
 static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
                                                     size_t array_len,
                                                     int shift)
@@ -147,8 +178,8 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
   {
     ++partitions[functor(shift,array,idx)].count;
   }
-  uint64_t count_zero = 0;
-  for (uint64_t idx = 0; idx < num_buckets; ++idx)
+  size_t count_zero = 0;
+  for (size_t idx = 0; idx < num_buckets; ++idx)
   {
     count_zero += (partitions[idx].count == 0);
   }
@@ -160,7 +191,7 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
   Numpartitionstype remaining_partitions[num_buckets];
   Counttype total = 0;
   size_t num_partitions = 0;
-  for (uint64_t idx = 0; idx < num_buckets; ++idx)
+  for (size_t idx = 0; idx < num_buckets; ++idx)
   {
     const Counttype count = partitions[idx].count;
     if (count > 0)
@@ -313,7 +344,7 @@ static std::pair<Buckets<Counttype> *,int> radixsort_ska_template(
 
 template<typename Counttype,typename basetype,int sizeof_unit,class SorterClass>
 static Buckets<Counttype> *radixsort_ska_then_other_generic(
-                                                   SorterClass &sorter_instance,
+                                                   SorterClass *sorter_instance,
                                                    int num_sort_bits,
                                                    basetype *array,
                                                    size_t num_units)
@@ -329,7 +360,7 @@ static Buckets<Counttype> *radixsort_ska_then_other_generic(
                                        num_units,
                                        /* for sizeof_unit>1 */
                                        sorter_instance
-                                         .reversed_byte_order_get());
+                                         ->reversed_byte_order_get());
   const int bits_already_sorted = std::get<1>(result);
   Buckets<Counttype> *buckets = std::get<0>(result);
   if (buckets == nullptr || bits_already_sorted >= num_sort_bits)
@@ -337,14 +368,15 @@ static Buckets<Counttype> *radixsort_ska_then_other_generic(
     return buckets;
   }
   const Counttype maximum_bucket_width = buckets->maximum_width_get();
-  sorter_instance.setup(maximum_bucket_width);
+  sorter_instance->setup(maximum_bucket_width);
   for (auto &&bck : *buckets)
   {
     const Counttype bucket_start = std::get<0>(bck);
     const Counttype bucket_width = std::get<1>(bck) - bucket_start;
     if (bucket_width > 1)
     {
-      sorter_instance.sort(array,bucket_start,bucket_width,bits_already_sorted);
+      sorter_instance->sort(array,bucket_start,bucket_width,
+                            bits_already_sorted);
     }
   }
   return buckets;
@@ -355,22 +387,23 @@ class LSBuint64Sorter
   private:
     uint64_t *uint64_buffer;
     size_t buffer_width;
-    int num_sort_bits;
+    const int num_sort_bits;
   public:
-  LSBuint64Sorter(int _num_sort_bits) :
-    uint64_buffer(nullptr),
-    buffer_width(0),
-    num_sort_bits(_num_sort_bits) {}
+  LSBuint64Sorter(int _num_sort_bits)
+    : uint64_buffer(nullptr)
+    , buffer_width(0)
+    , num_sort_bits(_num_sort_bits)
+  { }
   ~LSBuint64Sorter(void)
   {
     delete[] uint64_buffer;
   }
-  void setup(size_t bucket_width)
+  void setup(size_t _bucket_width)
   {
-    buffer_width = bucket_width;
-    uint64_buffer = new uint64_t [bucket_width];
+    buffer_width = _bucket_width;
+    uint64_buffer = new uint64_t [_bucket_width];
   }
-  bool reversed_byte_order_get() const noexcept
+  bool reversed_byte_order_get(void) const noexcept
   {
     return false; /* Not used */
   }
@@ -391,14 +424,15 @@ class LSBbytesSorter
 {
   private:
     uint8_t *uint8_buffer;
-    int num_sort_bits;
-    bool reversed_byte_order;
+    const int num_sort_bits;
+    const bool reversed_byte_order;
   public:
   LSBbytesSorter(int _num_sort_bits,
-                 bool _reversed_byte_order) :
-    uint8_buffer(nullptr),
-    num_sort_bits(_num_sort_bits),
-    reversed_byte_order(_reversed_byte_order) {}
+                 bool _reversed_byte_order)
+    : uint8_buffer(nullptr)
+    , num_sort_bits(_num_sort_bits)
+    , reversed_byte_order(_reversed_byte_order)
+   { }
   ~LSBbytesSorter(void)
   {
     delete[] uint8_buffer;
@@ -407,10 +441,10 @@ class LSBbytesSorter
   {
     uint8_buffer = new uint8_t [sizeof_unit * maximum_bucket_width];
   }
-  bool reversed_byte_order_get() const noexcept
+  bool reversed_byte_order_get(void) const noexcept
   {
     return reversed_byte_order;
-  };
+  }
   void sort(uint8_t *array,size_t bucket_start,size_t bucket_width,
             int bits_already_sorted)
   {
@@ -430,7 +464,7 @@ static Buckets<Counttype> *ska_lsb_radix_sort(int num_sort_bits,
 {
   LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
   return radixsort_ska_then_other_generic<Counttype,uint64_t,1,LSBuint64Sorter>
-                                          (lsb_uint64_sorter,
+                                          (&lsb_uint64_sorter,
                                            num_sort_bits,
                                            array,
                                            array_len);
@@ -493,7 +527,7 @@ static void show_non_empty_buckets(const Buckets<size_t> *buckets,
 #endif
 
 template<typename Counttype,typename basetype,int sizeof_unit,class SorterClass>
-static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
+static void ska_large_lsb_small_radix_sort_generic(SorterClass *sorter_instance,
                                                    int num_sort_bits,
                                                    basetype *array,
                                                    size_t num_units)
@@ -509,16 +543,14 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
                                int byte_index;
                              };
 
-  std::vector<StackStruct> stack{};
-
-  stack.push_back({0, num_units, 0});
-  sorter_instance.setup(skarupke_threshold);
-  while (!stack.empty())
+  std::vector<StackStruct> stack{{size_t(0), num_units, 0}};
+  sorter_instance->setup(skarupke_threshold);
+  while (not stack.empty())
   {
     StackStruct current = stack.back();
     stack.pop_back();
 
-    Buckets<Counttype> *buckets = nullptr;
+    Buckets<Counttype> *buckets;
     if constexpr (sizeof_unit == 1)
     {
       static_assert(sizeof(basetype) == 8);
@@ -531,7 +563,7 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
     {
       assert(num_sort_bits >= 8);
       const int this_byte_index = real_byte_index(sorter_instance
-                                                   .reversed_byte_order_get(),
+                                                    ->reversed_byte_order_get(),
                                                   current.byte_index);
       static_assert(sizeof(basetype) == 1);
       buckets = countingsort_skarupke_bytes<Counttype>
@@ -560,17 +592,17 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass &sorter_instance,
           if (bucket_width > skarupke_threshold)
           {
             stack.push_back({current.offset + bucket_start,
-                             bucket_width,
+                             static_cast<size_t>(bucket_width),
                              current.byte_index + 1});
           } else
           {
             if (bucket_width > 1)
             {
               const int bits_already_sorted = CHAR_BIT * current.byte_index;
-              sorter_instance.sort(array,
-                                   current.offset + bucket_start,
-                                   bucket_width,
-                                   bits_already_sorted);
+              sorter_instance->sort(array,
+                                    current.offset + bucket_start,
+                                    bucket_width,
+                                    bits_already_sorted);
             }
           }
         }
@@ -587,10 +619,32 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
   using Counttype = size_t;
   LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
   ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
-                                        (lsb_uint64_sorter,
+                                        (&lsb_uint64_sorter,
                                          num_sort_bits,
                                          array,
                                          num_units);
+}
+
+static inline void merge_sort_ska_large_lsb_small_radix_sort(int num_sort_bits,
+                                                             uint64_t *array,
+                                                             size_t num_units)
+{
+  using Counttype = size_t;
+  LSBuint64Sorter first_lsb_uint64_sorter(num_sort_bits),
+                  second_lsb_uint64_sorter(num_sort_bits);
+  Span<uint64_t> vec(array,num_units);
+  ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
+                                        (&first_lsb_uint64_sorter,
+                                         num_sort_bits,
+                                         vec.data(),
+                                         num_units/2);
+  auto mid = vec.begin() + num_units/2;
+  ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
+                                        (&second_lsb_uint64_sorter,
+                                         num_sort_bits,
+                                         vec.data() + num_units/2,
+                                         vec.size() - num_units/2);
+  std::inplace_merge(vec.begin(),mid,vec.end());
 }
 
 static inline void ska_large_lsb_small_radix_sort(int sizeof_unit,
@@ -600,8 +654,9 @@ static inline void ska_large_lsb_small_radix_sort(int sizeof_unit,
                                                   bool reversed_byte_order)
 {
   using Counttype = size_t;
-  assert(sizeof_unit >= 2 && sizeof_unit <= RADIX_SORT8_MAX_SIZEOF_UNIT);
-  assert(sizeof_unit * CHAR_BIT >= num_sort_bits);
+  assert(sizeof_unit >= 2 and
+         sizeof_unit <= RADIX_SORT8_MAX_SIZEOF_UNIT and
+         sizeof_unit * CHAR_BIT >= num_sort_bits);
   constexpr_for<2,RADIX_SORT8_MAX_SIZEOF_UNIT+1,1>([&](auto const_expr_idx)
   {
     if (sizeof_unit == const_expr_idx)
@@ -610,7 +665,7 @@ static inline void ska_large_lsb_small_radix_sort(int sizeof_unit,
                                                       reversed_byte_order);
       ska_large_lsb_small_radix_sort_generic<Counttype,uint8_t,const_expr_idx,
                                              LSBbytesSorter<const_expr_idx>>
-                                            (lsb_bytes_sorter,
+                                            (&lsb_bytes_sorter,
                                              num_sort_bits,
                                              array,
                                              num_units);
