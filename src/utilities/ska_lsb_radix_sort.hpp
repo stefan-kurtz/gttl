@@ -632,19 +632,79 @@ static inline void merge_sort_ska_large_lsb_small_radix_sort(int num_sort_bits,
   using Counttype = size_t;
   LSBuint64Sorter first_lsb_uint64_sorter(num_sort_bits),
                   second_lsb_uint64_sorter(num_sort_bits);
-  Span<uint64_t> vec(array,num_units);
+  Span<uint64_t> span(array,num_units);
   ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
                                         (&first_lsb_uint64_sorter,
                                          num_sort_bits,
-                                         vec.data(),
+                                         span.data(),
                                          num_units/2);
-  auto mid = vec.begin() + num_units/2;
+  auto mid = span.begin() + num_units/2;
   ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
                                         (&second_lsb_uint64_sorter,
                                          num_sort_bits,
-                                         vec.data() + num_units/2,
-                                         vec.size() - num_units/2);
-  std::inplace_merge(vec.begin(),mid,vec.end());
+                                         span.data() + num_units/2,
+                                         span.size() - num_units/2);
+  std::inplace_merge(span.begin(),mid,span.end());
+}
+
+class PartInfoTab
+{
+  private:
+  std::vector<size_t> end_indexes;
+  public:
+  PartInfoTab(size_t num_elements,size_t num_parts)
+  {
+    if (num_parts > num_elements)
+    {
+      end_indexes.push_back(num_elements);
+    } else
+    {
+      const size_t avg_width = (num_elements + num_parts - 1)/num_parts;
+      for (size_t p = 0; p < num_parts; p++)
+      {
+        end_indexes.push_back(std::min((p+1) * avg_width,num_elements));
+      }
+    }
+  }
+  size_t size(void) const noexcept
+  {
+    return end_indexes.size();
+  }
+  std::pair<size_t,size_t> operator [](size_t idx) const noexcept
+  {
+    return std::make_pair(idx == 0 ? 0 : end_indexes[idx-1],
+                          idx == 0 ? end_indexes[0]
+                                   : (end_indexes[idx] - end_indexes[idx-1]));
+  }
+};
+
+static inline void merge_sort_ska_large_lsb_small_radix_sort(int num_sort_bits,
+                                                             uint64_t *array,
+                                                             size_t num_units,
+                                                             size_t num_threads)
+{
+  using Counttype = size_t;
+  PartInfoTab part_info_tab(num_units,num_threads);
+  for (size_t idx = 0; idx < part_info_tab.size(); idx++)
+  {
+    size_t left, width;
+    std::tie(left,width) = part_info_tab[idx];
+    LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
+    ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
+                                          (&lsb_uint64_sorter,
+                                           num_sort_bits,
+                                           array + left,
+                                           width);
+  }
+  Span<uint64_t> span(array,num_units);
+  for (size_t idx = 1; idx < part_info_tab.size(); idx++)
+  {
+    size_t left, width;
+    std::tie(left,width) = part_info_tab[idx];
+    std::inplace_merge(span.begin(),
+                       span.begin() + left,
+                       span.begin() + left + width);
+  }
 }
 
 static inline void ska_large_lsb_small_radix_sort(int sizeof_unit,
