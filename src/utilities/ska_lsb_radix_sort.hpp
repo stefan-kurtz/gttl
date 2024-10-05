@@ -612,41 +612,6 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass *sorter_instance,
   }
 }
 
-static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
-                                                  uint64_t *array,
-                                                  size_t num_units)
-{
-  using Counttype = size_t;
-  LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
-  ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
-                                        (&lsb_uint64_sorter,
-                                         num_sort_bits,
-                                         array,
-                                         num_units);
-}
-
-static inline void merge_sort_ska_large_lsb_small_radix_sort(int num_sort_bits,
-                                                             uint64_t *array,
-                                                             size_t num_units)
-{
-  using Counttype = size_t;
-  LSBuint64Sorter first_lsb_uint64_sorter(num_sort_bits),
-                  second_lsb_uint64_sorter(num_sort_bits);
-  Span<uint64_t> span(array,num_units);
-  ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
-                                        (&first_lsb_uint64_sorter,
-                                         num_sort_bits,
-                                         span.data(),
-                                         num_units/2);
-  auto mid = span.begin() + num_units/2;
-  ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
-                                        (&second_lsb_uint64_sorter,
-                                         num_sort_bits,
-                                         span.data() + num_units/2,
-                                         span.size() - num_units/2);
-  std::inplace_merge(span.begin(),mid,span.end());
-}
-
 class PartInfoTab
 {
   private:
@@ -678,32 +643,64 @@ class PartInfoTab
   }
 };
 
-static inline void merge_sort_ska_large_lsb_small_radix_sort(int num_sort_bits,
-                                                             uint64_t *array,
-                                                             size_t num_units,
-                                                             size_t num_threads)
+#ifndef NDEBUG
+template<class It>
+static inline void check_order(It begin, It end)
+{
+  auto previous = *begin;
+  for(auto it = begin + 1; it != end; ++it)
+  {
+    if (previous > *it)
+    {
+      assert(false);
+    }
+    previous = *it;
+  }
+}
+#endif
+
+static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
+                                                  uint64_t *array,
+                                                  size_t num_units,
+                                                  size_t num_threads = 1)
 {
   using Counttype = size_t;
-  PartInfoTab part_info_tab(num_units,num_threads);
-  for (size_t idx = 0; idx < part_info_tab.size(); idx++)
+  if (num_threads == 1)
   {
-    size_t left, width;
-    std::tie(left,width) = part_info_tab[idx];
     LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
     ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,LSBuint64Sorter>
                                           (&lsb_uint64_sorter,
                                            num_sort_bits,
-                                           array + left,
-                                           width);
-  }
-  Span<uint64_t> span(array,num_units);
-  for (size_t idx = 1; idx < part_info_tab.size(); idx++)
+                                           array,
+                                           num_units);
+  } else
   {
-    size_t left, width;
-    std::tie(left,width) = part_info_tab[idx];
-    std::inplace_merge(span.begin(),
-                       span.begin() + left,
-                       span.begin() + left + width);
+    PartInfoTab part_info_tab(num_units,num_threads);
+    for (size_t idx = 0; idx < part_info_tab.size(); idx++)
+    {
+      size_t left, width;
+      std::tie(left,width) = part_info_tab[idx];
+      LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
+      ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,
+                                             LSBuint64Sorter>
+                                            (&lsb_uint64_sorter,
+                                             num_sort_bits,
+                                             array + left,
+                                             width);
+    }
+    Span<uint64_t> span(array,num_units);
+    for (size_t idx = 1; idx < part_info_tab.size(); idx++)
+    {
+      size_t left, width;
+      std::tie(left,width) = part_info_tab[idx];
+#ifndef NDEBUG
+      check_order(span.begin(),span.begin() + left);
+      check_order(span.begin() + left, span.begin() + left + width);
+#endif
+      std::inplace_merge(span.begin(),
+                         span.begin() + left,
+                         span.begin() + left + width);
+    }
   }
 }
 

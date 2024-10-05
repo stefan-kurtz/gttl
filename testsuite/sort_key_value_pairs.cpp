@@ -26,6 +26,7 @@ class SortKeyValuePairsOptions
 {
  private:
   size_t number_of_values;
+  size_t num_threads;
   bool help_option;
   char data_type_option;
   int sort_mode;
@@ -34,6 +35,7 @@ class SortKeyValuePairsOptions
  public:
   SortKeyValuePairsOptions()
     : number_of_values(0)
+    , num_threads(size_t(1))
     , data_type_option('i')
     , sort_mode(0)
     , sort_mode_option("lsb-radix")
@@ -56,7 +58,11 @@ class SortKeyValuePairsOptions
        ("m,sort_mode",
         "specify the method to use for sorting, "
         "possible are: lsb-radix, mergesort or stdsort",
-        cxxopts::value<std::string>(sort_mode_option)->default_value("r"))
+        cxxopts::value<std::string>(sort_mode_option)
+                                   ->default_value("lsb-radix"))
+       ("t,num_threads",
+        "specify the number of threads",
+        cxxopts::value<size_t>(num_threads)->default_value("1"))
        ("h,help", "print usage");
     try
     {
@@ -98,8 +104,18 @@ class SortKeyValuePairsOptions
       if (sort_mode_option == std::string("lsb-radix"))
       {
         sort_mode = 0;
+        if (data_type_option != 'i')
+        {
+          throw std::invalid_argument("option -t/--num_threads can only be "
+                                      "used for data_type i");
+        }
       } else
       {
+        if (num_threads != size_t(1))
+        {
+          throw std::invalid_argument("option -t/--num_threads can only be "
+                                      "used for lsb-radix");
+        }
         if (sort_mode_option == std::string("mergesort"))
         {
           sort_mode = 1;
@@ -126,6 +142,10 @@ class SortKeyValuePairsOptions
   size_t number_of_values_get(void) const noexcept
   {
     return number_of_values;
+  }
+  size_t num_threads_get(void) const noexcept
+  {
+    return num_threads;
   }
   char data_type_option_get(void) const noexcept
   {
@@ -252,7 +272,8 @@ static void sort_values(unsigned int seed,
                         int sort_mode,
                         size_t number_of_values,
                         double max_random,
-                        int num_sort_bits)
+                        int num_sort_bits,
+                        size_t num_threads)
 {
   std::vector<T> values{};
   values.reserve(number_of_values);
@@ -325,11 +346,13 @@ static void sort_values(unsigned int seed,
         ska_large_lsb_small_radix_sort(num_sort_bits,
                                        reinterpret_cast<uint64_t *>
                                                        (values.data()),
-                                       values.size());
+                                       values.size(),
+                                       num_threads);
       }
     }
-    StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort",
-                  values.size(),tag);
+    StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort and %zu "
+                  "thread%s",
+                  values.size(),tag,num_threads,num_threads == 1 ? "" : "s");
     rt_sorting.show(msg.str());
   } else
   {
@@ -403,7 +426,8 @@ int main(int argc, char *argv[])
       = static_cast<int>(CHAR_BIT * sizeof(double));
     sort_values<KeyValuePair>(seed,argv[0],show,sort_mode,
                               options.number_of_values_get(),
-                              DBL_MAX,num_sort_bits);
+                              DBL_MAX,num_sort_bits,
+                              size_t(1));
   } else
   {
     if (options.data_type_option_get() == 't')
@@ -412,7 +436,8 @@ int main(int argc, char *argv[])
         = static_cast<int>(CHAR_BIT * 2 * sizeof(uint64_t));
       sort_values<Key2ValuePair>(seed,argv[0],show,sort_mode,
                                  options.number_of_values_get(),
-                                 DBL_MAX,num_sort_bits);
+                                 DBL_MAX,num_sort_bits,
+                                 size_t(1));
     } else
     {
       assert(options.data_type_option_get() == 'i');
@@ -422,7 +447,8 @@ int main(int argc, char *argv[])
       sort_values<uint64_t>(seed,argv[0],show,sort_mode,
                             options.number_of_values_get(),
                             max_random,
-                            num_sort_bits);
+                            num_sort_bits,
+                            options.num_threads_get());
     }
   }
   return EXIT_SUCCESS;

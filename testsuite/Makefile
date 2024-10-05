@@ -227,7 +227,9 @@ test_sort_kvp:sort_key_value_pairs.x
 .PHONY:test_sort_i
 test_sort_i:sort_key_value_pairs.x
 	@for num in 200 2000 20000 200000 2000000 20000000 200000000; do \
-	   ./sort_key_value_pairs.x -d i -m lsb-radix $$num;\
+	   ./sort_key_value_pairs.x -t 1 -d i -m lsb-radix $$num;\
+	   ./sort_key_value_pairs.x -t 2 -d i -m lsb-radix $$num;\
+	   ./sort_key_value_pairs.x -t 3 -d i -m lsb-radix $$num;\
 	   ./sort_key_value_pairs.x -d i -m mergesort $$num;\
 	   ./sort_key_value_pairs.x -d i -m stdsort $$num;\
 	done
