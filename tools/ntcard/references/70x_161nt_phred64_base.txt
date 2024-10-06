@@ -1,0 +1,5 @@
+# TIME	enumeration (ms):	39
+F0 = 10496
+F1 (estimate) = 10624
+F1 (count) = 9100
+# TIME	estimate (ms):	295

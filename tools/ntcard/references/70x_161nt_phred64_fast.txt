@@ -1,0 +1,3 @@
+# TIME	enumeration (ms):	46
+F0 = 10496
+# TIME	estimate (ms):	14
