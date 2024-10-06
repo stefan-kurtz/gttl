@@ -7,6 +7,7 @@ debug:
 .PHONY:clean	
 clean:
 	@make -C testsuite clean
+	@make -C tools/ntcard clean
 
 .PHONY:tags
 tags:
