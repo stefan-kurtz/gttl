@@ -19,6 +19,7 @@
 #include "utilities/buckets.hpp"
 #include "utilities/lsb_radix_sort.hpp"
 #include "utilities/span.hpp"
+#include "utilities/runtime_class.hpp"
 
 #ifndef RADIX_SORT8_MAX_SIZEOF_UNIT
 #define RADIX_SORT8_MAX_SIZEOF_UNIT 32
