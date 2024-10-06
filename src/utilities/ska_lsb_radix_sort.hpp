@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <vector>
 #include <tuple>
+#include <thread>
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -676,18 +677,28 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
   } else
   {
     PartInfoTab part_info_tab(num_units,num_threads);
-    for (size_t idx = 0; idx < part_info_tab.size(); idx++)
+    std::vector<std::thread> threads;
+    for (size_t thd_num = 0; thd_num < part_info_tab.size(); thd_num++)
     {
-      size_t left, width;
-      std::tie(left,width) = part_info_tab[idx];
-      LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
-      ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,
-                                             LSBuint64Sorter>
-                                            (&lsb_uint64_sorter,
-                                             num_sort_bits,
-                                             array + left,
-                                             width);
+      threads.push_back(std::thread([&part_info_tab, array,
+                                     num_sort_bits, thd_num]
+      {
+        size_t left, width;
+        std::tie(left,width) = part_info_tab[thd_num];
+        LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
+        ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,
+                                               LSBuint64Sorter>
+                                              (&lsb_uint64_sorter,
+                                               num_sort_bits,
+                                               array + left,
+                                               width);
+      }));
     }
+    for (auto &th : threads)
+    {
+      th.join();
+    }
+    RunTimeClass rt_multi_way_merge{};
     Span<uint64_t> span(array,num_units);
     for (size_t idx = 1; idx < part_info_tab.size(); idx++)
     {
@@ -701,6 +712,9 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
                          span.begin() + left,
                          span.begin() + left + width);
     }
+    rt_multi_way_merge.show(std::string("merging ") +
+                            std::to_string(part_info_tab.size()) +
+                            std::string(" sorted vectors"));
   }
 }
 
