@@ -1,7 +1,7 @@
 CXX?=g++
 LD=${CXX}
 CFLAGS=-g -Wall -Werror -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3
-GTTL?=../../gttl
+GTTL=../..
 CPPFLAGS=-I ${GTTL}/src
 CXXFLAGS=-std=c++17
 LDFLAGS=-g
