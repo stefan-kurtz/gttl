@@ -16,6 +16,7 @@
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
 #include "utilities/merge_sort.hpp"
+#include "utilities/runtime_class.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
