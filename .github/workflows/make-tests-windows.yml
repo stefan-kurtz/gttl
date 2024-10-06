@@ -29,8 +29,6 @@ jobs:
       CPLUS_INCLUDE_PATH: "C:\\vcpkg\\packages\\zlib_x64-windows\\include"
 
     steps:
-    - name: Unset autocrlf
-      run: git config --global core.autocrlf false
     - uses: actions/checkout@v4
     - name: Install ZLib
       run: vcpkg install zlib

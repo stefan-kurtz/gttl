@@ -1,0 +1,24 @@
+# Sources
+*.cpp   text eol=lf diff=cpp
+*.hpp   text eol=lf diff=cpp
+
+# Scripts
+*.sh    text eol=lf
+*.py    text diff=python
+
+# Text files to be normalized by git
+.gitattributes text
+.gitignore     text
+*.md           text diff=markdown
+*.yml          text
+Makefile       text
+*.txt          text
+.clang-format  text
+
+# Genome Data Files
+# These are text files, but should never be modified by git.
+*.fasta -text
+*.fastq -text
+*.fna   -text
+*.fsa   -text
+*.tsv   -text
