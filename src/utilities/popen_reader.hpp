@@ -1,6 +1,11 @@
 #ifndef POPEN_READER_HPP
 #define POPEN_READER_HPP
-#include <unistd.h>
+#ifdef _WIN32
+  #define NOMINMAX
+  #include <io.h>
+#else
+  #include <unistd.h>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
