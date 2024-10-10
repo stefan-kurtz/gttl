@@ -24,11 +24,19 @@ class PopenReader
     : stdout_ptr(nullptr)
     , stderr_ptr(nullptr)
   {
-    bool pipe_error = false;
     int stdout_tab[2], stderr_tab[2];
-    pipe_error = static_cast<bool>(pipe(stdout_tab));
-    pipe_error = pipe_error || static_cast<bool>(pipe(stderr_tab));
-    assert(pipe_error == false);
+    int pipe_error = pipe(stdout_tab);
+    if (pipe_error != 0)
+    {
+      fprintf(stderr,"failed to open stdout-pipe\n");
+      exit(EXIT_FAILURE);
+    }
+    pipe_error = pipe(stderr_tab);
+    if (pipe_error != 0)
+    {
+      fprintf(stderr,"failed to open stderr-pipe\n");
+      exit(EXIT_FAILURE);
+    }
     const pid_t pid = fork();
     if (pid == static_cast<pid_t>(0))
     {
