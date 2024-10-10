@@ -75,7 +75,8 @@ test:test_alphabet \
      test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
-     test_split_string
+     test_split_string \
+     test_untar
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -292,6 +293,22 @@ test_split_string:split_string_mn.x
 	@./split_string_mn.x '	' ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
+
+.PHONY:test_untar
+test_untar:test_untar_small_stream test_untar_small_store
+	@echo "$@ passed"
+
+.PHONY:test_untar_small_stream
+test_untar_small_stream:untar_zipped_mn.x
+	@./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@echo "$@ passed"
+
+.PHONY:test_untar_small_store
+test_untar_small_store:untar_zipped_mn.x
+	@./untar_zipped_mn.x store ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@./untar_zipped_mn.x store ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}

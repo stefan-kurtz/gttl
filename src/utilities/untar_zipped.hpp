@@ -94,8 +94,7 @@ class TarReader
       throw std::string("line \"") + line +
             std::string("\" does not consist of exactly 6 columns");
     }
-    if (std::sscanf(line_vector[2].data(),"%lu",&current_file_size) != 1 or
-        current_file_size < 0)
+    if (std::sscanf(line_vector[2].data(),"%zu",&current_file_size) != 1)
     {
       throw std::string("cannot extract byte number from \"") +
             line_vector[2] + std::string("\"");
