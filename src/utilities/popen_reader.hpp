@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <cassert>
 
 class PopenReader
 {
@@ -18,9 +19,11 @@ class PopenReader
     : stdout_ptr(nullptr)
     , stderr_ptr(nullptr)
   {
+    bool pipe_error = false;
     int stdout_tab[2], stderr_tab[2];
-    pipe(stdout_tab);
-    pipe(stderr_tab);
+    pipe_error = static_cast<bool>(pipe(stdout_tab));
+    pipe_error = pipe_error || static_cast<bool>(pipe(stderr_tab));
+    assert(pipe_error == false);
     const pid_t pid = fork();
     if (pid == static_cast<pid_t>(0))
     {
