@@ -9,3 +9,6 @@ Note that Windows users will need to install ZLib as an additional dependency, e
 ```
 vcpkg install zlib
 ```
+With a `vcpkg` instance in `C:\vcpkg`.
+Windows users will also need to set the environment variables `CXX="clang++"` and
+`CPLUS_INCLUDE_PATH="C:\vcpkg\packages\zlib_x64-windows\include\"`.
