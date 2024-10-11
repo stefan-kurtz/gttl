@@ -3,6 +3,7 @@
 #ifdef _WIN32
   #define NOMINMAX
   #include <io.h>
+  #include "utilities/windows_fork.hpp"
 #else
   #include <unistd.h>
 #endif
@@ -25,13 +26,21 @@ class PopenReader
     , stderr_ptr(nullptr)
   {
     int stdout_tab[2], stderr_tab[2];
+#ifdef _WIN32
+    int pipe_error = _pipe(stdout_tab, 4096UL * 1024 * 1024, 0);
+#else
     int pipe_error = pipe(stdout_tab);
+#endif
     if (pipe_error != 0)
     {
       fprintf(stderr,"failed to open stdout-pipe\n");
       exit(EXIT_FAILURE);
     }
+#ifdef _WIN32
+    pipe_error = _pipe(stderr_tab, 4096UL * 1024 * 1024, 0);
+#else
     pipe_error = pipe(stderr_tab);
+#endif
     if (pipe_error != 0)
     {
       fprintf(stderr,"failed to open stderr-pipe\n");
@@ -40,11 +49,19 @@ class PopenReader
     const pid_t pid = fork();
     if (pid == static_cast<pid_t>(0))
     {
+#ifdef _WIN32
+      dup2(stdout_tab[1], _fileno(stdout));
+#else
       dup2(stdout_tab[1], STDOUT_FILENO);
+#endif
       close(stdout_tab[0]);
       close(stdout_tab[1]);
 
+#ifdef _WIN32
+      dup2(stderr_tab[1], _fileno(stderr));
+#else
       dup2(stderr_tab[1], STDERR_FILENO);
+#endif
       close(stderr_tab[0]);
       close(stderr_tab[1]);
 
