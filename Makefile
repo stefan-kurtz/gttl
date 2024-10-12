@@ -1,5 +1,8 @@
+TOOL_DIRS=$(sort $(dir $(wildcard tools/*/)))
+
 all:
 	@make -C testsuite test
+	$(foreach tool,$(TOOL_DIRS), @(make -C $(tool) test))
 
 debug:
 	@make -C testsuite debug=yes test
