@@ -53,7 +53,7 @@ class SequencesSplit
   {
     if (gttl_has_suffix(inputfilename,std::string(".gz")))
     {
-      throw std::string("cannot process .gz file with multiple threads");
+      throw std::string("cannot process .gz");
     }
     assert(num_parts > 0 && mapped_file.size() > 0);
     if (num_parts > mapped_file.size())

@@ -142,6 +142,6 @@ tags:
 .PHONY:clean
 clean:
 	@${RM} -r *.[oxd] *.x.dSYM/ gqf/*.[oxd]
-	@${RM} -r out TMP*
+	@${RM} -r out TMP* __pycache__
 
 -include ${wildcard *.d}
