@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <numeric>
+#include <string>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
