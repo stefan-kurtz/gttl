@@ -29,6 +29,7 @@
 #endif
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
+#include "utilities/has_suffix_or_prefix.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"
