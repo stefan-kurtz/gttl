@@ -53,6 +53,10 @@ EXECS=${subst .cpp,.x,${MAIN_SRC}}
 
 all:${EXECS}
 
+ifneq ($(OS),Windows_NT)
+test: test_untar
+endif
+
 test:test_alphabet \
      test_cycle_of_numbers \
      test_endian \
@@ -75,8 +79,7 @@ test:test_alphabet \
      test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
-     test_split_string \
-     test_untar
+     test_split_string
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
