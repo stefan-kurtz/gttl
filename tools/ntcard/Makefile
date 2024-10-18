@@ -5,7 +5,14 @@ GTTL=../..
 CPPFLAGS=-I ${GTTL}/src
 CXXFLAGS=-std=c++17
 LDFLAGS=-g
-LDLIBS=-lm -lz -lpthread -lstdc++
+
+ifeq ($(OS),Windows_NT)
+	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
+	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
+else
+	LDLIBS+=-lm -lz -lpthread -lstdc++
+endif
+
 
 ifneq ($(debug),yes)
   CFLAGS+=-DNDEBUG
