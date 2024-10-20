@@ -19,4 +19,6 @@
 *.swp
 
 tags
+compile_commands.json
+.cache/
 __pycache__
