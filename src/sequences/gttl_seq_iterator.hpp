@@ -170,6 +170,10 @@ class GttlSeqIterator
       gttl_li.reset();
       return Iterator(gttl_li,false);
     }
+    void reset(void)
+    {
+      gttl_li.reset();
+    }
     Iterator end()
     {
       return Iterator(gttl_li,true);
