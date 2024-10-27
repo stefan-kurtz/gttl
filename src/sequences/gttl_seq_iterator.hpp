@@ -136,6 +136,7 @@ class GttlSeqIterator
   private:
     GttlLineIterator<buf_size> gttl_li;
   public:
+    static constexpr bool is_fastq_iterator = false;
     GttlSeqIterator(GttlFpType _in_fp) :
         gttl_li(GttlLineIterator<buf_size>(_in_fp))
     {

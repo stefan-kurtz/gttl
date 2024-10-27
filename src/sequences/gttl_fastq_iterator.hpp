@@ -107,6 +107,7 @@ class GttlFastQIterator
   private:
     LineIterator &line_iterator;
   public:
+    static constexpr bool is_fastq_iterator = true;
     GttlFastQIterator(LineIterator &_line_iterator)
       : line_iterator(_line_iterator)
       {}
