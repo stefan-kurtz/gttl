@@ -15,6 +15,10 @@ ifeq ($(OS),Windows_NT)
 	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
 else
 	LDLIBS+=-lm -lz -lpthread -lstdc++
+  SHELL=/bin/bash
+  ifeq ($(SYSTEM),Darwin)
+    SHELL=/opt/local/bin/bash
+  endif
 endif
 
 ifeq ($(prof),yes)
