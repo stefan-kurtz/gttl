@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     if (len_parts != 0)
     {
       split_into_parts_length(fasta_it, output_basename, len_parts,
-                              result["compresssion_level"].as<size_t>());
+                              result["compression_level"].as<size_t>());
       return EXIT_SUCCESS;
     }
     if (num_sequences != 0)
