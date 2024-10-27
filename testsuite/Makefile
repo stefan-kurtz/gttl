@@ -16,9 +16,6 @@ ifeq ($(OS),Windows_NT)
 else
 	LDLIBS+=-lm -lz -lpthread -lstdc++
   SHELL=/bin/bash
-  ifeq ($(SYSTEM),Darwin)
-    SHELL=/opt/local/bin/bash
-  endif
 endif
 
 ifeq ($(prof),yes)
