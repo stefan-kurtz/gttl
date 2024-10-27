@@ -21,6 +21,7 @@ class MultiseqOptions
        zipped_option,
        rankdist_option,
        short_header_option,
+       sorted_by_header_option,
        statistics_option;
   size_t sample_size;
   unsigned int seed;
@@ -34,6 +35,7 @@ class MultiseqOptions
    , zipped_option(false)
    , rankdist_option(false)
    , short_header_option(false)
+   , sorted_by_header_option(false)
    , statistics_option(false)
    , sample_size(0)
    , seed(0)
@@ -68,6 +70,11 @@ class MultiseqOptions
         cxxopts::value<bool>(statistics_option)->default_value("false"))
        ("s,short_header", "show header up to and excluding the first blank",
         cxxopts::value<bool>(short_header_option)->default_value("false"))
+       ("sorted_by_header", "output sequences lexicographically sorted by "
+                            "the header; if option -s/--short_header is used, "
+                            "then only the short header determines the order; "
+                            "option requires to use option -w/--width",
+        cxxopts::value<bool>(sorted_by_header_option)->default_value("false"))
        ("w,width", "output headers and sequences; "
                    "width specifies the linewidth of the"
                    "sequence output; 0 means to output "
@@ -98,6 +105,11 @@ class MultiseqOptions
         throw std::invalid_argument("option -z/--zipped requires exactly "
                                     "two files");
       }
+      if (sorted_by_header_option and width_arg == -1)
+      {
+        throw std::invalid_argument("option --sorted_by_header requires to "
+                                    "use option -w/--width");
+      }
     }
     catch (const cxxopts::OptionException &e)
     {
@@ -124,6 +136,10 @@ class MultiseqOptions
   bool short_header_option_is_set(void) const noexcept
   {
     return short_header_option;
+  }
+  bool sorted_by_header_option_is_set(void) const noexcept
+  {
+    return sorted_by_header_option;
   }
   bool statistics_option_is_set(void) const noexcept
   {
@@ -235,8 +251,16 @@ int main(int argc, char *argv[])
       }
     } else
     {
-      multiseq->show(static_cast<size_t>(options.width_option_get()),
-                     options.short_header_option_is_set());
+      if (options.sorted_by_header_option_is_set())
+      {
+        multiseq->show_sorted_by_header(
+                    static_cast<size_t>(options.width_option_get()),
+                    options.short_header_option_is_set());
+      } else
+      {
+        multiseq->show(static_cast<size_t>(options.width_option_get()),
+                       options.short_header_option_is_set());
+      }
     }
   }
   if (options.statistics_option_is_set())

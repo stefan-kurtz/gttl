@@ -470,10 +470,9 @@ class GttlMultiseq
     }
     return total;
   }
-  void show_single_sequence(size_t width, bool short_header, size_t seqnum)
-       const noexcept
+  std::pair<const char *,size_t> header_ptr_with_length(size_t seqnum,
+                                                        bool short_header) const
   {
-    printf(">");
     const std::string_view header = header_get(seqnum);
     size_t header_offset, header_len;
     if (short_header)
@@ -484,7 +483,17 @@ class GttlMultiseq
       header_offset = 0;
       header_len = header.size();
     }
-    std::fwrite(header.data() + header_offset, sizeof (char),header_len,stdout);
+    return std::make_pair(header.data() + header_offset,header_len);
+  }
+  void show_single_sequence(size_t width, bool short_header, size_t seqnum)
+       const noexcept
+  {
+    printf(">");
+    const char *header_ptr;
+    size_t header_len;
+    std::tie(header_ptr,header_len)
+      = header_ptr_with_length(seqnum,short_header);
+    std::fwrite(header_ptr,sizeof (char),header_len,stdout);
     printf("\n");
     const char *currentseq = this->sequence_ptr_get(seqnum);
     const size_t currentlength = this->sequence_length_get(seqnum);
@@ -514,12 +523,11 @@ class GttlMultiseq
   void show(size_t width, bool short_header) const noexcept
   {
     assert(concatenated_sequences.size() > 0);
-    size_t seqnum;
 #ifndef NDEBUG
     bool found_maximum_seq_length = false;
     bool found_minimum_seq_length = false;
 #endif
-    for (seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       show_single_sequence(width,short_header,seqnum);
 #ifndef NDEBUG
@@ -538,6 +546,39 @@ class GttlMultiseq
     }
     assert(found_minimum_seq_length);
     assert(found_maximum_seq_length);
+  }
+  void show_sorted_by_header(size_t width, bool short_header) const
+  {
+    assert(concatenated_sequences.size() > 0);
+    std::vector<std::pair<std::string,size_t>> header_with_seqnum;
+    header_with_seqnum.reserve(sequences_number_get());
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      const char *header_ptr;
+      size_t header_len;
+      std::tie(header_ptr,header_len)
+        = header_ptr_with_length(seqnum,short_header);
+      std::string header_substring(header_ptr,header_len);
+      header_with_seqnum.push_back(std::make_pair(header_substring,seqnum));
+    }
+    std::sort(header_with_seqnum.begin(),header_with_seqnum.end());
+    for (size_t idx = 1; idx < header_with_seqnum.size(); idx++)
+    {
+      assert(std::get<0>(header_with_seqnum[idx-1]) <=
+             std::get<0>(header_with_seqnum[idx]));
+      if (std::get<0>(header_with_seqnum[idx-1]) ==
+          std::get<0>(header_with_seqnum[idx]))
+      {
+        std::string msg(
+          std::string("sequence set contains a duplicated header ") +
+          std::get<0>(header_with_seqnum[idx]));
+        throw msg;
+      }
+    }
+    for (auto &&hws : header_with_seqnum)
+    {
+      show_single_sequence(width,short_header,std::get<1>(hws));
+    }
   }
 
   /* Overload access operator[] */
