@@ -317,16 +317,16 @@ test_split_files:test_split_fastq_files test_split_fasta_files
 test_split_fasta_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
-	@cat ${TMPFILE}*.fasta | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
-	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@zcat ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@./split_files_mn.x -l 120 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
-	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@zcat ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@./split_files_mn.x -s 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
-	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@zcat ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@echo "Congratulations. $@ passed"
 
@@ -335,16 +335,16 @@ test_split_fasta_files:split_files_mn.x
 test_split_fastq_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
-	@cat ${TMPFILE}*.fastq | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@cat ${TMPFILE}*.fastq | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
-	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@zcat ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@./split_files_mn.x -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
-	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@zcat ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@./split_files_mn.x -s 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
-	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@zcat ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@echo "Congratulations. $@ passed"
 
