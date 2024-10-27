@@ -3,7 +3,16 @@
 
 #include <cstddef>
 #include <sstream>
+#include <type_traits>
+#include "sequences/gttl_fastq_iterator.hpp"
 #include "utilities/write_output_file.hpp"
+
+template <class T>
+struct is_fastq_iterator : std::false_type {};
+
+template <class T>
+struct is_fastq_iterator<GttlFastQIterator<T>> : std::true_type {};
+
 
 /*
 ** Split a FastQIterator or SeqIterator into fragments of a given length (of
@@ -31,7 +40,7 @@ void split_into_parts_length(SequenceIterator &seq_it,
 
     s_out << header << "\n" << sequence << "\n";
 
-    if constexpr (seq_it.is_fastq_iterator)
+    if constexpr (is_fastq_iterator<SequenceIterator>::value)
     {
       const std::string_view &quality = si.quality_get();
       s_out << "+\n" << quality << "\n";
