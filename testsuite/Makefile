@@ -79,7 +79,8 @@ test:test_alphabet \
      test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
-     test_split_string
+     test_split_string \
+     test_split_files
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -307,6 +308,47 @@ test_split_string:split_string_mn.x
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
+.PHONY:test_split_files
+test_split_files:test_split_fastq_files test_split_fasta_files
+		@echo "Congratulations. $@ passed"
+
+# We check uncompressed, custom higher compression level and all 3 types of splitting
+.PHONY:test_split_fasta_files
+test_split_fasta_files:split_files_mn.x
+	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
+	@cat ${TMPFILE}*.fasta | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@${RM} ${TMPFILE}*.fasta
+	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
+	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@${RM} ${TMPFILE}*.fasta.gz
+	@./split_files_mn.x -l 120 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
+	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@${RM} ${TMPFILE}*.fasta.gz
+	@./split_files_mn.x -s 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
+	@zcat ${TMPFILE}*.fasta.gz | diff -I "^+.*$$" - <(zcat ../testdata/varlen_paired_both.fasta.gz)
+	@${RM} ${TMPFILE}*.fasta.gz
+	@echo "Congratulations. $@ passed"
+
+
+.PHONY:test_split_fastq_files
+test_split_fastq_files:split_files_mn.x
+	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
+	@cat ${TMPFILE}*.fastq | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@${RM} ${TMPFILE}*.fastq
+	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
+	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@${RM} ${TMPFILE}*.fastq.gz
+	@./split_files_mn.x -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@${RM} ${TMPFILE}*.fastq.gz
+	@./split_files_mn.x -s 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@zcat ${TMPFILE}*.fastq.gz | diff -I "^+.*$$" - <(zcat ../testdata/SRR19536726_1_1000.fastq.gz)
+	@${RM} ${TMPFILE}*.fastq.gz
+	@echo "Congratulations. $@ passed"
+
+
 .PHONY:test_untar
 test_untar:test_untar_small_stream test_untar_small_store
 	@echo "$@ passed"
@@ -344,6 +386,6 @@ code_check:
 
 .PHONY:clean
 clean:
-	${RM} -r *.[odx] *.x.dSYM/ __pycache__ tmp.* TMP.*
+	${RM} -r *.[odx] *.x.dSYM/ __pycache__ tmp.* TMP.* *.fast[aq] *.fast[aq].gz
 
 -include ${wildcard *.d}
