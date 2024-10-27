@@ -86,7 +86,7 @@ void split_into_num_sequences(SequenceIterator &seq_it,
 
     s_out << header << "\n" << sequence << "\n";
 
-    if constexpr (seq_it.is_fastq_iterator)
+    if constexpr (is_fastq_iterator<SequenceIterator>::value)
     {
       const std::string_view &quality = si.quality_get();
       s_out << "+\n" << quality << "\n";
