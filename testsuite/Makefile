@@ -317,6 +317,7 @@ test_split_files:test_split_fastq_files test_split_fasta_files
 .PHONY:test_split_fasta_files
 test_split_fasta_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@${RM} ${TMPFILE}
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
 	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
@@ -335,6 +336,7 @@ test_split_fasta_files:split_files_mn.x
 .PHONY:test_split_fastq_files
 test_split_fastq_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@${RM} ${TMPFILE}
 	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
 	@cat ${TMPFILE}*.fastq | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq
