@@ -10,10 +10,12 @@
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 
-static bool has_suffix_with_extension(std::string &to_check,
-                                      std::string &suffix, std::string &extension)
+static bool has_suffix_with_extension(const std::string &to_check,
+                                      const std::string &suffix,
+                                      const std::string &extension)
 {
-  return gttl_has_suffix(to_check, suffix) || gttl_has_suffix(to_check, suffix + extension);
+  return gttl_has_suffix(to_check, suffix) or
+         gttl_has_suffix(to_check, suffix + extension);
 }
 
 int main(int argc, char *argv[])
