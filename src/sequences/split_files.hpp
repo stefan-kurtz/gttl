@@ -13,7 +13,6 @@ struct is_fastq_iterator : std::false_type {};
 template <class T>
 struct is_fastq_iterator<GttlFastQIterator<T>> : std::true_type {};
 
-
 /*
 ** Split a FastQIterator or SeqIterator into fragments of a given length (of
 ** symbols).
@@ -48,9 +47,10 @@ void split_into_parts_length(SequenceIterator &seq_it,
 
     length_iterated += sequence.size();
 
-    if (length_iterated > part_length)
+    if (length_iterated >= part_length)
     {
-      std::string fname_out = base_name + std::to_string(part_number) +
+      std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
+                              std::to_string(part_number) +
                               (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
       write_to_output_file(fname_out, s_out.str(), compression_level);
 
@@ -61,12 +61,12 @@ void split_into_parts_length(SequenceIterator &seq_it,
   }
   if (!s_out.str().empty())
   {
-    std::string fname_out = base_name + std::to_string(part_number) +
+    std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
+                            std::to_string(part_number) +
                             (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
     write_to_output_file(fname_out, s_out.str(), compression_level);
   }
 }
-
 
 /*
 ** Split a FastQIterator or SeqIterator into fragments of a given number of
@@ -96,7 +96,8 @@ void split_into_num_sequences(SequenceIterator &seq_it,
 
     if (seqs_iterated >= seqs_per_file)
     {
-      std::string fname_out = base_name + std::to_string(part_number) +
+      std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
+                              std::to_string(part_number) +
                               (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
       write_to_output_file(fname_out, s_out.str(), compression_level);
 
@@ -107,12 +108,12 @@ void split_into_num_sequences(SequenceIterator &seq_it,
   }
   if (!s_out.str().empty())
   {
-    std::string fname_out = base_name + std::to_string(part_number) +
+    std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
+                            std::to_string(part_number) +
                             (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
     write_to_output_file(fname_out, s_out.str(), compression_level);
   }
 }
-
 
 /*
 ** Split a FastQIterator or SeqIterator into a given number of fragments.
