@@ -10,6 +10,12 @@
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 
+static bool has_suffix_with_extension(std::string &to_check,
+                                      std::string &suffix, std::string &extension)
+{
+  return gttl_has_suffix(to_check, suffix) || gttl_has_suffix(to_check, suffix + extension);
+}
+
 int main(int argc, char *argv[])
 {
   cxxopts::Options options("split_gzip_mn.x",
@@ -100,8 +106,14 @@ int main(int argc, char *argv[])
 
   constexpr const int BUF_SIZE = 1 << 14;
 
-  if (gttl_has_suffix(ifilename, ".fasta") ||
-      gttl_has_suffix(ifilename, ".fasta.gz"))
+  if (has_suffix_with_extension(ifilename, ".fasta", ".gz") ||
+      has_suffix_with_extension(ifilename, ".fas", ".gz") ||
+      has_suffix_with_extension(ifilename, ".fa", ".gz") ||
+      has_suffix_with_extension(ifilename, ".fna", ".gz") ||
+      has_suffix_with_extension(ifilename, ".ffn", ".gz") ||
+      has_suffix_with_extension(ifilename, ".faa", ".gz") ||
+      has_suffix_with_extension(ifilename, ".mpfa", ".gz") ||
+      has_suffix_with_extension(ifilename, ".frn", ".gz"))
   {
     GttlSeqIterator<BUF_SIZE> fasta_it(ifilename.c_str());
     if (num_parts != 0)
@@ -122,8 +134,8 @@ int main(int argc, char *argv[])
                                result["compression_level"].as<size_t>());
       return EXIT_SUCCESS;
     }
-  } else if (gttl_has_suffix(ifilename, ".fastq") ||
-             gttl_has_suffix(ifilename, ".fastq.gz"))
+  } else if (has_suffix_with_extension(ifilename, ".fastq", ".gz") ||
+             has_suffix_with_extension(ifilename, ".fq", ".gz"))
   {
     GttlLineIterator<BUF_SIZE> line_it(ifilename.c_str());
     GttlFastQIterator<GttlLineIterator<BUF_SIZE>> fastq_it(line_it);
