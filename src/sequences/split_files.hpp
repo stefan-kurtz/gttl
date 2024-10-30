@@ -2,6 +2,7 @@
 #define SPLIT_FILES_HPP
 
 #include <cstddef>
+#include <cmath>
 #include <sstream>
 #include <type_traits>
 #include "sequences/gttl_fastq_iterator.hpp"
@@ -28,7 +29,8 @@ template <class SequenceIterator>
 void split_into_parts_length(SequenceIterator &seq_it,
                              const std::string &base_name,
                              const size_t &part_length,
-                             const size_t &compression_level)
+                             const size_t &compression_level,
+                             const size_t padding_length = 2)
 {
   size_t part_number = 1, length_iterated = 0;
   std::ostringstream s_out;
@@ -49,9 +51,12 @@ void split_into_parts_length(SequenceIterator &seq_it,
 
     if (length_iterated >= part_length)
     {
-      std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
-                              std::to_string(part_number) +
-                              (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
+      std::string fname_out = base_name;
+      for(size_t i = 1; i <= padding_length; i++)
+      {
+        fname_out += (part_number < std::pow(10, i) ? "0" : "");
+      }
+      fname_out += std::to_string(part_number) + (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
       write_to_output_file(fname_out, s_out.str(), compression_level);
 
       s_out.str("");
@@ -134,7 +139,7 @@ void split_into_num_files(SequenceIterator &seq_it,
   const size_t part_len =
       total_length / part_num + (size_t) (total_length % part_num != 0);
   seq_it.reset();
-  split_into_parts_length(seq_it, base_name, part_len, compression_level);
+  split_into_parts_length(seq_it, base_name, part_len, compression_level, (size_t) (std::log10(part_num)));
 }
 
 #endif // SPLIT_FILES_HPP
