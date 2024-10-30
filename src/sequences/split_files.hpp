@@ -56,7 +56,8 @@ void split_into_parts_length(SequenceIterator &seq_it,
       {
         fname_out += (part_number < std::pow(10, i) ? "0" : "");
       }
-      fname_out += std::to_string(part_number) + (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
+      fname_out += std::to_string(part_number) +
+          (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
       write_to_output_file(fname_out, s_out.str(), compression_level);
 
       s_out.str("");
@@ -139,7 +140,8 @@ void split_into_num_files(SequenceIterator &seq_it,
   const size_t part_len =
       total_length / part_num + (size_t) (total_length % part_num != 0);
   seq_it.reset();
-  split_into_parts_length(seq_it, base_name, part_len, compression_level, (size_t) (std::log10(part_num)));
+  split_into_parts_length(seq_it, base_name, part_len, compression_level,
+                          (size_t) (std::log10(part_num)));
 }
 
 #endif // SPLIT_FILES_HPP
