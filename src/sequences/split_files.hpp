@@ -67,9 +67,13 @@ void split_into_parts_length(SequenceIterator &seq_it,
   }
   if (!s_out.str().empty())
   {
-    std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
-                            std::to_string(part_number) +
-                            (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
+    std::string fname_out = base_name;
+    for(size_t i = 1; i <= padding_length; i++)
+    {
+      fname_out += (part_number < std::pow(10, i) ? "0" : "");
+    }
+    fname_out += std::to_string(part_number) +
+                (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
     write_to_output_file(fname_out, s_out.str(), compression_level);
   }
 }
