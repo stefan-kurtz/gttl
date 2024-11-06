@@ -1,0 +1,44 @@
+# kmersize=8, size(bittable) = 8192 bytes
+# open "../../testdata/vaccg.fna"
+# count=47440, allmers=65536
+# kmersize=4, size(bittable) = 32 bytes
+# open "../../testdata/vaccg.fna"
+# count=256, allmers=256
+# kmersize=6, size(bittable) = 512 bytes
+# open "../../testdata/vaccg.fna"
+# count=4080, allmers=4096
+# kmersize=5, size(bittable) = 128 bytes
+# open "../../testdata/vaccg.fna"
+# count=1024, allmers=1024
+>unword of minimal length 6
+agggcg
+>unword of minimal length 6
+aggggc
+>unword of minimal length 6
+cacccc
+>unword of minimal length 6
+cagggc
+>unword of minimal length 6
+cccccc
+>unword of minimal length 6
+ccgagc
+>unword of minimal length 6
+ccgccc
+>unword of minimal length 6
+cggggc
+>unword of minimal length 6
+ggcccg
+>unword of minimal length 6
+ggccct
+>unword of minimal length 6
+ggcggg
+>unword of minimal length 6
+gggccc
+>unword of minimal length 6
+gggccg
+>unword of minimal length 6
+gggcct
+>unword of minimal length 6
+ggggcc
+>unword of minimal length 6
+gggggc

@@ -1,0 +1,34 @@
+# kmersize=8, size(bittable) = 8192 bytes
+# open "../../testdata/at1MB.fna"
+# count=63507, allmers=65536
+# kmersize=4, size(bittable) = 32 bytes
+# open "../../testdata/at1MB.fna"
+# count=256, allmers=256
+# kmersize=6, size(bittable) = 512 bytes
+# open "../../testdata/at1MB.fna"
+# count=4096, allmers=4096
+# kmersize=7, size(bittable) = 2048 bytes
+# open "../../testdata/at1MB.fna"
+# count=16373, allmers=16384
+>unword of minimal length 7
+acgcgtg
+>unword of minimal length 7
+agcgcgc
+>unword of minimal length 7
+cgatacg
+>unword of minimal length 7
+cgcacgc
+>unword of minimal length 7
+cgcacta
+>unword of minimal length 7
+cgcgcgc
+>unword of minimal length 7
+cgcgcta
+>unword of minimal length 7
+gcgcgga
+>unword of minimal length 7
+gcgctag
+>unword of minimal length 7
+tagcgcg
+>unword of minimal length 7
+tcgcgcg

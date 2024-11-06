@@ -2,7 +2,8 @@ TOOL_DIRS=$(sort $(dir $(wildcard tools/*/)))
 
 all:
 	@make -C testsuite test
-	$(foreach tool,$(TOOL_DIRS), @(make -C $(tool) test))
+	@make -C tools/ntcard test
+	@make -C tools/unwords test
 
 debug:
 	@make -C testsuite debug=yes test
@@ -10,6 +11,7 @@ debug:
 .PHONY:clean	
 clean:
 	@make -C testsuite clean
+	@make -C tools/ntcard clean
 	@make -C tools/ntcard clean
 
 .PHONY:tags

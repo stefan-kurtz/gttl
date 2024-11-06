@@ -1,0 +1,94 @@
+# kmersize=8, size(bittable) = 8192 bytes
+# open "../../testdata/ychrIII.fna"
+# count=59760, allmers=65536
+# kmersize=4, size(bittable) = 32 bytes
+# open "../../testdata/ychrIII.fna"
+# count=256, allmers=256
+# kmersize=6, size(bittable) = 512 bytes
+# open "../../testdata/ychrIII.fna"
+# count=4096, allmers=4096
+# kmersize=7, size(bittable) = 2048 bytes
+# open "../../testdata/ychrIII.fna"
+# count=16343, allmers=16384
+>unword of minimal length 7
+acgcgcg
+>unword of minimal length 7
+acggggc
+>unword of minimal length 7
+agcggcc
+>unword of minimal length 7
+cacgcga
+>unword of minimal length 7
+cactcgg
+>unword of minimal length 7
+ccccgac
+>unword of minimal length 7
+ccccgcg
+>unword of minimal length 7
+ccccgta
+>unword of minimal length 7
+ccgaggc
+>unword of minimal length 7
+ccgcagg
+>unword of minimal length 7
+ccgcgta
+>unword of minimal length 7
+cctaggc
+>unword of minimal length 7
+cgccccc
+>unword of minimal length 7
+cgccccg
+>unword of minimal length 7
+cgcggct
+>unword of minimal length 7
+cgcgggg
+>unword of minimal length 7
+cgcgtag
+>unword of minimal length 7
+cggacta
+>unword of minimal length 7
+cggcccg
+>unword of minimal length 7
+cgggccc
+>unword of minimal length 7
+cgggccg
+>unword of minimal length 7
+cggggcg
+>unword of minimal length 7
+cgggggt
+>unword of minimal length 7
+cggtccg
+>unword of minimal length 7
+cgtcccg
+>unword of minimal length 7
+cgtgtcg
+>unword of minimal length 7
+ctcgcgg
+>unword of minimal length 7
+ctcgggg
+>unword of minimal length 7
+gcccggg
+>unword of minimal length 7
+gccggac
+>unword of minimal length 7
+gcgccgg
+>unword of minimal length 7
+gcgcgtg
+>unword of minimal length 7
+gcggccc
+>unword of minimal length 7
+ggaccgc
+>unword of minimal length 7
+ggacggg
+>unword of minimal length 7
+ggcggtc
+>unword of minimal length 7
+ggggcct
+>unword of minimal length 7
+gtcgggc
+>unword of minimal length 7
+tagcgcg
+>unword of minimal length 7
+tcccggg
+>unword of minimal length 7
+tccgagg
