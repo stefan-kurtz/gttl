@@ -17,7 +17,7 @@ IRC_OPTION?=--ignore_rc
 PYTHONPATH=../../scripts
 
 ifeq ($(OS),Windows_NT)
-	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTD_NO_WARNINGS
+	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
 	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
 else
 	LDLIBS+=-lm -lz -lpthread -lstdc++
