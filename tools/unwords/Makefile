@@ -146,7 +146,7 @@ compare_unwords_vac:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
 	@./unwords_mn.x ${IRC_OPTION} ${VAC} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
-	@diff -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_vac.txt
+	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_vac.txt
 	@${RM} ${TMPFILE1}
 	@echo "Congratulations. $@ passed"
 
@@ -156,7 +156,7 @@ compare_unwords_y3:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
 	@./unwords_mn.x ${IRC_OPTION} ${Y3} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
-	@diff -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_y3.txt
+	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_y3.txt
 	@${RM} ${TMPFILE1}
 	@echo "Congratulations. $@ passed"
 
@@ -166,7 +166,7 @@ compare_unwords_at:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
 	@./unwords_mn.x ${IRC_OPTION} ${AT} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
-	@diff -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_at.txt
+	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_at.txt
 	@${RM} ${TMPFILE1}
 	@echo "Congratulations. $@ passed"
 
