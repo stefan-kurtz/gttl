@@ -4,6 +4,7 @@
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <string>
 
 // Source from https://bitbucket.org/marco/samples.git queue.cpp
 

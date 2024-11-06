@@ -3,9 +3,11 @@
 
 #include <cstddef>
 #include <cmath>
+#include <functional>
 #include <sstream>
 #include <type_traits>
 #include "sequences/gttl_fastq_iterator.hpp"
+#include "threading/thread_pool_unknown_tasks.hpp"
 #include "utilities/write_output_file.hpp"
 
 template <class T>
@@ -30,10 +32,14 @@ void split_into_parts_length(SequenceIterator &seq_it,
                              const std::string &base_name,
                              const size_t &part_length,
                              const size_t &compression_level,
+                             const size_t n_threads,
                              const size_t padding_length = 2)
 {
   size_t part_number = 1, length_iterated = 0;
   std::ostringstream s_out;
+  ThreadPoolUnknownTasks<std::function<void()>> tp =
+    ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
+
   for (auto &&si : seq_it)
   {
     const std::string_view &sequence = si.sequence_get();
@@ -58,7 +64,14 @@ void split_into_parts_length(SequenceIterator &seq_it,
       }
       fname_out += std::to_string(part_number) +
           (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
-      write_to_output_file(fname_out, s_out.str(), compression_level);
+      if(n_threads == 1)
+      {
+        write_to_output_file(fname_out, s_out.str(), compression_level);
+      }else
+      {
+        tp.enqueue(std::bind(write_to_output_file, fname_out,s_out.str(),
+                             compression_level));
+      }
 
       s_out.str("");
       length_iterated = 0;
@@ -74,7 +87,13 @@ void split_into_parts_length(SequenceIterator &seq_it,
     }
     fname_out += std::to_string(part_number) +
                 (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
-    write_to_output_file(fname_out, s_out.str(), compression_level);
+    if(n_threads == 1)
+    {
+      write_to_output_file(fname_out, s_out.str(), compression_level);
+    }else{
+      tp.enqueue(std::bind(write_to_output_file, fname_out,s_out.str(),
+                           compression_level));
+    }
   }
 }
 
@@ -85,8 +104,11 @@ void split_into_parts_length(SequenceIterator &seq_it,
 template <class SequenceIterator>
 void split_into_num_sequences(SequenceIterator &seq_it,
                               const std::string &base_name,
-                              size_t seqs_per_file, size_t compression_level)
+                              size_t seqs_per_file, size_t compression_level,
+                              const size_t n_threads)
 {
+  ThreadPoolUnknownTasks<std::function<void()>> tp =
+    ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
   size_t part_number = 1, seqs_iterated = 0;
   std::ostringstream s_out;
   for (auto &&si : seq_it)
@@ -109,7 +131,13 @@ void split_into_num_sequences(SequenceIterator &seq_it,
       std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
                               std::to_string(part_number) +
                               (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
-      write_to_output_file(fname_out, s_out.str(), compression_level);
+      if(n_threads == 1)
+      {
+        write_to_output_file(fname_out, s_out.str(), compression_level);
+      }else{
+        tp.enqueue(std::bind(write_to_output_file, fname_out,s_out.str(),
+                             compression_level));
+      }
 
       s_out.str("");
       seqs_iterated = 0;
@@ -121,7 +149,14 @@ void split_into_num_sequences(SequenceIterator &seq_it,
     std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
                             std::to_string(part_number) +
                             (seq_it.is_fastq_iterator ? ".fastq" : ".fasta");
-    write_to_output_file(fname_out, s_out.str(), compression_level);
+    if(n_threads == 1)
+    {
+      write_to_output_file(fname_out, s_out.str(), compression_level);
+    }else
+    {
+      tp.enqueue(std::bind(write_to_output_file, fname_out,s_out.str(),
+                           compression_level));
+    }
   }
 }
 
@@ -134,7 +169,7 @@ void split_into_num_sequences(SequenceIterator &seq_it,
 template <class SequenceIterator>
 void split_into_num_files(SequenceIterator &seq_it,
                           const std::string &base_name, size_t part_num,
-                          size_t compression_level)
+                          size_t compression_level, const size_t n_threads)
 {
   size_t total_length = 0;
   for (auto &&si : seq_it)
@@ -145,7 +180,7 @@ void split_into_num_files(SequenceIterator &seq_it,
       total_length / part_num + (size_t) (total_length % part_num != 0);
   seq_it.reset();
   split_into_parts_length(seq_it, base_name, part_len, compression_level,
-                          (size_t) (std::log10(part_num)));
+                          n_threads, (size_t) (std::log10(part_num)));
 }
 
 #endif // SPLIT_FILES_HPP

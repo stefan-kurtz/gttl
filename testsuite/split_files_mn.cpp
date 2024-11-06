@@ -41,12 +41,18 @@ int main(int argc, char *argv[])
       "The output filenames (numbering and file-extensions will be added)",
       cxxopts::value<std::string>())(
       "c,compression_level", "The GZip compression level of the output files",
-      cxxopts::value<size_t>()->default_value("6"));
+      cxxopts::value<size_t>()->default_value("6"))(
+      "t,threads",
+      "The number of threads to run for GZip compression and file output",
+      cxxopts::value<size_t>()->default_value("1"));
 
   options.parse_positional({"file"});
   options.positional_help("<input file>");
 
   auto result = options.parse(argc, argv);
+
+  const size_t num_threads = result["threads"].as<size_t>();
+
 
   if (result.count("help"))
   {
@@ -121,19 +127,22 @@ int main(int argc, char *argv[])
     if (num_parts != 0)
     {
       split_into_num_files(fasta_it, output_basename, num_parts,
-                           result["compression_level"].as<size_t>());
+                           result["compression_level"].as<size_t>(),
+                           num_threads);
       return EXIT_SUCCESS;
     }
     if (len_parts != 0)
     {
       split_into_parts_length(fasta_it, output_basename, len_parts,
-                              result["compression_level"].as<size_t>());
+                              result["compression_level"].as<size_t>(),
+                              num_threads);
       return EXIT_SUCCESS;
     }
     if (num_sequences != 0)
     {
       split_into_num_sequences(fasta_it, output_basename, num_sequences,
-                               result["compression_level"].as<size_t>());
+                               result["compression_level"].as<size_t>(),
+                               num_threads);
       return EXIT_SUCCESS;
     }
   } else if (has_suffix_with_extension(ifilename, ".fastq", ".gz") ||
@@ -144,19 +153,22 @@ int main(int argc, char *argv[])
     if (num_parts != 0)
     {
       split_into_num_files(fastq_it, output_basename, num_parts,
-                           result["compression_level"].as<size_t>());
+                           result["compression_level"].as<size_t>(),
+                           num_threads);
       return EXIT_SUCCESS;
     }
     if (len_parts != 0)
     {
       split_into_parts_length(fastq_it, output_basename, len_parts,
-                              result["compression_level"].as<size_t>());
+                              result["compression_level"].as<size_t>(),
+                              num_threads);
       return EXIT_SUCCESS;
     }
     if (num_sequences != 0)
     {
       split_into_num_sequences(fastq_it, output_basename, num_sequences,
-                               result["compression_level"].as<size_t>());
+                               result["compression_level"].as<size_t>(),
+                               num_threads);
       return EXIT_SUCCESS;
     }
   }
