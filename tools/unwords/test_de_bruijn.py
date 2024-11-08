@@ -2,6 +2,7 @@
 
 import argparse
 import subprocess
+import sys
 
 def main():
     p = argparse.ArgumentParser(description='verify that unwords yields q+1 for a de Bruijn sequence')
@@ -13,6 +14,7 @@ def main():
     de_bruijn_result = subprocess.getoutput(f"./unwords_mn.x --ignore_rc {inputfile}")
     if f"# length of qgrams:\t{q+1}" in de_bruijn_result:
         exit(0)
+    print(de_bruijn_result, file=sys.stderr)
     raise ValueError(f"Length of unwords on de Bruijn sequence for q={q} is not {q+1}")
 
 
