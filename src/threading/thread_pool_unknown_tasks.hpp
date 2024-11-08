@@ -46,10 +46,7 @@ class ThreadPoolUnknownTasks
 
     ~ThreadPoolUnknownTasks()
     {
-      {
-        std::unique_lock<std::mutex> lock(queue_lock);
-        stop = true;
-      }
+      stop = true;
       tasks_changed.notify_all();
       for(auto& t : threads)
       {
