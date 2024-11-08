@@ -18,6 +18,10 @@
 # Editor temp files
 *.swp
 
+# Temporary files
+tmp.*
+TMP.*
+
 tags
 compile_commands.json
 .cache/
