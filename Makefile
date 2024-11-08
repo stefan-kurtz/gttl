@@ -12,7 +12,7 @@ debug:
 clean:
 	@make -C testsuite clean
 	@make -C tools/ntcard clean
-	@make -C tools/ntcard clean
+	@make -C tools/unwords clean
 
 .PHONY:tags
 tags:
