@@ -30,8 +30,8 @@ struct is_fastq_iterator<GttlFastQIterator<T>> : std::true_type {};
 template <class SequenceIterator>
 void split_into_parts_length(SequenceIterator &seq_it,
                              const std::string &base_name,
-                             const size_t &part_length,
-                             const size_t &compression_level,
+                             const size_t part_length,
+                             const size_t compression_level,
                              const size_t n_threads,
                              const size_t padding_length = 2)
 {

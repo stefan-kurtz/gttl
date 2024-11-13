@@ -3,7 +3,6 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include "threading/threadsafe_queue.hpp"
 
@@ -13,14 +12,14 @@ class ThreadPoolUnknownTasks
 {
   private:
     std::vector<std::thread> threads;
-    std::queue<FunctionType> tasks;
     ThreadsafeQueue<FunctionType> tsq;
     std::mutex queue_lock;
     std::condition_variable tasks_changed;
-    bool stop = false;
+    bool stop;
   public:
-    ThreadPoolUnknownTasks(const size_t num_threads =
-                           std::thread::hardware_concurrency())
+    ThreadPoolUnknownTasks(const size_t num_threads
+                             = std::thread::hardware_concurrency())
+      : stop(false)
     {
       for(size_t i = 0; i < num_threads; i++)
       {

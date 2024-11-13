@@ -89,7 +89,7 @@ check_deBruijn1:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "> de Bruijn sequence for q=1" > ${TMPFILE}
 	@${GTTL}/scripts/de_Bruijn.py -q 1 --dna >> ${TMPFILE}
-	@echo "AAA" >> ${TMPFILE}
+	@echo "A" >> ${TMPFILE}
 	@./test_de_bruijn.py -q 1 ${TMPFILE}
 	@${RM} ${TMPFILE}
 
