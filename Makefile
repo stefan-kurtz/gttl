@@ -1,5 +1,3 @@
-TOOL_DIRS=$(sort $(dir $(wildcard tools/*/)))
-
 all:
 	@make -C testsuite test
 	@make -C tools/ntcard test
@@ -17,6 +15,10 @@ clean:
 .PHONY:tags
 tags:
 	@./scripts/ctags.sh
+
+.PHONY:doc
+doc:
+	@make -C doc
 
 .PHONY:code_check
 code_check:

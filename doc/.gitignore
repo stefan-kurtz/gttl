@@ -1,0 +1,2 @@
+# Ignore graphviz include-graph files
+GTTL.gv*
