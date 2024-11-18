@@ -81,7 +81,8 @@ test:test_alphabet \
      test_guess_if_protein_seq \
      test_fs_prio_store \
      test_split_string \
-     test_split_files
+     test_split_files \
+     test_multiseq_factory
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
@@ -366,6 +367,17 @@ test_split_fastq_files:split_files_mn.x
 	@${RM} ${TMPFILE}*.fastq.gz
 	@echo "Congratulations. $@ passed"
 
+.PHONY:test_multiseq_factory
+test_multiseq_factory:multiseq_factory_mn.x
+	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@echo "# number of parts	20" > ${TMPFILE}
+	@./multiseq_factory_mn.x 100 ../testdata/at1MB.fna | diff - ${TMPFILE}
+	@echo "# number of parts	9" > ${TMPFILE}
+	@./multiseq_factory_mn.x 20 ../testdata/sw175.fna | diff - ${TMPFILE}
+	@echo "# number of parts	4" > ${TMPFILE}
+	@./multiseq_factory_mn.x 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff - ${TMPFILE}
+	@${RM} ${TMPFILE}
+	@echo "Congratulations. $@ passed"
 
 .PHONY:test_untar
 test_untar:test_untar_small_stream test_untar_small_store

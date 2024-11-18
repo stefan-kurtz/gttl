@@ -191,13 +191,14 @@ int main(int argc, char *argv[])
                                   options.rankdist_option_is_set() ||
                                   options.short_header_option_is_set())
                                   ? true : false;
+    const uint8_t padding_char = UINT8_MAX;
     if (options.zipped_option_is_set() && store_sequences)
     {
       multiseq = new GttlMultiseq(inputfiles[0],inputfiles[1],
-                                  store_sequences,UINT8_MAX);
+                                  store_sequences,padding_char);
     } else
     {
-      multiseq = new GttlMultiseq(inputfiles,store_sequences,UINT8_MAX);
+      multiseq = new GttlMultiseq(inputfiles,store_sequences,padding_char);
     }
   }
   catch (std::string &msg)
