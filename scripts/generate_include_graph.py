@@ -21,7 +21,7 @@ def construct_edges():
                 "grep",
                 "-RiIs",
                 "--exclude-dir=.git",
-                "-P",
+                "-E",
                 '#include\\W+\\"',
                 "../"
             ],
