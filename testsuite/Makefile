@@ -23,6 +23,10 @@ ifeq ($(prof),yes)
   LDFLAGS += -pg
 endif
 
+ifeq ($(valgrind),yes)
+  VALGRIND=../scripts/valgrind.sh
+endif
+
 ifeq ($(debug),yes)
   CFLAGS += -g
   LDFLAGS += -g
@@ -86,7 +90,7 @@ test:test_alphabet \
 	@echo "Congratulations. $@ passed."
 
 test_endian:./endian.x
-	@./endian.x
+	@${VALGRIND} ./endian.x
 	@echo "Congratulations. $@ passed."
 
 test_bitpacker:./bitpacker_main.x
@@ -95,17 +99,17 @@ test_bitpacker:./bitpacker_main.x
 
 test_non_wc_ranges:./count_non_wc_ranges.x
 	@./check_err.py --fail_for_protein_sequence ./count_non_wc_ranges.x
-	@./count_non_wc_ranges.x ${AT1MB} | diff --strip-trailing-cr - ../testdata/at1MB_non_wc.tsv
+	@${VALGRIND} ./count_non_wc_ranges.x ${AT1MB} | diff --strip-trailing-cr - ../testdata/at1MB_non_wc.tsv
 	@echo "Congratulations. $@ passed."
 
 test_alphabet:./alphabet.x
-	@./alphabet.x | diff --strip-trailing-cr - ../testdata/DNA_AA.tsv
+	@${VALGRIND} ./alphabet.x | diff --strip-trailing-cr - ../testdata/DNA_AA.tsv
 	@echo "Congratulations. $@ passed."
 
 test_cycle_of_numbers:./cycle_of_numbers_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@./cycle_of_numbers.py > ${TMPFILE}
-	@./cycle_of_numbers_mn.x | sort -nu | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./cycle_of_numbers_mn.x | sort -nu | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
@@ -117,21 +121,21 @@ test_char_range:char_range_mn.x
 
 test_nthash:enum_nthash.x test_nthash_wc_palindrome
 	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
-	@./enum_nthash.x --bytes_unit ${AT1MB} | \
+	@${VALGRIND} ./enum_nthash.x --bytes_unit ${AT1MB} | \
            grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/at1MB_nthash.tsv
-	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
            grep -v '^# TIME' | grep -v '_rc' | \
            diff --strip-trailing-cr - ../testdata/at1MB_nthash.tsv
-	@./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
+	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
            grep '_rc' | diff --strip-trailing-cr - ../testdata/at1MB_nthash_rc.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
+	@${VALGRIND} ./enum_nthash.x --bytes_unit ../testdata/vaccg.fna | \
            grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/vaccg_nthash.tsv
-	@./enum_nthash.x --with_rc --bytes_unit ../testdata/vaccg.fna | \
+	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ../testdata/vaccg.fna | \
            grep -v '^# TIME' | grep -v '_rc' | \
            diff --strip-trailing-cr - ../testdata/vaccg_nthash.tsv
-	@./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
+	@${VALGRIND} ./enum_nthash.x --bytes_unit ../testdata/ychrIII.fna | \
            grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/ychrIII_nthash.tsv
-	@./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
+	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
            grep -v '^# TIME' | grep -v '_rc' | \
            diff --strip-trailing-cr - ../testdata/ychrIII_nthash.tsv
 	@echo "Congratulations. $@ passed."
@@ -139,24 +143,24 @@ test_nthash:enum_nthash.x test_nthash_wc_palindrome
 .PHONY:test_nthash_wc_palindrome
 test_nthash_wc_palindrome:enum_nthash.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 1 > ${TMPFILE}
-	@./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 2 | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 1 > ${TMPFILE}
+	@${VALGRIND} ./enum_nthash.x -k 8 -s --with_rc ../testdata/wc_palindromes8.fna | grep -v '^#' | cut -f 2 | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq
 test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq
 	@./check_err.py ./multiseq_mn.x
-	@./multiseq_mn.x --width 0 ../testdata/small.fna | diff --strip-trailing-cr -I '^#' - ../testdata/small.fna
-	@./multiseq_mn.x --width 60 ${SW175} | diff --strip-trailing-cr -I '^#' - ${SW175}
-	@./multiseq_mn.x --statistics --rankdist --protein ${SW175} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/sw175_stat.tsv
-	@./multiseq_mn.x --width 70 ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${AT1MB}
-	@./multiseq_mn.x --statistics --rankdist ${AT1MB} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/at1MB_stat.tsv
-	@./multiseq_mn.x --zipped --width 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta
-	@./multiseq_mn.x --width 70 --short_header ${AT1MB} | grep '^>' | diff --strip-trailing-cr - ../testdata/at1MB_short_header.txt
+	@${VALGRIND} ./multiseq_mn.x --width 0 ../testdata/small.fna | diff --strip-trailing-cr -I '^#' - ../testdata/small.fna
+	@${VALGRIND} ./multiseq_mn.x --width 60 ${SW175} | diff --strip-trailing-cr -I '^#' - ${SW175}
+	@${VALGRIND} ./multiseq_mn.x --statistics --rankdist --protein ${SW175} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/sw175_stat.tsv
+	@${VALGRIND} ./multiseq_mn.x --width 70 ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${AT1MB}
+	@${VALGRIND} ./multiseq_mn.x --statistics --rankdist ${AT1MB} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/at1MB_stat.tsv
+	@${VALGRIND} ./multiseq_mn.x --zipped --width 0 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | grep -v '^#' | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta
+	@${VALGRIND} ./multiseq_mn.x --width 70 --short_header ${AT1MB} | grep '^>' | diff --strip-trailing-cr - ../testdata/at1MB_short_header.txt
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "42" > ${TMPFILE}
-	@./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep -c '^>' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep -c '^>' | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
@@ -173,17 +177,17 @@ test_sorted_by_header_multiseq:./multiseq_mn.x
 .PHONY:test_line_iterator
 test_line_iterator:line_iterator.x
 	@./line_iterator.py `find .. -name '*.[ch]pp'` | sh -s
-	@./line_iterator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
+	@${VALGRIND} ./line_iterator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@cat ${AT1MB} | tr -d '\n' > ${TMPFILE}
 	@echo "" >> ${TMPFILE}
-	@./line_iterator.x ${TMPFILE} | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./line_iterator.x ${TMPFILE} | diff --strip-trailing-cr - ${TMPFILE}
 	@cat ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@./line_iterator.x --all ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
-	@./line_iterator.x ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./line_iterator.x --all ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@./line_iterator.x --all ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
-	@./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./line_iterator.x --all ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
@@ -202,7 +206,7 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 .PHONY:test_fastq_iterator
 test_fastq_iterator:./fastq_mn.x
 	@for num_threads in 1 2 3 4 5; do \
-	  ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep -E '# char|# total_count_entries' | diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_dist.tsv;\
+	  ${VALGRIND} ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep -E '# char|# total_count_entries' | diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_dist.tsv;\
 	done
 	@sh ./test_fastq_iterator.sh
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
@@ -211,10 +215,10 @@ test_fastq_iterator:./fastq_mn.x
 .PHONY:test_fasta_iterator
 test_fasta_iterator:./fasta_mn.x
 	@for input_mode in "" --mapped; do \
-	  ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff --strip-trailing-cr - ${AT1MB};\
-	  ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff --strip-trailing-cr - ${SW175};\
-	  ./fasta_mn.x $${input_mode} --width 61 ${Y3} | diff --strip-trailing-cr - ${Y3};\
-	  ./fasta_mn.x $${input_mode} --width 61 ${VAC} | diff --strip-trailing-cr - ${VAC};\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff --strip-trailing-cr - ${AT1MB};\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff --strip-trailing-cr - ${SW175};\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${Y3} | diff --strip-trailing-cr - ${Y3};\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${VAC} | diff --strip-trailing-cr - ${VAC};\
 	done
 	@echo "Congratulations. $@ passed."
 
@@ -254,21 +258,21 @@ test_sort_i:sort_key_value_pairs.x
 
 .PHONY:test_eoplist
 test_eoplist:eoplist_mn.x
-	@./eoplist_mn.x silent 100000
-	@./eoplist_mn.x display 1000
+	@${VALGRIND} ./eoplist_mn.x silent 100000
+	@${VALGRIND} ./eoplist_mn.x display 1000
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_invint
 test_invint:enum_invint.x
-	@./enum_invint.x 15 ../testdata/vaccg.fna | diff --strip-trailing-cr - ../testdata/vaccg_invint15.tsv
-	@./enum_invint.x 15 ../testdata/ychrIII.fna | diff --strip-trailing-cr - ../testdata/ychrIII_invint15.tsv
-	@./enum_invint.x 14 ../testdata/at1MB.fna | diff --strip-trailing-cr - ../testdata/at1MB_invint14.tsv
+	@${VALGRIND} ./enum_invint.x 15 ../testdata/vaccg.fna | diff --strip-trailing-cr - ../testdata/vaccg_invint15.tsv
+	@${VALGRIND} ./enum_invint.x 15 ../testdata/ychrIII.fna | diff --strip-trailing-cr - ../testdata/ychrIII_invint15.tsv
+	@${VALGRIND} ./enum_invint.x 14 ../testdata/at1MB.fna | diff --strip-trailing-cr - ../testdata/at1MB_invint14.tsv
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_iterator_mapped
 test_line_iterator_mapped:line_iterator_mapped.x
-	@./line_iterator_mapped.x `ls ../testdata/*.fna | grep -E -v 'empty.fna|\.gz'`
-	@./line_iterator_mapped.x *.[hc]pp
+	@${VALGRIND} ./line_iterator_mapped.x `ls ../testdata/*.fna | grep -E -v 'empty.fna|\.gz'`
+	@${VALGRIND} ./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_minimizer_count
@@ -276,13 +280,13 @@ test_minimizer_count:minimizer_mn.x
 	@./check_err.py ./minimizer_mn.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of hashed kmers	37577" > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -c -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 -c -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 --show_mode 1 ${AT1MB} > ${TMPFILE}
-	@./minimizer_mn.x -w 30 -k 18 --show_mode 2 ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -c -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -c -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 --show_mode 1 ${AT1MB} > ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 --show_mode 2 ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
@@ -293,20 +297,20 @@ test_guess_if_protein_seq:./guess_if_protein_seq.x
 
 .PHONY:test_fs_prio_store
 test_fs_prio_store:./fs_prio_store_mn.x
-	@./fs_prio_store_mn.x 1000 1000 1000 100
-	@./fs_prio_store_mn.x 1000 1000 1000 10000
-	@./fs_prio_store_mn.x 1000 2000 10000000 1000
+	@${VALGRIND} ./fs_prio_store_mn.x 1000 1000 1000 100
+	@${VALGRIND} ./fs_prio_store_mn.x 1000 1000 1000 10000
+	@${VALGRIND} ./fs_prio_store_mn.x 1000 2000 10000000 1000
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_split_string
 test_split_string:split_string_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "A" > ${TMPFILE}
-	@./split_string_mn.x '	' ${TMPFILE}
+	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
 	@echo "A\tB" > ${TMPFILE}
-	@./split_string_mn.x '	' ${TMPFILE}
+	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
 	@echo "A\tB\nC" > ${TMPFILE}
-	@./split_string_mn.x '	' ${TMPFILE}
+	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
@@ -318,13 +322,13 @@ test_split_files:test_split_fastq_files test_split_fasta_files test_split_files_
 test_split_files_multithread:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
 	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
-	@./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
-	@./split_files_mn.x -t 8 -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -t 8 -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@echo "Congratulations. $@ passed"
@@ -334,16 +338,16 @@ test_split_files_multithread:split_files_mn.x
 test_split_fasta_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
 	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
-	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
-	@./split_files_mn.x -l 120 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -l 120 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
-	@./split_files_mn.x -s 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -s 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@echo "Congratulations. $@ passed"
@@ -353,16 +357,16 @@ test_split_fasta_files:split_files_mn.x
 test_split_fastq_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
 	@cat ${TMPFILE}*.fastq | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq
-	@./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
-	@./split_files_mn.x -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
-	@./split_files_mn.x -s 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -s 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@echo "Congratulations. $@ passed"
@@ -371,11 +375,11 @@ test_split_fastq_files:split_files_mn.x
 test_multiseq_factory:multiseq_factory_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "# number of parts	20" > ${TMPFILE}
-	@./multiseq_factory_mn.x 100 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x 100 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of parts	9" > ${TMPFILE}
-	@./multiseq_factory_mn.x 20 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x 20 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@echo "# number of parts	4" > ${TMPFILE}
-	@./multiseq_factory_mn.x 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
@@ -385,14 +389,14 @@ test_untar:test_untar_small_stream test_untar_small_store
 
 .PHONY:test_untar_small_stream
 test_untar_small_stream:untar_zipped_mn.x
-	@./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
 	@echo "$@ passed"
 
 .PHONY:test_untar_small_store
 test_untar_small_store:untar_zipped_mn.x
-	@./untar_zipped_mn.x store ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@./untar_zipped_mn.x store ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x store ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x store ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
 	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
