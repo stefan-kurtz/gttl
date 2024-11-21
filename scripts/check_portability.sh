@@ -14,7 +14,7 @@ git --no-pager grep -e "mktemp " --and \( --not -e "--tmpdir=" \) -- '**Makefile
     printf "%s: mktemp needs to be called with --tmpdir=. or similar, since /tmp does not exist on Windows.\n\n" "$0" && \
     errors_exist=true
 
-git --no-pager grep -e "egrep" -e "fgrep" -- '**Makefile' '**.sh' '**.py' && \
+git --no-pager grep -e "egrep" -e "fgrep" -- '**Makefile' '**.sh' '**.py' ':(exclude)scripts/check_portability.sh' && \
     printf "%s: egrep and fgrep may not exist on all systems. Use grep -E and grep -F instead.\n\n" "$0" && \
     errors_exist=true
 
