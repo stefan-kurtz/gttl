@@ -613,9 +613,11 @@ int main(int argc,char *argv[])
                     } else
                     {
                       for (size_t num_parts = 1;
-                           num_parts < std::min(dna_encoding_multi_length.
-                                                total_number_of_sequences_get(),
-                                                size_t(10)); num_parts++)
+                           num_parts <
+                              std::min(dna_encoding_multi_length.
+                                       total_number_of_nucleotide_ranges_get(),
+                                       size_t(10));
+                           num_parts++)
                       {
                         dna_encoding_multi_length.prepare_view(num_parts);
                         verify_decoding_parts_view

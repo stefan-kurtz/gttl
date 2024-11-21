@@ -1,3 +1,5 @@
 # TIME	enumeration (ms):	580
 F0 = 29382424
+F1 (count) = 141880743
+sequences_number = 29
 # TIME	estimate (ms):	32

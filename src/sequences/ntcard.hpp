@@ -25,6 +25,7 @@ static void ntcard_enumerate_inner(SeqIterator* gttl_si,
   using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
                                          ntcard_nucleotide_finder, true, false>;
 
+  size_t sequences_number = 0;
   for (auto &&si : *gttl_si)
   {
     auto sequence = si.sequence_get();
@@ -58,7 +59,9 @@ static void ntcard_enumerate_inner(SeqIterator* gttl_si,
         }
       }
     }
+    sequences_number++;
   }
+  table->sequences_number_set(sequences_number);
 }
 
 template <bool split_at_wildcard,
@@ -127,21 +130,45 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
     other_tables.push_back(new TableClass(s_value, r_value));
   }
   std::vector<std::thread> threads;
-  for (size_t thd_num = 0; thd_num < sequence_parts.size(); thd_num++)
+  if (gttl_likely_fasta_format(inputfilename))
   {
-    threads.push_back(std::thread([&first_table, &other_tables,
-                                   &sequence_parts,thd_num,qgram_length]
+    for (size_t thd_num = 0; thd_num < sequence_parts.size(); thd_num++)
     {
-      GttlSeqIterator<0> gttl_si(sequence_parts[thd_num]);
-      ntcard_enumerate_inner<split_at_wildcard,
-                             GttlSeqIterator<0>,
-                             HashValueIterator,
-                             TableClass>
-                            (&gttl_si,
-                             thd_num == 0 ? &first_table
-                                          : other_tables[thd_num-1],
-                             qgram_length);
-    }));
+      threads.push_back(std::thread([&first_table, &other_tables,
+                                     &sequence_parts,thd_num,qgram_length]
+      {
+        GttlSeqIterator<0> gttl_si(sequence_parts[thd_num]);
+        ntcard_enumerate_inner<split_at_wildcard,
+                               GttlSeqIterator<0>,
+                               HashValueIterator,
+                               TableClass>
+                              (&gttl_si,
+                               thd_num == 0 ? &first_table
+                                            : other_tables[thd_num-1],
+                               qgram_length);
+      }));
+    }
+  } else
+  {
+    for (size_t thd_num = 0; thd_num < sequence_parts.size(); thd_num++)
+    {
+      threads.push_back(std::thread([&first_table, &other_tables,
+                                     &sequence_parts,thd_num,qgram_length]
+      {
+        const std::string_view &this_view =  sequence_parts[thd_num];
+        GttlLineIterator<0> line_iterator(this_view.data(),this_view.size());
+        using FastQIterator = GttlFastQIterator<GttlLineIterator<0>>;
+        FastQIterator fastq_it(line_iterator);
+        ntcard_enumerate_inner<split_at_wildcard,
+                               FastQIterator,
+                               HashValueIterator,
+                               TableClass>
+                              (&fastq_it,
+                               thd_num == 0 ? &first_table
+                                            : other_tables[thd_num-1],
+                               qgram_length);
+      }));
+    }
   }
   for (auto &th : threads)
   {
@@ -283,6 +310,8 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
                                          qgram_length,
                                          s_value,
                                          r_value);
+    table.sequences_number_set(dna_encoding_multi_length
+                                  .total_number_of_sequences_get());
     rt_enumerate.show("ntcard.enumerate");
     return table;
   }

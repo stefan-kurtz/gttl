@@ -34,6 +34,8 @@ static void estimate_F_values(const NtcardOptions &options)
     RunTimeClass rt_estimate{};
     const double F0 = table.estimate_F0();
     printf("F0 = %.0f\n", F0);
+    printf("F1 (count) = %zu\n",table.F1_count_get());
+    printf("sequences_number = %zu\n",table.sequences_number_get());
     rt_estimate.show("estimate");
   } else
   {
@@ -52,6 +54,7 @@ static void estimate_F_values(const NtcardOptions &options)
     if (options.fast_option_is_set())
     {
       printf("F0 = %.0f\n", table.estimate_F0());
+      printf("F1 (count) = %zu\n",table.F1_count_get());
     } else
     {
       const NtTableResult nt_table_result = table.estimate_all();
@@ -71,6 +74,7 @@ static void estimate_F_values(const NtcardOptions &options)
       printf("F1 (estimate) = %.0f\n",nt_table_result.F1_get());
       printf("F1 (count) = %zu\n",nt_table_result.F1_count_get());
     }
+    printf("sequences_number = %zu\n",table.sequences_number_get());
     rt_estimate.show("estimate");
   }
 }

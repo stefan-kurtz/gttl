@@ -405,7 +405,9 @@ class DNAEncodingMultiLength
                                          ntcard_nucleotide_finder, true, false>;
   using ThisDNAEncodingForLength = DNAEncodingForLength<StoreUnitType,verbose>;
   std::vector<ThisDNAEncodingForLength *> enc_vec;
-  size_t total_size, total_number_of_sequences;
+  size_t total_size,
+         total_number_of_nucleotide_ranges,
+         total_number_of_sequences;
   using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t,size_t>>;
   KeyValuesType expanded_vec;
   std::vector<size_t> end_idx_of_part_vec;
@@ -550,11 +552,13 @@ class DNAEncodingMultiLength
       {
         update_enc_vec(sequence.data(),sequence.length());
       }
+      total_number_of_sequences++;
     }
   }
   public:
   DNAEncodingMultiLength(const std::string &inputfilename)
       : total_size(0)
+      , total_number_of_nucleotide_ranges(0)
       , total_number_of_sequences(0)
   {
     static constexpr const int buf_size = 1 << 14;
@@ -577,7 +581,8 @@ class DNAEncodingMultiLength
         enc_vec[idx]->final_resize();
         assert(w_idx < idx);
         total_size += enc_vec[idx]->total_size_get();
-        total_number_of_sequences += enc_vec[idx]->number_of_sequences_get();
+        total_number_of_nucleotide_ranges
+          += enc_vec[idx]->number_of_sequences_get();
         enc_vec[w_idx++] = enc_vec[idx];
       }
     }
@@ -774,6 +779,10 @@ class DNAEncodingMultiLength
   {
     return total_number_of_sequences;
   }
+  size_t total_number_of_nucleotide_ranges_get(void) const
+  {
+    return total_number_of_nucleotide_ranges;
+  }
   void verify_length_dist(std::map<size_t,size_t> &length_dist_map) const
   {
     size_t count_sum = 0;
@@ -781,10 +790,11 @@ class DNAEncodingMultiLength
     {
       count_sum += count_as_value;
     }
-    if (count_sum != total_number_of_sequences)
+    if (count_sum != total_number_of_nucleotide_ranges)
     {
       std::cerr << "count_sum = " << count_sum << " != "
-                << total_number_of_sequences << " = total_number_of_sequences"
+                << total_number_of_nucleotide_ranges
+                << " = total_number_of_nucleotide_ranges"
                 << std::endl;
       exit(EXIT_FAILURE);
     }

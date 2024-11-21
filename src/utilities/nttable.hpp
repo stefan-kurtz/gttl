@@ -59,7 +59,8 @@ class NtTable
   const size_t r_value;
   const uint64_t s_mask;
   const uint64_t r_mask;
-  size_t total_count;
+  size_t qgram_count,
+         sequences_number;
   std::vector<CountType> table;
 
  public:
@@ -68,13 +69,14 @@ class NtTable
     , r_value(_r)
     , s_mask(_s == 0 ? 0 : ((~uint64_t(0)) << (64 - _s)))
     , r_mask(               (~uint64_t(0)) >> (64 - _r))
-    , total_count(0)
+    , qgram_count(0)
+    , sequences_number(0)
     , table(size_t(1) << _r, 0)
   { }
 
   void add_hash(uint64_t hash)
   {
-    total_count++;
+    qgram_count++;
     if ((hash & s_mask) != 0)
     {
       return;
@@ -97,7 +99,8 @@ class NtTable
         table[idx] = CountTypeMax;
       }
     }
-    total_count += other.total_count;
+    qgram_count += other.qgram_count;
+    sequences_number += other.sequences_number;
   }
   double estimate_F0(void) const
   {
@@ -175,7 +178,23 @@ class NtTable
       F1 += static_cast<double>(i) * f_n[i];
     }
 
-    return NtTableResult(f_n, t_max, F0, F1, total_count);
+    return NtTableResult(f_n, t_max, F0, F1, qgram_count);
+  }
+
+  size_t F1_count_get(void) const noexcept
+  {
+    return qgram_count;
+  }
+
+  void sequences_number_set(size_t _sequences_number)
+  {
+    assert(sequences_number == 0);
+    sequences_number = _sequences_number;
+  }
+
+  size_t sequences_number_get(void) const noexcept
+  {
+    return sequences_number;
   }
 };
 #endif
