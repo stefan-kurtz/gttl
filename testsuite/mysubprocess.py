@@ -46,9 +46,9 @@ def mysubprocess_expect(cmd_line,expected_err_code,expected_err_msg = None):
         diff_pos = [i for i in range(len(n_stderr_str))
                       if n_stderr_str[i] != n_expected_err_msg[i]]
         assert len(diff_pos) > 0
-        first_diff = diff_pos[0]
+        first_diff_pos = diff_pos[0]
         sys.stderr.write(('diagnosis: n_stderr_str[{}] = {} != {} = '
                           ' n_expected_err_msg[{}]\n')
-                          .format(first_diff,n_stderr_str[first_diff],
-                                  n_expected_err_msg[first_diff],first_diff))
+                          .format(first_diff_pos,n_stderr_str[first_diff_pos],
+                                  n_expected_err_msg[first_diff_pos],first_diff_pos))
       exit(1)

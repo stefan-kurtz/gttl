@@ -26,6 +26,8 @@ SOFTWARE.
 #define WINDOWS_MMAN_HPP
 #ifdef _WIN32
 
+#define NOMINMAX
+
 #ifndef _MSC_VER
 #include <_mingw.h>
 #endif

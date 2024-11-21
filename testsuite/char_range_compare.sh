@@ -9,7 +9,7 @@ then
 fi
 
 inputfile=$1
-TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+TMPFILE=`mktemp --tmpdir=.` || exit 1
 ./char_range.py --alphabet 'N' ${inputfile} > ${TMPFILE}
 ./char_range_mn.x --singlechar ${inputfile} | diff --strip-trailing-cr - ${TMPFILE}
 for opti in '' --invert

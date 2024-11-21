@@ -4,8 +4,8 @@ import sys, re
 
 print('#!/bin/sh')
 print('set -e -x')
-print('TMPFILE_src=`mktemp TMP.XXXXXX` || exit 1')
-print('TMPFILE_target=`mktemp TMP.XXXXXX` || exit 1')
+print('TMPFILE_src=`mktemp --tmpdir=.` || exit 1')
+print('TMPFILE_target=`mktemp --tmpdir=.` || exit 1')
 for filename in sys.argv[1:]:
   print('cp {} ${{TMPFILE_src}}'.format(filename))
   print('./line_iterator.x ${TMPFILE_src} | diff --strip-trailing-cr - ${TMPFILE_src}')

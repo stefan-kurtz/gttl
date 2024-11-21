@@ -22,7 +22,7 @@ done
 
 for mapped_opt in "" --mapped
 do
-  TMPFILE=`mktemp tmp.XXXXXX` || exit 1
+  TMPFILE=`mktemp --tmpdir=.` || exit 1
   touch ${TMPFILE}
   for fastqfile in `ls ../testdata/*.fastq | sort`
   do
