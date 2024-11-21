@@ -1,8 +1,8 @@
 # TIME	enumeration (ms):	42
 f_1:	10368.006334	10368
 f_2:	127.996950	127
-F0 = 10496
-F1 (estimate) = 10624
-F1 (count) = 9100
-sequences_number = 70
+F0	10496
+F1 (estimate)	10624
+F1 (count)	9100
+sequences_number	70
 # TIME	estimate (ms):	295

@@ -33,9 +33,9 @@ static void estimate_F_values(const NtcardOptions &options)
                          options.num_threads_get());
     RunTimeClass rt_estimate{};
     const double F0 = table.estimate_F0();
-    printf("F0 = %.0f\n", F0);
-    printf("F1 (count) = %zu\n",table.F1_count_get());
-    printf("sequences_number = %zu\n",table.sequences_number_get());
+    printf("F0\t%.0f\n", F0);
+    printf("F1 (count)\t%zu\n",table.F1_count_get());
+    printf("sequences_number\t%zu\n",table.sequences_number_get());
     rt_estimate.show("estimate");
   } else
   {
@@ -53,8 +53,8 @@ static void estimate_F_values(const NtcardOptions &options)
     RunTimeClass rt_estimate{};
     if (options.fast_option_is_set())
     {
-      printf("F0 = %.0f\n", table.estimate_F0());
-      printf("F1 (count) = %zu\n",table.F1_count_get());
+      printf("F0\t%.0f\n", table.estimate_F0());
+      printf("F1 (count)\t%zu\n",table.F1_count_get());
     } else
     {
       const NtTableResult nt_table_result = table.estimate_all();
@@ -70,11 +70,11 @@ static void estimate_F_values(const NtcardOptions &options)
                   static_cast<size_t>(std::abs(this_f_value)));
         }
       }
-      printf("F0 = %.0f\n",nt_table_result.F0_get());
-      printf("F1 (estimate) = %.0f\n",nt_table_result.F1_get());
-      printf("F1 (count) = %zu\n",nt_table_result.F1_count_get());
+      printf("F0\t%.0f\n",nt_table_result.F0_get());
+      printf("F1 (estimate)\t%.0f\n",nt_table_result.F1_get());
+      printf("F1 (count)\t%zu\n",nt_table_result.F1_count_get());
     }
-    printf("sequences_number = %zu\n",table.sequences_number_get());
+    printf("sequences_number\t%zu\n",table.sequences_number_get());
     rt_estimate.show("estimate");
   }
 }

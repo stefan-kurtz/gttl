@@ -38,5 +38,16 @@ For further usage information, try `./ntcard_mn.x --help`
 ### Examples
 
 For instance, the F0-values (ie. the number of distinct k-mers in the sample)
-for `k=20` can be determined as follows:
+for `k=20` can be estimated by calling:
 `./ntcard_mn.x -q 20 -b <inputfile.fastq.gz>`
+
+Here is a concrete example with output:
+
+`./ntcard_mn.x -q 20 -b ../../testdata/70x_161nt_phred64.fastq`
+F0	9344
+F1 (count)	9940
+sequences_number	70
+
+So besides the estimated F0-value, the F1-value (ie. exact the number of all
+k-mers, including duplicates) and the number of sequences is shown.
+The identifiers are separated from the counts by a tabulator.

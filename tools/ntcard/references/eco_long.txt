@@ -538,8 +538,8 @@ f_536:	128.219101	128
 f_537:	-0.089677	0
 f_538:	-0.028282	0
 f_539:	128.195569	128
-F0 = 29382424
-F1 (estimate) = 142377122
-F1 (count) = 141880743
-sequences_number = 29
+F0	29382424
+F1 (estimate)	142377122
+F1 (count)	141880743
+sequences_number	29
 # TIME	estimate (ms):	253

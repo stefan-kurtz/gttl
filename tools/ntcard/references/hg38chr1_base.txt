@@ -1,6 +1,6 @@
 # TIME	enumeration (ms):	1556
-F0 = 208906875
-F1 (estimate) = 230821901
-F1 (count) = 230476683
-sequences_number = 1
+F0	208906875
+F1 (estimate)	230821901
+F1 (count)	230476683
+sequences_number	1
 # TIME	estimate (ms):	297

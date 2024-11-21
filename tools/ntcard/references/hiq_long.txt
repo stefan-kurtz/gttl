@@ -998,8 +998,8 @@ f_996:	-0.000173	0
 f_997:	-0.000155	0
 f_998:	-0.000129	0
 f_999:	-0.000123	0
-F0 = 1475519
-F1 (estimate) = 25373065
-F1 (count) = 24623352
-sequences_number = 16741
+F0	1475519
+F1 (estimate)	25373065
+F1 (count)	24623352
+sequences_number	16741
 # TIME	estimate (ms):	328

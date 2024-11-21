@@ -1,4 +1,4 @@
-F0 = 69120
-F1 (estimate) = 73600
-F1 (count) = 70000
-sequences_number = 1000
+F0	69120
+F1 (estimate)	73600
+F1 (count)	70000
+sequences_number	1000
