@@ -88,6 +88,9 @@ test:test_alphabet \
      test_split_files \
      test_multiseq_factory
 	@echo "Congratulations. $@ passed."
+ifeq ($(valgrind),yes)
+	@echo "Valgrind could find no issues in the executables it tested"
+endif
 
 test_endian:./endian.x
 	@${VALGRIND} ./endian.x

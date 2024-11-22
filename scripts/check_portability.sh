@@ -2,7 +2,7 @@
 
 errors_exist=false
 
-git --no-pager grep -e "diff " --and \( --not -e "--strip-trailing-cr" \) -- '**Makefile' '**.sh' '**.py' && \
+git --no-pager grep -w -e "diff" --and \( --not -e "--strip-trailing-cr" \) -- '**Makefile' '**.sh' '**.py' && \
     printf "%s: diff should only be used with the --strip-trailing-cr flag!\n\n" "$0" && \
     errors_exist=true
 
