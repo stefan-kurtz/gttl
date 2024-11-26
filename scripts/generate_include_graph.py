@@ -4,8 +4,6 @@
 import subprocess
 from glob import glob
 
-import graphviz
-
 
 def construct_nodes():
     """Get a list of all C++ Modules in the project"""
@@ -17,14 +15,7 @@ def construct_edges(base_dir="..", quiet=False):
     """Get a list of all project-internal #include statements"""
     internal_include_lines = (
         subprocess.run(
-            [
-                "grep",
-                "-RiIs",
-                "--exclude-dir=.git",
-                "-E",
-                '#include\\W+"',
-                base_dir
-            ],
+            ["grep", "-RiIs", "--exclude-dir=.git", "-E", '#include\\W+"', base_dir],
             stdout=subprocess.PIPE,
             check=True,
         )
@@ -45,7 +36,10 @@ def construct_edges(base_dir="..", quiet=False):
         if "/" not in depends_on:
             if not quiet:
                 print(
-                    "WARNING: NO INCLUDE PATH SPECIFIED IN: " + file + " -> " + depends_on
+                    "WARNING: NO INCLUDE PATH SPECIFIED IN: "
+                    + file
+                    + " -> "
+                    + depends_on
                 )
                 print("Resolved by changing to: " + depends_on)
             depends_on = "/".join(file.split("/")[:-1]) + "/" + depends_on
@@ -55,6 +49,10 @@ def construct_edges(base_dir="..", quiet=False):
 
 def main():
     """Primary entry point"""
+    # we import this here so that check_all_sources_tested.py does not depend on graphviz.
+    # This allows the CI to run it without requiring a graphviz installation
+    import graphviz
+
     # print(json.dumps(DEPENDS, sort_keys=True, indent=4))
     nodes = construct_nodes()
     edges = construct_edges()

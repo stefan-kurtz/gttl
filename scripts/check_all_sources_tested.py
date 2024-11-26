@@ -5,7 +5,9 @@ from generate_include_graph import construct_edges
 
 if __name__ == "__main__":
     # We first construct a list of all .hpp files in src/
-    sources = ["src/"+name for name in glob('**/*.hpp', root_dir="src", recursive=True)]
+    sources = [
+        "src/" + name for name in glob("**/*.hpp", root_dir="src", recursive=True)
+    ]
     # and a list of all include statements in src/ and testsuite/
     includes = construct_edges(base_dir=".", quiet=True)
 
@@ -21,4 +23,4 @@ if __name__ == "__main__":
     for s in sources:
         print(s)
 
-    #TODO: We should - once all tests are implemented - assert tht the list is empty.
+    # TODO: We should - once all tests are implemented - assert tht the list is empty.
