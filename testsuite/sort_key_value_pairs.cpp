@@ -105,7 +105,7 @@ class SortKeyValuePairsOptions
       if (sort_mode_option == std::string("lsb-radix"))
       {
         sort_mode = 0;
-        if (data_type_option != 'i')
+        if (data_type_option != 'i' && num_threads != size_t(1))
         {
           throw std::invalid_argument("option -t/--num_threads can only be "
                                       "used for data_type i");
