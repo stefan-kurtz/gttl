@@ -13,7 +13,7 @@ def construct_nodes():
     return source_files
 
 
-def construct_edges():
+def construct_edges(base_dir="..", quiet=False):
     """Get a list of all project-internal #include statements"""
     internal_include_lines = (
         subprocess.run(
@@ -22,8 +22,8 @@ def construct_edges():
                 "-RiIs",
                 "--exclude-dir=.git",
                 "-E",
-                '#include\\W+\\"',
-                "../"
+                '#include\\W+"',
+                base_dir
             ],
             stdout=subprocess.PIPE,
             check=True,
@@ -43,11 +43,12 @@ def construct_edges():
         ):
             depends_on = "src/" + depends_on
         if "/" not in depends_on:
-            print(
-                "WARNING: NO INCLUDE PATH SPECIFIED IN: " + file + " -> " + depends_on
-            )
+            if not quiet:
+                print(
+                    "WARNING: NO INCLUDE PATH SPECIFIED IN: " + file + " -> " + depends_on
+                )
+                print("Resolved by changing to: " + depends_on)
             depends_on = "/".join(file.split("/")[:-1]) + "/" + depends_on
-            print("Resolved by changing to: " + depends_on)
         includes.append((file, depends_on))
     return includes
 

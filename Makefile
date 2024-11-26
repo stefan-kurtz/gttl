@@ -27,3 +27,4 @@ code_check:
 	scripts/check_no_c_files.sh
 	scripts/check_gitattributes.sh
 	scripts/check_portability.sh
+	scripts/check_all_sources_tested.py
