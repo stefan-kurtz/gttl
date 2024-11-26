@@ -66,6 +66,7 @@ test:test_alphabet \
      test_cycle_of_numbers \
      test_endian \
      test_nthash \
+     test_plane_sweep_filter \
      test_bitpacker \
      test_char_range \
      test_matrix_partition \
@@ -107,6 +108,10 @@ test_non_wc_ranges:./count_non_wc_ranges.x
 
 test_alphabet:./alphabet.x
 	@${VALGRIND} ./alphabet.x | diff --strip-trailing-cr - ../testdata/DNA_AA.tsv
+	@echo "Congratulations. $@ passed."
+
+test_plane_sweep_filter:./plane_sweep_filter.x
+	@${VALGRIND} ./plane_sweep_filter.x | diff --strip-trailing-cr - ../testdata/non_redundant_matches.txt
 	@echo "Congratulations. $@ passed."
 
 test_cycle_of_numbers:./cycle_of_numbers_mn.x
