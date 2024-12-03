@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include "sequences/stored_match.hpp"
-// #include "sequences/non_redundant_matches.hpp"
 #include "sequences/non_redundant_matches.hpp"
 
 int main(void)
