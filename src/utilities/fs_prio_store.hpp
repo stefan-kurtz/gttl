@@ -7,6 +7,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 template <typename BaseType, bool heap_based = true>
 class FSPrioStore
