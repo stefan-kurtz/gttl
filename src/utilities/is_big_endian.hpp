@@ -1,5 +1,6 @@
 #ifndef IS_BIG_ENDIAN_HPP
 #define IS_BIG_ENDIAN_HPP
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdbool>
