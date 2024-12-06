@@ -2,13 +2,18 @@ CXX?=g++
 CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -funroll-loops -O3
 CPPFLAGS=-I ../src
 LD=${CXX}
-CXXFLAGS=-std=c++23
 AT1MB=../testdata/at1MB.fna
 SW175=../testdata/sw175.fna
 Y3=../testdata/ychrIII.fna
 VAC=../testdata/vaccg.fna
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
+
+ifeq ($(SYSTEM),Darwin)
+	CXXFLAGS=-std=c++2b
+else 
+	CXXFLAGS=-std=c++23
+endif
 
 ifeq ($(OS),Windows_NT)
 	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
