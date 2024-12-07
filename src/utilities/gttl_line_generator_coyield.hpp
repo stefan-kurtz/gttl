@@ -1,22 +1,49 @@
 #ifndef GTTL_LINE_GENERATOR_COYIELD_HPP
 #define GTTL_LINE_GENERATOR_COYIELD_HPP
 
-#include <fstream>
+#include <cstring>
 #include <generator>
 #include <string>
+#include <vector>
+#include "utilities/gttl_file_open.hpp"
 
-std::generator<std::string> gttl_read_lines(const std::string &file_path)
+template <const size_t buf_size = (1 << 14)>
+std::generator<std::string_view> gttl_read_lines(GttlFpType fp)
 {
-  std::ifstream file(file_path);
-  if(!file.is_open())
+  if (!fp)
   {
-    throw std::ios_base::failure("Failed to open file: " + file_path);
+    throw std::ios_base::failure("Invalid file pointer");
   }
-  std::string line;
-  while(std::getline(file, line))
+
+  // We use a vector instead of a static-sized array to prevent
+  // problems with large stack allocation.
+  static thread_local std::vector<char> buffer(buf_size);
+
+  while (gttl_fp_type_gets(fp, buffer.data(), buf_size))
   {
-    co_yield line;
+    size_t len = std::strlen(buffer.data());
+    // We trim LF and CR in the generator
+    if (len > 0 && buffer[len - 1] == '\n')
+    {
+      buffer[len - 1] = '\0';
+      len--;
+      if (len > 0 && buffer[len - 1] == '\r')
+      {
+        buffer[len - 1] = '\0';
+        len--;
+      }
+    }
+    //We return a string_view directly into the buffer
+    co_yield std::string_view(buffer.data(), len);
   }
+
+  gttl_fp_type_close(fp);
 }
 
-#endif //GTTL_LINE_GENERATOR_COYIELD_HPP
+template <const size_t buf_size = (1 << 14)>
+std::generator<std::string> gttl_read_lines(const std::string file_path)
+{
+  return gttl_read_lines<buf_size>(gttl_fp_type_open(file_path.c_str(), "r"));
+}
+
+#endif  // GTTL_LINE_GENERATOR_COYIELD_HPP
