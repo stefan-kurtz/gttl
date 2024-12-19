@@ -12,6 +12,7 @@ class GttlLineGenerator
   GttlLineGenerator(GttlFpType fp, bool _is_end = false)
     : file(fp)
     , is_end(_is_end)
+    , line_number(0)
   {
     out = default_buffer;
   }
@@ -19,6 +20,7 @@ class GttlLineGenerator
   GttlLineGenerator(const char* file_name, bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , is_end(_is_end)
+    , line_number(0)
   {
     out = default_buffer;
   }
@@ -28,17 +30,20 @@ class GttlLineGenerator
                     bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(_out)
-    , is_end(_is_end) {}
+    , is_end(_is_end)
+    , line_number(0) {}
 
 
   GttlLineGenerator(GttlFpType fp, char (&_out)[buf_size], bool _is_end = false)
     : file(fp)
     , out(_out)
-    , is_end(_is_end) {}
+    , is_end(_is_end)
+    , line_number(0) {}
 
   bool advance(void)
   {
     if(is_end) return false;
+    ++line_number;
     if(out == nullptr)
     {
       char to_discard[buf_size];
@@ -57,6 +62,11 @@ class GttlLineGenerator
 #else
     rewind(file);
 #endif
+  }
+
+  size_t line_number_get(void) const noexcept
+  {
+    return line_number;
   }
 
   void set_out_buffer(char* _out)
@@ -115,6 +125,7 @@ class GttlLineGenerator
   char* out;
   bool is_end;
   char default_buffer[buf_size];
+  size_t line_number;
 };
 
 #endif  // GTTL_LINE_GENERATOR_HPP

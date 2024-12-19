@@ -58,6 +58,16 @@ class GttlFastQGenerator
     return lg.advance();
   }
 
+  void reset(void)
+  {
+    lg.reset();
+  }
+
+  size_t line_number(void) const noexcept
+  {
+    return lg.line_number_get();
+  }
+
   class Iterator
   {
     public:
