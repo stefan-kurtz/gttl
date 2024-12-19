@@ -1,5 +1,5 @@
-#ifndef GTTL_LINE_GENERATOR_COYIELD_HPP
-#define GTTL_LINE_GENERATOR_COYIELD_HPP
+#ifndef GTTL_LINE_GENERATOR_HPP
+#define GTTL_LINE_GENERATOR_HPP
 
 #include <cstring>
 #include "utilities/gttl_file_open.hpp"
@@ -117,4 +117,4 @@ class GttlLineGenerator
   char default_buffer[buf_size];
 };
 
-#endif  // GTTL_LINE_GENERATOR_COYIELD_HPP
+#endif  // GTTL_LINE_GENERATOR_HPP
