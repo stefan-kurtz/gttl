@@ -1,76 +1,115 @@
 #ifndef GTTL_FASTQ_GENERATOR_HPP
 #define GTTL_FASTQ_GENERATOR_HPP
 
-#include <generator>
-#include "utilities/gttl_line_generator_coyield.hpp"
+#include <cstddef>
+#include "utilities/gttl_file_open.hpp"
+#include "utilities/gttl_line_generator.hpp"
 
-struct FastQEntry
+template <const size_t buf_size = (1 << 14)>
+struct GttlFastQEntry
 {
-  // Constructor using move-semantics
-  FastQEntry(std::string&& h, std::string&& s, std::string&& q)
-      : header(std::move(h))
-      , sequence(std::move(s))
-      , quality(std::move(q))
-  {}
-
-  // We return only a view, since that is almost always more efficient.
-  std::string_view header_get() const noexcept
-  {
-    return std::string_view(header);
-  }
-  std::string_view sequence_get() const noexcept
-  {
-    return std::string_view(sequence);
-  }
-  std::string_view quality_get() const noexcept
-  {
-    return std::string_view(quality);
-  }
-
- private:
-  // We store the data as std::string, thus holding ownership in the struct.
-  std::string header;
-  std::string sequence;
-  std::string quality;
+  char header[buf_size];
+  char sequence[buf_size];
+  char quality[buf_size];
 };
 
 template <const size_t buf_size = (1 << 14)>
-std::generator<FastQEntry> gttl_read_fastq(GttlFpType fp)
+class GttlFastQGenerator
 {
-  size_t state = 0;
-  // We need to use strings here, since a view into line would be overwritten
-  // on each iteration of the loop.
-  // However, this is fine because we can std::move() the strings themselves.
-  std::string header, sequence, quality;
+  public:
+  GttlFastQGenerator(const char* file_name,
+                     bool _is_end = false)
+    : out(&default_buffer)
+    , is_end(_is_end)
+    , lg(gttl_fp_type_open(file_name, "rb"), out->header, _is_end) {}
 
-  for (const auto&& line : gttl_read_lines<buf_size>(fp))
+  GttlFastQGenerator(GttlFpType fp,
+                     bool _is_end = false)
+    : out(&default_buffer)
+    , is_end(_is_end)
+    , lg(fp, out->header, _is_end) {}
+
+
+  GttlFastQGenerator(const char* file_name,
+                     GttlFastQEntry<buf_size> *_out,
+                     bool _is_end = false)
+    : lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
+    , out(_out)
+    , is_end(_is_end) {}
+
+  GttlFastQGenerator(GttlFpType fp,
+                     GttlFastQEntry<buf_size> *_out,
+                     bool _is_end = false)
+    : lg(fp, _out->header, _is_end)
+    , out(_out)
+    , is_end(_is_end) {}
+
+  bool advance(void)
   {
-    switch (state)
-    {
-      case 0:
-        header = line;
-        break;
-      case 1:
-        sequence = line;
-        break;
-      case 2:
-        break;
-      case 3:
-        quality = line;
-        // Construct the entry using move-semantics
-        co_yield FastQEntry(std::move(header),
-                            std::move(sequence),
-                            std::move(quality));
-        state = 0;
-        continue;
-    }
-    state++;
+    if(is_end) return false;
+    if(out == nullptr) return true;
+    lg.set_out_buffer(out->header);
+    lg.advance();
+    lg.set_out_buffer(out->sequence);
+    lg.advance();
+    lg.set_out_buffer(nullptr);
+    lg.advance();
+    lg.set_out_buffer(out->quality);
+    return lg.advance();
   }
-}
 
-std::generator<FastQEntry> gttl_read_fastq(const std::string file_path)
-{
-  return gttl_read_fastq(gttl_fp_type_open(file_path.c_str(), "r"));
-}
+  class Iterator
+  {
+    public:
+    Iterator(GttlFastQGenerator* generator, bool end = false)
+      : gen(generator), is_end(end)
+    {
+      if(!end) ++(*this);
+    }
+
+    const GttlFastQEntry<buf_size>* operator*() const
+    {
+      return gen->out;
+    }
+
+    const Iterator& operator++()
+    {
+      if(!gen->advance())
+        is_end = true;
+      return *this;
+    }
+
+    bool operator==(const Iterator& other) const
+    {
+      return (is_end == other.is_end) && (gen == other.gen);
+    }
+
+    bool operator!=(const Iterator& other) const
+    {
+      return !(*this == other);
+    }
+
+    private:
+    GttlFastQGenerator* gen;
+    bool is_end;
+  };
+
+
+  Iterator begin()
+  {
+    return Iterator(this, false);
+  }
+
+  Iterator end()
+  {
+    return Iterator(this, true);
+  }
+
+  private:
+  GttlFastQEntry<buf_size> default_buffer;
+  GttlFastQEntry<buf_size>* out;
+  bool is_end;
+  GttlLineGenerator<buf_size> lg;
+};
 
 #endif  // GTTL_FASTQ_GENERATOR_HPP

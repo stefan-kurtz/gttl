@@ -1,130 +1,120 @@
-#ifndef GTTL_LINE_GENERATOR_HPP
-#define GTTL_LINE_GENERATOR_HPP
+#ifndef GTTL_LINE_GENERATOR_COYIELD_HPP
+#define GTTL_LINE_GENERATOR_COYIELD_HPP
 
-#include <cstdio>
-#include <stdexcept>
-#include <string>
+#include <cstring>
 #include "utilities/gttl_file_open.hpp"
 
 
-template<size_t buf_size>
+template <const size_t buf_size = (1 << 14)>
 class GttlLineGenerator
 {
   public:
-    class Iterator
+  GttlLineGenerator(GttlFpType fp, bool _is_end = false)
+    : file(fp)
+    , is_end(_is_end)
+  {
+    out = default_buffer;
+  }
+
+  GttlLineGenerator(const char* file_name, bool _is_end = false)
+    : file(gttl_fp_type_open(file_name, "rb"))
+    , is_end(_is_end)
+  {
+    out = default_buffer;
+  }
+
+  GttlLineGenerator(const char* file_name,
+                    char (&_out)[buf_size],
+                    bool _is_end = false)
+    : file(gttl_fp_type_open(file_name, "rb"))
+    , out(_out)
+    , is_end(_is_end) {}
+
+
+  GttlLineGenerator(GttlFpType fp, char (&_out)[buf_size], bool _is_end = false)
+    : file(fp)
+    , out(_out)
+    , is_end(_is_end) {}
+
+  bool advance(void)
+  {
+    if(is_end) return false;
+    if(out == nullptr)
     {
-      public:
-        Iterator(GttlFpType _file, bool _is_end = false)
-          : file(_file)
-          , is_end(_is_end)
-          , buffer(nullptr)
-        {
-          if(file && !is_end)
-          {
-            buffer = new char[buf_size];
-            advance();
-          }
-        }
+      char to_discard[buf_size];
+      gttl_fp_type_gets(file, to_discard, buf_size);
+      return true;
+    }
+    if(!gttl_fp_type_gets(file, out, buf_size))
+      is_end = true;
+    return !is_end;
+  }
 
-        ~Iterator()
-        {
-            delete[] buffer;
-        }
+  void reset(void)
+  {
+#ifndef GTTL_WITHOUT_ZLIB
+    gzrewind(file);
+#else
+    rewind(file);
+#endif
+  }
 
-        Iterator& operator++()
-        {
-          advance();
-          return *this;
-        }
+  void set_out_buffer(char* _out)
+  {
+    out = _out;
+  }
 
-        const std::string& operator*() const
-        {
-          return current_line;
-        }
-
-        bool operator==(const Iterator& other) const
-        {
-          return is_end == other.is_end && file == other.file;
-        }
-
-        bool operator!=(const Iterator& other) const
-        {
-          return !(*this == other);
-        }
-
-        private:
-        GttlFpType file;
-        bool is_end;
-        char* buffer;
-        std::string current_line;
-
-        void advance()
-        {
-          if(file && gttl_fp_type_gets(file, buffer, buf_size))
-          {
-            current_line = std::string(buffer);
-            //TODO: Do we want to remove trailing newline characters here?
-          }else{
-            is_end = true;
-          }
-        }
-    };
-
-    explicit GttlLineGenerator(const char* inputfile)
-      : file(gttl_fp_type_open(inputfile, "r"))
+  class Iterator
+  {
+    public:
+    Iterator(GttlLineGenerator* generator, bool end = false)
+      : gen(generator), is_end(end)
     {
-      if(!file)
-      {
-        throw std::runtime_error(std::string("Unable to open file: ")
-                                 + inputfile);
-      }
+      if(!end) ++(*this);
     }
 
-    ~GttlLineGenerator()
+    const char* operator*() const
     {
-      if(file)
-      {
-        gttl_fp_type_close(file);
-      }
+      return gen->out;
     }
 
-    // For lvalue-reference iteration
-    Iterator begin() &
+    Iterator& operator++()
     {
-      return Iterator(file);
+      if(!gen->advance())
+        is_end = true;
+      return *this;
     }
 
-    Iterator end() &
+    bool operator==(const Iterator& other) const
     {
-      return Iterator(file, true);
+      return (is_end == other.is_end) && (gen == other.gen);
     }
 
-    // For rvalue-reference iteration
-    Iterator begin() &&
+    bool operator!=(const Iterator& other) const
     {
-      return Iterator(file);
-    }
-
-    Iterator end() &&
-    {
-      Iterator end_it(file, true);
-      file = nullptr;
-      own_file = false;
-      return end_it;
-    }
-
-    void reset(void)
-    {
-      if(!file)
-      {
-        throw std::runtime_error("Invalid file handle.");
-      }
-      gttl_fp_type_reset(file);
+      return !(*this == other);
     }
 
     private:
-    GttlFpType file;
-    bool own_file;
+    GttlLineGenerator* gen;
+    bool is_end;
+  };
+
+  Iterator begin()
+  {
+    return Iterator(this, false);
+  }
+
+  Iterator end()
+  {
+    return Iterator(this, true);
+  }
+
+  private:
+  GttlFpType file;
+  char* out;
+  bool is_end;
+  char default_buffer[buf_size];
 };
 
-#endif // GTTL_LINE_GENERATOR_HPP
+#endif  // GTTL_LINE_GENERATOR_COYIELD_HPP
