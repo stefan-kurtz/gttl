@@ -69,11 +69,14 @@ class GttlLineGenerator
       }
 
 
-      const char* next_newline = std::find(position, input_string + string_length, '\n');
+      const char* next_newline = std::find(position,
+                                           input_string + string_length,
+                                           '\n');
       const char* line_end = next_newline;
 
       // Remove trailing CRLF characters
-      while(line_end > position && (*(line_end - 1) == '\r' || *(line_end - 1) == '\n'))
+      while(line_end > position
+            && (*(line_end - 1) == '\r' || *(line_end - 1) == '\n'))
       {
         --line_end;
       }
@@ -86,7 +89,8 @@ class GttlLineGenerator
         out[copy_len] = '\0';
       }
 
-      position = (next_newline < input_string + string_length) ? next_newline + 1
+      position = (next_newline < input_string + string_length)
+        ? next_newline + 1
         : input_string + string_length;
       return true;
     }
