@@ -8,6 +8,18 @@
 template <const size_t buf_size = (1 << 14)>
 struct GttlFastQEntry
 {
+  const char* header_get() const noexcept
+  {
+    return header;
+  }
+  const char* sequence_get() const noexcept
+  {
+    return sequence;
+  }
+  const char* quality_get() const noexcept
+  {
+    return quality;
+  }
   char header[buf_size];
   char sequence[buf_size];
   char quality[buf_size];
@@ -43,6 +55,14 @@ class GttlFastQGenerator
     : lg(fp, _out->header, _is_end)
     , out(_out)
     , is_end(_is_end) {}
+
+  GttlFastQGenerator(const char* _input_string,
+                     size_t _string_length,
+                     bool _is_end = false)
+    : out(&default_buffer)
+    , is_end(_is_end)
+    , lg(_input_string, _string_length)
+    {}
 
   bool advance(void)
   {

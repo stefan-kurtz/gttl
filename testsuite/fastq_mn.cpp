@@ -17,7 +17,6 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
-#include <typeinfo>
 #include <cassert>
 #include <algorithm>
 #include <thread>
@@ -35,7 +34,7 @@
 #define XXH_INLINE_ALL
 #include "utilities/xxhash.hpp"
 #endif
-#include "sequences/gttl_fastq_iterator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/dna_seq_decoder.hpp"
@@ -45,8 +44,7 @@ static void fastq_split_writer(size_t split_size,
                                const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
-  GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+  GttlFastQGenerator<buf_size> fastq_it(inputfilename.c_str());
   int file_number = 0;
   auto it = fastq_it.begin();
   bool exhausted = false;
@@ -67,9 +65,9 @@ static void fastq_split_writer(size_t split_size,
         exhausted = true;
         break;
       }
-      const std::string_view &sequence = (*it).sequence_get();
-      const std::string_view &header = (*it).header_get();
-      const std::string_view &quality = (*it).quality_get();
+      const std::string_view &sequence = (*it)->sequence_get();
+      const std::string_view &header = (*it)->header_get();
+      const std::string_view &quality = (*it)->quality_get();
       out_stream << header << std::endl
                  << sequence << std::endl
                  << "+" << std::endl
@@ -96,7 +94,7 @@ static void process_fastq_iter(bool statistics,
   std::map<size_t,size_t> length_dist_map{};
   for (auto &&fastq_entry : fastq_it)
   {
-    const std::string_view &sequence = fastq_entry.sequence_get();
+    const std::string_view &sequence = fastq_entry->sequence_get();
     if (statistics)
     {
       min_length = std::min(min_length,sequence.size());
@@ -133,8 +131,8 @@ static void process_fastq_iter(bool statistics,
       {
         if (echo)
         {
-          const std::string_view &header = fastq_entry.header_get();
-          const std::string_view &quality = fastq_entry.quality_get();
+          const std::string_view &header = fastq_entry->header_get();
+          const std::string_view &quality = fastq_entry->quality_get();
           std::cout << header << std::endl
                     << sequence << std::endl
                     << "+" << std::endl
@@ -143,7 +141,7 @@ static void process_fastq_iter(bool statistics,
         {
           if (fasta_output)
           {
-            const std::string_view &header = fastq_entry.header_get();
+            const std::string_view &header = fastq_entry->header_get();
             std::cout << ">" << header.substr(1) << std::endl
                       << sequence << std::endl;
           }
@@ -192,9 +190,8 @@ static void process_single_file_streamed(bool statistics,
                                          const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
-  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
-  FastQIterator fastq_it(line_iterator);
+  using FastQIterator = GttlFastQGenerator<buf_size>;
+  FastQIterator fastq_it(inputfilename.c_str());
   process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
                                     inputfilename,fastq_it);
 }
@@ -205,12 +202,10 @@ static void process_single_file_mapped(bool statistics,
                                        hash_mode_type hash_mode,
                                        const std::string &inputfilename)
 {
-  constexpr const int buf_size = 0;
+  constexpr const int buf_size = 1 << 14;
   Gttlmmap<char> mapped_file(inputfilename.c_str());
-  GttlLineIterator<buf_size> line_iterator(mapped_file.ptr(),
-                                           mapped_file.size());
-  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
-  FastQIterator fastq_it(line_iterator);
+  using FastQIterator = GttlFastQGenerator<buf_size>;
+  FastQIterator fastq_it(mapped_file.ptr(), mapped_file.size());
   process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
                                     inputfilename,fastq_it);
 }
@@ -221,23 +216,21 @@ static void process_paired_files(bool statistics,
                                  const std::string &filename1)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlLineIterator<buf_size> line_iterator0(filename0.c_str()),
-                             line_iterator1(filename1.c_str());
-  using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
-  FastQIterator fastq_it0(line_iterator0),
-                fastq_it1(line_iterator1);
+  using FastQIterator = GttlFastQGenerator<buf_size>;
+  FastQIterator fastq_it0(filename0.c_str()),
+                fastq_it1(filename1.c_str());
 
   size_t seqnum = 0, total_length[2] = {0};
   auto it0 = fastq_it0.begin();
   auto it1 = fastq_it1.begin();
   while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
   {
-    const std::string_view &sequence0 = (*it0).sequence_get();
-    const std::string_view &sequence1 = (*it1).sequence_get();
+    const std::string_view &sequence0 = (*it0)->sequence_get();
+    const std::string_view &sequence1 = (*it1)->sequence_get();
     if (fasta_output)
     {
-      const std::string_view &header0 = (*it0).header_get();
-      const std::string_view &header1 = (*it1).header_get();
+      const std::string_view &header0 = (*it0)->header_get();
+      const std::string_view &header1 = (*it1)->header_get();
       std::cout << ">" << header0.substr(1) << std::endl;
       std::cout << sequence0 << std::endl;
       std::cout << ">" << header1.substr(1) << std::endl;
@@ -266,14 +259,13 @@ static void char_distribution_seq(const std::string &inputfilename)
     /* check_err.py checked */
   }
   constexpr const int buf_size = 1 << 14;
-  GttlLineIterator<buf_size> line_iterator(in_fp);
-  GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+  GttlFastQGenerator<buf_size> fastq_it(in_fp);
   size_t dist[4] = {0};
   size_t count_entries = 0;
-  for (auto &&fastq_entry : fastq_it)
+  for (auto fastq_entry : fastq_it)
   {
     count_entries++;
-    const std::string_view &sequence = fastq_entry.sequence_get();
+    const std::string_view &sequence = fastq_entry->sequence_get();
     for (auto &&cc : sequence)
     {
       dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
@@ -298,9 +290,8 @@ static void char_distribution_thd_gz(size_t num_threads,
     /* check_err.py checked */
   }
   constexpr const int buf_size = 1 << 12;
-  GttlLineIterator<buf_size> line_iterator(in_fp);
-  using BufferedFastQIter = GttlFastQIterator<GttlLineIterator<buf_size>>;
-  BufferedFastQIter fastq_it(line_iterator);
+  using BufferedFastQIter = GttlFastQGenerator<buf_size>;
+  BufferedFastQIter fastq_it(in_fp);
   size_t *dist = static_cast<size_t *>(calloc(4 * (num_threads-1),
                                               sizeof *dist));
   std::vector<std::thread> threads{};
@@ -311,7 +302,7 @@ static void char_distribution_thd_gz(size_t num_threads,
     for (auto &&fastq_entry : fastq_it)
     {
       count_entries++;
-      const std::string_view &seq_view = fastq_entry.sequence_get();
+      const std::string_view &seq_view = fastq_entry->sequence_get();
       sequence_queue.enqueue(std::string(seq_view.begin(),seq_view.end()));
     }
     std::cout << "# total_count_entries\t" << count_entries << std::endl;
@@ -383,14 +374,13 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
     threads.push_back(std::thread([&sequences_split, count_entries,dist,thd_num]
     {
       const std::string_view &this_view = sequences_split[thd_num];
-      GttlLineIterator<0> line_iterator(this_view.data(),this_view.size());
-      GttlFastQIterator<GttlLineIterator<0>> fastq_it(line_iterator);
+      GttlFastQGenerator<16384> fastq_it(this_view.data(), this_view.size());
       size_t local_count_entries = 0;
       size_t *local_dist = dist + 4 * thd_num;
       for (auto &&fastq_entry : fastq_it)
       {
         local_count_entries++;
-        const std::string_view &sequence = fastq_entry.sequence_get();
+        const std::string_view &sequence = fastq_entry->sequence_get();
         for (auto &&cc : sequence)
         {
           local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
