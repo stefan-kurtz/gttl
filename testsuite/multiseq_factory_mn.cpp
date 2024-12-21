@@ -1,15 +1,44 @@
 #include <iostream>
-#include <algorithm>
-#include <stdexcept>
 #include <vector>
 #include <cinttypes>
-#include "utilities/runtime_class.hpp"
 #include "sequences/multiseq_factory.hpp"
+
+template<bool length_based>
+static void test_multiseq_factory(size_t number_of_sequences_in_split,
+                                  const std::vector<std::string> &inputfiles)
+{
+  const uint8_t padding_char = UINT8_MAX;
+  const bool short_header = true;
+  GttlMultiseqFactory<length_based> *multiseq_factory = nullptr;
+  if (inputfiles.size() == 1)
+  {
+    multiseq_factory
+      = new GttlMultiseqFactory<length_based>
+                               (inputfiles[0],
+                                static_cast<size_t>
+                                           (number_of_sequences_in_split),
+                                padding_char,
+                                short_header);
+  } else
+  {
+    assert (inputfiles.size() == 2);
+    multiseq_factory
+      = new GttlMultiseqFactory<length_based>
+                               (inputfiles[0],
+                                inputfiles[1],
+                                static_cast<size_t>
+                                           (number_of_sequences_in_split),
+                                padding_char,
+                                short_header);
+  }
+  std::cout << "# number of parts\t" << multiseq_factory->size() << std::endl;
+  delete multiseq_factory;
+}
 
 int main(int argc, char *argv[])
 {
   int64_t number_of_sequences_in_split;
-  GttlMultiseqFactory *multiseq_factory = nullptr;
+  static constexpr const bool length_based = false;
 
   if ((argc == 3 or argc == 4) and
       std::sscanf(argv[1],"%" PRId64,&number_of_sequences_in_split) == 1 and
@@ -17,39 +46,24 @@ int main(int argc, char *argv[])
   {
     try
     {
-      const bool short_header = true;
-      const uint8_t padding_char = UINT8_MAX;
-      if (argc == 3)
+      std::vector<std::string> inputfiles{std::string(argv[2])};
+      if (argc == 4)
       {
-        multiseq_factory
-          = new GttlMultiseqFactory(std::string(argv[2]),
-                                    static_cast<size_t>
-                                               (number_of_sequences_in_split),
-                                    padding_char,
-                                    short_header);
-      } else
-      {
-        multiseq_factory
-          = new GttlMultiseqFactory(std::string(argv[2]),
-                                    std::string(argv[3]),
-                                    static_cast<size_t>
-                                               (number_of_sequences_in_split),
-                                    padding_char,
-                                    short_header);
+        inputfiles.push_back(std::string(argv[3]));
       }
+      test_multiseq_factory<length_based>(number_of_sequences_in_split,
+                                          inputfiles);
     }
     catch (std::string &msg)
     {
       std::cerr << argv[0] << ": file \"" << argv[2] << "\"";
       if (argc == 4)
       {
-        std::cerr << ", \"" << argv[2] << "\"";
+        std::cerr << ", \"" << argv[4] << "\"";
       }
       std::cerr << msg << std::endl;
       return EXIT_FAILURE;
     }
-    std::cout << "# number of parts\t" << multiseq_factory->size() << std::endl;
-    delete multiseq_factory;
   } else
   {
     std::cerr << "Usage: " << argv[0]
