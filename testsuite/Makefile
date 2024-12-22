@@ -380,7 +380,7 @@ test_split_fastq_files:split_files_mn.x
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_multiseq_factory
-test_multiseq_factory:multiseq_factory_mn.x
+test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "# number of parts	20" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -p 20 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
@@ -394,6 +394,8 @@ test_multiseq_factory:multiseq_factory_mn.x
 	@${VALGRIND} ./multiseq_factory_mn.x -n 20 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@echo "# number of parts	4" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x --width 70 -n 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq > ${TMPFILE}
+	@${VALGRIND} ./fastq_mn.x --width 70 -f ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 

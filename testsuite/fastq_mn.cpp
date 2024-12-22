@@ -38,6 +38,7 @@
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/dna_seq_decoder.hpp"
+#include "sequences/format_sequence.hpp"
 #include "seq_reader_options.hpp"
 
 static void fastq_split_writer(size_t split_size,
@@ -81,7 +82,7 @@ static void fastq_split_writer(size_t split_size,
 template<class FastQIterator>
 static void process_fastq_iter(bool statistics,
                                bool echo,
-                               bool fasta_output,
+                               size_t fasta_output,
                                hash_mode_type hash_mode,
                                const std::string &inputfilename,
                                FastQIterator &fastq_it)
@@ -139,11 +140,11 @@ static void process_fastq_iter(bool statistics,
                     << quality << std::endl;
         } else
         {
-          if (fasta_output)
+          if (fasta_output > 0)
           {
             const std::string_view &header = fastq_entry->header_get();
-            std::cout << ">" << header.substr(1) << std::endl
-                      << sequence << std::endl;
+            std::cout << ">" << header.substr(1) << std::endl;
+            gttl_format_sequence(sequence,fasta_output);
           }
         }
       }
@@ -185,7 +186,7 @@ static void process_fastq_iter(bool statistics,
 
 static void process_single_file_streamed(bool statistics,
                                          bool echo,
-                                         bool fasta_output,
+                                         size_t fasta_output,
                                          hash_mode_type hash_mode,
                                          const std::string &inputfilename)
 {
@@ -198,7 +199,7 @@ static void process_single_file_streamed(bool statistics,
 
 static void process_single_file_mapped(bool statistics,
                                        bool echo,
-                                       bool fasta_output,
+                                       size_t fasta_output,
                                        hash_mode_type hash_mode,
                                        const std::string &inputfilename)
 {
@@ -211,7 +212,7 @@ static void process_single_file_mapped(bool statistics,
 }
 
 static void process_paired_files(bool statistics,
-                                 bool fasta_output,
+                                 size_t fasta_output,
                                  const std::string &filename0,
                                  const std::string &filename1)
 {
@@ -227,14 +228,14 @@ static void process_paired_files(bool statistics,
   {
     const std::string_view &sequence0 = (*it0)->sequence_get();
     const std::string_view &sequence1 = (*it1)->sequence_get();
-    if (fasta_output)
+    if (fasta_output > 0)
     {
       const std::string_view &header0 = (*it0)->header_get();
       const std::string_view &header1 = (*it1)->header_get();
       std::cout << ">" << header0.substr(1) << std::endl;
-      std::cout << sequence0 << std::endl;
+      gttl_format_sequence(sequence0,fasta_output);
       std::cout << ">" << header1.substr(1) << std::endl;
-      std::cout << sequence1 << std::endl;
+      gttl_format_sequence(sequence1,fasta_output);
     }
     total_length[0] += sequence0.size();
     total_length[1] += sequence1.size();
@@ -518,7 +519,8 @@ int main(int argc,char *argv[])
   {
     const bool statistics = options.statistics_option_is_set();
     const bool echo = options.echo_option_is_set();
-    const bool fasta_output = options.fasta_output_option_is_set();
+    const size_t fasta_output = options.fasta_output_option_is_set()
+                                  ? options.line_width_get() : 0;
     const hash_mode_type hash_mode = options.hash_mode_get();
     const size_t split_size = options.split_size_get();
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
