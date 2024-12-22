@@ -164,7 +164,7 @@ double gttl_variance(InputIt first,InputIt last)
   double squared_difference = 0;
   for (auto it = first; it != last; ++it)
   {
-    const double diff = *it - mean;
+    const double diff = static_cast<double>(*it) - mean;
     squared_difference += (diff * diff);
   }
   return squared_difference / num_elements;

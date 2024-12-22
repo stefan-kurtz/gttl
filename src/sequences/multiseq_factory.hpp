@@ -3,23 +3,28 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <cmath>
+#include <cstdio>
 #include "sequences/gttl_multiseq.hpp"
 
-template<bool length_based>
 class GttlMultiseqFactory
 {
   private:
   std::vector<GttlMultiseq *> multiseq_vector;
   std::vector<size_t> seqnum_offset_vector;
-  size_t number_of_units_in_split;
+  size_t num_parts,
+         len_parts,
+         num_sequences;;
   bool fastq_paired_input;
   public:
   GttlMultiseqFactory(const std::string &fastq_file0,
                       const std::string &fastq_file1,
-                      size_t _number_of_units_in_split,
+                      size_t _num_sequences,
                       uint8_t padding_char,
                       bool short_header)
-    : number_of_units_in_split(_number_of_units_in_split)
+    : num_parts(0)
+    , len_parts(0)
+    , num_sequences(_num_sequences)
     , fastq_paired_input(true)
   {
     constexpr const int buf_size = 1 << 14;
@@ -40,7 +45,7 @@ class GttlMultiseqFactory
       GttlMultiseq *multiseq
         = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
 
-      for (size_t idx = 0; idx < number_of_units_in_split; idx++)
+      for (size_t idx = 0; idx < num_sequences; idx++)
       {
         if (it0 == fastq_it0.end() || it1 == fastq_it1.end())
         {
@@ -68,34 +73,57 @@ class GttlMultiseqFactory
     }
   }
   GttlMultiseqFactory(const std::string &inputfile,
-                      size_t _number_of_units_in_split,
+                      size_t _num_parts,
+                      size_t _len_parts,
+                      size_t _num_sequences,
                       uint8_t padding_char,
                       bool short_header)
-    : number_of_units_in_split(_number_of_units_in_split)
+    : num_parts(_num_parts)
+    , len_parts(_len_parts)
+    , num_sequences(_num_sequences)
     , fastq_paired_input(false)
   {
     constexpr const int buf_size = 1 << 14;
     GttlSeqIterator<buf_size> fasta_it(inputfile.c_str());
 
-    size_t current_part_number_of_units = 0;
     GttlMultiseq *multiseq
       = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
-    size_t seqnum = 0;
+    size_t seqnum = 0,
+           current_part_number_of_units = 0,
+           number_of_units_in_split = 0;
+    if (num_parts > 0)
+    {
+      GttlSeqIterator<buf_size> fasta_it(inputfile.c_str());
+      size_t sequences_total_length = 0;
+      for (auto &&si : fasta_it)
+      {
+        sequences_total_length += si.sequence_get().size();
+      }
+      len_parts = sequences_total_length/num_parts;
+    }
+    if (len_parts > 0)
+    {
+      number_of_units_in_split = len_parts; /*total length of seq. in parts*/
+    } else
+    {
+      number_of_units_in_split = num_sequences;
+    }
     for (auto &&si : fasta_it)
     {
       if (current_part_number_of_units < number_of_units_in_split)
       {
         multiseq->append<true>(si.header_get(),si.sequence_get(),padding_char);
-        if constexpr (length_based)
+        if (len_parts > 0)
         {
           current_part_number_of_units += si.sequence_get().size();
         } else
         {
+          assert(num_sequences > 0);
           current_part_number_of_units++;
         }
       } else
       {
-        if constexpr (not length_based)
+        if (num_sequences > 0)
         {
           assert(current_part_number_of_units == number_of_units_in_split);
         }
@@ -106,11 +134,13 @@ class GttlMultiseqFactory
             multiseq->short_header_cache_create<'|','|'>();
           }
           multiseq_vector.push_back(multiseq);
-          if constexpr (length_based)
+          if (len_parts > 0)
           {
             seqnum_offset_vector.push_back(seqnum);
           }
           multiseq = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
+          multiseq->append<true>(si.header_get(),si.sequence_get(),
+                                 padding_char);
         } else
         {
           delete multiseq;
@@ -127,7 +157,7 @@ class GttlMultiseqFactory
         multiseq->short_header_cache_create<'|','|'>();
       }
       multiseq_vector.push_back(multiseq);
-      if constexpr (length_based)
+      if (len_parts > 0)
       {
         seqnum_offset_vector.push_back(seqnum);
       }
@@ -144,12 +174,13 @@ class GttlMultiseqFactory
   {
     assert(idx < multiseq_vector.size());
     size_t sequence_number_offset;
-    if constexpr (length_based)
+    if (len_parts > 0)
     {
       sequence_number_offset = idx == 0 ? 0 : seqnum_offset_vector[idx-1];
     } else
     {
-      sequence_number_offset = idx * number_of_units_in_split;
+      assert(num_sequences > 0);
+      sequence_number_offset = idx * num_sequences;
     }
     return std::make_pair(multiseq_vector[idx],sequence_number_offset);
   }
@@ -160,6 +191,28 @@ class GttlMultiseqFactory
   bool is_fastq_paired_input(void) const noexcept
   {
     return fastq_paired_input;
+  }
+  void statistics(void) const noexcept
+  {
+    size_t total_length = 0, part_num = 0;
+    for (auto &&ms_ptr : multiseq_vector)
+    {
+      total_length += ms_ptr->sequences_total_length_get();
+      printf("%zu\t%zu\n",part_num,ms_ptr->sequences_total_length_get());
+      part_num++;
+    }
+    const size_t mean = total_length/this->size();
+    double squared_difference = 0;
+    printf("# total_length\t%zu\n",total_length);
+    printf("# mean length\t%zu\n",mean);
+    for (auto &&ms_ptr : multiseq_vector)
+    {
+      const double diff
+        = static_cast<double>(ms_ptr->sequences_total_length_get()) - mean;
+      squared_difference += (diff * diff);
+    }
+    const double variance = squared_difference / this->size();
+    printf("# stddev of size of parts\t%.2e\n",std::sqrt(variance));
   }
 };
 #endif
