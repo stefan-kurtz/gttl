@@ -1,5 +1,6 @@
 CXX?=g++
-CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -funroll-loops -O3
+CFLAGS=-Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -funroll-loops -O3 -g
+LDFLAGS=-g
 CPPFLAGS=-I ../src
 CXXFLAGS=-std=c++20
 LD=${CXX}
@@ -28,8 +29,6 @@ ifeq ($(valgrind),yes)
 endif
 
 ifeq ($(debug),yes)
-  CFLAGS += -g
-  LDFLAGS += -g
   ifneq (${sanitize},no)
     ifneq (${MACHINE},arm64)
       ifneq (,$(findstring clang++,$(CXX)),clang++)
