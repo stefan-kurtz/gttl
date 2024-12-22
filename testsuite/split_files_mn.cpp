@@ -20,7 +20,7 @@ static bool has_suffix_with_extension(const std::string &to_check,
 
 int main(int argc, char *argv[])
 {
-  cxxopts::Options options("split_gzip_mn.x",
+  cxxopts::Options options(argv[0],
                            "Split gzip-compressed sequence files");
   options.set_width(80);
   options.set_tab_expansion();
