@@ -38,7 +38,7 @@ do
      sed -e 's/paired_2/paired/' | diff --strip-trailing-cr - ../testdata/varlen_paired_stat.tsv
   ./fastq_mn.x ${mapped_opt} --statistics ../testdata/70x_161nt_phred64.fastq |\
       diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_stat.tsv
-  ./fastq_mn.x ${mapped_opt} --fasta_output ../testdata/varlen_paired_1.fastq |\
+  ./fastq_mn.x ${mapped_opt} --fasta_output --width 150 ../testdata/varlen_paired_1.fastq |\
       diff --strip-trailing-cr - ../testdata/varlen_paired_1.fasta
 done
-./fastq_mn.x --fasta_output ../testdata/varlen_paired_[12].fastq | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta
+./fastq_mn.x --fasta_output --width 150 ../testdata/varlen_paired_[12].fastq | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta
