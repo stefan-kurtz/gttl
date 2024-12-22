@@ -165,6 +165,7 @@ static void test_multiseq_factory(size_t num_parts,
     multiseq_factory
       = new GttlMultiseqFactory(inputfiles[0],
                                 inputfiles[1],
+                                num_parts,
                                 len_parts,
                                 num_sequences,
                                 padding_char,

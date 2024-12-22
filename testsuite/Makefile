@@ -403,6 +403,7 @@ test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 	@echo "# number of parts	25" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -l 8080 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 80 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -p 25 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 

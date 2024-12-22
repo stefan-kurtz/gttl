@@ -10,13 +10,26 @@
 class GttlMultiseqFactory
 {
   private:
+  static constexpr const int buf_size = 1 << 14;
   std::vector<GttlMultiseq *> multiseq_vector;
   std::vector<size_t> seqnum_offset_vector;
   size_t num_sequences;;
   bool fastq_paired_input;
+  size_t fastq_file_total_length_get(const std::string &inputfile) const
+  {
+    GttlLineIterator<buf_size> line_iterator(inputfile.c_str());
+    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+    size_t sequences_total_length = 0;
+    for (auto it = fastq_it.begin(); it != fastq_it.end(); ++it)
+    {
+      sequences_total_length += (*it).sequence_get().size();
+    }
+    return sequences_total_length;
+  }
   public:
   GttlMultiseqFactory(const std::string &fastq_file0,
                       const std::string &fastq_file1,
+                      size_t num_parts,
                       size_t len_parts,
                       size_t _num_sequences,
                       uint8_t padding_char,
@@ -24,16 +37,16 @@ class GttlMultiseqFactory
     : num_sequences(_num_sequences)
     , fastq_paired_input(true)
   {
-    constexpr const int buf_size = 1 << 14;
-    GttlLineIterator<buf_size> line_iterator0(fastq_file0.c_str()),
-                               line_iterator1(fastq_file1.c_str());
-    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it0(line_iterator0),
-                                                  fastq_it1(line_iterator1);
-    auto it0 = fastq_it0.begin();
-    auto it1 = fastq_it1.begin();
-
     GttlMultiseq *multiseq
       = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
+    if (num_parts > 0)
+    {
+      const size_t sequences_total_length
+        = fastq_file_total_length_get(fastq_file0) +
+          fastq_file_total_length_get(fastq_file1);
+      assert(len_parts == 0);
+      len_parts = sequences_total_length/num_parts;
+    }
     size_t number_of_units_in_split;
     if (len_parts > 0)
     {
@@ -44,6 +57,12 @@ class GttlMultiseqFactory
     }
     size_t seqnum = 0,
            current_part_number_of_units = 0;
+    GttlLineIterator<buf_size> line_iterator0(fastq_file0.c_str()),
+                               line_iterator1(fastq_file1.c_str());
+    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it0(line_iterator0),
+                                                  fastq_it1(line_iterator1);
+    auto it0 = fastq_it0.begin();
+    auto it1 = fastq_it1.begin();
     while(it0 != fastq_it0.end() and it1 != fastq_it1.end())
     {
       if (current_part_number_of_units < number_of_units_in_split)
