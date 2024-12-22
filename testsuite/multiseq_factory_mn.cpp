@@ -103,6 +103,12 @@ class MultiseqFactoryOptions
       usage(options);
       throw std::invalid_argument(e.what());
     }
+    if (inputfiles.size() == 2 and num_sequences > 0 and
+        num_sequences % size_t(2) != 0)
+    {
+      throw std::invalid_argument("if option -n is used for two files, the "
+                                  "arguments must be an even number");
+    }
   }
   size_t num_parts_get(void) const noexcept
   {
@@ -159,6 +165,7 @@ static void test_multiseq_factory(size_t num_parts,
     multiseq_factory
       = new GttlMultiseqFactory(inputfiles[0],
                                 inputfiles[1],
+                                len_parts,
                                 num_sequences,
                                 padding_char,
                                 short_header);

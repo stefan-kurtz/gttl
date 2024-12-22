@@ -385,21 +385,24 @@ test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 	@echo "# number of parts	20" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -p 20 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -w 70 -p 20 ../testdata/at1MB.fna | diff -I '^#' --strip-trailing-cr - ../testdata/at1MB.fna
-	@${VALGRIND} ./multiseq_factory_mn.x -l 38000 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -l 39000 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 100 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of parts	9" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -p 9 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -w 60 -p 9 ../testdata/sw175.fna | diff -I '^#' - --strip-trailing-cr ../testdata/sw175.fna
-	@${VALGRIND} ./multiseq_factory_mn.x -l 5800 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -l 6200 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 20 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@echo "# number of parts	4" > ${TMPFILE}
-	@${VALGRIND} ./multiseq_factory_mn.x -n 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -n 2 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of parts	10" > ${TMPFILE}
-	@${VALGRIND} ./multiseq_factory_mn.x -n 100 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
-	@${VALGRIND} ./multiseq_factory_mn.x --width 70 -n 1 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq > ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -n 200 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x --width 70 -n 2 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq > ${TMPFILE}
 	@${VALGRIND} ./fastq_mn.x --width 70 -f ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -w 70 -n 100 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz > ${TMPFILE}
 	@${VALGRIND} ./fastq_mn.x --width 70 -f ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
+	@echo "# number of parts	25" > ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -l 8080 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -n 80 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
