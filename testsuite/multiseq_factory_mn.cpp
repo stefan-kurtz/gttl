@@ -24,7 +24,8 @@ class MultiseqFactoryOptions
   std::vector<std::string> inputfiles;
   size_t num_parts,
          len_parts,
-         num_sequences;
+         num_sequences,
+         sequence_output_width;
   bool statistics_option,
        help_option;
 
@@ -33,6 +34,7 @@ class MultiseqFactoryOptions
     : num_parts(0)
     , len_parts(0)
     , num_sequences(0)
+    , sequence_output_width(0)
     , statistics_option(false)
     , help_option(false)
   {}
@@ -59,6 +61,9 @@ class MultiseqFactoryOptions
        cxxopts::value<size_t>(num_sequences)->default_value("0"))
       ("s,statistics", "output statistics of the sizes of the different parts",
         cxxopts::value<bool>(statistics_option)->default_value("false"))
+      ("w,width", "output sequences in lines of width specified by the "
+                  "argument of this option",
+        cxxopts::value<size_t>(sequence_output_width)->default_value("0"))
       ("h,help", "Print usage information");
     try
     {
@@ -111,6 +116,10 @@ class MultiseqFactoryOptions
   {
     return num_sequences;
   }
+  size_t sequence_output_width_get(void) const noexcept
+  {
+    return sequence_output_width;
+  }
   const std::vector<std::string> &inputfiles_get(void) const noexcept
   {
     return inputfiles;
@@ -128,6 +137,7 @@ class MultiseqFactoryOptions
 static void test_multiseq_factory(size_t num_parts,
                                   size_t len_parts,
                                   size_t num_sequences,
+                                  size_t sequence_output_width,
                                   bool statistics_option,
                                   const std::vector<std::string> &inputfiles)
 {
@@ -158,6 +168,10 @@ static void test_multiseq_factory(size_t num_parts,
   {
     multiseq_factory->statistics();
   }
+  if (sequence_output_width > 0)
+  {
+    multiseq_factory->sequence_output(sequence_output_width);
+  }
   delete multiseq_factory;
 }
 
@@ -182,6 +196,7 @@ int main(int argc, char *argv[])
     test_multiseq_factory(options.num_parts_get(),
                           options.len_parts_get(),
                           options.num_sequences_get(),
+                          options.sequence_output_width_get(),
                           options.statistics_option_is_set(),
                           options.inputfiles_get());
   }

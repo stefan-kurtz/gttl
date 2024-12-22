@@ -214,5 +214,12 @@ class GttlMultiseqFactory
     const double variance = squared_difference / this->size();
     printf("# stddev of size of parts\t%.2e\n",std::sqrt(variance));
   }
+  void sequence_output(size_t sequence_output_width) const noexcept
+  {
+    for (auto &&ms_ptr : multiseq_vector)
+    {
+      ms_ptr->show(sequence_output_width, false);
+    }
+  }
 };
 #endif

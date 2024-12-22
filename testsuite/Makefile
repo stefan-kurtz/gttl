@@ -384,10 +384,12 @@ test_multiseq_factory:multiseq_factory_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "# number of parts	20" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -p 20 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -w 70 -p 20 ../testdata/at1MB.fna | diff -I '^#' --strip-trailing-cr - ../testdata/at1MB.fna
 	@${VALGRIND} ./multiseq_factory_mn.x -l 38000 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 100 ../testdata/at1MB.fna | diff --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of parts	9" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -p 9 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
+	@${VALGRIND} ./multiseq_factory_mn.x -w 60 -p 9 ../testdata/sw175.fna | diff -I '^#' - --strip-trailing-cr ../testdata/sw175.fna
 	@${VALGRIND} ./multiseq_factory_mn.x -l 5800 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 20 ../testdata/sw175.fna | diff - --strip-trailing-cr ${TMPFILE}
 	@echo "# number of parts	4" > ${TMPFILE}
