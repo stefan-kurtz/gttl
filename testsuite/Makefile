@@ -413,14 +413,14 @@ test_untar:test_untar_small_stream test_untar_small_store
 
 .PHONY:test_untar_small_stream
 test_untar_small_stream:untar_zipped_mn.x
-	@${VALGRIND} ./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@${VALGRIND} ./untar_zipped_mn.x stream ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
 	@echo "$@ passed"
 
 .PHONY:test_untar_small_store
 test_untar_small_store:untar_zipped_mn.x
-	@${VALGRIND} ./untar_zipped_mn.x store ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@${VALGRIND} ./untar_zipped_mn.x store ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x --store_in_memory ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+	@${VALGRIND} ./untar_zipped_mn.x --store_in_memory ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
 	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
@@ -431,6 +431,9 @@ fasta_mn.x:fasta_mn.o seq_reader_options.o
 
 minimizer_mn.x:minimizer_opt.o minimizer_mn.o
 	$(CXX) ${LDFLAGS} minimizer_opt.o minimizer_mn.o -o $@ ${LDLIBS}
+
+untar_zipped_mn.x:untar_zipped_mn.o untar_zipped_op.o
+	$(CXX) ${LDFLAGS} untar_zipped_mn.o untar_zipped_op.o -o $@ ${LDLIBS}
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d) $< -c -o $@

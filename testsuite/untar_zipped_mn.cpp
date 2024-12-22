@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include "utilities/untar_zipped.hpp"
+#include "untar_zipped_op.hpp"
 
 static void entry_show(const DecompressedFile &entry)
 {
@@ -19,31 +20,36 @@ static void entry_show(const DecompressedFile &entry)
 
 int main(int argc, char* argv[])
 {
-  if (argc != 3 or (std::string(argv[1]) != "store" and
-                    std::string(argv[1]) != "stream"))
+  UnzippedTarOptions options;
+  try
   {
-    std::cerr << "Usage: " << argv[0]
-              << " <store|stream> <inputile (.tar.gz/.tar.bz2)>"
-              << std::endl;
+    options.parse(argc,argv);
+  }
+  catch (std::invalid_argument &e)
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-  const char *inputfile = argv[2];
-
-  const bool stream = std::string(argv[1]) == "stream";
+  if (options.help_option_is_set())
+  {
+    return EXIT_SUCCESS;
+  }
   std::vector<DecompressedFile> decompressed_files;
   try
   {
-    TarReader tar_reader(inputfile);
-
-    for (auto entry : tar_reader)
+    for (auto &&inputfile : options.inputfiles_get())
     {
-      if (stream)
+      TarReader tar_reader(inputfile);
+      for (auto entry : tar_reader)
       {
-        entry_show(entry);
-        entry.delete_data();
-      } else
-      {
-        decompressed_files.push_back(entry);
+        if (options.store_option_is_set())
+        {
+          decompressed_files.push_back(entry);
+        } else
+        {
+          entry_show(entry);
+          entry.delete_data();
+        }
       }
     }
   }
@@ -52,7 +58,7 @@ int main(int argc, char* argv[])
     std::cerr << argv[0] << ": " << msg << std::endl;
     return EXIT_FAILURE;
   }
-  if (not stream)
+  if (options.store_option_is_set())
   {
     for (auto &entry: decompressed_files)
     {
