@@ -2,23 +2,24 @@
 #define GTTL_FASTQ_GENERATOR_HPP
 
 #include <cstddef>
+#include <string_view>
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/gttl_line_generator.hpp"
 
 template <const size_t buf_size = (1 << 14)>
 struct GttlFastQEntry
 {
-  const char* header_get() const noexcept
+  std::string_view header_get() const noexcept
   {
-    return header;
+    return std::string_view(header);
   }
-  const char* sequence_get() const noexcept
+  std::string_view sequence_get() const noexcept
   {
-    return sequence;
+    return std::string_view(sequence);
   }
-  const char* quality_get() const noexcept
+  std::string_view quality_get() const noexcept
   {
-    return quality;
+    return std::string_view(quality);
   }
   char header[buf_size];
   char sequence[buf_size];
