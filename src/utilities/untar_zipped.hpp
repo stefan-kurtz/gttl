@@ -1,6 +1,7 @@
 #ifndef UNTAR_ZIPPED_HPP
 #define UNTAR_ZIPPED_HPP
 
+#include <iostream>
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -60,10 +61,10 @@ class DecompressedFile
 
 class TarReader
 {
-  PopenReader popen_reader;
-  std::string current_filename;
   size_t current_file_size,
          current_file_pos;
+  PopenReader *popen_reader;
+  std::string current_filename;
 
   // returns true if next file succesfully setup
   bool next_file(void)
@@ -77,7 +78,7 @@ class TarReader
     std::string line;
     while (true)
     {
-      const int cc = popen_reader.fgetc_stderr();
+      const int cc = popen_reader->fgetc_stderr();
       if (cc == '\n')
       {
         break;
@@ -112,8 +113,8 @@ class TarReader
       assert(current_file_pos <= current_file_size);
       count = std::min(count, current_file_size - current_file_pos);
       uint8_t *data_ptr = new uint8_t [count];
-      const size_t read_bytes = popen_reader.fread_stdout(data_ptr,
-                                                          size_t(1), count);
+      const size_t read_bytes = popen_reader->fread_stdout(data_ptr,
+                                                           size_t(1), count);
       current_file_pos += read_bytes;
       if (read_bytes != count)
       {
@@ -133,20 +134,38 @@ class TarReader
     {
       return "-Oxvvzf";
     }
+    if (gttl_has_suffix(filename,".tar"))
+    {
+      return "-Oxvvf";
+    }
     throw std::string("illegal filename ") +
           filename +
           std::string(", can only handle files with suffix "
-                      ".tar.gz or .tar.bz2");
+                      ".tar.gz or .tar.bz2 or .tar");
   }
 
   public:
-  TarReader(const std::string &filename)
-      : popen_reader({"gltar","gtar","tar"},"tar",option_string(filename),
-                     filename.c_str())
-      , current_file_size(0)
-      , current_file_pos(0)
+  TarReader(const std::string &inputfile,bool with_rapidgzip)
+    : current_file_size(0)
+    , current_file_pos(0)
+    , popen_reader(nullptr)
   {
+    if (with_rapidgzip)
+    {
+      popen_reader = new PopenReader({"gtar","tar"},
+                                     "tar","-I","rapidgzip","-Oxvvf",
+                                     inputfile.c_str());
+    } else
+    {
+      popen_reader = new PopenReader({"gltar","gtar","tar"},
+                                     "tar",option_string(inputfile),
+                                     inputfile.c_str());
+    }
     next_file();
+  }
+  ~TarReader(void)
+  {
+    delete popen_reader;
   }
   size_t current_file_size_get(void) const
   {

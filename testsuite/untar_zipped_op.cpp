@@ -22,6 +22,9 @@ void UnzippedTarOptions::parse(int argc, char **argv)
     ("m,store_in_memory",
      "store the unzipped files as strings in memory",
      cxxopts::value<bool>(store_option)->default_value("false"))
+    ("n,no_rapidgzip",
+     "do not use rapidgzip, even if available",
+     cxxopts::value<bool>(no_rapidgzip_option)->default_value("false"))
     ("h,help", "Print usage information");
   try
   {
@@ -63,4 +66,9 @@ bool UnzippedTarOptions::store_option_is_set(void) const noexcept
 bool UnzippedTarOptions::help_option_is_set(void) const noexcept
 {
   return help_option;
+}
+
+bool UnzippedTarOptions::no_rapidgzip_option_is_set(void) const noexcept
+{
+  return no_rapidgzip_option;
 }

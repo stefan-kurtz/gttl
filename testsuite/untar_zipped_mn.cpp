@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstdio>
+#include "utilities/split_string.hpp"
+#include "utilities/is_in_PATH.hpp"
 #include "utilities/untar_zipped.hpp"
 #include "untar_zipped_op.hpp"
 
@@ -37,9 +39,12 @@ int main(int argc, char* argv[])
   std::vector<DecompressedFile> decompressed_files;
   try
   {
+    const bool with_rapidgzip = ((not options.no_rapidgzip_option_is_set()) and
+                                 gttl_is_in_PATH("gtar") and
+                                 gttl_is_in_PATH("rapidgzip"));
     for (auto &&inputfile : options.inputfiles_get())
     {
-      TarReader tar_reader(inputfile);
+      TarReader tar_reader(inputfile,with_rapidgzip);
       for (auto entry : tar_reader)
       {
         if (options.store_option_is_set())

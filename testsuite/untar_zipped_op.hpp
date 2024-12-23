@@ -8,6 +8,7 @@ class UnzippedTarOptions
   private:
   std::vector<std::string> inputfiles;
   bool store_option = false,
+       no_rapidgzip_option = false,
        help_option = false;
   public:
   UnzippedTarOptions(void);
@@ -15,5 +16,6 @@ class UnzippedTarOptions
   const std::vector<std::string> &inputfiles_get(void) const noexcept;
   bool store_option_is_set(void) const noexcept;
   bool help_option_is_set(void) const noexcept;
+  bool no_rapidgzip_option_is_set(void) const noexcept;
 };
 #endif

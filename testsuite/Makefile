@@ -407,19 +407,14 @@ test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_untar
-test_untar:test_untar_small_stream test_untar_small_store
-	@echo "$@ passed"
-
-.PHONY:test_untar_small_stream
-test_untar_small_stream:untar_zipped_mn.x
-	@${VALGRIND} ./untar_zipped_mn.x ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@${VALGRIND} ./untar_zipped_mn.x ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@echo "$@ passed"
-
-.PHONY:test_untar_small_store
-test_untar_small_store:untar_zipped_mn.x
-	@${VALGRIND} ./untar_zipped_mn.x --store_in_memory ../testdata/pubmed_small.tar.bz2 | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
-	@${VALGRIND} ./untar_zipped_mn.x --store_in_memory ../testdata/pubmed_small.tar.gz | diff --strip-trailing-cr - ../testdata/pubmed_small.txt
+test_untar:untar_zipped_mn.x
+	@for suffix in gz bz2; do \
+	  for norapidgzip in "" "--no_rapidgzip"; do \
+	    for store_in_memory  in "" "--store_in_memory"; do \
+	      ${VALGRIND} ./untar_zipped_mn.x $${norapidgzip} $${store_in_memory} ../testdata/pubmed_small.tar.$${suffix} | diff --strip-trailing-cr - ../testdata/pubmed_small.txt;\
+	    done \
+	  done \
+	done
 	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
