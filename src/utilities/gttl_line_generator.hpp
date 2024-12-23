@@ -55,6 +55,11 @@ class GttlLineGenerator
     , position(_input_string)
     {}
 
+  ~GttlLineGenerator()
+  {
+    gttl_fp_type_close(file);
+  }
+
   bool advance(void)
   {
     if(is_end) return false;
