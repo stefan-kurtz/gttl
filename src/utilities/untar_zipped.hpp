@@ -145,21 +145,21 @@ class TarReader
   }
 
   public:
-  TarReader(const std::string &inputfile,bool with_rapidgzip)
+  TarReader(const std::string &filename,bool with_rapidgzip)
     : current_file_size(0)
     , current_file_pos(0)
     , popen_reader(nullptr)
   {
-    if (with_rapidgzip)
+    if (with_rapidgzip and not gttl_has_suffix(filename,".tar"))
     {
       popen_reader = new PopenReader({"gtar","tar"},
                                      "tar","-I","rapidgzip","-Oxvvf",
-                                     inputfile.c_str());
+                                     filename.c_str());
     } else
     {
       popen_reader = new PopenReader({"gltar","gtar","tar"},
-                                     "tar",option_string(inputfile),
-                                     inputfile.c_str());
+                                     "tar",option_string(filename),
+                                     filename.c_str());
     }
     next_file();
   }
