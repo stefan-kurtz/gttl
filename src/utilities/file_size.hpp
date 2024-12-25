@@ -13,21 +13,21 @@
 #include <fcntl.h>
 #include <sys/types.h>  // for fstat() and open()
 #include <sys/stat.h>
-#include "utilities/str_format.hpp"
+#include <string>
+#include <vector>
 
 inline size_t gttl_file_size(const char *filename)
 {
   int filedesc = open(filename,O_RDONLY);
   if (filedesc == -1)       // check for error code
   {
-    StrFormat msg(": cannot open file %s",filename);
-    throw msg.str();
+    throw std::string(": cannot open file ") + std::string(filename);
   }
   struct stat buf;
   if (fstat(filedesc,&buf) == -1) // get status of file
   {
-    StrFormat msg(": cannot access status of file %s",filename);
-    throw msg.str();
+    throw std::string(": cannot access status of file ") +
+          std::string(filename);
   }
   close(filedesc);
   return static_cast<size_t>(buf.st_size);
