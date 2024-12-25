@@ -111,15 +111,17 @@ class TarReader
     if (count > 0)
     {
       assert(current_file_pos <= current_file_size);
-      count = std::min(count, current_file_size - current_file_pos);
-      uint8_t *data_ptr = new uint8_t [count];
+      size_t bytes2read = std::min(count, current_file_size - current_file_pos);
+      uint8_t *data_ptr = new uint8_t [bytes2read+1];
       const size_t read_bytes = popen_reader->fread_stdout(data_ptr,
-                                                           size_t(1), count);
+                                                           size_t(1),
+                                                           bytes2read);
       current_file_pos += read_bytes;
-      if (read_bytes != count)
+      if (read_bytes != bytes2read)
       {
         throw std::string("Error reading file. Couldn't read to finish.");
       }
+      data_ptr[bytes2read] = '\0';
       return data_ptr;
     }
     return nullptr;
