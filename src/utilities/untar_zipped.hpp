@@ -169,7 +169,7 @@ class TarReader
   }
   ~TarReader(void)
   {
-    delete[] data_ptr;
+    free(data_ptr);
     delete popen_reader;
   }
   size_t current_file_size_get(void) const
