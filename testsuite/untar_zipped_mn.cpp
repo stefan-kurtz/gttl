@@ -39,9 +39,9 @@ int main(int argc, char* argv[])
   std::vector<DecompressedFile> decompressed_files;
   try
   {
-    const bool with_rapidgzip = ((not options.no_rapidgzip_option_is_set()) and
-                                 gttl_is_in_PATH("gtar") and
-                                 gttl_is_in_PATH("rapidgzip"));
+    const bool with_rapidgzip = (not options.no_rapidgzip_option_is_set()) and
+                                gttl_is_in_PATH("gtar") and
+                                gttl_is_in_PATH("rapidgzip");
     for (auto &&inputfile : options.inputfiles_get())
     {
       TarReader tar_reader(inputfile,with_rapidgzip);
@@ -53,7 +53,6 @@ int main(int argc, char* argv[])
         } else
         {
           entry_show(entry);
-          entry.delete_data();
         }
       }
     }
@@ -68,7 +67,6 @@ int main(int argc, char* argv[])
     for (auto &entry: decompressed_files)
     {
       entry_show(entry);
-      entry.delete_data();
     }
   }
   return EXIT_SUCCESS;

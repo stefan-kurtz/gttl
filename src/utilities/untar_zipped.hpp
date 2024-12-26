@@ -14,7 +14,7 @@ class DecompressedFile
 {
   std::string current_filename;
   size_t current_file_size;
-  uint8_t *data_ptr;
+  const uint8_t *data_ptr;
   public:
   DecompressedFile(void)
     : current_file_size(0)
@@ -27,10 +27,9 @@ class DecompressedFile
   }
   void set(const std::string &_current_filename,
            size_t _current_file_size,
-           uint8_t *_data_ptr)
+           const uint8_t *_data_ptr)
   {
-    assert(current_file_size == 0);
-    assert(data_ptr == nullptr);
+    assert(current_file_size == 0 and data_ptr == nullptr);
     current_filename = _current_filename;
     current_file_size = _current_file_size;
     data_ptr = _data_ptr;
@@ -43,14 +42,9 @@ class DecompressedFile
   {
     return current_file_size;
   }
-  uint8_t *data(void) const
+  const uint8_t *data(void) const
   {
     return data_ptr;
-  }
-  void delete_data(void)
-  {
-    delete[] data_ptr;
-    data_ptr = nullptr;
   }
   void clear(void)
   {
@@ -61,7 +55,9 @@ class DecompressedFile
 
 class TarReader
 {
-  size_t current_file_size,
+  uint8_t *data_ptr; /* TarReader keeps its own buffer */
+  size_t bytes_allocated,
+         current_file_size,
          current_file_pos;
   PopenReader *popen_reader;
   std::string current_filename;
@@ -74,7 +70,6 @@ class TarReader
       throw std::string("current file ") + current_filename +
             std::string("not read until its end");
     }
-    // setup next file
     std::string line;
     while (true)
     {
@@ -106,14 +101,19 @@ class TarReader
     return true;
   }
 
-  uint8_t *read_from_stdout(size_t count)
+  const uint8_t *read_from_stdout(size_t count)
   {
     if (count > 0)
     {
       assert(current_file_pos <= current_file_size);
       const size_t bytes2read
         = std::min(count, current_file_size - current_file_pos);
-      uint8_t *data_ptr = new uint8_t [bytes2read];
+      if (bytes2read > bytes_allocated)
+      {
+        data_ptr = static_cast<uint8_t *>(realloc(data_ptr,
+                                                  sizeof(uint8_t)*bytes2read));
+        bytes_allocated = bytes2read;
+      }
       const size_t read_bytes = popen_reader->fread_stdout(data_ptr,
                                                            size_t(1),
                                                            bytes2read);
@@ -148,7 +148,9 @@ class TarReader
 
   public:
   TarReader(const std::string &filename,bool with_rapidgzip)
-    : current_file_size(0)
+    : data_ptr(nullptr)
+    , bytes_allocated(0)
+    , current_file_size(0)
     , current_file_pos(0)
     , popen_reader(nullptr)
   {
@@ -167,6 +169,7 @@ class TarReader
   }
   ~TarReader(void)
   {
+    delete[] data_ptr;
     delete popen_reader;
   }
   size_t current_file_size_get(void) const
