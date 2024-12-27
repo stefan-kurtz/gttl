@@ -21,6 +21,7 @@ std::vector<T> gttl_read_vector(const char *filename)
     for (auto &&line : line_get)
     {
       file_content += line;
+      file_content += "\n";
     }
     if (file_content.size() % sizeof(T) != 0)
     {

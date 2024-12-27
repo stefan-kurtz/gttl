@@ -417,6 +417,16 @@ test_untar:untar_zipped_mn.x
 	done
 	@echo "$@ passed"
 
+.PHONY:test_read_vector
+test_read_vector:read_vector_mn.x
+	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@for filename in ${AT1MB} ${SW175} ${Y3} ${VAC}; do \
+	  gzip -9 -c $${filename} > ${TMPFILE}.gz; \
+	  ./read_vector_mn.x $${filename} ${TMPFILE}.gz; \
+	done
+	@${RM} ${TMPFILE} ${TMPFILE}.gz
+	@echo "$@ passed"
+	
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
 
