@@ -86,7 +86,8 @@ test:test_alphabet \
      test_fs_prio_store \
      test_split_string \
      test_split_files \
-     test_multiseq_factory
+     test_multiseq_factory \
+     test_read_vector
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
