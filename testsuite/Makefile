@@ -423,7 +423,7 @@ test_read_vector:read_vector_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@for filename in ${AT1MB} ${SW175} ${Y3} ${VAC}; do \
 	  gzip -9 -c $${filename} > ${TMPFILE}.gz; \
-	  ./read_vector_mn.x $${filename} ${TMPFILE}.gz; \
+	  ${VALGRIND} ./read_vector_mn.x $${filename} ${TMPFILE}.gz; \
 	done
 	@${RM} ${TMPFILE} ${TMPFILE}.gz
 	@echo "$@ passed"
