@@ -330,10 +330,10 @@ test_split_files:test_split_fastq_files test_split_fasta_files test_split_files_
 test_split_files_multithread:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@${VALGRIND} ./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -t 4 -p 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
 	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
-	@${VALGRIND} ./split_files_mn.x -t 4 -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -t 4 -p 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@${VALGRIND} ./split_files_mn.x -t 8 -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
@@ -346,16 +346,16 @@ test_split_files_multithread:split_files_mn.x
 test_split_fasta_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -p 5 -o ${TMPFILE} -c 0 ../testdata/varlen_paired_both.fasta.gz
 	@cat ${TMPFILE}*.fasta | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta
-	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -p 5 -o ${TMPFILE} -c 7 ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@${VALGRIND} ./split_files_mn.x -l 120 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
-	@${VALGRIND} ./split_files_mn.x -s 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./split_files_mn.x -n 2 -o ${TMPFILE} ../testdata/varlen_paired_both.fasta.gz
 	@gunzip -c ${TMPFILE}*.fasta.gz | diff --strip-trailing-cr - <(gunzip -c ../testdata/varlen_paired_both.fasta.gz)
 	@${RM} ${TMPFILE}*.fasta.gz
 	@echo "Congratulations. $@ passed"
@@ -365,16 +365,16 @@ test_split_fasta_files:split_files_mn.x
 test_split_fastq_files:split_files_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@${RM} ${TMPFILE}
-	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -p 5 -o ${TMPFILE} -c 0 ../testdata/SRR19536726_1_1000.fastq.gz
 	@cat ${TMPFILE}*.fastq | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq
-	@${VALGRIND} ./split_files_mn.x -n 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -p 5 -o ${TMPFILE} -c 7 ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@${VALGRIND} ./split_files_mn.x -l 20000 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
-	@${VALGRIND} ./split_files_mn.x -s 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./split_files_mn.x -n 200 -o ${TMPFILE} ../testdata/SRR19536726_1_1000.fastq.gz
 	@gunzip -c ${TMPFILE}*.fastq.gz | diff --strip-trailing-cr -I "^\+" - <(gunzip -c ../testdata/SRR19536726_1_1000.fastq.gz)
 	@${RM} ${TMPFILE}*.fastq.gz
 	@echo "Congratulations. $@ passed"
@@ -427,7 +427,7 @@ test_read_vector:read_vector_mn.x
 	done
 	@${RM} ${TMPFILE} ${TMPFILE}.gz
 	@echo "$@ passed"
-	
+
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
 

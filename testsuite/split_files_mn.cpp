@@ -28,14 +28,14 @@ int main(int argc, char *argv[])
   options.add_options()("f,file", "Input file to split",
                         cxxopts::value<std::string>())(
       "h,help", "Print usage information")(
-      "n,num_parts",
-      "Number of parts to split the file into (mutually exclusive with -l, -s)",
+      "p,num_parts",
+      "Number of parts to split the file into (mutually exclusive with -l, -n)",
       cxxopts::value<size_t>())(
       "l,len_parts",
-      "Length of parts to split the file into (mutually exclusive with -n, -s)",
+      "Length of parts to split the file into (mutually exclusive with -p, -n)",
       cxxopts::value<size_t>())(
-      "s,num_sequences",
-      "Number of sequences per file (mutually exclusive with -l, -n)",
+      "n,num_sequences",
+      "Number of sequences per file (mutually exclusive with -p, -l)",
       cxxopts::value<size_t>())(
       "o,output",
       "The output filenames (numbering and file-extensions will be added)",
