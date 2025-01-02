@@ -7,6 +7,7 @@
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/qgrams_hash_invint.hpp"
+#include "sequences/complement_uint8.hpp"
 
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
@@ -25,7 +26,7 @@ static void verify_hash_value_pair(HashValuePairIterator &qgiter,
   {
     uint8_t cc = qgram_rc[qgram_length - 1 - idx];
     assert(cc < 4);
-    cc = QgramRecHashValueIterator_complement(cc);
+    cc = complement_uint8(cc);
     if (cc != qgram_direct[idx])
     {
       StrFormat msg("incorrect reverse complement "

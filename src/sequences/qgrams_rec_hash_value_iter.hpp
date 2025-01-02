@@ -22,15 +22,11 @@
 #include <cassert>
 #include <cmath>
 #include <tuple>
-#include "sequences/alphabet.hpp"
 #include "utilities/cyclic_buffer.hpp"
+#include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"
-
-static inline uint8_t QgramRecHashValueIterator_complement(uint8_t rank)
-{
-  assert(rank < 4);
-  return 3 - rank;
-}
+#include "sequences/max_qgram_length.hpp"
+#include "sequences/complement_uint8.hpp"
 
 /* Implementation of iterator class follows concept described in
    https://davidgorski.ca/posts/stl-iterators/ */
@@ -110,9 +106,9 @@ class QgramRecHashValueIterator
                                                              new_rank);
           compl_hash_value
             = qgram_transformer.next_compl_hash_value_get(
-                 QgramRecHashValueIterator_complement(old_rank),
+                 complement_uint8(old_rank),
                  compl_hash_value,
-                 QgramRecHashValueIterator_complement(new_rank));
+                 complement_uint8(new_rank));
         }
         return {hash_value,compl_hash_value};
       }

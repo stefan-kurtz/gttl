@@ -41,6 +41,7 @@ SOFTWARE.
 #define NTHASH_FWD_HPP
 #include <cstdint>
 #include <cassert>
+#include "sequences/complement_uint8.hpp"
 
 class NThashTransformer
 {
@@ -208,9 +209,8 @@ class NThashTransformer
       idx--;
       rev_compl_code = rotate_left_1(rev_compl_code);
       rev_compl_code = swapbits033(rev_compl_code);
-      assert(t_qgram[idx] < uint8_t(4));
-      const uint8_t complement = uint8_t(3) - t_qgram[idx];
-      rev_compl_code ^= nt_hash_seed_table[static_cast<size_t>(complement)];
+      const uint8_t complement_cc = complement_uint8(t_qgram[idx]);
+      rev_compl_code ^= nt_hash_seed_table[static_cast<size_t>(complement_cc)];
     }
     return std::make_pair(fwd_code,rev_compl_code);
   }

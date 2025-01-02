@@ -29,6 +29,7 @@
 #include "utilities/unused.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/bytes_unit.hpp"
+#include "sequences/complement_uint8.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
@@ -196,8 +197,7 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
       for (size_t idx = 0; idx < qgram_length; idx++)
       {
         qgram_buffer[qgram_length - 1 - idx]
-          = QgramRecHashValueIterator_complement(
-              alphabet.char_to_rank(substring[seqpos + idx]));
+          = complement_uint8(alphabet.char_to_rank(substring[seqpos + idx]));
       }
       assert(this_rc_hash ==
              nt_hash_transformer.first_fwd_hash_value_get(qgram_buffer,

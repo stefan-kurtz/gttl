@@ -74,7 +74,7 @@ class GttlSubstring
     assert(start < original_seqlen);
     const size_t transformed_end = original_seqlen - 1 - start;
     assert(idx <= transformed_end);
-    return complement_uint8(original_seq[transformed_end - idx]);
+    return complement_uint8_wc_remains(original_seq[transformed_end - idx]);
   }
   std::string to_string(void) const noexcept
   {

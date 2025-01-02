@@ -72,7 +72,7 @@ static SWsimdResult sw_simd_uint32(GTTL_UNUSED const uint8_t *original_dbseq,
         assert(dbseq_len == original_dbseq_len);
       }
       current_char = original_dbseq[original_dbseq_len - 1 - dbseq_pos];
-      current_char = complement_uint8(current_char);
+      current_char = complement_uint8_wc_remains(current_char);
     }
     // printf("Current_char %d\n", current_char);
     size_t segment_pos;
