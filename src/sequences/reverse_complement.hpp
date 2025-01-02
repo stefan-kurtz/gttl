@@ -5,6 +5,7 @@
 #include <cstddef>
 #include "sequences/complement_uint8.hpp"
 
+template<uint8_t (&complement_function)(uint8_t)>
 static inline uint8_t *gttl_reverse_complement_encoded(const uint8_t *sequence,
                                                        size_t len)
 {
@@ -14,11 +15,19 @@ static inline uint8_t *gttl_reverse_complement_encoded(const uint8_t *sequence,
   {
     const uint8_t cc = sequence[idx];
 
-    rc_seq[len-1-idx] = complement_uint8_wc_remains(cc);
+    rc_seq[len-1-idx] = complement_function(cc);
   }
   return rc_seq;
 }
 
+static inline uint8_t *gttl_reverse_complement_encoded(const uint8_t *sequence,
+                                                       size_t len)
+{
+  return gttl_reverse_complement_encoded<complement_uint8_wc_remains>
+                                        (sequence,len);
+}
+
+template<uint8_t (&complement_function)(uint8_t)>
 static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
                                                            size_t len)
 {
@@ -28,8 +37,15 @@ static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
   {
     const uint8_t tmp = *fwd;
 
-    *fwd = complement_uint8_wc_remains(*bck);
-    *bck = complement_uint8_wc_remains(tmp);
+    *fwd = complement_function(*bck);
+    *bck = complement_function(tmp);
   }
+}
+
+static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
+                                                           size_t len)
+{
+  return gttl_reverse_complement_encoded_inplace<complement_uint8_wc_remains>
+                                                (sequence,len);
 }
 #endif
