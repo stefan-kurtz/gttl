@@ -80,13 +80,18 @@ class LiterateMultiseq
   }
   size_t *rank_dist_copy(void) const noexcept
   {
-    size_t *rdc = new size_t [rank_dist.size()];
+    size_t *rdc = reinterpret_cast<size_t *>
+                  (std::malloc(sizeof *rdc * rank_dist.size()));
     std::memcpy(rdc, rank_dist.data(), rank_dist.size() * sizeof *rdc);
     return rdc;
   }
   const std::array<size_t,alpha.size()+1> &rank_dist_get(void) const
   {
     return rank_dist;
+  }
+  size_t number_of_ranks(void) const noexcept
+  {
+    return rank_dist.size();
   }
 };
 #endif
