@@ -84,6 +84,7 @@ test:test_alphabet \
      test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
+     test_rdbuf \
      test_split_string \
      test_split_files \
      test_multiseq_factory \
@@ -308,6 +309,16 @@ test_fs_prio_store:./fs_prio_store_mn.x
 	@${VALGRIND} ./fs_prio_store_mn.x 1000 1000 1000 100
 	@${VALGRIND} ./fs_prio_store_mn.x 1000 1000 1000 10000
 	@${VALGRIND} ./fs_prio_store_mn.x 1000 2000 10000000 1000
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_rdbuf
+test_rdbuf:./rdbuf_mn.x
+	@${VALGRIND} ./rdbuf_mn.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
+	@${VALGRIND} ./rdbuf_mn.x ${SW175} | diff --strip-trailing-cr - ${SW175}
+	@${VALGRIND} ./rdbuf_mn.x ${Y3} | diff --strip-trailing-cr - ${Y3}
+	@${VALGRIND} ./rdbuf_mn.x ${VAC} | diff --strip-trailing-cr - ${VAC}
+	@${VALGRIND} ./rdbuf_mn.x ../testdata/SRR19536726_1_1000.fastq.gz | zdiff --strip-trailing-cr - ../testdata/SRR19536726_1_1000.fastq.gz 
+	@${VALGRIND} ./rdbuf_mn.x ../testdata/varlen_paired_both.fasta.gz | zdiff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta.gz 
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_split_string
