@@ -13,7 +13,7 @@ class GttlMultiseqFactory
   static constexpr const int buf_size = 1 << 14;
   std::vector<GttlMultiseq *> multiseq_vector;
   std::vector<size_t> seqnum_offset_vector;
-  size_t num_sequences;;
+  size_t num_sequences;
   bool fastq_paired_input;
   size_t fastq_file_total_length_get(const std::string &inputfile) const
   {
