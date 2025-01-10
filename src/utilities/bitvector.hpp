@@ -39,6 +39,14 @@ class Bitvector
   {
     value |= other.value;
   }
+  bool operator ==(const Bitvector &rhs) const noexcept
+  {
+    return value == rhs.value;
+  }
+  bool operator !=(const Bitvector &rhs) const noexcept
+  {
+    return value != rhs.value;
+  }
   size_t count(void) const noexcept
   {
     return popcount_uint64_t(value);

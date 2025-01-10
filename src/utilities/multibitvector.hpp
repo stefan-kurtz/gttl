@@ -87,6 +87,27 @@ class Multibitvector
       multibitvector[idx] |= other.multibitvector[idx];
     }
   }
+  bool operator==(const Multibitvector<track_count> &rhs) const noexcept
+  {
+    if (bits != rhs.bits) {
+      return false;
+    }
+    if constexpr (track_count) {
+      if (set_bits != rhs.set_bits) {
+        return false;
+      }
+    }
+    for (size_t idx = 0; idx < num_bitvectors; idx++) {
+      if (multibitvector[idx] != rhs.multibitvector[idx]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool operator!=(const Multibitvector<track_count> &rhs) const noexcept
+  {
+    return !(*this == rhs);
+  }
   size_t count(void) const noexcept
   {
     if constexpr (track_count)
