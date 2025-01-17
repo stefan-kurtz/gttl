@@ -15,8 +15,7 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) gzgets(FP, BUFFER, SIZE)
 #define gttl_fp_type_is_eof(FP)             gzeof(FP)
 
-
-std::string gttl_read_file(const char *file_name)
+static inline std::string gttl_read_file(const char *file_name)
 {
   FILE* fp = fopen(file_name, "rb");
   if(!fp)
@@ -93,7 +92,7 @@ using GttlFpType = FILE *;
                                              ? BUFFER : nullptr)
 #define gttl_fp_type_is_eof(FP)             feof(FP)
 
-std::string gttl_read_file(const char *file_name)
+static inline std::string gttl_read_file(const char *file_name)
 {
   std::string content;
   content.resize(gttl_file_size(file_name));
