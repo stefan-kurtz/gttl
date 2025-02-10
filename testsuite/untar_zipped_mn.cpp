@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
                                 gttl_is_in_PATH("rapidgzip");
     for (auto &&inputfile : options.inputfiles_get())
     {
-      TarReader tar_reader(inputfile,with_rapidgzip);
+      TarReader tar_reader(inputfile,with_rapidgzip,false);
       for (auto entry : tar_reader)
       {
         if (options.store_option_is_set())

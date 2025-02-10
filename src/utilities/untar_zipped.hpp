@@ -61,6 +61,7 @@ class TarReader
          current_file_pos;
   PopenReader *popen_reader;
   std::string current_filename;
+  const bool append_0_byte;
 
   // returns true if next file succesfully setup
   bool next_file(void)
@@ -101,7 +102,7 @@ class TarReader
     return true;
   }
 
-  const uint8_t *read_from_stdout(size_t count)
+  const uint8_t *read_from_stdout(size_t count, bool append_0_byte)
   {
     if (count > 0)
     {
@@ -110,19 +111,24 @@ class TarReader
         = std::min(count, current_file_size - current_file_pos);
       if (bytes2read > bytes_allocated)
       {
+        const size_t extra_byte = append_0_byte ? 1 : 0;
         data_ptr = static_cast<uint8_t *>(realloc(data_ptr,
                                                   sizeof(uint8_t)
-                                                  * (bytes2read+1)));
+                                                  * (bytes2read + extra_byte)));
         bytes_allocated = bytes2read;
       }
       const size_t read_bytes = popen_reader->fread_stdout(data_ptr,
                                                            size_t(1),
                                                            bytes2read);
-      current_file_pos += read_bytes;
       if (read_bytes != bytes2read)
       {
         throw std::string("Error reading file: Could not read to finish.");
       }
+      if (append_0_byte)
+      {
+        data_ptr[read_bytes] = '\0';
+      }
+      current_file_pos += read_bytes;
       return data_ptr;
     }
     return nullptr;
@@ -148,12 +154,13 @@ class TarReader
   }
 
   public:
-  TarReader(const std::string &filename,bool with_rapidgzip)
+  TarReader(const std::string &filename,bool with_rapidgzip,bool _append_0_byte)
     : data_ptr(nullptr)
     , bytes_allocated(0)
     , current_file_size(0)
     , current_file_pos(0)
     , popen_reader(nullptr)
+    , append_0_byte(_append_0_byte)
   {
     if (with_rapidgzip and not gttl_has_suffix(filename,".tar"))
     {
@@ -182,18 +189,21 @@ class TarReader
   {
     DecompressedFile local_entry;
     TarReader* reader;
-    bool exhausted;
+    bool append_0_byte,
+         exhausted;
     void update_iterator(void)
     {
       local_entry.set(reader->current_filename,
                       reader->current_file_size_get(),
                       reader->read_from_stdout(reader->
-                                                 current_file_size_get()));
+                                                 current_file_size_get(),
+                                               append_0_byte));
     }
 
     public:
     Iterator(TarReader* _reader)
       : reader(_reader)
+      , append_0_byte(_reader->append_0_byte)
       , exhausted(false)
     {
       update_iterator();
@@ -201,6 +211,7 @@ class TarReader
 
     Iterator(void)
       : reader(nullptr)
+      , append_0_byte(false)
       , exhausted(true)
     { }
 

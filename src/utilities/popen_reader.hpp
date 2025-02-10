@@ -89,9 +89,7 @@ class PopenReader
   }
   size_t fread_stdout(void *ptr, size_t size, size_t count)
   {
-    const size_t really_read = std::fread(ptr, size, count, stdout_ptr);
-    static_cast<uint8_t *>(ptr)[size * count] = '\0';
-    return really_read;
+    return std::fread(ptr, size, count, stdout_ptr);
   }
   int fgetc_stderr(void)
   {
