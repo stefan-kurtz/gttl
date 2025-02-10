@@ -111,7 +111,8 @@ class TarReader
       if (bytes2read > bytes_allocated)
       {
         data_ptr = static_cast<uint8_t *>(realloc(data_ptr,
-                                                  sizeof(uint8_t)*bytes2read));
+                                                  sizeof(uint8_t)
+                                                  * (bytes2read+1)));
         bytes_allocated = bytes2read;
       }
       const size_t read_bytes = popen_reader->fread_stdout(data_ptr,
