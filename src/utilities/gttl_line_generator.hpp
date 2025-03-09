@@ -5,8 +5,6 @@
 #include <cstring>
 #include "utilities/gttl_file_open.hpp"
 
-#include <iostream>
-
 template <const size_t buf_size = (1 << 14)>
 class GttlLineGenerator
 {
@@ -52,7 +50,7 @@ class GttlLineGenerator
     : line_number(0)
     , input_string(_input_string)
     , string_length(_string_length)
-    , position(_input_string)
+    , current_ptr(_input_string)
     {}
 
   ~GttlLineGenerator()
@@ -60,41 +58,34 @@ class GttlLineGenerator
     gttl_fp_type_close(file);
   }
 
-  bool advance(void)
+  bool advance(size_t *length = nullptr)
   {
     if(is_end) return false;
     ++line_number;
 
     if(input_string != nullptr)
     {
-      if(position >= input_string + string_length)
+      if(current_ptr >= input_string + string_length)
       {
         is_end = true;
         return false;
       }
 
 
-      const char* next_newline = std::find(position,
+      const char* next_newline = std::find(current_ptr,
                                            input_string + string_length,
                                            '\n');
       const char* line_end = next_newline;
 
-      // Remove trailing CRLF characters
-      while(line_end > position
-            && (*(line_end - 1) == '\r' || *(line_end - 1) == '\n'))
-      {
-        --line_end;
-      }
-
       if(out != nullptr)
       {
-        const size_t line_len = line_end - position;
+        const size_t line_len = line_end - current_ptr;
         const size_t copy_len = std::min(line_len, buf_size - 1);
-        std::memcpy(out, position, copy_len);
+        std::memcpy(out, current_ptr, copy_len);
         out[copy_len] = '\0';
       }
 
-      position = (next_newline < input_string + string_length)
+      current_ptr = (next_newline < input_string + string_length)
         ? next_newline + 1
         : input_string + string_length;
       return true;
@@ -114,6 +105,11 @@ class GttlLineGenerator
     {
       out[--len] = '\0';
     }
+
+    if(length != nullptr)
+    {
+      *length = len;
+    }
     return !is_end;
   }
 
@@ -123,7 +119,7 @@ class GttlLineGenerator
     line_number = 0;
     if(input_string != nullptr)
     {
-      position = input_string;
+      current_ptr = input_string;
     }
 #ifndef GTTL_WITHOUT_ZLIB
     gzrewind(file);
@@ -178,6 +174,11 @@ class GttlLineGenerator
     bool is_end;
   };
 
+  const char* operator*() const
+  {
+    return out;
+  }
+
   Iterator begin()
   {
     return Iterator(this, false);
@@ -186,6 +187,17 @@ class GttlLineGenerator
   Iterator end()
   {
     return Iterator(this, true);
+  }
+
+  char getc(void)
+  {
+    if(input_string != nullptr)
+    {
+      char ret = *input_string;
+      input_string += sizeof(char);
+      return ret;
+    }
+    return gttl_fp_type_getc(file);
   }
 
   private:
@@ -197,7 +209,7 @@ class GttlLineGenerator
 
   const char* input_string;
   size_t string_length;
-  const char* position;
+  const char* current_ptr;
 };
 
 #endif  // GTTL_LINE_GENERATOR_HPP

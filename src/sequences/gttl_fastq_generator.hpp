@@ -68,7 +68,15 @@ class GttlFastQGenerator
   bool advance(void)
   {
     if(is_end) return false;
-    if(out == nullptr) return true;
+    if(out == nullptr)
+    {
+      lg.set_out_buffer(nullptr);
+      for(size_t line = 0; line < 4; line++)
+      {
+        lg.advance();
+      }
+      return true;
+    }
     lg.set_out_buffer(out->header);
     lg.advance();
     lg.set_out_buffer(out->sequence);

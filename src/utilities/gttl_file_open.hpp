@@ -13,6 +13,7 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_close(FP)              gzclose(FP)
 #define gttl_fp_type_reset(FP)              gzseek(FP, 0, SEEK_SET)
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) gzgets(FP, BUFFER, SIZE)
+#define gttl_fp_type_getc(FP)               gzgetc(FP)
 #define gttl_fp_type_is_eof(FP)             gzeof(FP)
 
 static inline std::string gttl_read_file(const char *file_name)
@@ -84,25 +85,37 @@ static inline std::string gttl_read_file(const char *file_name)
 #else
 using GttlFpType = FILE *;
 #include <cstdio>
+#include <string>
+#include <stdexcept>
 #include "utilities/file_size.hpp"
 #define gttl_fp_type_open(FILENAME, MODE)   fopen(FILENAME, MODE)
 #define gttl_fp_type_close(FP)              fclose(FP)
 #define gttl_fp_type_reset(FP)              fseek(FP, 0, SEEK_SET)
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) (fgets(BUFFER, SIZE, FP) != nullptr\
                                              ? BUFFER : nullptr)
+#define gttl_fp_type_getc(FP)               getc(FP)
 #define gttl_fp_type_is_eof(FP)             feof(FP)
 
 static inline std::string gttl_read_file(const char *file_name)
 {
   std::string content;
-  content.resize(gttl_file_size(file_name));
+  size_t file_size = gttl_file_size(file_name);
+  content.resize(file_size);
   FILE* fp = fopen(file_name, "rb");
-  if(fp)
+  if(fp == nullptr)
   {
-    fread(content.data(), sizeof(char), content.size(), fp);
-    return content;
+    throw std::runtime_error(std::string("Error opening file: ")
+                             + std::to_string(errno));
   }
-  throw(errno);
+  size_t bytes_read = fread(content.data(), sizeof(char), content.size(), fp);
+  if(bytes_read != file_size)
+  {
+    throw std::runtime_error(std::string("Expected ")
+                             + std::to_string(file_size)
+                             + " bytes, but read only "
+                             + std::to_string(bytes_read));
+  }
+  return content;
 }
 #endif
 #endif
