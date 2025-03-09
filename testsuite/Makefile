@@ -88,7 +88,8 @@ test:test_alphabet \
      test_split_string \
      test_split_files \
      test_multiseq_factory \
-     test_read_vector
+     test_read_vector \
+     test_iterator_compare
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -438,6 +439,15 @@ test_read_vector:read_vector_mn.x
 	done
 	@${RM} ${TMPFILE} ${TMPFILE}.gz
 	@echo "$@ passed"
+
+.PHONY:test_iterator_compare
+test_iterator_compare:iterator_compare.x
+	@${VALGRIND} ./iterator_compare.x -q ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./iterator_compare.x -a ../testdata/varlen_paired_both.fasta.gz
+	@${VALGRIND} ./iterator_compare.x -a ${AT1MB}
+	@${VALGRIND} ./iterator_compare.x -a ${SW175}
+	@${VALGRIND} ./iterator_compare.x -q ../testdata/70x_161nt_phred64.fastq
+	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
