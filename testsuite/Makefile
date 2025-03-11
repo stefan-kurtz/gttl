@@ -89,7 +89,8 @@ test:test_alphabet \
      test_split_files \
      test_multiseq_factory \
      test_read_vector \
-     test_iterator_compare
+     test_iterator_compare \
+     test_string_of_digits
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -447,6 +448,11 @@ test_iterator_compare:iterator_compare.x
 	@${VALGRIND} ./iterator_compare.x -a ${AT1MB}
 	@${VALGRIND} ./iterator_compare.x -a ${SW175}
 	@${VALGRIND} ./iterator_compare.x -q ../testdata/70x_161nt_phred64.fastq
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_string_of_digits
+test_string_of_digits:string_of_digits.x
+	@${VALGRIND} ./string_of_digits.x
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
