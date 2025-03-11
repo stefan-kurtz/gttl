@@ -15,30 +15,49 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) gzgets(FP, BUFFER, SIZE)
 #define gttl_fp_type_getc(FP)               gzgetc(FP)
 #define gttl_fp_type_is_eof(FP)             gzeof(FP)
+#define gttl_fp_type_rewind(FP)             gzrewind(FP)
 
-static inline std::string gttl_read_file(const char *file_name)
+static inline bool is_gzip_header(const char *file_name)
 {
   FILE* fp = fopen(file_name, "rb");
   if(!fp)
   {
     throw std::runtime_error("Failed to open file: " + std::string(file_name));
   }
-
   constexpr const unsigned char magic_bytes[] = {0x1F, 0x8B};
   unsigned char header[sizeof(magic_bytes)];
-
   if(fread(header, sizeof(unsigned char), sizeof(header), fp) != sizeof(header))
   {
     fclose(fp);
-    throw std::runtime_error("Failed to read header of file: "
-                             + std::string(file_name));
+    // A file that does not have at least as many bytes as the GZip header
+    // cannot be a valid GZip file by definition.
+    return false;
   }
+  fclose(fp);
+  if(memcmp(header, magic_bytes, sizeof(magic_bytes)) == 0)
+  {
+    return true;
+  }else
+  {
+    return false;
+  }
+}
+
+static inline std::string gttl_read_file(const char *file_name)
+{
+  const bool is_gzip = is_gzip_header(file_name);
 
   // Check if the file is compressed by comparing magic-bytes
-  if(memcmp(header, magic_bytes, sizeof(magic_bytes)) != 0)
+  if(!is_gzip)
   {
+    FILE* fp = fopen(file_name, "rb");
+    if(!fp)
+    {
+      throw std::runtime_error("Failed to open file: " +
+                               std::string(file_name));
+    }
+
     // Not compressed
-    rewind(fp);
     size_t file_size = gttl_file_size(file_name);
 
     std::string content(file_size, '\0');
@@ -53,7 +72,6 @@ static inline std::string gttl_read_file(const char *file_name)
     return content;
   }else
   {
-    fclose(fp);
     gzFile fp = gzopen(file_name, "rb");
     if(!fp)
     {
@@ -95,6 +113,7 @@ using GttlFpType = FILE *;
                                              ? BUFFER : nullptr)
 #define gttl_fp_type_getc(FP)               getc(FP)
 #define gttl_fp_type_is_eof(FP)             feof(FP)
+#define gttl_fp_type_rewind(FP)             rewind(FP)
 
 static inline std::string gttl_read_file(const char *file_name)
 {

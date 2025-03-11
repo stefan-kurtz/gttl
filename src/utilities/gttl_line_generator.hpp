@@ -121,11 +121,7 @@ class GttlLineGenerator
     {
       current_ptr = input_string;
     }
-#ifndef GTTL_WITHOUT_ZLIB
-    gzrewind(file);
-#else
-    rewind(file);
-#endif
+    gttl_fp_type_rewind(file);
   }
 
   size_t line_number_get(void) const noexcept

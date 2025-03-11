@@ -114,11 +114,7 @@ class GttlLineIterator
       endofunit = false;
       file_index = 0;
       line_number = 0;
-#ifndef GTTL_WITHOUT_ZLIB
-      gzrewind(in_fp);
-#else
-      rewind(in_fp);
-#endif
+      gttl_fp_type_rewind(in_fp);
     }
     GttlLineIterator(GttlFpType _in_fp)
         : inputfiles(nullptr)
