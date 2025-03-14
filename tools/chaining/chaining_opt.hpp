@@ -1,5 +1,5 @@
-#ifndef UNWORDS_OPT_HPP
-#define UNWORDS_OPT_HPP
+#ifndef CHAINING_OPT_HPP
+#define CHAINING_OPT_HPP
 #include <cstddef>
 #include <string>
 #include <vector>

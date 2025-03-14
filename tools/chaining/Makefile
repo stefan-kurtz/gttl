@@ -59,9 +59,6 @@ chaining.x:chaining.o chaining_opt.o
 test_chaining.x:test_chaining.o
 	${LD} ${LDFLAGS} test_chaining.o -o $@ ${LDLIBS}
 
-test_lower_upper_bound.x:test_lower_upper_bound.o
-	${LD} ${LDFLAGS} test_lower_upper_bound.o -o $@ ${LDLIBS}
-
 %.o:%.cpp
 	${CXX} ${TIME_OPTION} -o $@ -c $< ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
