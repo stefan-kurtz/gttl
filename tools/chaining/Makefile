@@ -92,7 +92,7 @@ test_large:chaining.x
 		echo '# select first '$$lines' lines of ecoli_vs_ecoli.of'; \
 		head -n $$lines testdata/ecoli_vs_ecoli.of > ${TMPFILE}; \
     ./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-global.txt; \
-    ./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt; \
+    ./chaining.x --local ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "Congratulations, $@ passed."
