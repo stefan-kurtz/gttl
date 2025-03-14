@@ -42,7 +42,10 @@ else
   CFLAGS += -DNDEBUG
   ifeq ($(SYSTEM),Darwin)
   else
+	  ifeq ($(OS),Windows_NT)
+	  else
     LDLIBS+=-ldl
+	  endif
   endif
 endif
 
