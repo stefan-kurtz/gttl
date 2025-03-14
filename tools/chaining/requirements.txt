@@ -1,0 +1,20 @@
+# operations
+dict D, f ∈ M, non-negative integer p
+- insert(D, f): if f is not in D, then insert f into D
+- delete(D, f): remove f from D
+- pred(D, p): determine the largest match f'' ∈ D (with respect to ≺_y)
+  satisfying e(f'').y < p. If there is no such match, then pred(D, p) = ⊥
+  which stands for undefined.
+- succ(D, p): determine the smallest match f'' ∈ D (with respect to ≺_y)
+  satisfying p < e(f'').y. If there is no such match, then succ(D, p) = ⊥.
+
+# std::set
+template<class Key,
+         class Compare = std::less<Key>,
+         class Allocator = std::allocator<Key>> class set;
+associative container that contains a sorted set of unique objects of type Key.
+Sorting is done using the key comparison function Compare. 
+-  insert: inserts elements or nodes (since C++17)
+-  erase: erases elements 
+-  lower_bound: returns an iterator to the first element not less than the given key
+-  upper_bound: returns an iterator to the first element greater than the given key 

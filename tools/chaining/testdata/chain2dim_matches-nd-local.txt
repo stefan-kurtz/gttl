@@ -1,0 +1,10 @@
+# chain 0: length 1 score 1
+# chain 1: length 1 score 1
+# chain 2: length 1 score 1
+# chain 3: length 1 score 1
+# chain 4: length 1 score 1
+# chain 5: length 1 score 1
+# chain 6: length 1 score 1
+# chain 7: length 1 score 1
+# chain 8: length 1 score 1
+# chain 9: length 1 score 1

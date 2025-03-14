@@ -1,0 +1,4 @@
+# chain 0: length 2 score 2
+# chain 1: length 2 score 2
+# chain 2: length 2 score 2
+# chain 3: length 2 score 2
