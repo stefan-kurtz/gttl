@@ -1,5 +1,6 @@
 all:
 	@make -C testsuite test
+	@make -C tools/chaining test
 	@make -C tools/ntcard test
 	@make -C tools/unwords test
 
@@ -9,6 +10,7 @@ debug:
 .PHONY:clean	
 clean:
 	@make -C testsuite clean
+	@make -C tools/chaining clean
 	@make -C tools/ntcard clean
 	@make -C tools/unwords clean
 
