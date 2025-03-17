@@ -58,7 +58,7 @@ static inline std::string gttl_read_file(const char *file_name)
     }
 
     // Not compressed
-    size_t file_size = gttl_file_size(file_name);
+    const size_t file_size = gttl_file_size(file_name);
 
     std::string content(file_size, '\0');
     if(fread(content.data(), 1, file_size, fp) != file_size)
