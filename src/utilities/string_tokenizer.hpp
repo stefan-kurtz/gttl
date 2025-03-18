@@ -6,20 +6,20 @@
 
 class StringTokenizer
 {
-  private:
-    std::vector<std::string> token_list;
+  std::vector<std::string> token_list;
   public:
-  StringTokenizer(const std::string &instring) :
-    token_list({})
+  StringTokenizer(const std::string &instring)
   {
     bool inword = false;
-    std::string buffer{};
+    std::string buffer;
 
     for (auto it = instring.begin(); it != instring.end(); ++it)
     {
+      /* split string in maximum length substrings of alphabetic/digit/_/.
+         and store each substring in vector */
       const char cc = *it;
-      constexpr const int underscore = static_cast<int>('_');
-      constexpr const int dot = static_cast<int>('.');
+      static constexpr const int underscore = static_cast<int>('_');
+      static constexpr const int dot = static_cast<int>('.');
 
       if (isalpha(cc) || isdigit(cc) || cc == underscore || cc == dot)
       {
