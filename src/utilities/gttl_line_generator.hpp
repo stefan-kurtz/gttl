@@ -2,118 +2,203 @@
 #define GTTL_LINE_GENERATOR_HPP
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
+#include <string>
+#include <type_traits>
 #include "utilities/gttl_file_open.hpp"
 
-template <const size_t buf_size = (1 << 14)>
+template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 class GttlLineGenerator
 {
   public:
-  GttlLineGenerator(GttlFpType fp, bool _is_end = false)
+  explicit GttlLineGenerator (GttlFpType fp, bool _is_end = false)
     : file(fp)
     , is_end(_is_end)
     , line_number(0)
-    , input_string(nullptr)
   {
-    out = default_buffer;
+    set_default_out_buffer();
   }
 
-  GttlLineGenerator(const char* file_name, bool _is_end = false)
+  explicit GttlLineGenerator(const char* file_name, bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , is_end(_is_end)
     , line_number(0)
-    , input_string(nullptr)
   {
-    out = default_buffer;
+    set_default_out_buffer();
   }
 
-  GttlLineGenerator(const char* file_name,
+  explicit GttlLineGenerator(const char* file_name,
+                    std::string* _out,
+                    bool _is_end = false) requires use_heap
+    : file(gttl_fp_type_open(file_name, "rb"))
+    , out(_out)
+    , is_end(_is_end)
+    , line_number(0)
+    {}
+
+  explicit GttlLineGenerator(const char* file_name,
                     char (&_out)[buf_size],
-                    bool _is_end = false)
+                    bool _is_end = false) requires (!use_heap)
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(_out)
     , is_end(_is_end)
     , line_number(0)
-    , input_string(nullptr)
     {}
 
-
-  GttlLineGenerator(GttlFpType fp, char (&_out)[buf_size], bool _is_end = false)
+  explicit GttlLineGenerator(GttlFpType fp,
+                             std::string* _out,
+                             bool _is_end = false) requires use_heap
     : file(fp)
     , out(_out)
     , is_end(_is_end)
     , line_number(0)
-    , input_string(nullptr)
     {}
 
-  GttlLineGenerator(const char* _input_string, size_t _string_length)
-    : line_number(0)
+  explicit GttlLineGenerator(GttlFpType fp,
+                             char (&_out)[buf_size],
+                             bool _is_end = false) requires (!use_heap)
+    : file(fp)
+    , out(_out)
+    , is_end(_is_end)
+    , line_number(0)
+    {}
+
+  explicit GttlLineGenerator(const char* _input_string, size_t _string_length)
+    : file(nullptr)
+    , is_end(_string_length == 0)
+    , line_number(0)
     , input_string(_input_string)
     , string_length(_string_length)
     , current_ptr(_input_string)
-    {}
+    {
+      set_default_out_buffer();
+    }
 
   ~GttlLineGenerator()
   {
     gttl_fp_type_close(file);
   }
 
+private:
+  bool read_from_mapped_string(size_t *length)
+  {
+    if(current_ptr >= input_string + string_length)
+    {
+      is_end = true;
+      return false;
+    }
+
+    const char* next_newline = std::find(current_ptr,
+                                         input_string + string_length,
+                                         '\n');
+    const size_t line_len = next_newline - current_ptr;
+    const size_t copy_len = std::min(line_len, buf_size - 1);
+
+    if(out != nullptr)
+    {
+      if constexpr (use_heap)
+      {
+        out->resize(copy_len);
+        std::memcpy(out->data(), current_ptr, copy_len);
+      }else
+      {
+        std::memcpy(out, current_ptr, copy_len);
+        out[copy_len] = '\0';
+      }
+    }
+
+    if(length != nullptr)
+    {
+      (*length) = copy_len;
+    }
+
+    current_ptr = (next_newline < input_string + string_length)
+      ? next_newline + 1
+      : input_string + string_length;
+    return true;
+  }
+
+  bool read_from_file(size_t* length)
+  {
+    // ch is an int, which is larger than char, to accomodate
+    // error-values and EOF (=-1)
+    int ch = EOF;
+    size_t len = 0;
+    while((ch = gttl_fp_type_getc(file)) != EOF)
+    {
+      if(ch == '\r') continue;
+      if(ch == '\n') break;
+      if constexpr(use_heap)
+      {
+        out->push_back(static_cast<char>(ch));
+      }else
+      {
+        out[len] = static_cast<char>(ch);
+        len++;
+      }
+    }
+    if constexpr(!use_heap)
+    {
+      out[len] = '\0';
+    }
+    if(ch == EOF) is_end = true;
+
+    if(length != nullptr)
+    {
+      if constexpr(use_heap)
+      {
+        *length = out->size();
+      }else
+      {
+        *length = len;
+      }
+    }
+    return !is_end;
+  }
+
+public:
+  bool discard_line(size_t *length = nullptr)
+  {
+    char ch = EOF;
+    if(length != nullptr)
+    {
+      *length = 0;
+    }
+    while((ch = gttl_fp_type_getc(file)) != EOF)
+    {
+      if(ch == '\n') break;
+      if(length != nullptr)
+      {
+        (*length)++;
+      }
+    }
+    return (ch != EOF);
+  }
+
   bool advance(size_t *length = nullptr)
   {
+    if(length != nullptr)
+    {
+      *length = 0;
+    }
     if(is_end) return false;
     ++line_number;
 
     if(input_string != nullptr)
     {
-      if(current_ptr >= input_string + string_length)
-      {
-        is_end = true;
-        return false;
-      }
-
-
-      const char* next_newline = std::find(current_ptr,
-                                           input_string + string_length,
-                                           '\n');
-      const char* line_end = next_newline;
-
-      if(out != nullptr)
-      {
-        const size_t line_len = line_end - current_ptr;
-        const size_t copy_len = std::min(line_len, buf_size - 1);
-        std::memcpy(out, current_ptr, copy_len);
-        out[copy_len] = '\0';
-      }
-
-      current_ptr = (next_newline < input_string + string_length)
-        ? next_newline + 1
-        : input_string + string_length;
-      return true;
+      return read_from_mapped_string(length);
     }
 
     if(out == nullptr)
     {
-      char to_discard[buf_size];
-      if(!gttl_fp_type_gets(file, to_discard, buf_size))
-        is_end = true;
-      return !is_end;
-    }
-    if(!gttl_fp_type_gets(file, out, buf_size))
-      is_end = true;
-    size_t len = std::strlen(out);
-    while(len > 0 && (out[len-1] == '\r' || out[len-1] == '\n'))
-    {
-      out[--len] = '\0';
+      return discard_line(length);
     }
 
-    if(length != nullptr)
-    {
-      *length = len;
-    }
-    return !is_end;
+    return read_from_file(length);
   }
 
-  void reset(void)
+  void reset()
   {
     is_end = false;
     line_number = 0;
@@ -124,34 +209,54 @@ class GttlLineGenerator
     gttl_fp_type_rewind(file);
   }
 
-  size_t line_number_get(void) const noexcept
+  [[nodiscard]] size_t line_number_get() const noexcept
   {
     return line_number;
   }
 
-  void set_out_buffer(char* _out)
+  void set_out_buffer(std::string* _out) requires use_heap
   {
     out = _out;
+  }
+
+  void set_out_buffer(char* _out) requires (!use_heap)
+  {
+    out = _out;
+  }
+
+  void set_default_out_buffer()
+  {
+    if constexpr(use_heap)
+    {
+      out = &default_buffer;
+    }else
+    {
+      out = default_buffer;
+    }
   }
 
   class Iterator
   {
     public:
-    Iterator(GttlLineGenerator* generator, bool end = false)
+    explicit Iterator(GttlLineGenerator* generator, bool end = false)
       : gen(generator), is_end(end)
     {
       if(!end) ++(*this);
     }
 
-    const char* operator*() const
+    const std::string& operator*() const requires use_heap
+    {
+      return *(gen->out);
+    }
+
+    const char* operator*() const requires (!use_heap)
     {
       return gen->out;
     }
 
     Iterator& operator++()
     {
-      if(!gen->advance())
-        is_end = true;
+      is_end = !gen->advance();
       return *this;
     }
 
@@ -160,17 +265,17 @@ class GttlLineGenerator
       return (is_end == other.is_end) && (gen == other.gen);
     }
 
-    bool operator!=(const Iterator& other) const
-    {
-      return !(*this == other);
-    }
-
     private:
     GttlLineGenerator* gen;
     bool is_end;
   };
 
-  const char* operator*() const
+  std::string operator*() const requires use_heap
+  {
+    return *out;
+  }
+
+  const char* operator*() const requires (!use_heap)
   {
     return out;
   }
@@ -185,7 +290,7 @@ class GttlLineGenerator
     return Iterator(this, true);
   }
 
-  char getc(void)
+  char getc()
   {
     if(input_string != nullptr)
     {
@@ -197,15 +302,18 @@ class GttlLineGenerator
   }
 
   private:
+  using buf_type = std::conditional_t<use_heap, std::string, char[buf_size]>;
+  using out_type = std::conditional_t<use_heap, std::string*, char*>;
+
   GttlFpType file;
-  char* out;
+  out_type out;
   bool is_end;
-  char default_buffer[buf_size];
+  buf_type default_buffer;
   size_t line_number;
 
-  const char* input_string;
-  size_t string_length;
-  const char* current_ptr;
+  const char* input_string = nullptr;
+  size_t string_length = 0;
+  const char* current_ptr = nullptr;
 };
 
 #endif  // GTTL_LINE_GENERATOR_HPP
