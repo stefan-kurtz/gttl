@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "utilities/constexpr_for.hpp"
-#include "utilities/gttl_line_iterator.hpp"
+#include "utilities/gttl_line_generator.hpp"
 #include "utilities/split_string.hpp"
 // #include "sequences/stored_match.hpp"
 #include "stored_match.hpp"
@@ -26,17 +26,16 @@ int main(int argc, char *argv[])
   }
 
   constexpr const int buf_size = 1 << 14;
-  std::string buffer{};
   const std::string inputfile = options.inputfile_get();
   const bool local_option = options.local_option_is_set();
   const bool silent_option = options.silent_option_is_set();
   std::vector<GttlStoredMatch> matches{};
   try
   {
-    GttlLineIterator<buf_size> gttl_li(inputfile.c_str());
-    while (gttl_li.next(&buffer))
+    GttlLineGenerator<buf_size> gttl_lg(inputfile.c_str());
+    for(const auto *line : gttl_lg)
     {
-      std::vector<std::string> vec = gttl_split_string(buffer, ' ');
+      std::vector<std::string> vec = gttl_split_string(line, ' ');
       if (vec.size() != 5)
       {
         throw std::string(": line has ") + std::to_string(vec.size()) +
@@ -48,7 +47,6 @@ int main(int argc, char *argv[])
                            std::stoul(vec[3])-std::stoul(vec[2])+1,
                            0,
                            std::stoul(vec[4]));
-      buffer.clear();
     }
   }
   catch (std::string &msg)

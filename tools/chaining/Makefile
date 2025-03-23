@@ -3,7 +3,7 @@ LD=${CXX}
 CFLAGS=-g -m64 -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -pedantic
 GTTL=../..
 CPPFLAGS=-I ${GTTL}/src
-CXXFLAGS=-std=c++17
+CXXFLAGS=-std=c++20
 LDFLAGS=-g -m64
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
