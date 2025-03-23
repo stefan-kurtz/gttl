@@ -19,8 +19,8 @@ if __name__ == "__main__":
             continue
 
     # and print all remaining ones
-    print("The following source-files are not being tested anywhere")
+    print("> The following source-files are not being tested anywhere")
     for s in sources:
-        print(s)
+        print("- " + s)
 
     # TODO: We should - once all tests are implemented - assert tht the list is empty.
