@@ -1,25 +1,25 @@
 #ifndef CHAINING_HPP
 #define CHAINING_HPP
-#include <vector>
-#include <set>
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-#include <cassert>
 #include "utilities/constexpr_if.hpp"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <iterator>
+#include <set>
+#include <vector>
 
 template <typename ElementClass, bool local = false>
 class Chain
 {
   private:
-  static constexpr const size_t undef = ~size_t(0);
+  static constexpr const size_t undef = ~static_cast<size_t>(0);
   std::vector<size_t> precursors;
   std::vector<uint32_t> scores;
 
   struct ElementValue
   {
     uint32_t value;
-    ElementValue(uint32_t _value)
+    explicit ElementValue(uint32_t _value)
     : value(_value)
     {}
   };
@@ -96,7 +96,7 @@ class Chain
   };
 
   public:
-  Chain(const std::vector<ElementClass> &elements)
+  explicit Chain(const std::vector<ElementClass> &elements)
   : precursors(elements.size(), undef)
   , scores(elements.size(), 0)
   {
@@ -121,13 +121,11 @@ class Chain
       event_schedule.emplace_back(elements[idx].primary_endpos_get(),
                                   idx + 1);
     }
-    std::sort(event_schedule.begin(), event_schedule.end());
+    std::ranges::sort(event_schedule);
 
-    for (auto it_sweep_line = event_schedule.begin();
-         it_sweep_line != event_schedule.end();
-         it_sweep_line++)
+    for (auto & it_sweep_line : event_schedule)
     {
-      auto current = std::get<1>(*it_sweep_line);
+      auto current = std::get<1>(it_sweep_line);
 
       if (current < 0) // process start point
       {
@@ -192,32 +190,31 @@ class Chain
       }
     }
   }
-  size_t precursor(size_t idx) const noexcept
+  [[nodiscard]] size_t precursor(size_t idx) const noexcept
   {
     assert(idx < precursors.size());
     return precursors[idx];
   }
-  uint32_t score(size_t idx) const noexcept
+  [[nodiscard]] uint32_t score(size_t idx) const noexcept
   {
     assert(idx < scores.size());
     return scores[idx];
   }
-  uint32_t score(void) const noexcept
+  [[nodiscard]] uint32_t score(void) const noexcept
   {
-    return *std::max_element(scores.begin(), scores.end());
+    return *std::ranges::max_element(scores);
   }
   Iterator begin(void) const noexcept
   {
     auto first_elem = std::distance(scores.begin(),
-                                    std::max_element(scores.begin(),
-                                                     scores.end()));
+                                    std::ranges::max_element(scores));
     return Iterator(precursors, first_elem);
   }
   Iterator end(void) const noexcept
   {
     return Iterator(precursors, undef);
   }
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     size_t size = 0;
     for (auto it = begin(); it != end(); ++it)

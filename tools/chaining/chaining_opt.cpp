@@ -1,9 +1,8 @@
-#include <cstddef>
+#include "utilities/cxxopts.hpp"
+#include "chaining_opt.hpp"
 #include <cstdbool>
 #include <string>
 #include <vector>
-#include "utilities/cxxopts.hpp"
-#include "chaining_opt.hpp"
 
 ChainingOptions::ChainingOptions(void)
   : inputfiles({})
@@ -76,10 +75,10 @@ void ChainingOptions::parse(int argc, char **argv)
       help_option = true;
     }
 
-    const std::vector<std::string> unmatched_args = result.unmatched();
-    for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+    const std::vector<std::string>& unmatched_args = result.unmatched();
+    for (const auto & unmatched_arg : unmatched_args)
     {
-      inputfiles.push_back(unmatched_args[idx]);
+      inputfiles.push_back(unmatched_arg);
     }
     if (inputfiles.size() < 1)
     {
@@ -92,7 +91,7 @@ void ChainingOptions::parse(int argc, char **argv)
   }
   catch (const cxxopts::OptionException &e)
   {
-    std::cerr << options.help() << std::endl;
+    std::cerr << options.help() << '\n';
     if (!help_option)
     {
       throw std::invalid_argument(e.what());

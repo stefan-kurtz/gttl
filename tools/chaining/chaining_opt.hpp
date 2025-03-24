@@ -1,9 +1,8 @@
 #ifndef CHAINING_OPT_HPP
 #define CHAINING_OPT_HPP
-#include <cstddef>
+#include <cstdbool>
 #include <string>
 #include <vector>
-#include <cstdbool>
 
 class ChainingOptions
 {
@@ -16,9 +15,9 @@ class ChainingOptions
   public:
   ChainingOptions(void);
   void parse(int argc, char **argv);
-  bool help_option_is_set(void) const noexcept;
-  bool local_option_is_set(void) const noexcept;
-  bool silent_option_is_set(void) const noexcept;
-  const std::string &inputfile_get(void) const noexcept;
+  [[nodiscard]] bool help_option_is_set(void) const noexcept;
+  [[nodiscard]] bool local_option_is_set(void) const noexcept;
+  [[nodiscard]] bool silent_option_is_set(void) const noexcept;
+  [[nodiscard]] const std::string &inputfile_get(void) const noexcept;
 };
 #endif

@@ -46,48 +46,48 @@ class GttlStoredMatch
            _distance <= max_value &&
            _weight <= max_value);
   }
-  uint32_t primary_startpos_get(void) const noexcept
+  [[nodiscard]] uint32_t primary_startpos_get(void) const noexcept
   {
     return primary_startpos;
   }
-  uint32_t primary_len_get(void) const noexcept
+  [[nodiscard]] uint32_t primary_len_get(void) const noexcept
   {
     return primary_len;
   }
-  uint32_t primary_endpos_get(void) const noexcept
+  [[nodiscard]] uint32_t primary_endpos_get(void) const noexcept
   {
     return primary_startpos + primary_len - 1;
   }
-  uint32_t secondary_startpos_get(void) const noexcept
+  [[nodiscard]] uint32_t secondary_startpos_get(void) const noexcept
   {
     return secondary_startpos;
   }
-  uint32_t secondary_len_get(void) const noexcept
+  [[nodiscard]] uint32_t secondary_len_get(void) const noexcept
   {
     return secondary_len;
   }
-  uint32_t secondary_endpos_get(void) const noexcept
+  [[nodiscard]] uint32_t secondary_endpos_get(void) const noexcept
   {
     return secondary_startpos + secondary_len - 1;
   }
-  uint32_t distance_get(void) const noexcept
+  [[nodiscard]] uint32_t distance_get(void) const noexcept
   {
     return distance;
   }
-  uint32_t weight_get(void) const noexcept
+  [[nodiscard]] uint32_t weight_get(void) const noexcept
   {
     return weight;
   }
-  int32_t gap_score(void) const noexcept
+  [[nodiscard]] int32_t gap_score(void) const noexcept
   {
     return - static_cast<int32_t>(primary_endpos_get())
            - static_cast<int32_t>(secondary_endpos_get());
   }
-  int32_t gap_score(const GttlStoredMatch& other) const noexcept
+  [[nodiscard]] int32_t gap_score(const GttlStoredMatch& other) const noexcept
   {
     return static_cast<int32_t>(primary_startpos_get())
          + static_cast<int32_t>(secondary_startpos_get())
-         + static_cast<int32_t>(other.gap_score());
+         + other.gap_score();
   }
   /* the == and != operators are needed to check the consistency of the filter
      results in verify_filer */
@@ -105,31 +105,31 @@ class GttlStoredMatch
     return not (*this == other);
   }
   /* compare by weight only */
-  bool superior_weight(const GttlStoredMatch& other) const noexcept
+  [[nodiscard]] bool superior_weight(const GttlStoredMatch& other) const noexcept
   {
     return this->weight_get() > other.weight_get();
   }
   /* compare weights and if a tie, compare by primary startpos */
-  bool superior_weight_tie_primary_startpos(const GttlStoredMatch& other)
+  [[nodiscard]] bool superior_weight_tie_primary_startpos(const GttlStoredMatch& other)
     const noexcept
   {
       return this->superior_weight(other) or
              (this->weight_get() == other.weight_get() and
               this->primary_startpos_get() > other.primary_startpos_get());
   }
-  bool inferior_secondary_endpos(const uint32_t pos) const noexcept
+  [[nodiscard]] bool inferior_secondary_endpos(const uint32_t pos) const noexcept
   {
     return this->secondary_endpos_get() < pos;
   }
   /* compare secondary_endpos and if a tie, compare by all values */
-  bool inferior_secondary_endpos_tie_unequal(const GttlStoredMatch& other)
+  [[nodiscard]] bool inferior_secondary_endpos_tie_unequal(const GttlStoredMatch& other)
     const noexcept
   {
       return this->inferior_secondary_endpos(other.secondary_endpos_get()) or
              (this->secondary_endpos_get() == other.secondary_endpos_get() and
               *this != other);
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     return std::to_string(primary_startpos) + "," +
            std::to_string(primary_len) + "," +

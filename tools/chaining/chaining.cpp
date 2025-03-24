@@ -1,9 +1,9 @@
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 #include "utilities/constexpr_for.hpp"
 #include "utilities/gttl_line_generator.hpp"
 #include "utilities/split_string.hpp"
-// #include "sequences/stored_match.hpp"
 #include "stored_match.hpp"
 #include "chaining.hpp"
 #include "chaining_opt.hpp"
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &e)
   {
-    std::cerr << argv[0] << e.what() << std::endl;
+    std::cerr << argv[0] << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
 
-  constexpr const int buf_size = 1 << 14;
+  constexpr const int buf_size = 1U << 14U;
   const std::string inputfile = options.inputfile_get();
   const bool local_option = options.local_option_is_set();
   const bool silent_option = options.silent_option_is_set();
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
       std::vector<std::string> vec = gttl_split_string(line, ' ');
       if (vec.size() != 5)
       {
-        throw std::string(": line has ") + std::to_string(vec.size()) +
-              std::string(" columns, but 5 are expected");
+        throw std::runtime_error(": line has " + std::to_string(vec.size())
+                                 + " columns, but 5 are expected");
       }
       matches.emplace_back(std::stoul(vec[0]),
                            std::stoul(vec[1])-std::stoul(vec[0])+1,
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
   }
   catch (std::string &msg)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << msg << '\n';
     return EXIT_FAILURE;
   }
 
@@ -61,12 +61,12 @@ int main(int argc, char *argv[])
     {
       Chain<GttlStoredMatch, compile_time_local_option> chaining(matches);
       std::cout << "# chain: length " << chaining.size()
-                << " score " << chaining.score() << std::endl;
+                << " score " << chaining.score() << '\n';
       if (not silent_option)
       {
         for (auto idx : chaining)
         {
-          std::cout << idx << " " << matches[idx].to_string() << std::endl;
+          std::cout << idx << " " << matches[idx].to_string() << '\n';
         }
       }
     }
