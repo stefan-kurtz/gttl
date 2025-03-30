@@ -105,24 +105,28 @@ class GttlStoredMatch
     return not (*this == other);
   }
   /* compare by weight only */
-  [[nodiscard]] bool superior_weight(const GttlStoredMatch& other) const noexcept
+  [[nodiscard]] bool superior_weight(const GttlStoredMatch& other)
+    const noexcept
   {
     return this->weight_get() > other.weight_get();
   }
   /* compare weights and if a tie, compare by primary startpos */
-  [[nodiscard]] bool superior_weight_tie_primary_startpos(const GttlStoredMatch& other)
+  [[nodiscard]] bool superior_weight_tie_primary_startpos(
+    const GttlStoredMatch& other)
     const noexcept
   {
       return this->superior_weight(other) or
              (this->weight_get() == other.weight_get() and
               this->primary_startpos_get() > other.primary_startpos_get());
   }
-  [[nodiscard]] bool inferior_secondary_endpos(const uint32_t pos) const noexcept
+  [[nodiscard]] bool inferior_secondary_endpos(const uint32_t pos)
+    const noexcept
   {
     return this->secondary_endpos_get() < pos;
   }
   /* compare secondary_endpos and if a tie, compare by all values */
-  [[nodiscard]] bool inferior_secondary_endpos_tie_unequal(const GttlStoredMatch& other)
+  [[nodiscard]] bool inferior_secondary_endpos_tie_unequal(
+    const GttlStoredMatch& other)
     const noexcept
   {
       return this->inferior_secondary_endpos(other.secondary_endpos_get()) or
