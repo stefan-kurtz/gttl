@@ -1,12 +1,12 @@
 #ifndef GTTL_LINE_GENERATOR_HPP
 #define GTTL_LINE_GENERATOR_HPP
 
+#include "utilities/gttl_file_open.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <string>
 #include <type_traits>
-#include "utilities/gttl_file_open.hpp"
 
 template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 class GttlLineGenerator
@@ -39,7 +39,7 @@ class GttlLineGenerator
 
   explicit GttlLineGenerator(const char* file_name,
                     char (&_out)[buf_size],
-                    bool _is_end = false) requires (!use_heap)
+                    bool _is_end = false) requires (not use_heap)
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(_out)
     , is_end(_is_end)
@@ -57,7 +57,7 @@ class GttlLineGenerator
 
   explicit GttlLineGenerator(GttlFpType fp,
                              char (&_out)[buf_size],
-                             bool _is_end = false) requires (!use_heap)
+                             bool _is_end = false) requires (not use_heap)
     : file(fp)
     , out(_out)
     , is_end(_is_end)
@@ -74,6 +74,12 @@ class GttlLineGenerator
     {
       set_default_out_buffer();
     }
+
+  // Delete copy/move constructur & assignment operator
+  GttlLineGenerator(const GttlLineGenerator &other) = delete;
+  GttlLineGenerator& operator=(const GttlLineGenerator &other) = delete;
+  GttlLineGenerator(GttlLineGenerator&& other) = delete;
+  GttlLineGenerator& operator=(GttlLineGenerator&& other) = delete;
 
   ~GttlLineGenerator()
   {
@@ -103,6 +109,7 @@ private:
         std::memcpy(out->data(), current_ptr, copy_len);
       }else
       {
+        //TODO: Don't use 0-terminated string here
         std::memcpy(out, current_ptr, copy_len);
         out[copy_len] = '\0';
       }
@@ -138,7 +145,7 @@ private:
         len++;
       }
     }
-    if constexpr(!use_heap)
+    if constexpr(not use_heap)
     {
       out[len] = '\0';
     }
@@ -154,10 +161,9 @@ private:
         *length = len;
       }
     }
-    return !is_end;
+    return not is_end;
   }
 
-public:
   bool discard_line(size_t *length = nullptr)
   {
     char ch = EOF;
@@ -176,6 +182,7 @@ public:
     return (ch != EOF);
   }
 
+public:
   bool advance(size_t *length = nullptr)
   {
     if(length != nullptr)
@@ -184,6 +191,11 @@ public:
     }
     if(is_end) return false;
     ++line_number;
+
+    if constexpr(use_heap)
+    {
+      if(out != nullptr) out->clear();
+    }
 
     if(input_string != nullptr)
     {
@@ -219,7 +231,7 @@ public:
     out = _out;
   }
 
-  void set_out_buffer(char* _out) requires (!use_heap)
+  void set_out_buffer(char* _out) requires (not use_heap)
   {
     out = _out;
   }
@@ -241,7 +253,7 @@ public:
     explicit Iterator(GttlLineGenerator* generator, bool end = false)
       : gen(generator), is_end(end)
     {
-      if(!end) ++(*this);
+      if(not end) ++(*this);
     }
 
     const std::string& operator*() const requires use_heap
@@ -249,20 +261,20 @@ public:
       return *(gen->out);
     }
 
-    const char* operator*() const requires (!use_heap)
+    const char* operator*() const requires (not use_heap)
     {
       return gen->out;
     }
 
     Iterator& operator++()
     {
-      is_end = !gen->advance();
+      is_end = not gen->advance();
       return *this;
     }
 
     bool operator==(const Iterator& other) const
     {
-      return (is_end == other.is_end) && (gen == other.gen);
+      return (is_end == other.is_end) and (gen == other.gen);
     }
 
     private:
@@ -275,7 +287,7 @@ public:
     return *out;
   }
 
-  const char* operator*() const requires (!use_heap)
+  const char* operator*() const requires (not use_heap)
   {
     return out;
   }

@@ -1,14 +1,14 @@
 #ifndef GTTL_FASTA_GENERATOR_HPP
 #define GTTL_FASTA_GENERATOR_HPP
 
-#include <stdexcept>
+#include "utilities/gttl_file_open.hpp"
+#include "utilities/gttl_line_generator.hpp"
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include "utilities/gttl_file_open.hpp"
-#include "utilities/gttl_line_generator.hpp"
 
-template <const size_t buf_size = (1 << 14), const bool use_heap = false>
+template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 struct GttlFastAEntry
 {
   [[nodiscard]] std::string_view header_get() const noexcept
@@ -34,12 +34,12 @@ struct GttlFastAEntry
   }
 };
 
-template <const size_t buf_size = (1 << 14), const bool use_heap = false>
+template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 class GttlFastAGenerator
 {
   public:
   explicit GttlFastAGenerator(const char* file_name,
-                              bool _is_end = false) requires (!use_heap)
+                              bool _is_end = false) requires (not use_heap)
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(gttl_fp_type_open(file_name, "rb"), out->header, _is_end)
@@ -86,90 +86,63 @@ class GttlFastAGenerator
   bool advance()
   {
     if(is_end) return false;
+    //TODO: Test this case. In all generators.
     if(out == nullptr)
     {
-      //TODO: Test this! Both here and in the FastQGenerator.
-      // This section might still be affected by the return-value problem.
       if constexpr(use_heap)
       {
         std::string to_discard;
         lg.set_out_buffer(&to_discard);
-        lg.advance();
-        lg.advance();
-        bool ret = true;
-        while(!to_discard.starts_with('>'))
-        {
-          ret = lg.advance();
-        }
-        return ret;
       }else
       {
         char to_discard[buf_size];
         lg.set_out_buffer(to_discard);
-        lg.advance();
-        lg.advance();
-        bool ret = true;
-        while(to_discard[0] != '>')
-        {
-          ret = lg.advance();
-        }
-        return ret;
       }
+      lg.advance();
+      lg.advance();
+      is_first_entry = false;
+      while(lg.getc() != '>')
+      {
+        if(not lg.advance()) return false;
+      }
+      return true;
     }
-    char next = lg.getc();
-    // (char) -1 is EOF
-    if(next == -1) return false;
 
     if constexpr (use_heap)
     {
       out->header.clear();
       out->sequence.clear();
-      if (next == '>')
+      if (is_first_entry)
       {
-        lg.set_out_buffer(&out->header);
-        lg.advance();
-        out->header = '>' + out->header;
-      }else
-      {
-        lg.set_out_buffer(&out->header);
-        lg.advance();
-        out->header = ">";
-        out->header += next + out->header;
+        lg.getc();
+        is_first_entry = false;
       }
+      lg.set_out_buffer(&out->header);
+      if(not lg.advance()) return false;
     }else
     {
-      out->header[0] = '>';
-      if (next == '>')
+      if(is_first_entry)
       {
-        lg.set_out_buffer(out->header + sizeof(char));
-      } else
-      {
-        (out->header)[1] = next;
-        lg.set_out_buffer(out->header + (2 * sizeof(char)));
+        lg.getc();
+        is_first_entry = false;
       }
-      lg.advance();
+      lg.set_out_buffer(out->header);
+      if(not lg.advance()) return false;
     }
     size_t offset = 0;
     size_t line_length = 0;
-    next = lg.getc();
-    while(next != '>')
+    char next = lg.getc();
+    // (char) -1 is EOF
+    while(next != '>' and next != static_cast<char>(-1))
     {
-      // (char) -1 is EOF
-      if(next == -1)
-        break;
       if constexpr(use_heap)
       {
-        //TODO: Is there a better way to do this?
-        //      frequently copying a buffer like this is slow.
-        std::string next_seqline;
-        lg.set_out_buffer(&next_seqline);
+        lg.set_out_buffer(&out->sequence);
         lg.advance(&line_length);
-        out->sequence += next + next_seqline;
-        offset += line_length + 1;
+        out->sequence.insert(0, 1, next);
       }else
       {
-        out->sequence[offset] = next;
-        offset++;
+        out->sequence[offset++] = next;
         lg.set_out_buffer((out->sequence) + ((offset) * sizeof(char)));
         lg.advance(&line_length);
         offset += line_length;
@@ -182,6 +155,8 @@ class GttlFastAGenerator
   void reset(void)
   {
     lg.reset();
+    is_first_entry = true;
+    is_end = false;
   }
 
   void line_number(void) const noexcept
@@ -195,7 +170,7 @@ class GttlFastAGenerator
     explicit Iterator(GttlFastAGenerator* generator, bool end = false)
       : gen(generator), is_end(end)
     {
-      if(!end) ++(*this);
+      if(not end) ++(*this);
     }
 
     const GttlFastAEntry<buf_size, use_heap>* operator*() const
@@ -205,19 +180,18 @@ class GttlFastAGenerator
 
     const Iterator& operator++()
     {
-      if(!gen->advance())
-        is_end = true;
+      if(not gen->advance()) is_end = true;
       return *this;
     }
 
     bool operator==(const Iterator& other) const
     {
-      return (is_end == other.is_end) && (gen == other.gen);
+      return (is_end == other.is_end) and (gen == other.gen);
     }
 
     bool operator!=(const Iterator& other) const
     {
-      return !(*this == other);
+      return not (*this == other);
     }
 
     private:
@@ -239,6 +213,7 @@ class GttlFastAGenerator
   GttlFastAEntry<buf_size, use_heap> default_buffer;
   GttlFastAEntry<buf_size, use_heap>* out;
   bool is_end;
+  bool is_first_entry = true;
   GttlLineGenerator<buf_size, use_heap> lg;
 };
 #endif // GTTL_FASTA_GENERATOR_HPP

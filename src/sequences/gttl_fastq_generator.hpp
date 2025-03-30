@@ -1,14 +1,14 @@
 #ifndef GTTL_FASTQ_GENERATOR_HPP
 #define GTTL_FASTQ_GENERATOR_HPP
 
+#include "utilities/gttl_file_open.hpp"
+#include "utilities/gttl_line_generator.hpp"
 #include <cstddef>
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include "utilities/gttl_file_open.hpp"
-#include "utilities/gttl_line_generator.hpp"
 
-template <const size_t buf_size = (1 << 14), const bool use_heap = false>
+template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 struct GttlFastQEntry
 {
   [[nodiscard]] std::string_view header_get() const noexcept
@@ -40,12 +40,12 @@ struct GttlFastQEntry
   }
 };
 
-template <const size_t buf_size = (1 << 14), const bool use_heap = false>
+template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
 class GttlFastQGenerator
 {
   public:
   explicit GttlFastQGenerator(const char* file_name,
-                              bool _is_end = false) requires (!use_heap)
+                              bool _is_end = false) requires (not use_heap)
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(gttl_fp_type_open(file_name, "rb"), out->header, _is_end) {}
@@ -123,6 +123,7 @@ class GttlFastQGenerator
   void reset()
   {
     lg.reset();
+    is_end = false;
   }
 
   [[nodiscard]] size_t line_number() const noexcept
@@ -136,7 +137,7 @@ class GttlFastQGenerator
     explicit Iterator(GttlFastQGenerator* generator, bool end = false)
       : gen(generator), is_end(end)
     {
-      if(!end) ++(*this);
+      if(not end) ++(*this);
     }
 
     const GttlFastQEntry<buf_size, use_heap>* operator*() const
@@ -146,19 +147,21 @@ class GttlFastQGenerator
 
     const Iterator& operator++()
     {
-      if(!gen->advance())
+      if(not gen->advance())
+      {
         is_end = true;
+      }
       return *this;
     }
 
     bool operator==(const Iterator& other) const
     {
-      return (is_end == other.is_end) && (gen == other.gen);
+      return (is_end == other.is_end) and (gen == other.gen);
     }
 
     bool operator!=(const Iterator& other) const
     {
-      return !(*this == other);
+      return not (*this == other);
     }
 
     private:

@@ -194,11 +194,24 @@ test_line_iterator:line_iterator.x
 	@echo "" >> ${TMPFILE}
 	@${VALGRIND} ./line_iterator.x ${TMPFILE} | diff --strip-trailing-cr - ${TMPFILE}
 	@cat ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@${VALGRIND} ./line_iterator.x --all ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@${VALGRIND} ./line_iterator.x --all ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@${RM} ${TMPFILE}
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_line_generator
+test_line_generator:line_generator.x
+	@./line_generator.py `find .. -name '*.[ch]pp'` | sh -s
+	@${VALGRIND} ./line_generator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
+	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
+	@cat ${AT1MB} | tr -d '\n' > ${TMPFILE}
+	@echo "" >> ${TMPFILE}
+	@${VALGRIND} ./line_generator.x ${TMPFILE} | diff --strip-trailing-cr - ${TMPFILE}
+	@cat ${AT1MB} ${AT1MB} > ${TMPFILE}
+	@${VALGRIND} ./line_generator.x ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
+	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
+	@${VALGRIND} ./line_generator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
