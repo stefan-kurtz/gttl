@@ -39,7 +39,14 @@ class Chain
     {}
     bool operator ()(const size_t id1, const size_t id2) const
     {
-      return elements[id1].inferior_secondary_endpos_tie_unequal(elements[id2]);
+      const auto &e1 = elements[id1];
+      const auto &e2 = elements[id2];
+
+      if(e1.secondary_endpos_get() != e2.secondary_endpos_get())
+      {
+        return e1.secondary_endpos_get() < e2.secondary_endpos_get();
+      }
+      return id1 < id2;
     }
     bool operator ()(const size_t id, const ElementValue &element) const
     {
