@@ -479,6 +479,7 @@ test_binary_iterator:binary_iterator.x
 	@${VALGRIND} ./binary_iterator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
 	@${VALGRIND} ./binary_iterator.x ${SW175} | diff --strip-trailing-cr - ${SW175}
 	@while IFS= read -r file; do \
+       file=$$(echo "$$file" | tr -d '\r'); \
        ${VALGRIND} ./binary_iterator.x "../testdata/$$file" | diff --strip-trailing-cr - "../testdata/$$file"; \
      done < ../testdata/corrupt_files.txt
 	@echo "Congratulations. $@ passed"
