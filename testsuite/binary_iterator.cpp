@@ -16,12 +16,14 @@ int main(int argc, char *argv[])
     }
     catch (const std::out_of_range &err)
     {
-      std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what() << '\n';
+      std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what()
+                << '\n';
       return EXIT_FAILURE;
     }
-    catch(const std::runtime_error &err)
+    catch (const std::runtime_error &err)
     {
-      std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what() << '\n';
+      std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what()
+                << '\n';
       return EXIT_FAILURE;
     }
   }
