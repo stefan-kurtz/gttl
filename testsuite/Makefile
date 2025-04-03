@@ -90,7 +90,8 @@ test:test_alphabet \
      test_multiseq_factory \
      test_read_vector \
      test_iterator_compare \
-     test_string_of_digits
+     test_string_of_digits \
+     test_binary_iterator
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -471,6 +472,15 @@ test_iterator_compare:iterator_compare.x
 .PHONY:test_string_of_digits
 test_string_of_digits:string_of_digits.x
 	@${VALGRIND} ./string_of_digits.x
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_binary_iterator
+test_binary_iterator:binary_iterator.x
+	@${VALGRIND} ./binary_iterator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
+	@${VALGRIND} ./binary_iterator.x ${SW175} | diff --strip-trailing-cr - ${SW175}
+	@while IFS= read -r file; do \
+       ${VALGRIND} ./binary_iterator.x "../testdata/$$file" | diff --strip-trailing-cr - "../testdata/$$file"; \
+     done < ../testdata/corrupt_files.txt
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
