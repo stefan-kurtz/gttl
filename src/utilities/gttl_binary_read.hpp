@@ -129,6 +129,10 @@ class BinaryFileIterator
       if (buffer_size == 0)
       {
         // In this case we reached EOF
+        if(std::fclose(file) != 0)
+        {
+          throw std::runtime_error("Could not close file!");
+        }
         file = nullptr;
       }
     }
