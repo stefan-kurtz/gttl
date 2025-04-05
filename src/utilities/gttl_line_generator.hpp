@@ -349,11 +349,23 @@ public:
   {
     if(input_string != nullptr)
     {
-      char ret = *input_string;
-      input_string += sizeof(char);
-      return ret;
+      if(current_ptr >= input_string + string_length)
+      {
+        is_end = true;
+        return EOF;
+      }
+      return *current_ptr++;
     }
-    return gttl_fp_type_getc(file);
+
+    if(file_buf_pos >= file_buf_end)
+    {
+      if(not refill_file_buffer())
+      {
+        is_end = true;
+        return EOF;
+      }
+    }
+    return file_buf[file_buf_pos++];
   }
 
   private:

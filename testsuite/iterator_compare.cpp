@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   const bool use_heap = result["use-heap"].as<bool>();
 
 
-  constexpr const size_t buf_size = (1 << 14);
+  constexpr const size_t buf_size = (1 << 20);
   size_t pseudo_hash_gen = 0;
   size_t pseudo_hash_it = 0;
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     runtime.reset();
     for(auto &entry : fa_it)
     {
-      pseudo_hash_it += count_occ(entry.header_get(), '>');
+      pseudo_hash_it += count_occ(entry.header_get(), ':');
       pseudo_hash_it += count_occ(entry.sequence_get(), 'a');
       pseudo_hash_it += count_occ(entry.sequence_get(), 'A');
     }
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
       runtime.reset();
       for(auto entry : fa_gen)
       {
-        pseudo_hash_gen += count_occ(entry->header_get(), '>');
+        pseudo_hash_gen += count_occ(entry->header_get(), ':');
         pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
         pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
       }
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
       runtime.reset();
       for(auto entry : fa_gen)
       {
-        pseudo_hash_gen += count_occ(entry->header_get(), '>');
+        pseudo_hash_gen += count_occ(entry->header_get(), ':');
         pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
         pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
       }
