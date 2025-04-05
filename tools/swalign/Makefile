@@ -171,7 +171,7 @@ test-agc-DNA:sw_all_against_all.x ${TESTVEVFILE}
 	  ${MEMCHECK} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 60 > ${TMPFILE1}; \
 	  ./alignment_parse.py ${TMPFILE1}; \
 	  ./cmp_with_alignment.py -s ${TMPFILE1} smrt100-2000.a60_new.tsv; \
-	  ${MEMCHECK} $${prog} -d smrt100-2000-first.fna -q smrt100-2000-last.fna -s unit_score_nuc_lower -g 4 1 -v 2 | sort -k 1 -n -k 2 -n | diff -I '^#' - testdata/smrt100-2000-d_vs_q.tsv; \
+	  ${MEMCHECK} $${prog} -d smrt100-2000-first.fna -q smrt100-2000-last.fna -s unit_score_nuc_lower -g 4 1 -v 2 | grep -v '^#' | sort -k 1 -n -k 2 -n | diff -I '^#' - testdata/smrt100-2000-d_vs_q.tsv; \
 	  $${prog} -d testdata/humhdabcd.fna -q testdata/humdystrop.fna -g 4 1 -v 2 -a 5 | diff -I '^#' - testdata/humhdabcd_humdystrop.tsv; \
 	done
 	@echo "tests for DNA alignments with affine gap costs (vectorized) passed"
@@ -254,7 +254,7 @@ test-swaga-proteins-self:sw_all_against_all.x
 test-swaga-proteins-query:sw_all_against_all.x
 	@$(eval TMPFILE1 := $(shell mktemp))
 	@for num_threads in 1 2 4; do\
-	  ./sw_all_against_all.x -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | sort -k1 -n -k2 -n | diff -I '^#' - testdata/ref-query-protein.tsv;\
+	  ./sw_all_against_all.x -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | grep -v '^#' | sort -k1 -n -k2 -n | diff -I '^#' - testdata/ref-query-protein.tsv;\
 	done
 	@./select-best.py -a 29 testdata/ref-query-protein.tsv | sort -k1 -n -k2 -n > ${TMPFILE1}
 	@for num_threads in 1 2 4; do\
