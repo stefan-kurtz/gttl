@@ -4,6 +4,7 @@
 #include "utilities/gttl_file_open.hpp"
 #include <algorithm>
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <string>
 #include <type_traits>
@@ -128,40 +129,56 @@ private:
 
   bool read_from_file(size_t* length)
   {
-    // ch is an int, which is larger than char, to accomodate
-    // error-values and EOF (=-1)
-    int ch = EOF;
+    if(length != nullptr) *length = 0;
     size_t len = 0;
-    while((ch = gttl_fp_type_getc(file)) != EOF)
+
+    if constexpr(use_heap) out->clear();
+
+    while(true)
     {
-      if(ch == '\r') continue;
-      if(ch == '\n') break;
-      if constexpr(use_heap)
+      if(file_buf_pos >= file_buf_end)
       {
-        out->push_back(static_cast<char>(ch));
+        if(!refill_file_buffer())
+        {
+          is_end = true;
+          return len > 0;
+        }
+      }
+
+      char* next_newline = static_cast<char*>(std::memchr(file_buf + file_buf_pos, '\n', file_buf_end - file_buf_pos));
+      if(next_newline != nullptr)
+      {
+        size_t line_len = next_newline - (file_buf + file_buf_pos);
+        if constexpr(use_heap)
+        {
+          out->append(file_buf + file_buf_pos, line_len);
+        }else
+        {
+          std::memcpy(out + len, file_buf + file_buf_pos, line_len);
+          len += line_len;
+          out[len] = '\0';
+        }
+        file_buf_pos += line_len + 1;
+        break;
+      }
+      // In this case there is no newline, so we copy everything and continue reading
+      size_t remaining = file_buf_end - file_buf_pos;
+      if constexpr (use_heap)
+      {
+        out->append(file_buf + file_buf_pos, remaining);
       }else
       {
-        out[len] = static_cast<char>(ch);
-        len++;
+        std::memcpy(out + len, file_buf + file_buf_pos, remaining);
+        len += remaining;
       }
+      file_buf_pos = file_buf_end;
     }
-    if constexpr(not use_heap)
-    {
-      out[len] = '\0';
-    }
-    if(ch == EOF) is_end = true;
 
     if(length != nullptr)
     {
-      if constexpr(use_heap)
-      {
-        *length = out->size();
-      }else
-      {
-        *length = len;
-      }
+      *length = len;
     }
-    return not is_end;
+    return true;
   }
 
   bool discard_line(size_t *length = nullptr)
@@ -218,6 +235,8 @@ public:
     {
       current_ptr = input_string;
     }
+    file_buf_pos = 0;
+    file_buf_end = 0;
     gttl_fp_type_rewind(file);
   }
 
@@ -231,7 +250,7 @@ public:
     out = _out;
   }
 
-  void set_out_buffer(char* _out) requires (not use_heap)
+  void set_out_buffer(char* const _out) requires (not use_heap)
   {
     out = _out;
   }
@@ -316,6 +335,17 @@ public:
   private:
   using buf_type = std::conditional_t<use_heap, std::string, char[buf_size]>;
   using out_type = std::conditional_t<use_heap, std::string*, char*>;
+
+  char file_buf[buf_size]{};
+  size_t file_buf_pos = 0;
+  size_t file_buf_end = 0;
+
+  bool refill_file_buffer()
+  {
+    file_buf_end = gttl_fp_type_read(file_buf, sizeof(char), buf_size, file);
+    file_buf_pos = 0;
+    return file_buf_end > 0;
+  }
 
   GttlFpType file;
   out_type out;

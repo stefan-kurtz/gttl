@@ -16,6 +16,7 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_getc(FP)               gzgetc(FP)
 #define gttl_fp_type_is_eof(FP)             gzeof(FP)
 #define gttl_fp_type_rewind(FP)             gzrewind(FP)
+#define gttl_fp_type_read(BUFFER, SIZE, COUNT, FP) gzread(FP, BUFFER, (COUNT)*(SIZE))
 
 static inline bool is_gzip_header(const char *file_name)
 {
@@ -114,6 +115,7 @@ using GttlFpType = FILE *;
 #define gttl_fp_type_getc(FP)               getc(FP)
 #define gttl_fp_type_is_eof(FP)             feof(FP)
 #define gttl_fp_type_rewind(FP)             rewind(FP)
+#define gttl_fp_type_read(BUFFER, SIZE, COUNT, FP) fread(BUFFER, SIZE, COUNT, FP)
 
 static inline std::string gttl_read_file(const char *file_name)
 {
