@@ -3,6 +3,7 @@
 #ifndef UNIT_SCORE_AA_HPP
 #define UNIT_SCORE_AA_HPP
 #include <cstdint>
+#include <cstddef>
 struct Unit_score_aa
 {
   static constexpr const char characters[] = "ARNDCQEGHILKMFPSTWYVBZX*";
@@ -61,6 +62,5 @@ struct Unit_score_aa
       /* * */ {-5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5,
                -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5}};
   static constexpr const int8_t smallest_score = -5;
-  static constexpr const int8_t highest_score = 2;
 };
 #endif

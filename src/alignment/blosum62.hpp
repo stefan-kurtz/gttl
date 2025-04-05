@@ -3,7 +3,8 @@
 #ifndef BLOSUM62_HPP
 #define BLOSUM62_HPP
 #include <cstdint>
-    struct Blosum62
+#include <cstddef>
+struct Blosum62
 {
   static constexpr const char characters[] = "ARNDCQEGHILKMFPSTWYVBZX*";
   static constexpr size_t num_of_chars = size_t(24);
@@ -61,6 +62,5 @@
       /* * */ {-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,
                -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 1}};
   static constexpr const int8_t smallest_score = -4;
-  static constexpr const int8_t highest_score = 11;
 };
 #endif
