@@ -153,7 +153,7 @@ test-agc-proteins:sw_all_against_all.x ${TESTVECFILE}
 	  ${MEMCHECK} $${prog} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -t 2 -a 1 | ./largerscore.py - testdata/ref-query-protein.tsv; \
 	  for moption in "" "-m"; do\
 	    ${MEMCHECK} $${prog} -d Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 5 $${moption} | diff -I '^#' - testdata/Q6GZS4-query-cigar.tsv; \
-	    ${MEMCHECK} $${prog} -d Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 60 $${moption} | diff -I '^#' - testdata/Q6GZS4-query-align.aln; \
+	    ${MEMCHECK} $${prog} -d Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 60 $${moption} | diff -I '^#' - testdata/Q6GZS4-query-align.txt; \
 	  done;\
 	done
 	@echo "tests for protein alignments with affine gap costs (vectorized) passed"
@@ -360,7 +360,7 @@ test-restrict:sw_all_against_all.x testdata/seq18.fasta testdata/seq50.fasta tes
 	@echo "$@ passed"
 
 .PHONY:test_mmseq_FP
-test_mmseq_FP:
+test_mmseq_FP:sw_all_against_all.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@./sw_all_against_all.x -h -a 60 -d testdata/A0A059IV01.fna  -q testdata/C0QTH6.fna > ${TMPFILE}
 	@./alignment_parse.py ${TMPFILE}

@@ -74,7 +74,7 @@ class SWOutputResultShared
       std::fputc('\t',fpout);
     } else
     {
-      fprintf(fpout,"%lu\t%lu\t",i,j);
+      fprintf(fpout,"%zu\t%zu\t",i,j);
     }
   }
 
@@ -201,7 +201,7 @@ class SWOutputResultShared
                                         best_coords.raw_score);
         if (dp_score != static_cast<size_t>(best_coords.raw_score))
         {
-          fprintf(stderr,"file %s, line %d: dp_score = %lu != %u "
+          fprintf(stderr,"file %s, line %d: dp_score = %zu != %u "
                          "expected_score\n",
                  __FILE__,__LINE__,dp_score,best_coords.raw_score);
           exit(EXIT_FAILURE);

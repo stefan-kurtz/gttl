@@ -293,7 +293,7 @@ struct SWOptions
     }
     if (best > 0)
     {
-      fprintf(fpout," -b %lu",best);
+      fprintf(fpout," -b %zu",best);
     }
     if (min_bit_score > 0)
     {
@@ -305,7 +305,7 @@ struct SWOptions
     }
     if (num_threads > 1)
     {
-      fprintf(fpout," -t %lu",num_threads);
+      fprintf(fpout," -t %zu",num_threads);
     }
     if (dbfile != nullptr)
     {
