@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, argparse
+sys.path.append('../scripts')
 from fastaIterator import fasta_next
 
 def parse_arguments(argv):

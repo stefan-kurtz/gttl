@@ -18,7 +18,7 @@ def fasta_next(filename):
   for line in stream:
     if not re.search(r'^(>|\s*$|\s*#)',line):
       seq_list.append(line)
-    elif len(line) > 0 and line[0] == '>':
+    elif line.startswith('>'):
       if header is not None:
         yield header, seq_list2sequence(seq_list)
         seq_list.clear()

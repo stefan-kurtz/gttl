@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, re, argparse
+sys.path.append('../../scripts')
 from SEmatch import SEmatch
 
 def show_best_hits(best,sort_by_score_only,fields_list,current_hits):

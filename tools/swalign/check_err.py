@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse, sys, shutil, os
+sys.path.append('../../scripts')
 from mysubprocess import mysubprocess_expect
 
 def files2msg_get(p):

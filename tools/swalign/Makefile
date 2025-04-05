@@ -48,9 +48,17 @@ ifeq ($(prof),yes)
 endif
 
 ifeq (${MACHINE},x86_64)
-  avxflag=${shell lscpu | egrep 'Markierung|Flags' | tr ' ' '\n' | grep -i AVX2}
-  ifeq (${avxflag},avx2)
+  avxflag=${shell lscpu | egrep 'Markierung|Flags' | tr ' ' '\n' | grep -i AVX512 | head -c 6}
+  ifeq (${avxflag},avx512)
+    # we assume avx512 implies avx2 availability
     CFLAGS += -mavx2
+    # the following does not work yet
+    # CFLAGS += -DAVX512
+  else
+    avxflag=${shell lscpu | egrep 'Markierung|Flags' | tr ' ' '\n' | grep -i AVX2 | head -c 4}
+    ifeq (${avxflag},avx2)
+      CFLAGS += -mavx2
+    endif
   endif
 endif
 
