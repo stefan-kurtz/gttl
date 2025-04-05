@@ -8,6 +8,7 @@ on:
       - '**.c'
       - '**.hpp'
       - '**.h'
+      - '**Makefile'
       - '.github/workflows/code-check.yml'
 
   pull_request:
