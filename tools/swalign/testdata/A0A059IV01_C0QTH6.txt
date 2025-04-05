@@ -1,0 +1,11 @@
+# Options: ./sw_all_against_all.x -v 2 -g 11 1 -a 60 -h -d A0A059IV01.fna -q C0QTH6.fna
+# Fields: s. seqid, q. seqid, s. start, s. len, q. start, q. len, score, bit score
+A0A059IV01	C0QTH6	8	65	42	66	108	46
+Sbjct  8    IAIGLAVFGMLGAG-LGIANIFSAMLNGIARNPESEGKMKSYVYIGAAMVEIMGLLAFVL  66
+            |  | |     | |  |  |     | | ||||   ||      || |  |   |     
+Query  42   IGAGVAIGAAAGGGAAGLGNAIRGVLEGMARNPNMGGKLLTTMFIGMALIETFVLYGLLI  101
+
+Sbjct  67   AMLLIF  72
+            |    |
+Query  102  AIIFLF  107
+
