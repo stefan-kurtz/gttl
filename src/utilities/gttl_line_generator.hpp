@@ -145,7 +145,11 @@ private:
         }
       }
 
-      char* next_newline = static_cast<char*>(std::memchr(file_buf + file_buf_pos, '\n', file_buf_end - file_buf_pos));
+      char* next_newline =
+        static_cast<char*>(
+          std::memchr(file_buf + file_buf_pos,
+                      '\n',
+                      file_buf_end - file_buf_pos));
       if(next_newline != nullptr)
       {
         size_t line_len = next_newline - (file_buf + file_buf_pos);
@@ -161,7 +165,8 @@ private:
         file_buf_pos += line_len + 1;
         break;
       }
-      // In this case there is no newline, so we copy everything and continue reading
+      // In this case there is no newline,
+      // so we copy everything and continue reading
       size_t remaining = file_buf_end - file_buf_pos;
       if constexpr (use_heap)
       {
@@ -184,13 +189,32 @@ private:
   bool discard_line(size_t *length = nullptr)
   {
     char ch = EOF;
+    size_t len = 0;
+
     if(length != nullptr)
     {
       *length = 0;
     }
-    while((ch = gttl_fp_type_getc(file)) != EOF)
+
+    while(true)
     {
-      if(ch == '\n') break;
+      if(file_buf_pos >= file_buf_end)
+      {
+        if(!refill_file_buffer())
+        {
+          is_end = true;
+          return len > 0;
+        }
+      }
+
+      ch = file_buf[file_buf_pos];
+      if(ch == '\n')
+      {
+        file_buf_pos++;
+        break;
+      }
+
+      file_buf_pos++;
       if(length != nullptr)
       {
         (*length)++;
