@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <string>
 #include <type_traits>
 
@@ -138,7 +139,7 @@ private:
     {
       if(file_buf_pos >= file_buf_end)
       {
-        if(!refill_file_buffer())
+        if(not refill_file_buffer())
         {
           is_end = true;
           return len > 0;
@@ -153,6 +154,16 @@ private:
       if(next_newline != nullptr)
       {
         size_t line_len = next_newline - (file_buf + file_buf_pos);
+
+        //Remove \r in case of DOS-style line-endings
+        const char& last_char = *(file_buf + file_buf_pos + line_len - 1);
+        bool removed_cr = false;
+        if (last_char == '\r')
+        {
+          line_len--;
+          removed_cr = true;
+        }
+
         if constexpr(use_heap)
         {
           out->append(file_buf + file_buf_pos, line_len);
@@ -162,7 +173,7 @@ private:
           len += line_len;
           out[len] = '\0';
         }
-        file_buf_pos += line_len + 1;
+        file_buf_pos += line_len + 1 + static_cast<size_t>(removed_cr);
         break;
       }
       // In this case there is no newline,
@@ -200,7 +211,7 @@ private:
     {
       if(file_buf_pos >= file_buf_end)
       {
-        if(!refill_file_buffer())
+        if(not refill_file_buffer())
         {
           is_end = true;
           return len > 0;
