@@ -86,68 +86,80 @@ class GttlFastAGenerator
   bool advance()
   {
     if(is_end) return false;
-    //TODO: Test this case. In all generators.
+
     if(out == nullptr)
     {
-      if constexpr(use_heap)
+      lg.set_out_buffer(nullptr);
+
+      if(not lg.advance()) return false;
+
+      while(true)
       {
-        std::string to_discard;
-        lg.set_out_buffer(&to_discard);
-      }else
-      {
-        char to_discard[buf_size];
-        lg.set_out_buffer(to_discard);
+        int ch = lg.getc();
+        if(ch == EOF or ch == '>') break;
+        lg.advance();
       }
-      lg.advance();
-      lg.advance();
-      is_first_entry = false;
-      while(lg.getc() != '>')
-      {
-        if(not lg.advance()) return false;
-      }
-      return true;
+
+      is_end = (lg.line_number_get() == 0);
+      return not is_end;
     }
 
-    if constexpr (use_heap)
+    if(is_first_entry)
+    {
+      int ch = lg.getc();
+      if(ch != '>') return false;
+      is_first_entry = false;
+    }
+
+    if constexpr(use_heap)
     {
       out->header.clear();
       out->sequence.clear();
-      if (is_first_entry)
-      {
-        lg.getc();
-        is_first_entry = false;
-      }
       lg.set_out_buffer(&out->header);
-      if(not lg.advance()) return false;
     }else
     {
-      if(is_first_entry)
-      {
-        lg.getc();
-        is_first_entry = false;
-      }
+      out->header[0] = '\0';
+      out->sequence[0] = '\0';
       lg.set_out_buffer(out->header);
-      if(not lg.advance()) return false;
     }
-    size_t offset = 0;
-    size_t line_length = 0;
-    char next = lg.getc();
-    // (char) -1 is EOF
-    while(next != '>' and next != static_cast<char>(-1))
+
+    if(not lg.advance())
     {
-      if constexpr(use_heap)
+      is_end = true;
+      return false;
+    }
+
+    if constexpr(not use_heap)
+    {
+      size_t offset = 0;
+      while(true)
       {
-        lg.set_out_buffer(&out->sequence);
-        lg.advance(&line_length);
-        out->sequence.insert(0, 1, next);
-      }else
-      {
-        out->sequence[offset++] = next;
-        lg.set_out_buffer((out->sequence) + ((offset) * sizeof(char)));
-        lg.advance(&line_length);
-        offset += line_length;
+        int ch = lg.getc();
+        if(ch == EOF or ch == '>') break;
+
+        out->sequence[offset++] = static_cast<char>(ch);
+        lg.set_out_buffer(out->sequence + offset);
+        size_t len = 0;
+        if(not lg.advance(&len)) break;
+        offset += len;
       }
-      next = lg.getc();
+      out->sequence[offset] = '\0';
+    }else
+    {
+      std::string temp;
+      temp.reserve(buf_size);
+      while(true)
+      {
+        int ch = lg.getc();
+        if(ch == EOF or ch == '>') break;
+
+        temp.clear();
+        out->sequence.push_back(static_cast<char>(ch));
+        lg.set_out_buffer(&temp);
+        size_t len = 0;
+        if(not lg.advance(&len)) break;
+        out->sequence.append(temp, 0, temp.size());
+      }
     }
     return true;
   }
@@ -159,7 +171,7 @@ class GttlFastAGenerator
     is_end = false;
   }
 
-  void line_number(void) const noexcept
+  [[nodiscard]] size_t line_number(void) const noexcept
   {
     return lg.line_number_get();
   }

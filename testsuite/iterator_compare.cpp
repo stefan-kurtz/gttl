@@ -13,7 +13,7 @@
 //TODO: valgrind
 //TODO: Test with very-large-lines
 
-inline size_t count_occ(const std::string_view string, char symbol)
+inline static size_t count_occ(const std::string_view string, char symbol)
 {
   return std::ranges::count(string, symbol);
 }
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   const bool use_heap = result["use-heap"].as<bool>();
 
 
-  constexpr const size_t buf_size = (1 << 20);
+  constexpr const size_t buf_size = (1 << 14);
   size_t pseudo_hash_gen = 0;
   size_t pseudo_hash_it = 0;
 

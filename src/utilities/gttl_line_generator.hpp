@@ -155,13 +155,16 @@ private:
       {
         size_t line_len = next_newline - (file_buf + file_buf_pos);
 
-        //Remove \r in case of DOS-style line-endings
-        const char& last_char = *(file_buf + file_buf_pos + line_len - 1);
         bool removed_cr = false;
-        if (last_char == '\r')
+        if(line_len > 0)
         {
-          line_len--;
-          removed_cr = true;
+          //Remove \r in case of DOS-style line-endings
+          const char* const last_char = (file_buf + file_buf_pos + line_len - 1);
+          if (*last_char == '\r')
+          {
+            line_len--;
+            removed_cr = true;
+          }
         }
 
         if constexpr(use_heap)
