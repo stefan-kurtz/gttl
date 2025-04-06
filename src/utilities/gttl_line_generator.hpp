@@ -159,7 +159,8 @@ private:
         if(line_len > 0)
         {
           //Remove \r in case of DOS-style line-endings
-          const char* const last_char = (file_buf + file_buf_pos + line_len - 1);
+          const char* const last_char =
+            (file_buf + file_buf_pos + line_len - 1);
           if (*last_char == '\r')
           {
             line_len--;
