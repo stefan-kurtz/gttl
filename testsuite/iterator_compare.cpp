@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cassert>
 #include <cstring>
 #include <iostream>
 #include "sequences/gttl_fasta_generator.hpp"
@@ -16,6 +15,16 @@
 inline static size_t count_occ(const std::string_view string, char symbol)
 {
   return std::ranges::count(string, symbol);
+}
+
+inline static void assert_always(bool condition)
+{
+  if(not condition)
+  {
+    std::cerr <<
+      "Assertion error: Iterators do not yield the same result!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 int main(int argc, char *argv[])
@@ -62,7 +71,7 @@ int main(int argc, char *argv[])
   const bool use_heap = result["use-heap"].as<bool>();
 
 
-  constexpr const size_t buf_size = (1 << 14);
+  constexpr const size_t buf_size = (1 << 20);
   size_t pseudo_hash_gen = 0;
   size_t pseudo_hash_it = 0;
 
@@ -113,7 +122,7 @@ int main(int argc, char *argv[])
     // If the hashes are not identical, a mistake exists in
     // at least one implementation.
     // Performance comparinsons make no sense when this is the case.
-    assert(pseudo_hash_it == pseudo_hash_gen);
+    assert_always(pseudo_hash_it == pseudo_hash_gen);
   }
   else if(result["fasta"].as<bool>())
   {
@@ -154,6 +163,6 @@ int main(int argc, char *argv[])
       runtime.show("Generator method");
     }
     std::cout << pseudo_hash_it << "\t" << pseudo_hash_gen << "\n";
-    assert(pseudo_hash_it == pseudo_hash_gen);
+    assert_always(pseudo_hash_it == pseudo_hash_gen);
   }
 }
