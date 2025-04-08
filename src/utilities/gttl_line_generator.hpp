@@ -133,8 +133,6 @@ private:
     if(length != nullptr) *length = 0;
     size_t len = 0;
 
-    if constexpr(use_heap) out->clear();
-
     while(true)
     {
       if(file_buf_pos >= file_buf_end)
@@ -239,7 +237,7 @@ private:
   }
 
 public:
-  bool advance(size_t *length = nullptr)
+  bool advance(size_t *length = nullptr, bool append = false)
   {
     if(length != nullptr)
     {
@@ -250,7 +248,7 @@ public:
 
     if constexpr(use_heap)
     {
-      if(out != nullptr) out->clear();
+      if(out != nullptr and not append) out->clear();
     }
 
     if(input_string != nullptr)

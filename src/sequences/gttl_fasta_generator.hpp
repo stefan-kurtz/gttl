@@ -146,19 +146,14 @@ class GttlFastAGenerator
       out->sequence[offset] = '\0';
     }else
     {
-      std::string temp;
-      temp.reserve(buf_size);
+      lg.set_out_buffer(&out->sequence);
       while(true)
       {
         int ch = lg.getc();
         if(ch == EOF or ch == '>') break;
 
-        temp.clear();
         out->sequence.push_back(static_cast<char>(ch));
-        lg.set_out_buffer(&temp);
-        size_t len = 0;
-        if(not lg.advance(&len)) break;
-        out->sequence.append(temp, 0, temp.size());
+        if(not lg.advance(nullptr, true)) break;
       }
     }
     return true;
