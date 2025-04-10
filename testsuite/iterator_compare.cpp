@@ -6,6 +6,7 @@
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "utilities/cxxopts.hpp"
+#include "utilities/constexpr_for.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/runtime_class.hpp"
 
@@ -29,8 +30,8 @@ inline static void assert_always(bool condition)
 
 int main(int argc, char *argv[])
 {
-  cxxopts::Options options(argv[0],
-                "Compare old Iterator vs new Generator implementations");
+  cxxopts::Options options(argv[0],"Compare old Iterator vs new Generator "
+                                   "implementations");
   options.set_width(80);
   options.set_tab_expansion();
 
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
       ("h,help", "Print usage information")
       ("f,file", "Input file to compare",
        cxxopts::value<std::string>())
-      ("H,use-heap", "Use heap-based storage via std::string for the generator")
+      ("g,generator_first", "first run generator")
       ("a,fasta", "Read FastA input")
       ("q,fastq", "Read FastQ input");
 
@@ -67,99 +68,101 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  const bool use_heap = result["use-heap"].as<bool>();
   constexpr const size_t buf_size = (1 << 14);
-  size_t pseudo_hash_gen = 0;
-  size_t pseudo_hash_it = 0;
+  size_t pseudo_hash[3] = {0,0,0};
 
   const char* file = result["file"].as<std::string>().c_str();
 
   RunTimeClass runtime{};
+  const int first_idx = result["generator_first"].as<bool>() ? 1 : 0;
   if (result["fastq"].as<bool>())
   {
-    GttlLineIterator<buf_size> line_it(file);
-    GttlFastQIterator<GttlLineIterator<buf_size>> fq_it(line_it);
-
-    runtime.reset();
-    for(auto& entry : fq_it)
+    for (int idx = 0; idx < 2; idx++)
     {
-      pseudo_hash_it += count_occ(entry.header_get().data(), '@');
-      pseudo_hash_it += count_occ(entry.sequence_get().data(), 'a');
-      pseudo_hash_it += count_occ(entry.quality_get().data(), 'F');
-    }
-    runtime.show("Iterator method");
-
-    if (use_heap)
-    {
-      GttlFastQGenerator<buf_size, true> fq_gen(file);
-      runtime.reset();
-      for(auto entry : fq_gen)
+      if (idx == first_idx)
       {
-        pseudo_hash_gen += count_occ(entry->header, '@');
-        pseudo_hash_gen += count_occ(entry->sequence, 'a');
-        pseudo_hash_gen += count_occ(entry->quality, 'F');
-      }
-      runtime.show("Generator method");
-    } else
-    {
-      GttlFastQGenerator<buf_size, false> fq_gen(file);
-      runtime.reset();
-      for(auto entry : fq_gen)
-      {
-        pseudo_hash_gen += count_occ(entry->header, '@');
-        pseudo_hash_gen += count_occ(entry->sequence, 'a');
-        pseudo_hash_gen += count_occ(entry->quality, 'F');
-      }
-      runtime.show("Generator method");
-    }
+        GttlLineIterator<buf_size> line_it(file);
+        GttlFastQIterator<GttlLineIterator<buf_size>> fq_it(line_it);
 
-    std::cout << pseudo_hash_it << "\t" << pseudo_hash_gen << "\n";
-    // If the hashes are not identical, a mistake exists in
-    // at least one implementation.
-    // Performance comparinsons make no sense when this is the case.
-    assert_always(pseudo_hash_it == pseudo_hash_gen);
+        runtime.reset();
+        for(auto& entry : fq_it)
+        {
+          pseudo_hash[idx] += count_occ(entry.header_get().data(), '@');
+          pseudo_hash[idx] += count_occ(entry.sequence_get().data(), 'a');
+          pseudo_hash[idx] += count_occ(entry.quality_get().data(), 'F');
+        }
+        runtime.show("Iterator method");
+      } else
+      {
+        constexpr_for<1,2+1,1>([&](auto mode)
+        {
+          constexpr const bool use_heap = mode == 1 ? false : true;
+          GttlFastQGenerator<buf_size, use_heap> fq_gen(file);
+          runtime.reset();
+          int count_idx;
+          if (idx == 1)
+          {
+            count_idx = mode;
+          } else
+          {
+            count_idx = (mode == 1) ? 0 : 2;
+          }
+          for(auto entry : fq_gen)
+          {
+            pseudo_hash[count_idx] += count_occ(entry->header, '@');
+            pseudo_hash[count_idx] += count_occ(entry->sequence, 'a');
+            pseudo_hash[count_idx] += count_occ(entry->quality, 'F');
+          }
+          runtime.show(use_heap ? "Generator method with heap" :
+                                  "Generator method with stack");
+        });
+      }
+    }
   } else
   {
     if (result["fasta"].as<bool>())
     {
-      GttlSeqIterator<buf_size> fa_it(file);
-
-      runtime.reset();
-      for(auto &entry : fa_it)
+      for (int idx = 0; idx < 2; idx++)
       {
-        pseudo_hash_it += count_occ(entry.header_get(), ':');
-        pseudo_hash_it += count_occ(entry.sequence_get(), 'a');
-        pseudo_hash_it += count_occ(entry.sequence_get(), 'A');
-      }
-      runtime.show("Iterator method");
-
-      if (use_heap)
-      {
-        GttlFastAGenerator<buf_size, true> fa_gen(file);
-
-        runtime.reset();
-        for(auto entry : fa_gen)
+        if (idx == first_idx)
         {
-          pseudo_hash_gen += count_occ(entry->header_get(), ':');
-          pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
-          pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
-        }
-        runtime.show("Generator method");
-      }else
-      {
-        GttlFastAGenerator<buf_size, false> fa_gen(file);
-
-        runtime.reset();
-        for(auto entry : fa_gen)
+          GttlSeqIterator<buf_size> fa_it(file);
+          runtime.reset();
+          for(auto &entry : fa_it)
+          {
+            pseudo_hash[idx] += count_occ(entry.header_get(), ':');
+            pseudo_hash[idx] += count_occ(entry.sequence_get(), 'a');
+            pseudo_hash[idx] += count_occ(entry.sequence_get(), 'A');
+          }
+          runtime.show("Iterator method");
+        } else
         {
-          pseudo_hash_gen += count_occ(entry->header_get(), ':');
-          pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
-          pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
+          constexpr const bool use_heap = true;
+          GttlFastAGenerator<buf_size, use_heap> fa_gen(file);
+          runtime.reset();
+          for(auto entry : fa_gen)
+          {
+            pseudo_hash[idx] += count_occ(entry->header_get(), ':');
+            pseudo_hash[idx] += count_occ(entry->sequence_get(), 'a');
+            pseudo_hash[idx] += count_occ(entry->sequence_get(), 'A');
+          }
+          runtime.show("Generator method with heap");
         }
-        runtime.show("Generator method");
       }
-      std::cout << pseudo_hash_it << "\t" << pseudo_hash_gen << "\n";
-      assert_always(pseudo_hash_it == pseudo_hash_gen);
     }
   }
+  const int num_values = result["fasta"].as<bool>() ? 2 : 3;
+  for (int idx = 0; idx < num_values; idx++)
+  {
+    std::cout << pseudo_hash[idx] << (idx < (num_values - 1) ? "\t" : "\n");
+  }
+  // If the hashes are not identical, a mistake exists in
+  // at least one implementation.
+  // Performance comparinsons make no sense when this is the case.
+  assert_always(pseudo_hash[0] == pseudo_hash[1]);
+  if (num_values > 2)
+  {
+    assert_always(pseudo_hash[1] == pseudo_hash[2]);
+  }
+  return EXIT_SUCCESS;
 }

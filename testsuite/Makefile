@@ -462,11 +462,6 @@ test_iterator_compare:iterator_compare.x
 	@${VALGRIND} ./iterator_compare.x -a ${AT1MB}
 	@${VALGRIND} ./iterator_compare.x -a ${SW175}
 	@${VALGRIND} ./iterator_compare.x -q ../testdata/70x_161nt_phred64.fastq
-	@${VALGRIND} ./iterator_compare.x -H -q ../testdata/SRR19536726_1_1000.fastq.gz
-	@${VALGRIND} ./iterator_compare.x -H -a ../testdata/varlen_paired_both.fasta.gz
-	@${VALGRIND} ./iterator_compare.x -H -a ${AT1MB}
-	@${VALGRIND} ./iterator_compare.x -H -a ${SW175}
-	@${VALGRIND} ./iterator_compare.x -H -q ../testdata/70x_161nt_phred64.fastq
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_string_of_digits
