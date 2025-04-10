@@ -19,7 +19,7 @@ inline static size_t count_occ(const std::string_view string, char symbol)
 
 inline static void assert_always(bool condition)
 {
-  if(not condition)
+  if (not condition)
   {
     std::cerr <<
       "Assertion error: Iterators do not yield the same result!" << std::endl;
@@ -42,26 +42,25 @@ int main(int argc, char *argv[])
       ("a,fasta", "Read FastA input")
       ("q,fastq", "Read FastQ input");
 
-
   options.parse_positional({"file"});
   options.positional_help("<input file>");
 
   auto result = options.parse(argc, argv);
 
-  if(result.count("help"))
+  if (result.count("help"))
   {
     std::cout << options.help() << std::endl;
     exit(EXIT_SUCCESS);
   }
 
-  if(result["fasta"].as<bool>() == result["fastq"].as<bool>())
+  if (result["fasta"].as<bool>() == result["fastq"].as<bool>())
   {
     std::cerr << argv[0] <<
         ": Exactly one of --fasta and --fastq must be passed.\n";
     exit(EXIT_FAILURE);
   }
 
-  if(!result.count("file"))
+  if (!result.count("file"))
   {
     std::cerr << argv[0] << ": A filename must be specified."
         << std::endl;
@@ -69,18 +68,14 @@ int main(int argc, char *argv[])
   }
 
   const bool use_heap = result["use-heap"].as<bool>();
-
-
   constexpr const size_t buf_size = (1 << 14);
   size_t pseudo_hash_gen = 0;
   size_t pseudo_hash_it = 0;
 
   const char* file = result["file"].as<std::string>().c_str();
 
-  RunTimeClass runtime;
-
-
-  if(result["fastq"].as<bool>())
+  RunTimeClass runtime{};
+  if (result["fastq"].as<bool>())
   {
     GttlLineIterator<buf_size> line_it(file);
     GttlFastQIterator<GttlLineIterator<buf_size>> fq_it(line_it);
@@ -94,7 +89,7 @@ int main(int argc, char *argv[])
     }
     runtime.show("Iterator method");
 
-    if(use_heap)
+    if (use_heap)
     {
       GttlFastQGenerator<buf_size, true> fq_gen(file);
       runtime.reset();
@@ -105,7 +100,7 @@ int main(int argc, char *argv[])
         pseudo_hash_gen += count_occ(entry->quality, 'F');
       }
       runtime.show("Generator method");
-    }else
+    } else
     {
       GttlFastQGenerator<buf_size, false> fq_gen(file);
       runtime.reset();
@@ -123,46 +118,48 @@ int main(int argc, char *argv[])
     // at least one implementation.
     // Performance comparinsons make no sense when this is the case.
     assert_always(pseudo_hash_it == pseudo_hash_gen);
-  }
-  else if(result["fasta"].as<bool>())
+  } else
   {
-    GttlSeqIterator<buf_size> fa_it(file);
-
-    runtime.reset();
-    for(auto &entry : fa_it)
+    if (result["fasta"].as<bool>())
     {
-      pseudo_hash_it += count_occ(entry.header_get(), ':');
-      pseudo_hash_it += count_occ(entry.sequence_get(), 'a');
-      pseudo_hash_it += count_occ(entry.sequence_get(), 'A');
-    }
-    runtime.show("Iterator method");
-
-    if(use_heap)
-    {
-      GttlFastAGenerator<buf_size, true> fa_gen(file);
+      GttlSeqIterator<buf_size> fa_it(file);
 
       runtime.reset();
-      for(auto entry : fa_gen)
+      for(auto &entry : fa_it)
       {
-        pseudo_hash_gen += count_occ(entry->header_get(), ':');
-        pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
-        pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
+        pseudo_hash_it += count_occ(entry.header_get(), ':');
+        pseudo_hash_it += count_occ(entry.sequence_get(), 'a');
+        pseudo_hash_it += count_occ(entry.sequence_get(), 'A');
       }
-      runtime.show("Generator method");
-    }else
-    {
-      GttlFastAGenerator<buf_size, false> fa_gen(file);
+      runtime.show("Iterator method");
 
-      runtime.reset();
-      for(auto entry : fa_gen)
+      if (use_heap)
       {
-        pseudo_hash_gen += count_occ(entry->header_get(), ':');
-        pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
-        pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
+        GttlFastAGenerator<buf_size, true> fa_gen(file);
+
+        runtime.reset();
+        for(auto entry : fa_gen)
+        {
+          pseudo_hash_gen += count_occ(entry->header_get(), ':');
+          pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
+          pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
+        }
+        runtime.show("Generator method");
+      }else
+      {
+        GttlFastAGenerator<buf_size, false> fa_gen(file);
+
+        runtime.reset();
+        for(auto entry : fa_gen)
+        {
+          pseudo_hash_gen += count_occ(entry->header_get(), ':');
+          pseudo_hash_gen += count_occ(entry->sequence_get(), 'a');
+          pseudo_hash_gen += count_occ(entry->sequence_get(), 'A');
+        }
+        runtime.show("Generator method");
       }
-      runtime.show("Generator method");
+      std::cout << pseudo_hash_it << "\t" << pseudo_hash_gen << "\n";
+      assert_always(pseudo_hash_it == pseudo_hash_gen);
     }
-    std::cout << pseudo_hash_it << "\t" << pseudo_hash_gen << "\n";
-    assert_always(pseudo_hash_it == pseudo_hash_gen);
   }
 }
