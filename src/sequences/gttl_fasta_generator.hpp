@@ -3,6 +3,7 @@
 
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/gttl_line_generator.hpp"
+#include <cassert>
 #include <cstddef>
 #include <string>
 #include <string_view>
@@ -137,6 +138,7 @@ class GttlFastAGenerator
         int ch = lg.getc();
         if(ch == EOF or ch == '>') break;
 
+        assert(offset + 1 <= buf_size);
         out->sequence[offset++] = static_cast<char>(ch);
         lg.set_out_buffer(out->sequence + offset);
         size_t len = 0;

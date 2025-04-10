@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 // 4KB is default page size, 8/16 might be more memory friendly,
 // but 64KB is the default of std::ifstream. I assume this is reasonable.
@@ -15,13 +16,18 @@ template <typename T,
           const size_t buf_size = (default_buffer_bytes / sizeof(T))>
 class BinaryFileIterator
 {
- private:
+  static_assert(buf_size > 0, "Buffer size may not be zero");
+  static_assert(std::is_trivially_copyable_v<T>,
+                "BinaryFileIterator can only work with types that are "
+                "trivially copyable.");
+
+  private:
   const char* filename;
 
- public:
+  public:
   class Iterator
   {
-   public:
+    public:
     explicit Iterator(const char* filename)
         : file(std::fopen(filename, "rb")), buffer_pos(0), buffer_size(0)
     {
@@ -37,7 +43,7 @@ class BinaryFileIterator
     Iterator(const Iterator&) = delete;
     Iterator& operator=(const Iterator&) = delete;
 
-    // Though they may be moved
+    // Though they may be moved, with the file being closed
     Iterator(Iterator&& other) noexcept
         : file(other.file),
           buffer_pos(other.buffer_pos),
@@ -46,6 +52,7 @@ class BinaryFileIterator
       std::memcpy(buffer, other.buffer, sizeof(buffer));
       other.file = nullptr;
     }
+
     Iterator& operator=(Iterator&& other) noexcept
     {
       if (this != &other)
@@ -109,9 +116,9 @@ class BinaryFileIterator
              buffer_size == other.buffer_size;
     }
 
-    bool operator!=(const Iterator& other) const { return !(*this == other); }
+    bool operator!=(const Iterator& other) const { return not(*this == other); }
 
-   private:
+    private:
     FILE* file;
     T buffer[buf_size];
     size_t buffer_pos;
@@ -129,7 +136,7 @@ class BinaryFileIterator
       if (buffer_size == 0)
       {
         // In this case we reached EOF
-        if(std::fclose(file) != 0)
+        if (std::fclose(file) != 0)
         {
           throw std::runtime_error("Could not close file!");
         }
