@@ -32,7 +32,7 @@ def construct_edges(base_dir="..", quiet=False):
         if depends_on.startswith(
             ("alignment", "indexes", "sequences", "threading", "utilities")
         ):
-            depends_on = "src/" + depends_on
+            depends_on = "./src/" + depends_on
         if "/" not in depends_on:
             if not quiet:
                 print(
