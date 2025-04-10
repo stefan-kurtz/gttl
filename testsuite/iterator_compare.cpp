@@ -9,7 +9,6 @@
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/runtime_class.hpp"
 
-//TODO: valgrind
 //TODO: Test with very-large-lines
 
 inline static size_t count_occ(const std::string_view string, char symbol)
