@@ -10,8 +10,10 @@
 #else
 #define NOMINMAX
 #include <io.h>
+#include "utilities/windows_mkdtemp.hpp"
 #endif
 #include "utilities/str_format.hpp"
+
 
 class ThreadsOutputFiles
 {
@@ -48,7 +50,7 @@ class ThreadsOutputFiles
     }
     for (size_t t_idx = 0; t_idx < num_threads; t_idx++)
     {
-      constexpr const char *file_format_string = "%s%cthread_%02lu.tsv";
+      constexpr const char *file_format_string = "%s%cthread_%02zu.tsv";
       StrFormat fname(file_format_string,cc_threads_out_prefix,separator,t_idx);
       output_filenames.push_back(fname.str());
       FILE *out_fp = fopen(fname.str().c_str(),"w");

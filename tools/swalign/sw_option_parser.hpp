@@ -5,6 +5,7 @@
 #else
 #define NOMINMAX
 #include <io.h>
+#include "utilities/windows_getopt.hpp"
 #endif
 #include <cstdint>
 #include <cassert>
