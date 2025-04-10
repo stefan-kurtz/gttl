@@ -8,7 +8,7 @@ LDLIBS=-lm -lz -lpthread -lstdc++
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 SWAGAOBJ=sw_all_against_all.o
-AT=../../testdata/at1MB.fna
+AT1MB=../../testdata/at1MB.fna
 TESTVECFILE=Q6GZS4.fsa\
             ref-query-protein-v1.tsv\
             smrt100-2000.v2.tsv\
@@ -281,7 +281,7 @@ test-swaga-proteins-header:sw_all_against_all.x
 test-swaga-DNA:sw_all_against_all.x
 	@$(eval TMPFILE1 := $(shell mktemp))
 	@$(eval TMPFILE2 := $(shell mktemp))
-	@../../scripts/select-seq.py -f 100 ${AT} > ${TMPFILE1}
+	@../../scripts/select-seq.py -f 100 ${AT1MB} > ${TMPFILE1}
 	@./sw_all_against_all.x -d ${TMPFILE1} | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/at100-d.tsv
 	@${RM} ${TMPFILE1}
 	@echo "$@ passed"
@@ -292,7 +292,7 @@ test-swaga-b:sw_all_against_all.x
 	@$(eval TMPFILE2 := $(shell mktemp))
 	@$(eval TMPFILE3 := $(shell mktemp))
 	@./sw_all_against_all.x -d testdata/seq50.fasta | ./select-best.py -a 50 - > ${TMPFILE1}
-	@../../scripts/select-seq.py -f 100 ${AT} > ${TMPFILE2}
+	@../../scripts/select-seq.py -f 100 ${AT1MB} > ${TMPFILE2}
 	@./sw_all_against_all.x -d ${TMPFILE2} | ./select-best.py -a 37 - > ${TMPFILE3}
 	@for num_threads in 1 2 3 4; do\
 	  ./sw_all_against_all.x -t $${num_threads} -b 50 -d testdata/seq50.fasta | diff --strip-trailing-cr -I '^#' - ${TMPFILE1};\
@@ -334,7 +334,7 @@ test-calls:testdata/query-protein.fasta smrt100-2000-first.fna smrt100-2000-last
 .PHONY:test-alignment-parse
 test-alignment-parse:sw_all_against_all.x
 	@$(eval TMPFILE := $(shell mktemp))
-	@../../scripts/select-seq.py -f 250 ${AT} > ${TMPFILE}
+	@../../scripts/select-seq.py -f 250 ${AT1MB} > ${TMPFILE}
 	@./sw_all_against_all.x -d ${TMPFILE} -a 60 | ./alignment_parse.py -
 	@echo "$@ passed"
 

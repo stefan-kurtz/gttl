@@ -8,13 +8,13 @@ LDFLAGS=-g -m64
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 OBJ=unwords_mn.o unwords_opt.o
-AT=${GTTL}/testdata/at1MB.fna
+AT1MB=${GTTL}/testdata/at1MB.fna
 VAC=${GTTL}/testdata/vaccg.fna
 Y3=${GTTL}/testdata/ychrIII.fna
 PROTEIN_FILE=${GTTL}/testdata/protein.fsa
 SW_175=${GTTL}/testdata/sw175.fna
 IRC_OPTION?=--ignore_rc
-PYTHONPATH=../../scripts
+PYTHONPAT1MBH=../../scripts
 
 ifeq ($(OS),Windows_NT)
 	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
@@ -24,7 +24,7 @@ else
   SHELL=/bin/bash
 endif
 
-export PYTHONPATH=../../scripts
+export PYTHONPAT1MBH=../../scripts
 
 ifeq (,$(findstring g++-,$(CXX)))
   CFLAG += -march=native
@@ -122,8 +122,8 @@ check_unwords_y3:unwords_mn.x
 .PHONY:check_unwords_at
 check_unwords_at:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${AT} > ${TMPFILE}
-	@./check_unwords.py ${TMPFILE} ${AT}
+	@./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE}
+	@./check_unwords.py ${TMPFILE} ${AT1MB}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
 
@@ -164,7 +164,7 @@ compare_unwords_y3:unwords_mn.x
 .PHONY:compare_unwords_at
 compare_unwords_at:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${AT} > ${TMPFILE1}
+	@./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_at.txt
 	@${RM} ${TMPFILE1} ${TMPFILE2}

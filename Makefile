@@ -1,11 +1,18 @@
+.PHONY:clean
 all:
 	@make -C testsuite test
 	@make -C tools/chaining test
 	@make -C tools/ntcard test
 	@make -C tools/unwords test
+	@make -C tools/swalign test
 
+.PHONY:clean
 debug:
 	@make -C testsuite debug=yes test
+	@make -C tools/chaining debug=yes test
+	@make -C tools/ntcard debug=yes test
+	@make -C tools/unwords debug=yes test
+	@make -C tools/swalign debug=yes test
 
 .PHONY:clean	
 clean:
@@ -13,6 +20,7 @@ clean:
 	@make -C tools/chaining clean
 	@make -C tools/ntcard clean
 	@make -C tools/unwords clean
+	@make -C tools/swalign clean
 
 .PHONY:tags
 tags:
