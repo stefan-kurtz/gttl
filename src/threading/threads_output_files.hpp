@@ -5,7 +5,12 @@
 #include <vector>
 #include <cstring>
 #include <iostream>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#define NOMINMAX
+#include <io.h>
+#endif
 #include "utilities/str_format.hpp"
 
 class ThreadsOutputFiles
