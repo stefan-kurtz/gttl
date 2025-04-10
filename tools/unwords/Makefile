@@ -14,7 +14,7 @@ Y3=${GTTL}/testdata/ychrIII.fna
 PROTEIN_FILE=${GTTL}/testdata/protein.fsa
 SW_175=${GTTL}/testdata/sw175.fna
 IRC_OPTION?=--ignore_rc
-PYTHONPAT1MBH=../../scripts
+PYTHONPATH=../../scripts
 
 ifeq ($(OS),Windows_NT)
 	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
@@ -24,7 +24,7 @@ else
   SHELL=/bin/bash
 endif
 
-export PYTHONPAT1MBH=../../scripts
+export PYTHONPATH=../../scripts
 
 ifeq (,$(findstring g++-,$(CXX)))
   CFLAG += -march=native
