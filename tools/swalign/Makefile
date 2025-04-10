@@ -8,6 +8,7 @@ LDLIBS=-lm -lz -lpthread -lstdc++
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 SWAGAOBJ=sw_all_against_all.o
+AT=../../testdata/at1MB.fna
 TESTVECFILE=Q6GZS4.fsa\
             ref-query-protein-v1.tsv\
             smrt100-2000.v2.tsv\
@@ -226,7 +227,7 @@ test-lgc:sw_all_against_all.x testdata/gsa-seqpair.fasta testdata/gsa-align.tsv 
 	@echo "tests for linear gap costs (vectorized) passed"
 
 .PHONY:test_seqoutput
-test_seqoutput:sw_all_against_all.x 
+test_seqoutput:sw_all_against_all.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@paste testdata/local-coords18.tsv testdata/local-seqs18.txt > ${TMPFILE}
 	@${MEMCHECK} ./sw_all_against_all.x -g 0 4 -a 6+7 -d testdata/seq18.fasta |  grep -v '^#' | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -w -I '^#' - ${TMPFILE}
