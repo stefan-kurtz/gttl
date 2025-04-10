@@ -1,6 +1,11 @@
 #ifndef SW_OPTION_PARSER_HPP
 #define SW_OPTION_PARSER_HPP
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#define NOMINMAX
+#include <io.h>
+#endif
 #include <cstdint>
 #include <cassert>
 #include <cstdio>

@@ -1,6 +1,6 @@
 CXX?=g++
 LD=${CXX}
-CFLAGS=-g -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -pedantic
+CFLAGS=-g -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -march=native -pedantic
 CPPFLAGS=-I ../../src
 CXXFLAGS=-std=c++20
 LDFLAGS=-g
@@ -26,10 +26,18 @@ ifeq ($(memcheck),yes)
 endif
 
 ifneq ($(findstring clang++,$(CXX)),clang++)
-  TIME_OPTION=-time
   ifneq ($(SYSTEM),Darwin)
+    TIME_OPTION=-time
     CFLAGS += -march=native
   endif
+endif
+
+ifeq ($(OS),Windows_NT)
+	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
+	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
+else
+	LDLIBS+=-lm -lz -lpthread -lstdc++
+  SHELL=/bin/bash
 endif
 
 ifeq ($(debug),yes)
