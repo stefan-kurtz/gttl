@@ -4,7 +4,6 @@ CFLAGS=-g -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpoi
 CPPFLAGS=-I ../../src
 CXXFLAGS=-std=c++20
 LDFLAGS=-g
-LDLIBS=-lm -lz -lpthread -lstdc++
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
 SWAGAOBJ=sw_all_against_all.o
