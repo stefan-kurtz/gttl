@@ -15,6 +15,7 @@ TESTVECFILE=Q6GZS4.fsa\
             smrt100-2000.v2.best2.tsv\
             smrt100-2000-first.fna\
             smrt100-2000-last.fna
+SSW_SIMD_DEBUG?=0
 
 ifeq ($(memcheck),yes)
   ifeq (${SYSTEM},Darwin)
@@ -36,7 +37,7 @@ ifeq ($(OS),Windows_NT)
 	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
 else
 	LDLIBS+=-lm -lz -lpthread -lstdc++
-  SHELL=/bin/bash
+  SHELL?=/bin/bash
 endif
 
 ifeq ($(debug),yes)
@@ -136,7 +137,7 @@ score_matrix_list_update:../../src/alignment/scoring_info_and_seq_trans.hpp \
 	make sequence_decode_function.hpp
 
 %.o:%.cpp
-	$(CXX) ${TIME_OPTION} -o $@ -c $< ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
+	$(CXX) ${TIME_OPTION} -o $@ -c $<  -DSSW_SIMD_DEBUG=${SSW_SIMD_DEBUG} ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 ref-query-protein-v1.tsv:testdata/ref-query-protein.tsv
 	@cat $< | awk '/^[^#]/ {print $$1 "\t" $$2 "\t" $$3+$$4-1 "\t" $$5+$$6-1 "\t" $$7 "\t" $$8}' > $@

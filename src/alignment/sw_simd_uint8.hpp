@@ -16,6 +16,10 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
                                   uint8_t abs_smallest_score,
                                   SSWresources *ssw_resources)
 {
+#if SSW_SIMD_DEBUG > 0
+  uint64_t column_count = 0;
+  uint64_t column_max_move_count = 0;
+#endif
   SWsimdResult sw_simd_result(0, query_len - 1, UINT8_MAX);
   const size_t simd_size = SIMD_VECSIZE_INT * 4,
                segment_len = (query_len + simd_size - 1) / simd_size;
@@ -43,6 +47,8 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
   simd_int *pvHLoad = pvHStore + segment_len;
   simd_int *pvE = pvHLoad + segment_len;
   simd_int *pvHmax = pvE + segment_len;
+  simd_int *pvHStoreNext = pvHLoad;
+  simd_int *pvHStoreNextNext = pvHStore;
 
   int64_t dbseq_pos, dbseq_pos_end;
   assert(dbseq_len > 0);
@@ -61,6 +67,9 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
   /* outer loop to process the database sequence */
   while (dbseq_pos != dbseq_pos_end)
   {
+#if SSW_SIMD_DEBUG > 0
+    column_count++;
+#endif
     assert(dbseq_pos >= 0);
     uint8_t current_char;
     if constexpr (forward_strand)
@@ -88,9 +97,11 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
     print_simd_int<uint8_t>("vH shifted: ", vH);
 
     /* Swap the 2 H buffers. */
-    pv = pvHLoad;
     pvHLoad = pvHStore;
-    pvHStore = pv;
+    pvHStore = pvHStoreNext;
+    pv = pvHStoreNext;
+    pvHStoreNext = pvHStoreNextNext;
+    pvHStoreNextNext = pv;
 
     /* inner loop to process the query sequence */
     for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
@@ -215,7 +226,13 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
         sw_simd_result.on_dbseq = static_cast<size_t>(dbseq_pos);
         /* Store the column with the highest alignment score in order to
            trace the alignment ending position on query. */
-        memcpy(pvHmax, pvHStore, segment_len * sizeof *pvHmax);
+        // memcpy(pvHmax,pvHStore,segment_len * sizeof *pvHmax);
+#if SSW_SIMD_DEBUG > 0
+        column_max_move_count++;
+#endif
+        pv = pvHmax;
+        pvHmax = pvHStoreNextNext;
+        pvHStoreNextNext = pv;
       }
     }
 
@@ -225,6 +242,14 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
       break;
     }
     dbseq_pos += step;
+#if SSW_SIMD_DEBUG > 1
+    uint8_t *ptr = reinterpret_cast<uint8_t *>(pvHStore);
+    for (size_t i = 0; i < segment_len * simd_size; i++)
+    {
+      printf("%4d", ptr[(i % segment_len) * simd_size + i / segment_len]);
+    }
+    printf("\n");
+#endif
   }
 
   if (static_cast<uint32_t>(max_align_score) +
@@ -253,6 +278,9 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
   {
     delete ssw_resources;
   }
+#if SSW_SIMD_DEBUG > 0
+  printf("alignment uint8 %zu/%zu\n", column_max_move_count, column_count);
+#endif
   return sw_simd_result;
 }
 #endif

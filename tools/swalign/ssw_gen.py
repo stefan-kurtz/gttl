@@ -22,6 +22,10 @@ template = environment.from_string('''template<bool forward_reading,bool forward
                                  uint8_t abs_smallest_score,
                                  SSWresources *ssw_resources)
 {
+#if SSW_SIMD_DEBUG > 0
+  uint64_t column_count = 0;
+  uint64_t column_max_move_count = 0;
+#endif
   SWsimdResult sw_simd_result(0,query_len - 1,UINT{{ width }}_MAX);
   const size_t simd_size = SIMD_VECSIZE_INT * {{ 32//width }},
                segment_len = (query_len + simd_size - 1) / simd_size;
@@ -49,6 +53,8 @@ template = environment.from_string('''template<bool forward_reading,bool forward
   simd_int *pvHLoad = pvHStore + segment_len;
   simd_int *pvE = pvHLoad + segment_len;
   simd_int *pvHmax = pvE + segment_len;
+  simd_int *pvHStoreNext = pvHLoad;
+  simd_int *pvHStoreNextNext = pvHStore;
 
   int64_t dbseq_pos, dbseq_pos_end;
   assert(dbseq_len > 0);
@@ -67,6 +73,9 @@ template = environment.from_string('''template<bool forward_reading,bool forward
   /* outer loop to process the database sequence */
   while (dbseq_pos != dbseq_pos_end)
   {
+#if SSW_SIMD_DEBUG > 0
+    column_count++;
+#endif
     assert(dbseq_pos >= 0);
     uint8_t current_char;
     if constexpr (forward_strand)
@@ -96,9 +105,11 @@ template = environment.from_string('''template<bool forward_reading,bool forward
     print_simd_int<uint{{ width }}_t>("vH shifted: ", vH);
 
     /* Swap the 2 H buffers. */
-    pv = pvHLoad;
     pvHLoad = pvHStore;
-    pvHStore = pv;
+    pvHStore = pvHStoreNext;
+    pv = pvHStoreNext;
+    pvHStoreNext = pvHStoreNextNext;
+    pvHStoreNextNext = pv;
 
     /* inner loop to process the query sequence */
     for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len); ++segment_pos)
@@ -219,7 +230,13 @@ template = environment.from_string('''template<bool forward_reading,bool forward
         sw_simd_result.on_dbseq = static_cast<size_t>(dbseq_pos);
         /* Store the column with the highest alignment score in order to
            trace the alignment ending position on query. */
-        memcpy(pvHmax,pvHStore,segment_len * sizeof *pvHmax);
+        // memcpy(pvHmax,pvHStore,segment_len * sizeof *pvHmax);
+#if SSW_SIMD_DEBUG > 0
+        column_max_move_count++;
+#endif
+        pv = pvHmax;
+        pvHmax = pvHStoreNextNext;
+        pvHStoreNextNext = pv;
       }
     }
 
@@ -229,6 +246,13 @@ template = environment.from_string('''template<bool forward_reading,bool forward
       break;
     }
     dbseq_pos += step;
+#if SSW_SIMD_DEBUG > 1
+    uint{{ width }}_t *ptr = reinterpret_cast<uint{{ width }}_t *>(pvHStore);
+    for (size_t i = 0; i < segment_len * simd_size; i++) {
+      printf("%4d", ptr[(i % segment_len) * simd_size + i / segment_len]);
+    }
+    printf("\\n");
+#endif
   }
 
   if (static_cast<uint32_t>(max_align_score) + static_cast<uint32_t>(abs_smallest_score) < UINT{{ width }}_MAX)
@@ -255,6 +279,9 @@ template = environment.from_string('''template<bool forward_reading,bool forward
   {
     delete ssw_resources;
   }
+#if SSW_SIMD_DEBUG > 0
+  printf("alignment uint{{ width }} %zu/%zu\\n", column_max_move_count, column_count);
+#endif
   return sw_simd_result;
 }''')
 
