@@ -14,19 +14,17 @@ class GttlLineGenerator
   public:
   explicit GttlLineGenerator (GttlFpType fp, bool _is_end = false)
     : file(fp)
+    , out(&default_buffer)
     , is_end(_is_end)
     , line_number(0)
-  {
-    set_default_out_buffer();
-  }
+  {}
 
   explicit GttlLineGenerator(const char* file_name, bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
+    , out(&default_buffer)
     , is_end(_is_end)
     , line_number(0)
-  {
-    set_default_out_buffer();
-  }
+  {}
 
   explicit GttlLineGenerator(const char* file_name,
                     std::string* _out,
@@ -48,14 +46,13 @@ class GttlLineGenerator
 
   explicit GttlLineGenerator(const char* _input_string, size_t _string_length)
     : file(nullptr)
+    , out(&default_buffer)
     , is_end(_string_length == 0)
     , line_number(0)
     , input_string(_input_string)
     , string_length(_string_length)
     , current_ptr(_input_string)
-    {
-      set_default_out_buffer();
-    }
+    {}
 
   // Delete copy/move constructur & assignment operator
   GttlLineGenerator(const GttlLineGenerator &other) = delete;
@@ -239,11 +236,6 @@ public:
   void set_out_buffer(std::string* _out)
   {
     out = _out;
-  }
-
-  void set_default_out_buffer()
-  {
-    out = &default_buffer;
   }
 
   class Iterator
