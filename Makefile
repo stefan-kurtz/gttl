@@ -6,7 +6,7 @@ all:
 	@make -C tools/unwords test
 	@make -C tools/swalign test
 
-.PHONY:clean
+.PHONY:debug
 debug:
 	@make -C testsuite debug=yes test
 	@make -C tools/chaining debug=yes test
