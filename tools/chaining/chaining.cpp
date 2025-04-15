@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   try
   {
     GttlLineGenerator<buf_size> gttl_lg(inputfile.c_str());
-    for(const auto *line : gttl_lg)
+    for(const auto& line : gttl_lg)
     {
       std::vector<std::string> vec = gttl_split_string(line, ' ');
       if (vec.size() != 5)

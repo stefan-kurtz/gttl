@@ -13,7 +13,7 @@ int main(int argc,char *argv[])
     bool this_file_is_empty = true;
     try
     {
-      GttlLineGenerator<buf_size, false> gttl_li(argv[idx]);
+      GttlLineGenerator<buf_size> gttl_li(argv[idx]);
       for (const auto& line : gttl_li)
       {
         std::cout << line << '\n';

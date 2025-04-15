@@ -6,11 +6,9 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <string>
-#include <type_traits>
 
-template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
+template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlLineGenerator
 {
   public:
@@ -32,16 +30,7 @@ class GttlLineGenerator
 
   explicit GttlLineGenerator(const char* file_name,
                     std::string* _out,
-                    bool _is_end = false) requires use_heap
-    : file(gttl_fp_type_open(file_name, "rb"))
-    , out(_out)
-    , is_end(_is_end)
-    , line_number(0)
-    {}
-
-  explicit GttlLineGenerator(const char* file_name,
-                    char (&_out)[buf_size],
-                    bool _is_end = false) requires (not use_heap)
+                    bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(_out)
     , is_end(_is_end)
@@ -50,16 +39,7 @@ class GttlLineGenerator
 
   explicit GttlLineGenerator(GttlFpType fp,
                              std::string* _out,
-                             bool _is_end = false) requires use_heap
-    : file(fp)
-    , out(_out)
-    , is_end(_is_end)
-    , line_number(0)
-    {}
-
-  explicit GttlLineGenerator(GttlFpType fp,
-                             char (&_out)[buf_size],
-                             bool _is_end = false) requires (not use_heap)
+                             bool _is_end = false)
     : file(fp)
     , out(_out)
     , is_end(_is_end)
@@ -105,16 +85,8 @@ private:
 
     if(out != nullptr)
     {
-      if constexpr (use_heap)
-      {
-        out->resize(copy_len);
-        std::memcpy(out->data(), current_ptr, copy_len);
-      }else
-      {
-        //TODO: Don't use 0-terminated string here
-        std::memcpy(out, current_ptr, copy_len);
-        out[copy_len] = '\0';
-      }
+      out->resize(copy_len);
+      std::memcpy(out->data(), current_ptr, copy_len);
     }
 
     if(length != nullptr)
@@ -166,29 +138,14 @@ private:
           }
         }
 
-        if constexpr(use_heap)
-        {
-          out->append(file_buf + file_buf_pos, line_len);
-        }else
-        {
-          std::memcpy(out + len, file_buf + file_buf_pos, line_len);
-          len += line_len;
-          out[len] = '\0';
-        }
+        out->append(file_buf + file_buf_pos, line_len);
         file_buf_pos += line_len + 1 + static_cast<size_t>(removed_cr);
         break;
       }
       // In this case there is no newline,
       // so we copy everything and continue reading
       size_t remaining = file_buf_end - file_buf_pos;
-      if constexpr (use_heap)
-      {
-        out->append(file_buf + file_buf_pos, remaining);
-      }else
-      {
-        std::memcpy(out + len, file_buf + file_buf_pos, remaining);
-        len += remaining;
-      }
+      out->append(file_buf + file_buf_pos, remaining);
       file_buf_pos = file_buf_end;
     }
 
@@ -246,10 +203,7 @@ public:
     if(is_end) return false;
     ++line_number;
 
-    if constexpr(use_heap)
-    {
-      if(out != nullptr and not append) out->clear();
-    }
+    if(out != nullptr and not append) out->clear();
 
     if(input_string != nullptr)
     {
@@ -282,25 +236,14 @@ public:
     return line_number;
   }
 
-  void set_out_buffer(std::string* _out) requires use_heap
-  {
-    out = _out;
-  }
-
-  void set_out_buffer(char* const _out) requires (not use_heap)
+  void set_out_buffer(std::string* _out)
   {
     out = _out;
   }
 
   void set_default_out_buffer()
   {
-    if constexpr(use_heap)
-    {
-      out = &default_buffer;
-    }else
-    {
-      out = default_buffer;
-    }
+    out = &default_buffer;
   }
 
   class Iterator
@@ -312,14 +255,9 @@ public:
       if(not end) ++(*this);
     }
 
-    const std::string& operator*() const requires use_heap
+    const std::string& operator*() const
     {
       return *(gen->out);
-    }
-
-    const char* operator*() const requires (not use_heap)
-    {
-      return gen->out;
     }
 
     Iterator& operator++()
@@ -338,14 +276,9 @@ public:
     bool is_end;
   };
 
-  std::string operator*() const requires use_heap
+  std::string operator*() const
   {
     return *out;
-  }
-
-  const char* operator*() const requires (not use_heap)
-  {
-    return out;
   }
 
   Iterator begin()
@@ -382,9 +315,6 @@ public:
   }
 
   private:
-  using buf_type = std::conditional_t<use_heap, std::string, char[buf_size]>;
-  using out_type = std::conditional_t<use_heap, std::string*, char*>;
-
   char file_buf[buf_size]{};
   size_t file_buf_pos = 0;
   size_t file_buf_end = 0;
@@ -397,9 +327,9 @@ public:
   }
 
   GttlFpType file;
-  out_type out;
+  std::string* out;
   bool is_end;
-  buf_type default_buffer;
+  std::string default_buffer;
   size_t line_number;
 
   const char* input_string = nullptr;

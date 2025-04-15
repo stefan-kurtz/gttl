@@ -6,9 +6,8 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
-template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
+template <const size_t buf_size = (size_t{1} << size_t{14})>
 struct GttlFastQEntry
 {
   [[nodiscard]] std::string_view header_get() const noexcept
@@ -24,34 +23,24 @@ struct GttlFastQEntry
     return std::string_view(quality);
   }
 
-  using buf_type = std::conditional_t<use_heap, std::string, char[buf_size]>;
-  buf_type header;
-  buf_type sequence;
-  buf_type quality;
+  std::string header;
+  std::string sequence;
+  std::string quality;
 
   GttlFastQEntry()
   {
-    if constexpr(use_heap)
-    {
-      header.reserve(buf_size);
-      sequence.reserve(buf_size);
-      quality.reserve(buf_size);
-    }
+    header.reserve(buf_size);
+    sequence.reserve(buf_size);
+    quality.reserve(buf_size);
   }
 };
 
-template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
+template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastQGenerator
 {
   public:
   explicit GttlFastQGenerator(const char* file_name,
-                              bool _is_end = false) requires (not use_heap)
-    : out(&default_buffer)
-    , is_end(_is_end)
-    , lg(gttl_fp_type_open(file_name, "rb"), out->header, _is_end) {}
-
-  explicit GttlFastQGenerator(const char* file_name,
-                              bool _is_end = false) requires use_heap
+                              bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(gttl_fp_type_open(file_name, "rb"), &(out->header), _is_end) {}
@@ -60,18 +49,18 @@ class GttlFastQGenerator
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
-    , lg(fp, out->header, _is_end) {}
+    , lg(fp, &out->header, _is_end) {}
 
 
   explicit GttlFastQGenerator(const char* file_name,
-                              GttlFastQEntry<buf_size, use_heap> *_out,
+                              GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
     : lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
     , out(_out)
     , is_end(_is_end) {}
 
   explicit GttlFastQGenerator(GttlFpType fp,
-                              GttlFastQEntry<buf_size, use_heap> *_out,
+                              GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
     : lg(fp, _out->header, _is_end)
     , out(_out)
@@ -97,27 +86,14 @@ class GttlFastQGenerator
       }
       return true;
     }
-    if constexpr(use_heap)
-    {
-      lg.set_out_buffer(&out->header);
-      lg.advance();
-      lg.set_out_buffer(&out->sequence);
-      lg.advance();
-      lg.set_out_buffer(nullptr);
-      lg.advance();
-      lg.set_out_buffer(&out->quality);
-      return lg.advance();
-    }else
-    {
-      lg.set_out_buffer(out->header);
-      lg.advance();
-      lg.set_out_buffer(out->sequence);
-      lg.advance();
-      lg.set_out_buffer(nullptr);
-      lg.advance();
-      lg.set_out_buffer(out->quality);
-      return lg.advance();
-    }
+    lg.set_out_buffer(&out->header);
+    lg.advance();
+    lg.set_out_buffer(&out->sequence);
+    lg.advance();
+    lg.set_out_buffer(nullptr);
+    lg.advance();
+    lg.set_out_buffer(&out->quality);
+    return lg.advance();
   }
 
   void reset()
@@ -140,7 +116,7 @@ class GttlFastQGenerator
       if(not end) ++(*this);
     }
 
-    const GttlFastQEntry<buf_size, use_heap>* operator*() const
+    const GttlFastQEntry<buf_size>* operator*() const
     {
       return gen->out;
     }
@@ -181,10 +157,10 @@ class GttlFastQGenerator
   }
 
   private:
-  GttlFastQEntry<buf_size, use_heap> default_buffer;
-  GttlFastQEntry<buf_size, use_heap>* out;
+  GttlFastQEntry<buf_size> default_buffer;
+  GttlFastQEntry<buf_size>* out;
   bool is_end;
-  GttlLineGenerator<buf_size, use_heap> lg;
+  GttlLineGenerator<buf_size> lg;
 };
 
 #endif  // GTTL_FASTQ_GENERATOR_HPP

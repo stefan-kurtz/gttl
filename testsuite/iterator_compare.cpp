@@ -6,11 +6,8 @@
 #include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "utilities/cxxopts.hpp"
-#include "utilities/constexpr_for.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/runtime_class.hpp"
-
-//TODO: Test with very-large-lines
 
 inline static size_t count_occ(const std::string_view string, char symbol)
 {
@@ -22,7 +19,7 @@ inline static void assert_always(bool condition)
   if (not condition)
   {
     std::cerr <<
-      "Assertion error: Iterators do not yield the same result!" << std::endl;
+      "Assertion error: Iterators do not yield the same result!" << '\n';
     exit(EXIT_FAILURE);
   }
 }
@@ -60,7 +57,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  if (!result.count("file"))
+  if (not result.count("file"))
   {
     std::cerr << argv[0] << ": A filename must be specified."
         << std::endl;
@@ -71,6 +68,7 @@ int main(int argc, char *argv[])
   size_t pseudo_hash[3] = {0,0,0};
 
   const char* file = result["file"].as<std::string>().c_str();
+  std::cout << "# " << file << '\n';
 
   RunTimeClass runtime{};
   const int first_idx = result["generator_first"].as<bool>() ? 1 : 0;
@@ -86,35 +84,22 @@ int main(int argc, char *argv[])
         runtime.reset();
         for(auto& entry : fq_it)
         {
-          pseudo_hash[idx] += count_occ(entry.header_get().data(), '@');
-          pseudo_hash[idx] += count_occ(entry.sequence_get().data(), 'a');
-          pseudo_hash[idx] += count_occ(entry.quality_get().data(), 'F');
+          pseudo_hash[1] += count_occ(entry.header_get(), '@');
+          pseudo_hash[1] += count_occ(entry.sequence_get(), 'a');
+          pseudo_hash[1] += count_occ(entry.quality_get(), 'F');
         }
         runtime.show("Iterator method");
       } else
       {
-        constexpr_for<1,2+1,1>([&](auto mode)
+        GttlFastQGenerator<buf_size> fq_gen(file);
+        runtime.reset();
+        for(const auto *entry : fq_gen)
         {
-          constexpr const bool use_heap = mode == 1 ? false : true;
-          GttlFastQGenerator<buf_size, use_heap> fq_gen(file);
-          runtime.reset();
-          int count_idx;
-          if (idx == 1)
-          {
-            count_idx = mode;
-          } else
-          {
-            count_idx = (mode == 1) ? 0 : 2;
-          }
-          for(auto entry : fq_gen)
-          {
-            pseudo_hash[count_idx] += count_occ(entry->header, '@');
-            pseudo_hash[count_idx] += count_occ(entry->sequence, 'a');
-            pseudo_hash[count_idx] += count_occ(entry->quality, 'F');
-          }
-          runtime.show(use_heap ? "Generator method with heap" :
-                                  "Generator method with stack");
-        });
+          pseudo_hash[0] += count_occ(entry->header, '@');
+          pseudo_hash[0] += count_occ(entry->sequence, 'a');
+          pseudo_hash[0] += count_occ(entry->quality, 'F');
+        }
+        runtime.show("Generator method");
       }
     }
   } else
@@ -136,32 +121,26 @@ int main(int argc, char *argv[])
           runtime.show("Iterator method");
         } else
         {
-          constexpr const bool use_heap = true;
-          GttlFastAGenerator<buf_size, use_heap> fa_gen(file);
+          GttlFastAGenerator<buf_size> fa_gen(file);
           runtime.reset();
-          for(auto entry : fa_gen)
+          for(const auto *entry : fa_gen)
           {
             pseudo_hash[idx] += count_occ(entry->header_get(), ':');
             pseudo_hash[idx] += count_occ(entry->sequence_get(), 'a');
             pseudo_hash[idx] += count_occ(entry->sequence_get(), 'A');
           }
-          runtime.show("Generator method with heap");
+          runtime.show("Generator method");
         }
       }
     }
   }
-  const int num_values = result["fasta"].as<bool>() ? 2 : 3;
-  for (int idx = 0; idx < num_values; idx++)
+  for (int idx = 0; idx < 2; idx++)
   {
-    std::cout << pseudo_hash[idx] << (idx < (num_values - 1) ? "\t" : "\n");
+    std::cout << pseudo_hash[idx] << (idx == 0 ? "\t" : "\n");
   }
   // If the hashes are not identical, a mistake exists in
   // at least one implementation.
   // Performance comparinsons make no sense when this is the case.
   assert_always(pseudo_hash[0] == pseudo_hash[1]);
-  if (num_values > 2)
-  {
-    assert_always(pseudo_hash[1] == pseudo_hash[2]);
-  }
   return EXIT_SUCCESS;
 }

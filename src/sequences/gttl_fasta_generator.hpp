@@ -7,9 +7,8 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
-template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
+template <const size_t buf_size = (size_t{1} << size_t{14})>
 struct GttlFastAEntry
 {
   [[nodiscard]] std::string_view header_get() const noexcept
@@ -21,33 +20,22 @@ struct GttlFastAEntry
     return std::string_view(sequence);
   }
 
-  using buf_type = std::conditional_t<use_heap, std::string, char[buf_size]>;
-  buf_type header;
-  buf_type sequence;
+  std::string header;
+  std::string sequence;
 
   GttlFastAEntry()
   {
-    if constexpr (use_heap)
-    {
-      header.reserve(buf_size);
-      sequence.reserve(buf_size);
-    }
+    header.reserve(buf_size);
+    sequence.reserve(buf_size);
   }
 };
 
-template <const size_t buf_size = (1U << 14U), const bool use_heap = false>
+template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastAGenerator
 {
   public:
   explicit GttlFastAGenerator(const char* file_name,
-                              bool _is_end = false) requires (not use_heap)
-    : out(&default_buffer)
-    , is_end(_is_end)
-    , lg(gttl_fp_type_open(file_name, "rb"), out->header, _is_end)
-  {}
-
-  explicit GttlFastAGenerator(const char* file_name,
-                              bool _is_end = false) requires use_heap
+                              bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(gttl_fp_type_open(file_name, "rb"), &(out->header), _is_end)
@@ -61,7 +49,7 @@ class GttlFastAGenerator
   {}
 
   explicit GttlFastAGenerator(const char* file_name,
-                              GttlFastAEntry<buf_size, use_heap> *_out,
+                              GttlFastAEntry<buf_size> *_out,
                               bool _is_end = false)
     : out(_out)
     , is_end(_is_end)
@@ -69,7 +57,7 @@ class GttlFastAGenerator
   {}
 
   explicit GttlFastAGenerator(GttlFpType fp,
-                              GttlFastAEntry<buf_size, use_heap> *_out,
+                              GttlFastAEntry<buf_size> *_out,
                               bool _is_end = false)
     : out(_out)
     , is_end(_is_end)
@@ -112,17 +100,9 @@ class GttlFastAGenerator
       is_first_entry = false;
     }
 
-    if constexpr(use_heap)
-    {
-      out->header.clear();
-      out->sequence.clear();
-      lg.set_out_buffer(&out->header);
-    }else
-    {
-      out->header[0] = '\0';
-      out->sequence[0] = '\0';
-      lg.set_out_buffer(out->header);
-    }
+    out->header.clear();
+    out->sequence.clear();
+    lg.set_out_buffer(&out->header);
 
     if(not lg.advance())
     {
@@ -130,33 +110,14 @@ class GttlFastAGenerator
       return false;
     }
 
-    if constexpr(not use_heap)
+    lg.set_out_buffer(&out->sequence);
+    while(true)
     {
-      size_t offset = 0;
-      while(true)
-      {
-        int ch = lg.getc();
-        if(ch == EOF or ch == '>') break;
+      int ch = lg.getc();
+      if(ch == EOF or ch == '>') break;
 
-        assert(offset + 1 <= buf_size);
-        out->sequence[offset++] = static_cast<char>(ch);
-        lg.set_out_buffer(out->sequence + offset);
-        size_t len = 0;
-        if(not lg.advance(&len)) break;
-        offset += len;
-      }
-      out->sequence[offset] = '\0';
-    }else
-    {
-      lg.set_out_buffer(&out->sequence);
-      while(true)
-      {
-        int ch = lg.getc();
-        if(ch == EOF or ch == '>') break;
-
-        out->sequence.push_back(static_cast<char>(ch));
-        if(not lg.advance(nullptr, true)) break;
-      }
+      out->sequence.push_back(static_cast<char>(ch));
+      if(not lg.advance(nullptr, true)) break;
     }
     return true;
   }
@@ -182,7 +143,7 @@ class GttlFastAGenerator
       if(not end) ++(*this);
     }
 
-    const GttlFastAEntry<buf_size, use_heap>* operator*() const
+    const GttlFastAEntry<buf_size>* operator*() const
     {
       return gen->out;
     }
@@ -219,10 +180,10 @@ class GttlFastAGenerator
   }
 
   private:
-  GttlFastAEntry<buf_size, use_heap> default_buffer;
-  GttlFastAEntry<buf_size, use_heap>* out;
+  GttlFastAEntry<buf_size> default_buffer;
+  GttlFastAEntry<buf_size>* out;
   bool is_end;
   bool is_first_entry = true;
-  GttlLineGenerator<buf_size, use_heap> lg;
+  GttlLineGenerator<buf_size> lg;
 };
 #endif // GTTL_FASTA_GENERATOR_HPP

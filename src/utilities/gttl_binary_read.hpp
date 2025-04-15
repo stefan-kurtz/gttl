@@ -10,7 +10,7 @@
 
 // 4KB is default page size, 8/16 might be more memory friendly,
 // but 64KB is the default of std::ifstream. I assume this is reasonable.
-constexpr const size_t default_buffer_bytes = 1U << 16U;
+constexpr const size_t default_buffer_bytes = size_t{1} << size_t{16};
 
 template <typename T,
           const size_t buf_size = (default_buffer_bytes / sizeof(T))>
