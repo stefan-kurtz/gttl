@@ -62,7 +62,9 @@ void split_into_parts_length(SequenceIterator &seq_it,
       std::string fname_out = base_name;
       for(size_t i = 1; i <= padding_length; i++)
       {
-        fname_out += (part_number < static_cast<size_t>(std::pow(10, i)) ? "0" : "");
+        fname_out += (part_number < static_cast<size_t>(std::pow(10, i))
+                        ? "0"
+                        : "");
       }
       fname_out += std::to_string(part_number) +
           (seq_it.is_fastq_generator ? ".fastq" : ".fasta");
@@ -86,7 +88,9 @@ void split_into_parts_length(SequenceIterator &seq_it,
     std::string fname_out = base_name;
     for(size_t i = 1; i <= padding_length; i++)
     {
-      fname_out += (part_number < static_cast<size_t>(std::pow(10, i)) ? "0" : "");
+      fname_out += (part_number < static_cast<size_t>(std::pow(10, i))
+                    ? "0"
+                    : "");
     }
     fname_out += std::to_string(part_number) +
                 (seq_it.is_fastq_generator ? ".fastq" : ".fasta");

@@ -84,9 +84,11 @@ int main(int argc,char *argv[])
       if (options.mapped_option_is_set())
       {
         Gttlmmap<char> mapped_file(inputfile.c_str());
-        GttlFastAGenerator<buf_size> gttl_si(std::string_view(mapped_file.ptr(),
-                                                              mapped_file.size()));
-        process_iterator<GttlFastAGenerator<buf_size>>(gttl_si,statistics,line_width);
+        GttlFastAGenerator<buf_size> gttl_si(std::string_view(
+                                               mapped_file.ptr(),
+                                               mapped_file.size()));
+        process_iterator<GttlFastAGenerator<buf_size>>(gttl_si,
+                                                       statistics,line_width);
       } else
       {
         GttlFastAGenerator<buf_size> gttl_si(inputfile.c_str());
