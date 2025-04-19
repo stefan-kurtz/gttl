@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <iostream>
 #include <string>
 #include <vector>
 #include "sequences/guess_if_protein_seq.hpp"
@@ -23,13 +24,13 @@ int main(int argc,char *argv[])
   if (argc < 2)
   {
     std::cerr << "Usage: " << argv[0] << " <inputfile1> [inputfile2...]"
-              << std::endl;
+              << '\n';
     return EXIT_FAILURE;
   }
   std::vector<std::string> inputfiles{};
   for (int idx = 1; idx < argc; idx++)
   {
-    inputfiles.push_back(argv[idx]);
+    inputfiles.emplace_back(argv[idx]);
   }
   if (guess_if_protein_file(inputfiles))
   {

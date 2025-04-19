@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <string_view>
 #include <cstdio>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
@@ -37,11 +38,11 @@ static void process_iterator(Iterator &iterator,
   size_t seqnum = 0, total_length = 0;
   for (auto &&si : iterator)
   {
-    const std::string_view &sequence = si.sequence_get();
+    const std::string_view &sequence = si->sequence_get();
     if (line_width > 0)
     {
-      const std::string_view &header = si.header_get();
-      std::cout << header << std::endl;
+      const std::string_view &header = si->header_get();
+      std::cout << '>' << header << std::endl;
       gttl_format_sequence(sequence,line_width);
     }
     seqnum++;
@@ -77,20 +78,20 @@ int main(int argc,char *argv[])
     const bool statistics = options.statistics_option_is_set();
     const size_t line_width = options.line_width_get();
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
-    for (size_t idx = 0; idx < inputfiles.size(); idx++)
+    constexpr const size_t buf_size = size_t{1} << size_t{14};
+    for (const auto & inputfile : inputfiles)
     {
       if (options.mapped_option_is_set())
       {
-        Gttlmmap<char> mapped_file(inputfiles[idx].c_str());
-        GttlSeqIterator<0> gttl_si(std::string_view(mapped_file.ptr(),
-                                                    mapped_file.size()));
-        process_iterator<GttlSeqIterator<0>>(gttl_si,statistics,line_width);
+        Gttlmmap<char> mapped_file(inputfile.c_str());
+        GttlFastAGenerator<buf_size> gttl_si(std::string_view(mapped_file.ptr(),
+                                                              mapped_file.size()));
+        process_iterator<GttlFastAGenerator<buf_size>>(gttl_si,statistics,line_width);
       } else
       {
-        constexpr const int buf_size = 1 << 14;
-        GttlSeqIterator<buf_size> gttl_si(inputfiles[idx].c_str());
-        process_iterator<GttlSeqIterator<buf_size>>(gttl_si,statistics,
-                                                    line_width);
+        GttlFastAGenerator<buf_size> gttl_si(inputfile.c_str());
+        process_iterator<GttlFastAGenerator<buf_size>>(gttl_si,statistics,
+                                                       line_width);
 
       }
     }

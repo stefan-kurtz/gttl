@@ -21,6 +21,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
@@ -116,7 +117,6 @@ template<class CharFinder,const CharFinder &char_finder,bool forward,
          bool invert>
 static void display_char_ranges(const char *inputfilename)
 {
-  constexpr const int buf_size = 1 << 14;
   const bool is_protein = guess_if_protein_file(inputfilename);
 
   if (is_protein)
@@ -130,16 +130,16 @@ static void display_char_ranges(const char *inputfilename)
     throw std::string(": cannot open file");
     /* check_err.py checked */
   }
-  GttlSeqIterator<buf_size> gttl_si(in_fp);
+  GttlFastAGenerator fasta_gen(in_fp);
   size_t ranges_total_length = 0;
   using ThisCharRange = GttlCharRange<CharFinder,char_finder,forward,invert>;
   try /* need this, as the catch needs to close the file pointer
          to prevent a memory leak */
   {
     size_t seqnum = 0;
-    for (auto &&si : gttl_si)
+    for (const auto *si : fasta_gen)
     {
-      auto sequence = si.sequence_get();
+      auto sequence = si->sequence_get();
       ThisCharRange ranger(sequence.data(),sequence.size());
       for (auto const &&range : ranger)
       {

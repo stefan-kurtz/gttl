@@ -3,11 +3,11 @@
 #include <iostream>
 #include <string>
 #include <zlib.h>
-#include "sequences/gttl_fastq_iterator.hpp"
+#include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/split_files.hpp"
 #include "utilities/cxxopts.hpp"
-#include "utilities/gttl_line_iterator.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 
 static bool has_suffix_with_extension(const std::string &to_check,
@@ -123,24 +123,24 @@ int main(int argc, char *argv[])
       has_suffix_with_extension(ifilename, ".mpfa", ".gz") ||
       has_suffix_with_extension(ifilename, ".frn", ".gz"))
   {
-    GttlSeqIterator<BUF_SIZE> fasta_it(ifilename.c_str());
+    GttlFastAGenerator<BUF_SIZE> fasta_gen(ifilename.c_str());
     if (num_parts != 0)
     {
-      split_into_num_files(fasta_it, output_basename, num_parts,
+      split_into_num_files(fasta_gen, output_basename, num_parts,
                            result["compression_level"].as<size_t>(),
                            num_threads);
       return EXIT_SUCCESS;
     }
     if (len_parts != 0)
     {
-      split_into_parts_length(fasta_it, output_basename, len_parts,
+      split_into_parts_length(fasta_gen, output_basename, len_parts,
                               result["compression_level"].as<size_t>(),
                               num_threads);
       return EXIT_SUCCESS;
     }
     if (num_sequences != 0)
     {
-      split_into_num_sequences(fasta_it, output_basename, num_sequences,
+      split_into_num_sequences(fasta_gen, output_basename, num_sequences,
                                result["compression_level"].as<size_t>(),
                                num_threads);
       return EXIT_SUCCESS;
@@ -148,25 +148,24 @@ int main(int argc, char *argv[])
   } else if (has_suffix_with_extension(ifilename, ".fastq", ".gz") ||
              has_suffix_with_extension(ifilename, ".fq", ".gz"))
   {
-    GttlLineIterator<BUF_SIZE> line_it(ifilename.c_str());
-    GttlFastQIterator<GttlLineIterator<BUF_SIZE>> fastq_it(line_it);
+    GttlFastQGenerator fastq_gen(ifilename.c_str());
     if (num_parts != 0)
     {
-      split_into_num_files(fastq_it, output_basename, num_parts,
+      split_into_num_files(fastq_gen, output_basename, num_parts,
                            result["compression_level"].as<size_t>(),
                            num_threads);
       return EXIT_SUCCESS;
     }
     if (len_parts != 0)
     {
-      split_into_parts_length(fastq_it, output_basename, len_parts,
+      split_into_parts_length(fastq_gen, output_basename, len_parts,
                               result["compression_level"].as<size_t>(),
                               num_threads);
       return EXIT_SUCCESS;
     }
     if (num_sequences != 0)
     {
-      split_into_num_sequences(fastq_it, output_basename, num_sequences,
+      split_into_num_sequences(fastq_gen, output_basename, num_sequences,
                                result["compression_level"].as<size_t>(),
                                num_threads);
       return EXIT_SUCCESS;

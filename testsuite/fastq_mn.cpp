@@ -80,13 +80,13 @@ static void fastq_split_writer(size_t split_size,
   }
 }
 
-template<class FastQIterator>
+template<class FastQGenerator>
 static void process_fastq_iter(bool statistics,
                                bool echo,
                                size_t fasta_output,
                                hash_mode_type hash_mode,
                                const std::string &inputfilename,
-                               FastQIterator &fastq_it)
+                               FastQGenerator &fastq_it)
 {
   size_t seqnum = 0,
          total_length = 0,
@@ -192,9 +192,9 @@ static void process_single_file_streamed(bool statistics,
                                          const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  using FastQIterator = GttlFastQGenerator<buf_size>;
-  FastQIterator fastq_it(inputfilename.c_str());
-  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
+  using FastQGenerator = GttlFastQGenerator<buf_size>;
+  FastQGenerator fastq_it(inputfilename.c_str());
+  process_fastq_iter<FastQGenerator>(statistics,echo,fasta_output,hash_mode,
                                     inputfilename,fastq_it);
 }
 
@@ -206,9 +206,9 @@ static void process_single_file_mapped(bool statistics,
 {
   constexpr const int buf_size = 1 << 14;
   Gttlmmap<char> mapped_file(inputfilename.c_str());
-  using FastQIterator = GttlFastQGenerator<buf_size>;
-  FastQIterator fastq_it(mapped_file.ptr(), mapped_file.size());
-  process_fastq_iter<FastQIterator>(statistics,echo,fasta_output,hash_mode,
+  using FastQGenerator = GttlFastQGenerator<buf_size>;
+  FastQGenerator fastq_it(mapped_file.ptr(), mapped_file.size());
+  process_fastq_iter<FastQGenerator>(statistics,echo,fasta_output,hash_mode,
                                     inputfilename,fastq_it);
 }
 
@@ -218,9 +218,9 @@ static void process_paired_files(bool statistics,
                                  const std::string &filename1)
 {
   constexpr const int buf_size = 1 << 14;
-  using FastQIterator = GttlFastQGenerator<buf_size>;
-  FastQIterator fastq_it0(filename0.c_str()),
-                fastq_it1(filename1.c_str());
+  using FastQGenerator = GttlFastQGenerator<buf_size>;
+  FastQGenerator fastq_it0(filename0.c_str()),
+                 fastq_it1(filename1.c_str());
 
   size_t seqnum = 0, total_length[2] = {0};
   auto it0 = fastq_it0.begin();

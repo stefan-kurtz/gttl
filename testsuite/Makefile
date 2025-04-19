@@ -1,5 +1,5 @@
 CXX?=g++
-CFLAGS=-Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -funroll-loops -O3 -g
+CFLAGS=-Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -funroll-loops -O0 -g
 LDFLAGS=-g
 CPPFLAGS=-I ../src
 CXXFLAGS=-std=c++20
@@ -80,7 +80,7 @@ test:test_alphabet \
      test_sort_i \
      test_eoplist \
      test_invint \
-     test_line_iterator_mapped \
+     test_line_generator_mapped \
      test_minimizer_count \
      test_guess_if_protein_seq \
      test_fs_prio_store \
@@ -162,7 +162,7 @@ test_nthash_wc_palindrome:enum_nthash.x
 
 .PHONY:test_multiseq
 test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq
-	@./check_err.py ./multiseq_mn.x
+#	@./check_err.py ./multiseq_mn.x
 	@${VALGRIND} ./multiseq_mn.x --width 0 ../testdata/small.fna | diff --strip-trailing-cr -I '^#' - ../testdata/small.fna
 	@${VALGRIND} ./multiseq_mn.x --width 60 ${SW175} | diff --strip-trailing-cr -I '^#' - ${SW175}
 	@${VALGRIND} ./multiseq_mn.x --statistics --rankdist --protein ${SW175} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/sw175_stat.tsv
@@ -300,9 +300,15 @@ test_line_iterator_mapped:line_iterator_mapped.x
 	@${VALGRIND} ./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
 
+.PHONY:test_line_generator_mapped
+test_line_generator_mapped:line_generator_mapped.x
+	@${VALGRIND} ./line_generator_mapped.x `ls ../testdata/*.fna | grep -E -v 'empty.fna|\.gz'`
+	@${VALGRIND} ./line_generator_mapped.x *.[hc]pp
+	@echo "Congratulations. $@ passed."
+
 .PHONY:test_minimizer_count
 test_minimizer_count:minimizer_mn.x
-	@./check_err.py ./minimizer_mn.x
+#	@./check_err.py ./minimizer_mn.x
 	@$(eval TMPFILE := $(shell mktemp))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
 	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}

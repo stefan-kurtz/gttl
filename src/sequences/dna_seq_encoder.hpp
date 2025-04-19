@@ -24,6 +24,8 @@
 #include <cinttypes>
 #include <algorithm>
 #include <map>
+#include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -536,9 +538,9 @@ class DNAEncodingMultiLength
   template<class Iterator>
   void read_the_input(Iterator &iter)
   {
-    for (auto &sequence_entry : iter)
+    for (auto sequence_entry : iter)
     {
-      const std::string_view &sequence = sequence_entry.sequence_get();
+      const std::string_view &sequence = sequence_entry->sequence_get();
       if constexpr (split_at_wildcard)
       {
         NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
@@ -561,17 +563,15 @@ class DNAEncodingMultiLength
       , total_number_of_nucleotide_ranges(0)
       , total_number_of_sequences(0)
   {
-    static constexpr const int buf_size = 1 << 14;
     const bool fasta_format = gttl_likely_fasta_format(inputfilename);
     if (fasta_format)
     {
-      GttlSeqIterator<buf_size> gttl_si(inputfilename.c_str());
-      read_the_input(gttl_si);
+      GttlFastAGenerator fasta_gen(inputfilename.c_str());
+      read_the_input(fasta_gen);
     } else
     {
-      GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
-      GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
-      read_the_input(fastq_it);
+      GttlFastQGenerator fastq_gen(inputfilename.c_str());
+      read_the_input(fastq_gen);
     }
     size_t w_idx = 0;
     for (size_t idx = 0; idx < enc_vec.size(); idx++)

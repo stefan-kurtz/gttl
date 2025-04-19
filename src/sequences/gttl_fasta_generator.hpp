@@ -5,6 +5,7 @@
 #include "utilities/gttl_line_generator.hpp"
 #include <cassert>
 #include <cstddef>
+#include <cstdio>
 #include <string>
 #include <string_view>
 
@@ -34,6 +35,7 @@ template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastAGenerator
 {
   public:
+  static constexpr const bool is_fastq_generator = false;
   explicit GttlFastAGenerator(const char* file_name,
                               bool _is_end = false)
     : out(&default_buffer)
@@ -45,7 +47,7 @@ class GttlFastAGenerator
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
-    , lg(fp, out->header, _is_end)
+    , lg(fp, &out->header, _is_end)
   {}
 
   explicit GttlFastAGenerator(const char* file_name,
@@ -53,7 +55,7 @@ class GttlFastAGenerator
                               bool _is_end = false)
     : out(_out)
     , is_end(_is_end)
-    , lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
+    , lg(gttl_fp_type_open(file_name, "rb"), &_out->header, _is_end)
   {}
 
   explicit GttlFastAGenerator(GttlFpType fp,
@@ -61,7 +63,7 @@ class GttlFastAGenerator
                               bool _is_end = false)
     : out(_out)
     , is_end(_is_end)
-    , lg(fp, _out->header, _is_end)
+    , lg(fp, &_out->header, _is_end)
   {}
 
   explicit GttlFastAGenerator(const char* _input_string,
@@ -70,6 +72,12 @@ class GttlFastAGenerator
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(_input_string, _string_length)
+  {}
+
+  explicit GttlFastAGenerator(const std::string_view &_input_string, bool _is_end = false)
+    : out(&default_buffer)
+    , is_end(_is_end)
+    , lg(_input_string.data(), _input_string.size())
   {}
 
   bool advance()
@@ -96,7 +104,11 @@ class GttlFastAGenerator
     if(is_first_entry)
     {
       int ch = lg.getc();
-      if(ch != '>') return false;
+      if(ch != '>')
+      {
+        throw std::runtime_error(", line " + std::to_string(lg.line_number_get())
+                                 + ": corrupted sequence");
+      }
       is_first_entry = false;
     }
 
@@ -118,6 +130,12 @@ class GttlFastAGenerator
 
       out->sequence.push_back(static_cast<char>(ch));
       if(not lg.advance(nullptr, true)) break;
+    }
+
+    if(out->sequence_get().empty() or out->sequence_get()[0] == '>')
+    {
+      throw std::runtime_error(", line " + std::to_string(lg.line_number_get())
+                               + ": corrupted sequence");
     }
     return true;
   }

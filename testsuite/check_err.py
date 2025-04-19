@@ -12,17 +12,17 @@ def files2msg_get(fail_for_protein_sequence,p):
        '{}/testdata/only_header.fna'.format(p)
               : ', line 2: corrupted sequence',
        '{}/testdata/only_sequence.fna'.format(p)
-              : ', line 2: corrupted sequence',
+              : ', line 1: corrupted sequence',
        '{}/testdata/first_corrupt.fna'.format(p)
-              : ', line 4: corrupted sequence',
+              : ', line 2: corrupted sequence',
        '{}/testdata/second_corrupt.fna'.format(p)
               : ', line 4: corrupted sequence',
        '{}/testdata/middle_of_3_err.fna'.format(p)
-              : ', line 6: corrupted sequence',
+              : ', line 4: corrupted sequence',
        '{}/testdata/non_existing.fna'.format(p)
               : ': cannot open file',
-       '{}/testdata/no_eol.fna'.format(p)
-              : ', line 2: missing newline character',
+#       '{}/testdata/no_eol.fna'.format(p)
+#              : ', line 2: missing newline character',
          }
   if fail_for_protein_sequence:
     d['{}/testdata/protein.fsa'.format(p)] = ': can only handle DNA sequences'

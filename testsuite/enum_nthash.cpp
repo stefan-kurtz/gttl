@@ -18,22 +18,23 @@
 #include <cstdlib>
 #include <cstdbool>
 #include <cstdint>
+#include <exception>
+#include <stdexcept>
 #include <string>
 #include <algorithm>
 #include <iostream>
 #include <tuple>
 #include <cinttypes>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/bytes_unit.hpp"
-#include "sequences/complement_uint8.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
 
@@ -247,7 +248,7 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error(": cannot open file");
     /* check_err.py checked */
   }
   size_t total_length = 0;
@@ -268,47 +269,38 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   }
   const uint64_t hashmask = gttl_bits2maxvalue<uint64_t>(hashbits);
   constexpr const int buf_size = 1 << 14;
-  GttlSeqIterator<buf_size> gttl_si(in_fp);
+  GttlFastAGenerator<buf_size> fasta_gen(in_fp);
   using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
                                          nucleotide_finder,
                                          true,false>;
-  try /* need this, as the catch needs to close the file pointer
-         to prevent a memory leak */
+  for (auto &&si : fasta_gen)
   {
-    for (auto &&si : gttl_si)
+    auto sequence = si->sequence_get();
+    total_length += sequence.size();
+    max_sequence_length = std::max(max_sequence_length,sequence.size());
+    NucleotideRanger nuc_ranger(sequence.data(),sequence.size());
+    for (auto const &&range : nuc_ranger)
     {
-      auto sequence = si.sequence_get();
-      total_length += sequence.size();
-      max_sequence_length = std::max(max_sequence_length,sequence.size());
-      NucleotideRanger nuc_ranger(sequence.data(),sequence.size());
-      for (auto const &&range : nuc_ranger)
-      {
-        const size_t this_length = std::get<1>(range);
-        const char *substring = sequence.data() + std::get<0>(range);
-        auto result = apply_qgram_iterator<HashValueIterator,
-                                           with_rc,
-                                           show_hash_values,
-                                           sizeof_unit_hashed_qgrams,
-                                           create_bytes_unit>
-                                          (qgram_length,
-                                           hashmask,
-                                           hashed_qgram_packer,
-                                           seqnum,
-                                           substring,
-                                           this_length);
-        sum_hash_values += std::get<0>(result);
-        sum_rc_hash_values += std::get<1>(result);
-        count_all_qgrams += std::get<2>(result);
-        bytes_unit_sum += std::get<3>(result);
-        bytes_unit_sum_rc += std::get<4>(result);
-      }
-      seqnum++;
+      const size_t this_length = std::get<1>(range);
+      const char *substring = sequence.data() + std::get<0>(range);
+      auto result = apply_qgram_iterator<HashValueIterator,
+                                         with_rc,
+                                         show_hash_values,
+                                         sizeof_unit_hashed_qgrams,
+                                         create_bytes_unit>
+                                        (qgram_length,
+                                         hashmask,
+                                         hashed_qgram_packer,
+                                         seqnum,
+                                         substring,
+                                         this_length);
+      sum_hash_values += std::get<0>(result);
+      sum_rc_hash_values += std::get<1>(result);
+      count_all_qgrams += std::get<2>(result);
+      bytes_unit_sum += std::get<3>(result);
+      bytes_unit_sum_rc += std::get<4>(result);
     }
-  }
-  catch (std::string &msg)
-  {
-    gttl_fp_type_close(in_fp);
-    throw msg;
+    seqnum++;
   }
   delete hashed_qgram_packer;
   printf("# num_of_sequences\t%zu\n",seqnum);
@@ -325,7 +317,6 @@ static void enumerate_nt_hash_template(const char *inputfilename,
     printf("# sum_rc_hash_values\t%" PRIu64 "\n",sum_rc_hash_values);
     printf("# bytes_unit_sum_rc\t%zu\n",bytes_unit_sum_rc);
   }
-  gttl_fp_type_close(in_fp);
 }
 
 #define CALL_enumerate_nt_hash_template(BYTE_UNITS,BYTE_UNITS_OPTION)\
@@ -364,7 +355,7 @@ static void enumerate_nt_hash(const char *inputfilename,
 
   if (is_protein)
   {
-    throw std::string(": can only handle DNA sequences");
+    throw std::runtime_error(": can only handle DNA sequences");
     /* check_err.py checked */
   }
   const bool store_sequences = false;
@@ -439,10 +430,10 @@ int main(int argc,char *argv[])
                           options.hashbits_get());
       }
     }
-    catch (std::string &msg)
+    catch (std::exception &msg)
     {
       std::cerr << progname << ": file \"" << inputfile << "\""
-                << msg << std::endl;
+                << msg.what() << std::endl;
       haserr = true;
       break;
     }

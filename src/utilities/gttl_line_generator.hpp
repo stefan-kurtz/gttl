@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
 #include <string>
 
 template <const size_t buf_size = (size_t{1} << size_t{14})>
@@ -16,15 +17,25 @@ class GttlLineGenerator
     : file(fp)
     , out(&default_buffer)
     , is_end(_is_end)
-    , line_number(0)
-  {}
+    , line_number(1)
+  {
+    if(file == nullptr)
+    {
+      throw std::runtime_error(": cannot open file");
+    }
+  }
 
   explicit GttlLineGenerator(const char* file_name, bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(&default_buffer)
     , is_end(_is_end)
-    , line_number(0)
-  {}
+    , line_number(1)
+  {
+    if(file == nullptr)
+    {
+      throw std::runtime_error(": cannot open file");
+    }
+  }
 
   explicit GttlLineGenerator(const char* file_name,
                     std::string* _out,
@@ -32,8 +43,13 @@ class GttlLineGenerator
     : file(gttl_fp_type_open(file_name, "rb"))
     , out(_out)
     , is_end(_is_end)
-    , line_number(0)
-    {}
+    , line_number(1)
+    {
+      if(file == nullptr)
+      {
+        throw std::runtime_error(": cannot open file");
+      }
+    }
 
   explicit GttlLineGenerator(GttlFpType fp,
                              std::string* _out,
@@ -41,14 +57,19 @@ class GttlLineGenerator
     : file(fp)
     , out(_out)
     , is_end(_is_end)
-    , line_number(0)
-    {}
+    , line_number(1)
+    {
+      if(file == nullptr)
+      {
+        throw std::runtime_error(": cannot open file");
+      }
+    }
 
   explicit GttlLineGenerator(const char* _input_string, size_t _string_length)
     : file(nullptr)
     , out(&default_buffer)
     , is_end(_string_length == 0)
-    , line_number(0)
+    , line_number(1)
     , input_string(_input_string)
     , string_length(_string_length)
     , current_ptr(_input_string)
@@ -66,7 +87,7 @@ class GttlLineGenerator
   }
 
 private:
-  bool read_from_mapped_string(size_t *length)
+  bool read_from_mapped_string(size_t *length, bool append)
   {
     if(current_ptr >= input_string + string_length)
     {
@@ -82,8 +103,16 @@ private:
 
     if(out != nullptr)
     {
-      out->resize(copy_len);
-      std::memcpy(out->data(), current_ptr, copy_len);
+      if(append)
+      {
+        const size_t old_size = out->size();
+        out->resize(old_size + copy_len);
+        std::memcpy(out->data() + old_size, current_ptr, copy_len);
+      }else
+      {
+        out->resize(copy_len);
+        std::memcpy(out->data(), current_ptr, copy_len);
+      }
     }
 
     if(length != nullptr)
@@ -204,7 +233,7 @@ public:
 
     if(input_string != nullptr)
     {
-      return read_from_mapped_string(length);
+      return read_from_mapped_string(length, append);
     }
 
     if(out == nullptr)
@@ -218,7 +247,7 @@ public:
   void reset()
   {
     is_end = false;
-    line_number = 0;
+    line_number = 1;
     if(input_string != nullptr)
     {
       current_ptr = input_string;

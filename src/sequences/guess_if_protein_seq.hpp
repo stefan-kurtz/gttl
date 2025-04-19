@@ -21,11 +21,10 @@
 #include <cstring>
 #include <climits>
 #include <algorithm>
-#include <iostream>
+#include <stdexcept>
 #include <vector>
 #include <string>
-#include "utilities/str_format.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
+#include "sequences/gttl_fasta_generator.hpp"
 
 /* checks first chars of sequence, returns true if sequence is
    definitely a protein sequence */
@@ -60,47 +59,32 @@ bool guess_if_protein_file_generic(const char *filename)
 
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error(": cannot open file");
   }
   ReaderClass reader(in_fp);
   size_t total_length = 0;
   bool decided_if_protein = false;
-  try /* need this, as the catch needs to close the file pointer
-         to prevent a memory leak */
+  for (auto &&si : reader)
   {
-    for (auto &&si : reader)
+    auto sequence = si->sequence_get();
+    if (guess_if_protein_sequence(sequence.data(),sequence.size()))
     {
-      auto sequence = si.sequence_get();
-      if (guess_if_protein_sequence(sequence.data(),sequence.size()))
-      {
-        decided_if_protein = true;
-        break;
-      }
-      total_length += sequence.size();
-      if (total_length >= GUESS_SIZE_TO_DECIDE)
-      {
-        break;
-      }
+      decided_if_protein = true;
+      break;
+    }
+    total_length += sequence.size();
+    if (total_length >= GUESS_SIZE_TO_DECIDE)
+    {
+      break;
     }
   }
-  catch (std::string &ext)
-  {
-    gttl_fp_type_close(in_fp);
-    throw ext;
-  }
-  gttl_fp_type_close(in_fp);
-  if (decided_if_protein) /* have found evidence of protein in
-                             GUESS_SIZE_TO_DECIDE first characters */
-  {
-    return true; /* it is a protein */
-  }
-  return false;
+  return decided_if_protein;
 }
 
 inline bool guess_if_protein_file(const char *filename)
 {
   constexpr const int buf_size = 1 << 14;
-  return guess_if_protein_file_generic<GttlSeqIterator<buf_size>>(filename);
+  return guess_if_protein_file_generic<GttlFastAGenerator<buf_size>>(filename);
 }
 
 inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
@@ -131,7 +115,7 @@ bool guess_if_protein_multiseq(const MultiseqClass *multiseq)
       is_protein_sequence = true;
       break;
     }
-    if (sequences_total_length >= size_t(GUESS_SIZE_TO_DECIDE))
+    if (sequences_total_length >= size_t{GUESS_SIZE_TO_DECIDE})
     {
       break;
     }

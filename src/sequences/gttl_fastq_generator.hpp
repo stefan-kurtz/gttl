@@ -39,6 +39,7 @@ template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastQGenerator
 {
   public:
+  static constexpr const bool is_fastq_generator = true;
   explicit GttlFastQGenerator(const char* file_name,
                               bool _is_end = false)
     : out(&default_buffer)

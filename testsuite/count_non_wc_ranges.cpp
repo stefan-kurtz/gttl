@@ -18,9 +18,12 @@
 #include <cstdlib>
 #include <cstdbool>
 #include <cstdint>
+#include <exception>
+#include <stdexcept>
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/mathsupport.hpp"
 #include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
@@ -58,52 +61,43 @@ static void count_non_wildcard_ranges(const char *inputfilename)
 
   if (is_protein)
   {
-    throw std::string(": can only handle DNA sequences");
+    throw std::runtime_error(": can only handle DNA sequences");
     /* check_err.py checked */
   }
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error(": cannot open file");
     /* check_err.py checked */
   }
-  GttlSeqIterator<buf_size> gttl_si(in_fp);
+  GttlFastAGenerator<buf_size> gttl_si(in_fp);
   size_t total_length = 0;
   size_t num_of_sequences = 0;
   size_t non_wildcard_ranges_total_length = 0;
   size_t non_wildcard_ranges_max_length = 0;
   size_t non_wildcard_ranges_number = 0;
   size_t max_sequence_length = 0;
-  try /* need this, as the catch needs to close the file pointer
-         to prevent a memory leak */
+  for (auto &&si : gttl_si)
   {
-    for (auto &&si : gttl_si)
-    {
-      auto sequence = si.sequence_get();
-      total_length += sequence.size();
-      max_sequence_length = std::max(max_sequence_length,sequence.size());
-      NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());
-      std::vector<std::pair<size_t,size_t>> sequence_ranges
-        = nwcr_it.enumerate();
+    auto sequence = si->sequence_get();
+    total_length += sequence.size();
+    max_sequence_length = std::max(max_sequence_length,sequence.size());
+    NonWildCardRangeIterator<'N'> nwcr_it(sequence.data(),sequence.size());
+    std::vector<std::pair<size_t,size_t>> sequence_ranges
+      = nwcr_it.enumerate();
 #ifndef NDEBUG
-      verify_non_wildcard_ranges<'N'>(sequence,sequence_ranges);
+    verify_non_wildcard_ranges<'N'>(sequence,sequence_ranges);
 #endif
-      for (auto &&nwr_it : sequence_ranges)
-      {
-        const size_t this_length = std::get<1>(nwr_it) -
-                                   std::get<0>(nwr_it) + 1;
-        non_wildcard_ranges_total_length += this_length;
-        non_wildcard_ranges_max_length
-          = std::max(non_wildcard_ranges_max_length,this_length);
-      }
-      non_wildcard_ranges_number += sequence_ranges.size();
-      num_of_sequences++;
+    for (auto &&nwr_it : sequence_ranges)
+    {
+      const size_t this_length = std::get<1>(nwr_it) -
+                                 std::get<0>(nwr_it) + 1;
+      non_wildcard_ranges_total_length += this_length;
+      non_wildcard_ranges_max_length
+        = std::max(non_wildcard_ranges_max_length,this_length);
     }
-  }
-  catch (std::string &msg)
-  {
-    gttl_fp_type_close(in_fp);
-    throw msg;
+    non_wildcard_ranges_number += sequence_ranges.size();
+    num_of_sequences++;
   }
   printf("# filename\t%s\n",inputfilename);
   printf("# num_of_sequences\t%zu\n",num_of_sequences);
@@ -121,7 +115,6 @@ static void count_non_wildcard_ranges(const char *inputfilename)
             gttl_required_bits<size_t>(non_wildcard_ranges_number));
   printf("# non_wildcard_ranges_max_length.bits\t%d\n",
             gttl_required_bits<size_t>(non_wildcard_ranges_max_length));
-  gttl_fp_type_close(in_fp);
 }
 
 int main(int argc,char *argv[])
@@ -134,10 +127,10 @@ int main(int argc,char *argv[])
     {
       count_non_wildcard_ranges(argv[idx]);
     }
-    catch (std::string &msg)
+    catch (std::exception &msg)
     {
       std::cerr << progname << ": file \"" << argv[idx] << "\""
-                << msg << std::endl;
+                << msg.what() << std::endl;
       haserr = true;
       break;
     }
