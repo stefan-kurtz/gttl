@@ -75,6 +75,15 @@ class GttlFastQGenerator
     , lg(_input_string, _string_length)
     {}
 
+    explicit GttlFastQGenerator(const std::vector<std::string>* _file_list,
+                                GttlFastQEntry<buf_size> *_out = nullptr,
+                                bool _is_end = false)
+    : out(_out == nullptr ? &default_buffer : _out)
+    , is_end(_is_end)
+    , lg(_file_list, &out->header, _is_end)
+    {}
+
+
   bool advance()
   {
     if(is_end) return false;

@@ -75,6 +75,25 @@ class GttlLineGenerator
     , current_ptr(_input_string)
     {}
 
+  explicit GttlLineGenerator(const std::vector<std::string>* _file_list,
+                             std::string* _out = nullptr,
+                             bool _is_end = false)
+    : file(nullptr)
+    , out(_out == nullptr ? &default_buffer : _out)
+    , is_end(_file_list == nullptr or _file_list->empty() or _is_end)
+    , line_number(1)
+    , file_list(_file_list)
+    {
+      if(not is_end)
+      {
+        file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");
+        if(file == nullptr)
+        {
+          throw std::runtime_error(": cannot open file");
+        }
+      }
+    }
+
   // Delete copy/move constructur & assignment operator
   GttlLineGenerator(const GttlLineGenerator &other) = delete;
   GttlLineGenerator& operator=(const GttlLineGenerator &other) = delete;
@@ -342,9 +361,33 @@ public:
 
   bool refill_file_buffer()
   {
-    file_buf_end = gttl_fp_type_read(file_buf, sizeof(char), buf_size, file);
-    file_buf_pos = 0;
-    return file_buf_end > 0;
+    while(true)
+    {
+      if(file == nullptr)
+      {
+        is_end = true;
+        return false;
+      }
+      file_buf_end = gttl_fp_type_read(file_buf, sizeof(char), buf_size, file);
+      file_buf_pos = 0;
+      if(file_buf_end > 0)
+      {
+        return true;
+      }
+      //Otherwise, the current file has been fully read.
+      gttl_fp_type_close(file);
+      file = nullptr;
+
+      if(file_list != nullptr and file_index + 1 < file_list->size())
+      {
+        file_index++;
+        file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");
+        if(file == nullptr)
+        {
+          throw std::runtime_error(": cannot open file");
+        }
+      }
+    }
   }
 
   GttlFpType file;
@@ -356,6 +399,9 @@ public:
   const char* input_string = nullptr;
   size_t string_length = 0;
   const char* current_ptr = nullptr;
+
+  const std::vector<std::string>* file_list = nullptr;
+  size_t file_index = 0;
 };
 
 #endif  // GTTL_LINE_GENERATOR_HPP

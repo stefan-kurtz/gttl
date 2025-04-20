@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <string>
 #include <string_view>
+#include <utility>
 
 template <const size_t buf_size = (size_t{1} << size_t{14})>
 struct GttlFastAEntry
@@ -29,6 +30,11 @@ struct GttlFastAEntry
     header.reserve(buf_size);
     sequence.reserve(buf_size);
   }
+
+  GttlFastAEntry(std::string  _header, std::string  _sequence)
+    : header(std::move(_header))
+    , sequence(std::move(_sequence))
+  {}
 };
 
 template <const size_t buf_size = (size_t{1} << size_t{14})>
@@ -79,6 +85,14 @@ class GttlFastAGenerator
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(_input_string.data(), _input_string.size())
+  {}
+
+  explicit GttlFastAGenerator(const std::vector<std::string>* _file_list,
+                              GttlFastAEntry<buf_size> *_out = nullptr,
+                              bool _is_end = false)
+    : out(_out == nullptr ? &default_buffer : _out)
+    , is_end(_is_end)
+    , lg(_file_list, &out->header, _is_end)
   {}
 
   bool advance()

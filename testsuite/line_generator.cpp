@@ -1,38 +1,73 @@
 #include "utilities/gttl_line_generator.hpp"
 #include <cstring>
+#include <exception>
 #include <iostream>
 
 int main(int argc,char *argv[])
 {
-  // We use 2^20 here, because one of our tests creates a line of size ~985k
-  constexpr const int buf_size = 1U << 20U;
+  constexpr const int buf_size = 1 << 14;
+  std::string buffer{};
   bool haserr = false;
 
-  for (int idx = 1; idx < argc; idx++)
+  if (argc > 2 && strcmp(argv[1],"--all") == 0)
   {
-    bool this_file_is_empty = true;
+    std::vector<std::string> inputfiles{};
+    for (int idx = 2; idx < argc; idx++)
+    {
+      inputfiles.emplace_back(argv[idx]);
+    }
+    bool all_empty_files = true;
     try
     {
-      GttlLineGenerator<buf_size> gttl_li(argv[idx]);
+      GttlLineGenerator<buf_size> gttl_li(&inputfiles);
       for (const auto& line : gttl_li)
       {
+        all_empty_files = false;
         std::cout << line << '\n';
-        this_file_is_empty = false;
+        buffer.clear();
       }
     }
-    catch (std::string &msg)
+    catch (std::exception &msg)
     {
-      std::cerr << argv[0] << ": file \"" << argv[1] << "\""
-                << msg << '\n';
+      std::cerr << argv[0] << ": file \"" << argv[2] << "\""
+                << msg.what() << '\n';
       haserr = true;
-      break;
     }
-    if (this_file_is_empty)
+    if (!haserr && all_empty_files)
     {
-      std::cerr << argv[0] << ": file \"" << argv[1]
-                << "\", line 1: corrupted sequence" << '\n';
-      haserr = true;
-      break;
+      std::cerr << argv[0] << ": file \"" << argv[2]
+                << "\", line 1: corrupted sequence\n";
+      haserr = false;
+    }
+  } else
+  {
+    for (int idx = 1; idx < argc; idx++)
+    {
+      bool this_file_is_empty = true;
+      try
+      {
+        GttlLineGenerator<buf_size> gttl_li(argv[idx]);
+        for (const auto& line : gttl_li)
+        {
+          std::cout << line << '\n';
+          this_file_is_empty = false;
+          buffer.clear();
+        }
+      }
+      catch (std::exception &msg)
+      {
+        std::cerr << argv[0] << ": file \"" << argv[1] << "\""
+                  << msg.what() << '\n';
+        haserr = true;
+        break;
+      }
+      if (this_file_is_empty)
+      {
+        std::cerr << argv[0] << ": file \"" << argv[1]
+                  << "\", line 1: corrupted sequence" << '\n';
+        haserr = true;
+        break;
+      }
     }
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
