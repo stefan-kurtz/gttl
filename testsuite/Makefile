@@ -1,5 +1,5 @@
 CXX?=g++
-CFLAGS=-Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -funroll-loops -O0 -g
+CFLAGS=-Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -funroll-loops -O3 -g
 LDFLAGS=-g
 CPPFLAGS=-I ../src
 CXXFLAGS=-std=c++20
