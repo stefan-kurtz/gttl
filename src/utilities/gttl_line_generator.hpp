@@ -273,7 +273,15 @@ public:
     }
     file_buf_pos = 0;
     file_buf_end = 0;
-    gttl_fp_type_rewind(file);
+    if(file_list != nullptr and not file_list->empty())
+    {
+      gttl_fp_type_close(file);
+      file_index = 0;
+      file = gttl_fp_type_open((*file_list)[0].c_str(), "rb");
+    }else
+    {
+      gttl_fp_type_rewind(file);
+    }
   }
 
   [[nodiscard]] size_t line_number_get() const noexcept
@@ -374,11 +382,18 @@ public:
       {
         return true;
       }
+      // If we have only 1 file to read, we do NOT want to close it,
+      // so as to not lose its handle.
+      if (file_list == nullptr)
+      {
+        is_end = true;
+        return false;
+      }
       //Otherwise, the current file has been fully read.
       gttl_fp_type_close(file);
       file = nullptr;
 
-      if(file_list != nullptr and file_index + 1 < file_list->size())
+      if(file_index + 1 < file_list->size())
       {
         file_index++;
         file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");

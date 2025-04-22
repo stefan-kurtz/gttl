@@ -80,7 +80,6 @@ static void verify_hashvalues_for_file(const char *inputfilename,
   std::cout << "# hash_value_sum\t" << hash_value_sum << std::endl;
   std::cout << "# complement hash_value_sum\t" << compl_hash_value_sum
             << std::endl;
-  gttl_fp_type_close(in_fp);
 }
 
 int main(int argc,char *argv[])

@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cstdbool>
 #include <cstdint>
+#include <exception>
 #include <string>
 #include <algorithm>
 #include <iostream>
@@ -133,29 +134,19 @@ static void display_char_ranges(const char *inputfilename)
   GttlFastAGenerator fasta_gen(in_fp);
   size_t ranges_total_length = 0;
   using ThisCharRange = GttlCharRange<CharFinder,char_finder,forward,invert>;
-  try /* need this, as the catch needs to close the file pointer
-         to prevent a memory leak */
+  size_t seqnum = 0;
+  for (const auto *si : fasta_gen)
   {
-    size_t seqnum = 0;
-    for (const auto *si : fasta_gen)
+    auto sequence = si->sequence_get();
+    ThisCharRange ranger(sequence.data(),sequence.size());
+    for (auto const &&range : ranger)
     {
-      auto sequence = si->sequence_get();
-      ThisCharRange ranger(sequence.data(),sequence.size());
-      for (auto const &&range : ranger)
-      {
-        std::cout << seqnum << "\t" << std::get<0>(range)
-                  << "\t" << std::get<1>(range) << std::endl;
-        ranges_total_length += std::get<1>(range);
-      }
-      seqnum++;
+      std::cout << seqnum << "\t" << std::get<0>(range)
+                << "\t" << std::get<1>(range) << std::endl;
+      ranges_total_length += std::get<1>(range);
     }
+    seqnum++;
   }
-  catch (std::string &msg)
-  {
-    gttl_fp_type_close(in_fp);
-    throw msg;
-  }
-  gttl_fp_type_close(in_fp);
   std::cout << "# ranges_total_length\t" << ranges_total_length << std::endl;
 }
 

@@ -273,7 +273,6 @@ static void char_distribution_seq(const std::string &inputfilename)
       dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
     }
   }
-  gttl_fp_type_close(in_fp);
   std::cout << "# total_count_entries\t" << count_entries << std::endl;
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
@@ -335,7 +334,6 @@ static void char_distribution_thd_gz(size_t num_threads,
   {
     th.join();
   }
-  gttl_fp_type_close(in_fp);
   size_t flushed_sequences = 0;
   while (true)
   {
