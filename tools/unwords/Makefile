@@ -3,7 +3,7 @@ LD=${CXX}
 CFLAGS=-m64 -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -pedantic
 GTTL=../..
 CPPFLAGS=-I ${GTTL}/src
-CXXFLAGS=-std=c++17
+CXXFLAGS=-std=c++20
 LDFLAGS=-g -m64
 SYSTEM?=$(shell uname -s)
 MACHINE?=$(shell uname -m)
@@ -29,6 +29,10 @@ export PYTHONPATH=../../scripts
 ifeq (,$(findstring g++-,$(CXX)))
   CFLAG += -march=native
   TIME_OPTIONS=-time
+endif
+
+ifeq ($(valgrind),yes)
+  VALGRIND=${GTTL}/scripts/valgrind.sh
 endif
 
 ifeq ($(debug),yes)
@@ -106,7 +110,7 @@ check_deBruijn10:unwords_mn.x
 .PHONY:check_unwords_vac
 check_unwords_vac:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${VAC} > ${TMPFILE}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${VAC} > ${TMPFILE}
 	@./check_unwords.py ${TMPFILE} ${VAC}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -114,7 +118,7 @@ check_unwords_vac:unwords_mn.x
 .PHONY:check_unwords_y3
 check_unwords_y3:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${Y3} > ${TMPFILE}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${Y3} > ${TMPFILE}
 	@./check_unwords.py ${TMPFILE} ${Y3}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -122,7 +126,7 @@ check_unwords_y3:unwords_mn.x
 .PHONY:check_unwords_at
 check_unwords_at:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE}
 	@./check_unwords.py ${TMPFILE} ${AT1MB}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -130,7 +134,7 @@ check_unwords_at:unwords_mn.x
 .PHONY:check_unwords_p
 check_unwords_p:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${PROTEIN_FILE} > ${TMPFILE}
+	@${VALGRIND} ./unwords_mn.x ${PROTEIN_FILE} > ${TMPFILE}
 	@./check_unwords.py ${TMPFILE} ${PROTEIN_FILE}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -138,7 +142,7 @@ check_unwords_p:unwords_mn.x
 .PHONY:check_unwords_sw175
 check_unwords_sw175:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${SW_175} > ${TMPFILE}
+	@${VALGRIND} ./unwords_mn.x ${SW_175} > ${TMPFILE}
 	@./check_unwords.py ${TMPFILE} ${SW_175}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -146,7 +150,7 @@ check_unwords_sw175:unwords_mn.x
 .PHONY:compare_unwords_vac
 compare_unwords_vac:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${VAC} > ${TMPFILE1}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${VAC} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_vac.txt
 	@${RM} ${TMPFILE1} ${TMPFILE2}
@@ -155,7 +159,7 @@ compare_unwords_vac:unwords_mn.x
 .PHONY:compare_unwords_y3
 compare_unwords_y3:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${Y3} > ${TMPFILE1}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${Y3} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_y3.txt
 	@${RM} ${TMPFILE1} ${TMPFILE2}
@@ -164,7 +168,7 @@ compare_unwords_y3:unwords_mn.x
 .PHONY:compare_unwords_at
 compare_unwords_at:unwords_mn.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
-	@./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE1}
+	@${VALGRIND} ./unwords_mn.x ${IRC_OPTION} ${AT1MB} > ${TMPFILE1}
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@diff --strip-trailing-cr -I '^[#>]' -i ${TMPFILE1} ${GTTL}/testdata/unwords_at.txt
 	@${RM} ${TMPFILE1} ${TMPFILE2}

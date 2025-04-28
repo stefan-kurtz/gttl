@@ -1,11 +1,11 @@
 #ifndef UNWORDS_HPP
 #define UNWORDS_HPP
+#include <exception>
 #include <vector>
 #include <cmath>
-#include <algorithm>
+#include "utilities/access_maybe_pointer.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/constexpr_for.hpp"
-#include "utilities/file_size.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/multibitvector.hpp"
 #include "sequences/char_range.hpp"
@@ -26,15 +26,15 @@ class Unwords
     , multibitvector(number_of_all_qgrams)
     , sequences_total_length(0)
     {}
-  size_t qgram_length_get(void) const noexcept
+  [[nodiscard]] size_t qgram_length_get(void) const noexcept
   {
     return qgram_length;
   }
-  size_t number_of_all_qgrams_get(void) const noexcept
+  [[nodiscard]] size_t number_of_all_qgrams_get(void) const noexcept
   {
     return number_of_all_qgrams;
   }
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     return multibitvector.size() - multibitvector.count();
   }
@@ -42,7 +42,7 @@ class Unwords
   {
     multibitvector.set(integer_code);
   }
-  std::vector<size_t> unwords_vector_get(void) const noexcept
+  [[nodiscard]] std::vector<size_t> unwords_vector_get(void) const noexcept
   {
     std::vector<size_t> unwords_vector{};
     for (size_t integer_code = 0; integer_code < number_of_all_qgrams;
@@ -60,20 +60,20 @@ class Unwords
   void show(const char *alphabet) const noexcept
   {
     QgramDecoder<alphabetsize,false> qgram_decoder(alphabet,qgram_length);
-    std::cout << "# alphabet size:\t" << alphabetsize << std::endl;
-    std::cout << "# length of qgrams:\t" << qgram_length << std::endl;
+    std::cout << "# alphabet size:\t" << alphabetsize << '\n';
+    std::cout << "# length of qgrams:\t" << qgram_length << '\n';
     std::cout << "# number of all qgrams:\t" << number_of_all_qgrams
-              << std::endl;
+              << '\n';
     std::cout << "# total length of sequences:\t" << sequences_total_length
-              << std::endl;
-    std::cout << "# number of unwords:\t" << size() << std::endl;
-    std::cout << "# unwords:" << std::endl;
+              << '\n';
+    std::cout << "# number of unwords:\t" << size() << '\n';
+    std::cout << "# unwords:\n";
 
     auto unwords_vector = unwords_vector_get();
     for (const auto integer_code : unwords_vector)
     {
       const char *qgram = qgram_decoder.decode(integer_code);
-      std::cout << qgram << std::endl;
+      std::cout << qgram << '\n';
     }
   }
 };
@@ -88,9 +88,13 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
   bool all_qgrams_present = false;
   try
   {
-    for (auto si : seq_iterator)
+    if constexpr(requires { seq_iterator.reset(); })
     {
-      auto sequence = si.sequence_get();
+      seq_iterator.reset();
+    }
+    for (auto const& si : seq_iterator)
+    {
+      auto sequence = access_maybe_pointer(si).sequence_get();
       CharRanger ranger(sequence.data(),sequence.size());
       for (auto const &&range : ranger)
       {
@@ -120,7 +124,7 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
       }
     }
   }
-  catch (std::string &msg)
+  catch (std::exception &msg)
   {
     delete unwords;
     throw msg;

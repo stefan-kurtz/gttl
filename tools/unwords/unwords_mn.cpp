@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/unwords.hpp"
 #include "unwords_opt.hpp"
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   }
   catch (std::invalid_argument &e)
   {
-    std::cerr << argv[0] << e.what() << std::endl;
+    std::cerr << argv[0] << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
   }
   catch (std::string &msg)
   {
-    std::cerr << argv[0] << msg << std::endl;
+    std::cerr << argv[0] << msg << '\n';
     return EXIT_FAILURE;
   }
   if (guessed_protein_sequences &&
@@ -38,8 +38,7 @@ int main(int argc, char *argv[])
     std::cerr << argv[0] << ": " << ("input seems to be aminoacid sequences, "
                                      "but option "
                                      "-i/--ignore_reverse_complement is only "
-                                     "available for DNA sequences")
-              << std::endl;;
+                                     "available for DNA sequences\n");
     return EXIT_FAILURE;
   }
 
@@ -53,8 +52,8 @@ int main(int argc, char *argv[])
       qgram_length_max = options.qgram_length_max_get();
     } else
     {
-      const size_t alphabetsize = guessed_protein_sequences ? size_t(20)
-                                                            : size_t(4);
+      const size_t alphabetsize = guessed_protein_sequences ? size_t{20}
+                                                            : size_t{4};
       size_t upperbound_sequence_length;
       if (options.ignore_reverse_complement_option_is_set())
       {
@@ -68,20 +67,20 @@ int main(int argc, char *argv[])
                                                    alphabetsize);
     }
     RunTimeClass rt_unwords_finder{};
-    const int buf_size = 1 << 14;
-    GttlSeqIterator<buf_size> gttl_si(&inputfiles);
+    const int buf_size = size_t{1} << size_t{14};
+    GttlFastAGenerator<buf_size> gttl_si(&inputfiles);
     if (options.store_sequences_option_is_set())
     {
       RunTimeClass rt_sequence_storing{};
-      std::vector<SequenceEntry> sequences{};
-      for (auto si : gttl_si)
+      std::vector<GttlFastAEntry<buf_size>> sequences{};
+      for (const auto *si : gttl_si)
       {
-        sequences.push_back(SequenceEntry(std::string(""),
-                                          std::string(si.sequence_get())));
+        sequences.emplace_back(std::string(""),
+                               std::string(si->sequence_get()));
       }
       StrFormat msg("storing %zu sequences",sequences.size());
       rt_sequence_storing.show(msg.str());
-      unwords = unwords_finder<std::vector<SequenceEntry>>
+      unwords = unwords_finder<std::vector<GttlFastAEntry<buf_size>>>
                               (guessed_protein_sequences,
                                !options
                                  .ignore_reverse_complement_option_is_set(),
@@ -89,7 +88,7 @@ int main(int argc, char *argv[])
                                sequences);
     } else
     {
-      unwords = unwords_finder<GttlSeqIterator<buf_size>>
+      unwords = unwords_finder<GttlFastAGenerator<buf_size>>
                               (guessed_protein_sequences,
                                !options
                                  .ignore_reverse_complement_option_is_set(),
@@ -100,7 +99,7 @@ int main(int argc, char *argv[])
   }
   catch (std::string &msg)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << msg << '\n';
     haserr = true;
   }
   if (!haserr)
@@ -108,8 +107,7 @@ int main(int argc, char *argv[])
     if (unwords == nullptr)
     {
       std::cerr << argv[0] << ": all words of length <= " << qgram_length_max
-                << " occur in the sequences, i.e. there are no unwords"
-                << std::endl;
+                << " occur in the sequences, i.e. there are no unwords\n";
       haserr = true;
     } else
     {
