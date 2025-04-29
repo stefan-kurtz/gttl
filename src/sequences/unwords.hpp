@@ -79,20 +79,20 @@ class Unwords
 };
 
 template<class CharRanger, class InvertibleIntcodeIterator,
-         bool reverse_complement_option, class SeqIterator>
+         bool reverse_complement_option, class SeqGenerator>
 static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
                                         size_t alphabetsize,
-                                        SeqIterator &seq_iterator)
+                                        SeqGenerator &seq_generator)
 {
   Unwords *unwords = new Unwords(alphabetsize,qgram_length);
   bool all_qgrams_present = false;
   try
   {
-    if constexpr(requires { seq_iterator.reset(); })
+    if constexpr(requires { seq_generator.reset(); })
     {
-      seq_iterator.reset();
+      seq_generator.reset();
     }
-    for (auto const& si : seq_iterator)
+    for (auto const& si : seq_generator)
     {
       auto sequence = access_maybe_pointer(si).sequence_get();
       CharRanger ranger(sequence.data(),sequence.size());
@@ -133,10 +133,10 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
 }
 
 template<class CharRanger, class InvertibleIntcodeIterator,
-         bool reverse_complement, class SeqIterator>
+         bool reverse_complement, class SeqGenerator>
 static Unwords *unwords_binary_search(size_t qgram_length_max,
                                       size_t alphabetsize,
-                                      SeqIterator &seq_iterator)
+                                      SeqGenerator &seq_generator)
 {
   Unwords *last_successful_unwords = nullptr;
   size_t l = 1,
@@ -149,10 +149,10 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
     Unwords *unwords = try_if_all_qgrams_occur<CharRanger,
                                                InvertibleIntcodeIterator,
                                                reverse_complement,
-                                               SeqIterator>
+                                               SeqGenerator>
                                               (qgram_length,
                                                alphabetsize,
-                                               seq_iterator);
+                                               seq_generator);
     StrFormat msg("count number of different %zu-grams", qgram_length);
     compute_unwords_runtime.show(msg.str());
     if (unwords->size() > 0)
@@ -172,11 +172,11 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
 static constexpr const char_finder::NucleotideFinder unw_nucleotide_finder{};
 static constexpr const char_finder::AminoacidFinder unw_aminoacid_finder{};
 
-template<class SeqIterator>
+template<class SeqGenerator>
 static Unwords *unwords_finder(bool is_protein_sequence,
                                bool reverse_complement,
                                size_t qgram_length_max,
-                               SeqIterator &seq_iterator)
+                               SeqGenerator &seq_generator)
 {
   Unwords *unwords = nullptr;
   if (!is_protein_sequence)
@@ -192,10 +192,10 @@ static Unwords *unwords_finder(bool is_protein_sequence,
         unwords = unwords_binary_search<NucleotideRanger,
                                         InvertibleIntegercode2Iterator4,
                                         compile_time_reverse_complement,
-                                        SeqIterator>
+                                        SeqGenerator>
                                        (qgram_length_max,
                                         4,
-                                        seq_iterator);
+                                        seq_generator);
       }
     });
   } else
@@ -206,10 +206,10 @@ static Unwords *unwords_finder(bool is_protein_sequence,
     unwords = unwords_binary_search<AminoacidRanger,
                                     InvertibleIntegercodeIterator20,
                                     false,
-                                    SeqIterator>
+                                    SeqGenerator>
                                    (qgram_length_max,
                                     20,
-                                    seq_iterator);
+                                    seq_generator);
   }
   return unwords;
 }
@@ -229,7 +229,7 @@ size_t estimate_qgram_length_max(const std::vector<std::string> &inputfiles)
 {
   size_t sequences_length = 0;
   const int buf_size = 1 << 14;
-  GttlSeqIterator<buf_size> gttl_si(&inputfiles);
+  GttlFastAGenerator<buf_size> gttl_si(&inputfiles);
   try
   {
     for (auto &&si : gttl_si)

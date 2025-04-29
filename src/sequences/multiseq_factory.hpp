@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cmath>
 #include <cstdio>
+#include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_multiseq.hpp"
 
 class GttlMultiseqFactory
@@ -17,12 +18,11 @@ class GttlMultiseqFactory
   bool fastq_paired_input;
   size_t fastq_file_total_length_get(const std::string &inputfile) const
   {
-    GttlLineIterator<buf_size> line_iterator(inputfile.c_str());
-    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it(line_iterator);
+    GttlFastQGenerator<buf_size> fastq_it(inputfile.c_str());
     size_t sequences_total_length = 0;
-    for (auto it = fastq_it.begin(); it != fastq_it.end(); ++it)
+    for (const auto *it : fastq_it)
     {
-      sequences_total_length += (*it).sequence_get().size();
+      sequences_total_length += it->sequence_get().size();
     }
     return sequences_total_length;
   }
@@ -55,22 +55,20 @@ class GttlMultiseqFactory
     {
       number_of_units_in_split = num_sequences;
     }
-    size_t seqnum = 0,
-           current_part_number_of_units = 0;
-    GttlLineIterator<buf_size> line_iterator0(fastq_file0.c_str()),
-                               line_iterator1(fastq_file1.c_str());
-    GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it0(line_iterator0),
-                                                  fastq_it1(line_iterator1);
+    size_t seqnum = 0;
+    size_t current_part_number_of_units = 0;
+    GttlFastQGenerator<buf_size> fastq_it0(fastq_file0.c_str());
+    GttlFastQGenerator<buf_size> fastq_it1(fastq_file1.c_str());
     auto it0 = fastq_it0.begin();
     auto it1 = fastq_it1.begin();
     while(it0 != fastq_it0.end() and it1 != fastq_it1.end())
     {
       if (current_part_number_of_units < number_of_units_in_split)
       {
-        auto sequence0 = (*it0).sequence_get();
-        multiseq->append<true>((*it0).header_get(),sequence0,padding_char);
-        auto sequence1 = (*it1).sequence_get();
-        multiseq->append<true>((*it1).header_get(),sequence1,padding_char);
+        auto sequence0 = (*it0)->sequence_get();
+        multiseq->append<true>((*it0)->header_get(),sequence0,padding_char);
+        auto sequence1 = (*it1)->sequence_get();
+        multiseq->append<true>((*it1)->header_get(),sequence1,padding_char);
         current_part_number_of_units
           += (len_parts > 0 ? (sequence0.size() + sequence1.size())
                             : 2);
@@ -90,10 +88,10 @@ class GttlMultiseqFactory
             seqnum_offset_vector.push_back(seqnum);
           }
           multiseq = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
-          auto sequence0 = (*it0).sequence_get();
-          multiseq->append<true>((*it0).header_get(),sequence0,padding_char);
-          auto sequence1 = (*it1).sequence_get();
-          multiseq->append<true>((*it1).header_get(),sequence1,padding_char);
+          auto sequence0 = (*it0)->sequence_get();
+          multiseq->append<true>((*it0)->header_get(),sequence0,padding_char);
+          auto sequence1 = (*it1)->sequence_get();
+          multiseq->append<true>((*it1)->header_get(),sequence1,padding_char);
           current_part_number_of_units
             = (len_parts > 0 ? (sequence0.size() + sequence1.size())
                              : 2);
@@ -131,17 +129,17 @@ class GttlMultiseqFactory
     , fastq_paired_input(false)
   {
     constexpr const int buf_size = 1 << 14;
-    GttlSeqIterator<buf_size> fasta_it(inputfile.c_str());
+    GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());
 
     GttlMultiseq *multiseq
       = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
     if (num_parts > 0)
     {
-      GttlSeqIterator<buf_size> fasta_it(inputfile.c_str());
+      GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());
       size_t sequences_total_length = 0;
       for (auto &&si : fasta_it)
       {
-        sequences_total_length += si.sequence_get().size();
+        sequences_total_length += si->sequence_get().size();
       }
       assert(len_parts == 0);
       len_parts = sequences_total_length/num_parts;
@@ -160,9 +158,11 @@ class GttlMultiseqFactory
     {
       if (current_part_number_of_units < number_of_units_in_split)
       {
-        multiseq->append<true>(si.header_get(),si.sequence_get(),padding_char);
+        multiseq->append<true>(si->header_get(),
+                               si->sequence_get(),
+                               padding_char);
         current_part_number_of_units
-          += (len_parts > 0 ? si.sequence_get().size() : 1);
+          += (len_parts > 0 ? si->sequence_get().size() : 1);
       } else
       {
         assert(len_parts > 0 or
@@ -179,10 +179,10 @@ class GttlMultiseqFactory
             seqnum_offset_vector.push_back(seqnum);
           }
           multiseq = new GttlMultiseq(true,padding_char); /* CONSTRUCTOR */
-          multiseq->append<true>(si.header_get(),si.sequence_get(),
+          multiseq->append<true>(si->header_get(),si->sequence_get(),
                                  padding_char);
           current_part_number_of_units
-            = (len_parts > 0 ? si.sequence_get().size() : 1);
+            = (len_parts > 0 ? si->sequence_get().size() : 1);
         } else
         {
           delete multiseq;

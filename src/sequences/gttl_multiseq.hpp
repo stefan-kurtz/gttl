@@ -12,11 +12,12 @@
 #include <algorithm>
 #include <climits>
 
+#include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
+#include "utilities/str_format.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cycle_of_numbers.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
-#include "sequences/gttl_fastq_iterator.hpp"
 
 /* A class to store various sequences and their header information.
  the inputfile is read in using fasta_reader.
@@ -66,8 +67,8 @@ class GttlMultiseq
   {
     if constexpr (store)
     {
-      header_vector.push_back(std::string(header.substr(1,header.size()-1)));
-      header_total_length += header.size() - 1;
+      header_vector.emplace_back(header);
+      header_total_length += header.size();
       concatenated_sequences += sequence;
       append_padding_char(this_padding_char);
       sequence_offsets.push_back(concatenated_sequences.size());
@@ -111,10 +112,8 @@ class GttlMultiseq
     if (zip_readpair_files)
     {
       assert(inputfiles.size() == 2);
-      GttlLineIterator<buf_size> line_iterator0(inputfiles[0].c_str()),
-                                 line_iterator1(inputfiles[1].c_str());
-      GttlFastQIterator<GttlLineIterator<buf_size>> fastq_it0(line_iterator0),
-                                                    fastq_it1(line_iterator1);
+      GttlFastQGenerator<buf_size> fastq_it0(inputfiles[0].c_str());
+      GttlFastQGenerator<buf_size> fastq_it1(inputfiles[1].c_str());
 
       auto it0 = fastq_it0.begin();
       auto it1 = fastq_it1.begin();
@@ -122,8 +121,12 @@ class GttlMultiseq
       {
         while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
         {
-          append<true>((*it0).header_get(),(*it0).sequence_get(),padding_char);
-          append<true>((*it1).header_get(),(*it1).sequence_get(),padding_char);
+          append<true>((*it0)->header_get(),
+                       (*it0)->sequence_get(),
+                       padding_char);
+          append<true>((*it1)->header_get(),
+                       (*it1)->sequence_get(),
+                       padding_char);
           ++it0;
           ++it1;
         }
@@ -131,8 +134,12 @@ class GttlMultiseq
       {
         while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
         {
-          append<false>((*it0).header_get(),(*it0).sequence_get(),padding_char);
-          append<false>((*it1).header_get(),(*it1).sequence_get(),padding_char);
+          append<false>((*it0)->header_get(),
+                        (*it0)->sequence_get(),
+                        padding_char);
+          append<false>((*it1)->header_get(),
+                        (*it1)->sequence_get(),
+                        padding_char);
           ++it0;
           ++it1;
         }
@@ -150,18 +157,18 @@ class GttlMultiseq
       }
     } else
     {
-      GttlSeqIterator<buf_size> gttl_si(&inputfiles);
+      GttlFastAGenerator<buf_size> gttl_si(&inputfiles);
       if (store)
       {
         for (auto &&si : gttl_si)
         {
-          append<true>(si.header_get(),si.sequence_get(),padding_char);
+          append<true>(si->header_get(),si->sequence_get(),padding_char);
         }
       } else
       {
         for (auto &&si : gttl_si)
         {
-          append<false>(si.header_get(),si.sequence_get(),padding_char);
+          append<false>(si->header_get(),si->sequence_get(),padding_char);
         }
       }
     }
@@ -174,321 +181,321 @@ class GttlMultiseq
      const noexcept
   {
     size_t idx;
-    for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
-      /* Nothing */ ;
-    return std::make_pair(0,idx);
-  }
+  for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
+    /* Nothing */ ;
+  return std::make_pair(0,idx);
+}
 
-  template<char first_delim,char second_delim>
-  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
-     const noexcept
+template<char first_delim,char second_delim>
+std::pair<size_t,size_t> short_header_substring(const std::string_view header)
+    const noexcept
+{
+  const char *first_delim_ptr
+    = static_cast<const char *>
+                  (std::memchr(static_cast<const void *>(header.data()),
+                              first_delim,header.size()));
+  if (first_delim_ptr != NULL)
   {
-    const char *first_delim_ptr
+    const char *second_delim_ptr
       = static_cast<const char *>
-                   (std::memchr(static_cast<const void *>(header.data()),
-                                first_delim,header.size()));
-    if (first_delim_ptr != NULL)
+                    (memchr(static_cast<const void *>
+                                      (first_delim_ptr+1),
+                                        second_delim,
+                                        static_cast<size_t>
+                                                  (header.data() +
+                                                    header.size()
+                                                    - (first_delim_ptr+1))));
+    const char *header_end
+      = second_delim_ptr != NULL ? second_delim_ptr
+                                  : (header.data() + header.size());
+    return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
+                                              header.data()),
+                          static_cast<size_t>(header_end -
+                                              (first_delim_ptr+1)));
+  }
+  return short_header_substring(header);
+}
+
+public:
+
+void padding_after_last_sequence(uint8_t this_padding_char)
+{
+  multipadding(false,this_padding_char,6);
+}
+
+GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
+  : padding_char(_padding_char)
+  , constant_padding_char(true)
+  , has_reverse_complement(false)
+  , has_read_pairs(false)
+{
+  std::vector<std::string> inputfiles{std::string(inputfile)};
+  multiseq_reader(inputfiles,store,false);
+}
+
+GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
+  : padding_char(_padding_char)
+  , constant_padding_char(true)
+  , has_reverse_complement(false)
+  , has_read_pairs(false)
+{
+  std::vector<std::string> inputfiles{inputfile};
+  multiseq_reader(inputfiles,store,false);
+}
+
+GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
+              uint8_t _padding_char)
+  : padding_char(_padding_char)
+  , constant_padding_char(true)
+  , has_reverse_complement(false)
+  , has_read_pairs(false)
+{
+  multiseq_reader(inputfiles,store,false);
+}
+
+GttlMultiseq(const std::string &readpair_file1,
+              const std::string &readpair_file2,
+              bool store, uint8_t _padding_char)
+  : padding_char(_padding_char)
+  , constant_padding_char(true)
+  , has_reverse_complement(false)
+  , has_read_pairs(true)
+{
+  std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
+  multiseq_reader(inputfiles,store,true);
+}
+
+GttlMultiseq(bool store, uint8_t _padding_char)
+  : padding_char(_padding_char)
+  , constant_padding_char(true)
+  , has_reverse_complement(false)
+  , has_read_pairs(false)
+{
+  if (store)
+  {
+    padding_before_first_sequence(padding_char);
+  }
+}
+
+GttlMultiseq(const std::vector<std::string> &inputfiles,
+              const std::vector<uint8_t> &forbidden_as_padding)
+  : constant_padding_char(false)
+  , has_reverse_complement(false)
+  , has_read_pairs(false)
+{
+  CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
+  uint8_t this_padding_char = cycle_of_numbers.next();
+  padding_before_first_sequence(this_padding_char);
+  static constexpr const int buf_size = 1 << 14;
+  GttlFastAGenerator<buf_size> gttl_si(&inputfiles);
+  for (auto &&si : gttl_si)
+  {
+    this_padding_char = cycle_of_numbers.next();
+    append<true>(si->header_get(),si->sequence_get(),this_padding_char);
+  }
+  /* in case the computation of the lcp is a suffix of the last sequence,
+      so that the lcp-computation crosses sequence boundaries involving
+      identical sequence padding characters. Then the positions after
+      the padding character for the last sequence are accessed. When
+      blockwise comparisons are used, even 7 characters after the end
+      of the last sequence are accessed. So after the padding character
+      used anyway, we add 6 more padding characters. */
+  padding_after_last_sequence(this_padding_char);
+}
+
+~GttlMultiseq(void)
+{
+}
+
+size_t sequences_number_get(void) const noexcept
+{
+  return sequences_number;
+}
+
+size_t sequences_total_length_get(void) const noexcept
+{
+  return sequences_total_length;
+}
+
+size_t sequences_minimum_length_get(void) const noexcept
+{
+  return sequences_minimum_length;
+}
+
+size_t sequences_maximum_length_get(void) const noexcept
+{
+  return sequences_maximum_length;
+}
+
+int sequences_length_bits_get(void) const noexcept
+{
+  return gttl_required_bits<size_t>(sequences_maximum_length);
+}
+
+int sequences_number_bits_get(void) const noexcept
+{
+  assert(sequences_number_get() > 0);
+  return gttl_required_bits<size_t>(sequences_number_get() - 1);
+}
+
+int sequences_bits_get(void) const noexcept
+{
+  return sequences_number_bits_get() + sequences_length_bits_get();
+}
+
+char padding_char_get(void) const
+{
+  if (!constant_padding_char)
+  {
+    std::cerr << "programming error: " << __func__
+              << " only works if the padding character is constant"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return padding_char;
+}
+
+void has_reverse_complement_set(void) noexcept
+{
+  has_reverse_complement = true;
+}
+
+bool has_reverse_complement_is_set(void) const noexcept
+{
+  return has_reverse_complement;
+}
+
+bool has_read_pairs_is_set(void) const noexcept
+{
+  return has_read_pairs;
+}
+
+/* Give the length of sequence seqnum EXCLUDING padding symbol at the end */
+size_t sequence_length_get(size_t seqnum) const noexcept
+{
+  /* To Check whether there are any problems considering the pointer at
+  sequences_number goes out of bound and is used for the length of the last
+  sequence */
+  assert(seqnum + 1 < sequence_offsets.size() &&
+          sequence_offsets[seqnum + 1] > sequence_offsets[seqnum]);
+  return sequence_offsets[seqnum + 1] - sequence_offsets[seqnum] - 1;
+}
+
+/* Returns a pointer to the sequence with number seqnum */
+const char *sequence_ptr_get(size_t seqnum) const noexcept
+{
+  assert(seqnum < sequences_number_get() &&
+          sequence_offsets[seqnum] < concatenated_sequences.size());
+  return concatenated_sequences.data() + sequence_offsets[seqnum];
+}
+
+/* Returns a pointer to the sequence with number seqnum */
+/* This function shall only be called after transforming the sequences
+    using a LiterateMultiseq */
+const uint8_t *encoded_sequence_ptr_get(size_t seqnum) const noexcept
+{
+  assert(seqnum < sequences_number_get() &&
+          sequence_offsets[seqnum] < concatenated_sequences.size());
+  return reinterpret_cast<const uint8_t *>
+                          (concatenated_sequences.data() +
+                          sequence_offsets[seqnum]);
+}
+
+const char *sequence_ptr_get(void) const noexcept
+{
+  return sequence_ptr_get(0);
+}
+
+uint8_t sequence_char_get(size_t position) const noexcept
+{
+  return static_cast<uint8_t>(concatenated_sequences[position+1]);
+}
+
+
+char *sequence_ptr_writable_get(size_t seqnum)
+{
+  assert(seqnum < sequences_number_get() &&
+          sequence_offsets[seqnum] < concatenated_sequences.size());
+  return concatenated_sequences.data() + sequence_offsets[seqnum];
+}
+
+const std::string_view header_get(size_t seqnum) const noexcept
+{
+  assert(seqnum < header_vector.size());
+  return header_vector[seqnum];
+}
+
+std::pair<size_t,size_t> short_header_get(size_t seqnum) const noexcept
+{
+  assert(seqnum < short_header_cache.size());
+  uint16_t sh_offset, sh_len;
+  std::tie(sh_offset,sh_len) = short_header_cache[seqnum];
+  return std::make_pair(static_cast<size_t>(sh_offset),
+                        static_cast<size_t>(sh_len));
+}
+
+std::vector<std::string> statistics() const noexcept
+{
+  std::vector<std::string> log_vector{};
+  log_vector.push_back(std::string("sequences_number\t") +
+                        std::to_string(sequences_number_get()));
+  log_vector.push_back(std::string("sequences_number_bits\t") +
+                        std::to_string(sequences_number_bits_get()));
+  log_vector.push_back(std::string("sequences_minimum_length\t") +
+                        std::to_string(sequences_minimum_length_get()));
+  log_vector.push_back(std::string("sequences_maximum_length\t") +
+                        std::to_string(sequences_maximum_length_get()));
+  log_vector.push_back(std::string("sequences_length_bits\t") +
+                        std::to_string(sequences_length_bits_get()));
+  log_vector.push_back(std::string("sequences_total_length\t") +
+                        std::to_string(sequences_total_length_get()));
+  return log_vector;
+}
+
+std::vector<std::pair<size_t,size_t>> length_distribution(void)
+    const noexcept
+{
+  std::vector<std::pair<size_t,size_t>> length_dist_table{};
+  length_dist_table.reserve(length_dist_map.size());
+  for (auto const& [key, value] : length_dist_map)
+  {
+    length_dist_table.push_back(std::make_pair(key,value));
+  }
+  std::sort(length_dist_table.begin(),length_dist_table.end());
+  return length_dist_table;
+}
+size_t total_number_of_suffixes(size_t prefix_length) const noexcept
+{
+  size_t total = 0;
+  for (auto &&element : length_dist_map)
+  {
+    if (std::get<0>(element) >= prefix_length)
     {
-      const char *second_delim_ptr
-        = static_cast<const char *>
-                     (memchr(static_cast<const void *>
-                                        (first_delim_ptr+1),
-                                         second_delim,
-                                         static_cast<size_t>
-                                                    (header.data() +
-                                                     header.size()
-                                                     - (first_delim_ptr+1))));
-      const char *header_end
-        = second_delim_ptr != NULL ? second_delim_ptr
-                                   : (header.data() + header.size());
-      return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
-                                                header.data()),
-                            static_cast<size_t>(header_end -
-                                                (first_delim_ptr+1)));
+      total += (std::get<0>(element) - prefix_length + 1) *
+                std::get<1>(element);
     }
-    return short_header_substring(header);
   }
-
-  public:
-
-  void padding_after_last_sequence(uint8_t this_padding_char)
+  return total;
+}
+std::pair<const char *,size_t> header_ptr_with_length(size_t seqnum,
+                                                      bool short_header) const
+{
+  const std::string_view header = header_get(seqnum);
+  size_t header_offset, header_len;
+  if (short_header)
   {
-    multipadding(false,this_padding_char,6);
+    std::tie(header_offset,header_len) = short_header_get(seqnum);
+  } else
+  {
+    header_offset = 0;
+    header_len = header.size();
   }
-
-  GttlMultiseq(const char *inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
-    , constant_padding_char(true)
-    , has_reverse_complement(false)
-    , has_read_pairs(false)
-  {
-    std::vector<std::string> inputfiles{std::string(inputfile)};
-    multiseq_reader(inputfiles,store,false);
-  }
-
-  GttlMultiseq(const std::string &inputfile, bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
-    , constant_padding_char(true)
-    , has_reverse_complement(false)
-    , has_read_pairs(false)
-  {
-    std::vector<std::string> inputfiles{inputfile};
-    multiseq_reader(inputfiles,store,false);
-  }
-
-  GttlMultiseq(const std::vector<std::string> &inputfiles,bool store,
-               uint8_t _padding_char)
-    : padding_char(_padding_char)
-    , constant_padding_char(true)
-    , has_reverse_complement(false)
-    , has_read_pairs(false)
-  {
-    multiseq_reader(inputfiles,store,false);
-  }
-
-  GttlMultiseq(const std::string &readpair_file1,
-               const std::string &readpair_file2,
-               bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
-    , constant_padding_char(true)
-    , has_reverse_complement(false)
-    , has_read_pairs(true)
-  {
-    std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
-    multiseq_reader(inputfiles,store,true);
-  }
-
-  GttlMultiseq(bool store, uint8_t _padding_char)
-    : padding_char(_padding_char)
-    , constant_padding_char(true)
-    , has_reverse_complement(false)
-    , has_read_pairs(false)
-  {
-    if (store)
-    {
-      padding_before_first_sequence(padding_char);
-    }
-  }
-
-  GttlMultiseq(const std::vector<std::string> &inputfiles,
-               const std::vector<uint8_t> &forbidden_as_padding)
-    : constant_padding_char(false)
-    , has_reverse_complement(false)
-    , has_read_pairs(false)
-  {
-    CycleOfNumbers cycle_of_numbers(forbidden_as_padding);
-    uint8_t this_padding_char = cycle_of_numbers.next();
-    padding_before_first_sequence(this_padding_char);
-    static constexpr const int buf_size = 1 << 14;
-    GttlSeqIterator<buf_size> gttl_si(&inputfiles);
-    for (auto &&si : gttl_si)
-    {
-      this_padding_char = cycle_of_numbers.next();
-      append<true>(si.header_get(),si.sequence_get(),this_padding_char);
-    }
-    /* in case the computation of the lcp is a suffix of the last sequence,
-       so that the lcp-computation crosses sequence boundaries involving
-       identical sequence padding characters. Then the positions after
-       the padding character for the last sequence are accessed. When
-       blockwise comparisons are used, even 7 characters after the end
-       of the last sequence are accessed. So after the padding character
-       used anyway, we add 6 more padding characters. */
-    padding_after_last_sequence(this_padding_char);
-  }
-
-  ~GttlMultiseq(void)
-  {
-  }
-
-  size_t sequences_number_get(void) const noexcept
-  {
-    return sequences_number;
-  }
-
-  size_t sequences_total_length_get(void) const noexcept
-  {
-    return sequences_total_length;
-  }
-
-  size_t sequences_minimum_length_get(void) const noexcept
-  {
-    return sequences_minimum_length;
-  }
-
-  size_t sequences_maximum_length_get(void) const noexcept
-  {
-    return sequences_maximum_length;
-  }
-
-  int sequences_length_bits_get(void) const noexcept
-  {
-    return gttl_required_bits<size_t>(sequences_maximum_length);
-  }
-
-  int sequences_number_bits_get(void) const noexcept
-  {
-    assert(sequences_number_get() > 0);
-    return gttl_required_bits<size_t>(sequences_number_get() - 1);
-  }
-
-  int sequences_bits_get(void) const noexcept
-  {
-    return sequences_number_bits_get() + sequences_length_bits_get();
-  }
-
-  char padding_char_get(void) const
-  {
-    if (!constant_padding_char)
-    {
-      std::cerr << "programming error: " << __func__
-                << " only works if the padding character is constant"
-                << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    return padding_char;
-  }
-
-  void has_reverse_complement_set(void) noexcept
-  {
-    has_reverse_complement = true;
-  }
-
-  bool has_reverse_complement_is_set(void) const noexcept
-  {
-    return has_reverse_complement;
-  }
-
-  bool has_read_pairs_is_set(void) const noexcept
-  {
-    return has_read_pairs;
-  }
-
-  /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */
-  size_t sequence_length_get(size_t seqnum) const noexcept
-  {
-    /* To Check whether there are any problems considering the pointer at
-    sequences_number goes out of bound and is used for the length of the last
-    sequence */
-    assert(seqnum + 1 < sequence_offsets.size() &&
-           sequence_offsets[seqnum + 1] > sequence_offsets[seqnum]);
-    return sequence_offsets[seqnum + 1] - sequence_offsets[seqnum] - 1;
-  }
-
-  /* Returns a pointer to the sequence with number seqnum */
-  const char *sequence_ptr_get(size_t seqnum) const noexcept
-  {
-    assert(seqnum < sequences_number_get() &&
-           sequence_offsets[seqnum] < concatenated_sequences.size());
-    return concatenated_sequences.data() + sequence_offsets[seqnum];
-  }
-
-  /* Returns a pointer to the sequence with number seqnum */
-  /* This function shall only be called after transforming the sequences
-      using a LiterateMultiseq */
-  const uint8_t *encoded_sequence_ptr_get(size_t seqnum) const noexcept
-  {
-    assert(seqnum < sequences_number_get() &&
-           sequence_offsets[seqnum] < concatenated_sequences.size());
-    return reinterpret_cast<const uint8_t *>
-                           (concatenated_sequences.data() +
-                            sequence_offsets[seqnum]);
-  }
-
-  const char *sequence_ptr_get(void) const noexcept
-  {
-    return sequence_ptr_get(0);
-  }
-
-  uint8_t sequence_char_get(size_t position) const noexcept
-  {
-    return static_cast<uint8_t>(concatenated_sequences[position+1]);
-  }
-
-
-  char *sequence_ptr_writable_get(size_t seqnum)
-  {
-    assert(seqnum < sequences_number_get() &&
-           sequence_offsets[seqnum] < concatenated_sequences.size());
-    return concatenated_sequences.data() + sequence_offsets[seqnum];
-  }
-
-  const std::string_view header_get(size_t seqnum) const noexcept
-  {
-    assert(seqnum < header_vector.size());
-    return header_vector[seqnum];
-  }
-
-  std::pair<size_t,size_t> short_header_get(size_t seqnum) const noexcept
-  {
-    assert(seqnum < short_header_cache.size());
-    uint16_t sh_offset, sh_len;
-    std::tie(sh_offset,sh_len) = short_header_cache[seqnum];
-    return std::make_pair(static_cast<size_t>(sh_offset),
-                          static_cast<size_t>(sh_len));
-  }
-
-  std::vector<std::string> statistics() const noexcept
-  {
-    std::vector<std::string> log_vector{};
-    log_vector.push_back(std::string("sequences_number\t") +
-                         std::to_string(sequences_number_get()));
-    log_vector.push_back(std::string("sequences_number_bits\t") +
-                         std::to_string(sequences_number_bits_get()));
-    log_vector.push_back(std::string("sequences_minimum_length\t") +
-                         std::to_string(sequences_minimum_length_get()));
-    log_vector.push_back(std::string("sequences_maximum_length\t") +
-                         std::to_string(sequences_maximum_length_get()));
-    log_vector.push_back(std::string("sequences_length_bits\t") +
-                         std::to_string(sequences_length_bits_get()));
-    log_vector.push_back(std::string("sequences_total_length\t") +
-                         std::to_string(sequences_total_length_get()));
-    return log_vector;
-  }
-
-  std::vector<std::pair<size_t,size_t>> length_distribution(void)
-     const noexcept
-  {
-    std::vector<std::pair<size_t,size_t>> length_dist_table{};
-    length_dist_table.reserve(length_dist_map.size());
-    for (auto const& [key, value] : length_dist_map)
-    {
-      length_dist_table.push_back(std::make_pair(key,value));
-    }
-    std::sort(length_dist_table.begin(),length_dist_table.end());
-    return length_dist_table;
-  }
-  size_t total_number_of_suffixes(size_t prefix_length) const noexcept
-  {
-    size_t total = 0;
-    for (auto &&element : length_dist_map)
-    {
-      if (std::get<0>(element) >= prefix_length)
-      {
-        total += (std::get<0>(element) - prefix_length + 1) *
-                 std::get<1>(element);
-      }
-    }
-    return total;
-  }
-  std::pair<const char *,size_t> header_ptr_with_length(size_t seqnum,
-                                                        bool short_header) const
-  {
-    const std::string_view header = header_get(seqnum);
-    size_t header_offset, header_len;
-    if (short_header)
-    {
-      std::tie(header_offset,header_len) = short_header_get(seqnum);
-    } else
-    {
-      header_offset = 0;
-      header_len = header.size();
-    }
-    return std::make_pair(header.data() + header_offset,header_len);
-  }
-  void show_single_sequence(size_t width, bool short_header, size_t seqnum)
-       const noexcept
-  {
-    printf(">");
+  return std::make_pair(header.data() + header_offset,header_len);
+}
+void show_single_sequence(size_t width, bool short_header, size_t seqnum)
+      const noexcept
+{
+  printf(">");
     const char *header_ptr;
     size_t header_len;
     std::tie(header_ptr,header_len)
@@ -639,14 +646,14 @@ static GttlMultiseq *multiseq_with_reverse_complement(
                            uint8_t padding_char)
 {
   static constexpr const int buf_size = 1 << 14;
-  GttlSeqIterator<buf_size> gttl_si(&inputfiles);
+  GttlFastAGenerator<buf_size> gttl_si(&inputfiles);
   GttlMultiseq *multiseq
     = new GttlMultiseq(store,padding_char); /* CONSTRUCTOR */
   multiseq->has_reverse_complement_set();
   for (auto &&si : gttl_si)
   {
-    const std::string_view &seq = si.sequence_get();
-    multiseq->append<store>(si.header_get(),seq,padding_char);
+    const std::string_view &seq = si->sequence_get();
+    multiseq->append<store>(si->header_get(),seq,padding_char);
     std::string rc_seq{};
     rc_seq.reserve(seq.size());
     size_t bck = seq.size();
@@ -655,7 +662,7 @@ static GttlMultiseq *multiseq_with_reverse_complement(
       bck--;
       rc_seq.push_back(complement_base(seq[bck]));
     }
-    multiseq->append<store>(si.header_get(),rc_seq,padding_char);
+    multiseq->append<store>(si->header_get(),rc_seq,padding_char);
   }
   return multiseq;
 }
