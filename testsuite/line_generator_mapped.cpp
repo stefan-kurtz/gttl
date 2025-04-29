@@ -3,7 +3,6 @@
 #include "utilities/gttl_line_generator.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
-#include "utilities/gttl_line_iterator.hpp"
 
 static size_t count_lines(const char *file_part, size_t len)
 {

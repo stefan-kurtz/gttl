@@ -1,24 +1,25 @@
 #ifndef NTCARD_HPP
 #define NTCARD_HPP
 
+#include <cstddef>
 #include <thread>
 #include <vector>
+#include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
-#include "sequences/gttl_fastq_iterator.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/dna_seq_decoder.hpp"
 
 template <bool split_at_wildcard,
-          class SeqIterator,
+          class SeqGenerator,
           class HashValueIterator,
           class TableClass>
-static void ntcard_enumerate_inner(SeqIterator* gttl_si,
+static void ntcard_enumerate_inner(SeqGenerator* gttl_si,
                                    TableClass* table,
                                    size_t qgram_length)
 {
@@ -28,7 +29,7 @@ static void ntcard_enumerate_inner(SeqIterator* gttl_si,
   size_t sequences_number = 0;
   for (auto &&si : *gttl_si)
   {
-    auto sequence = si.sequence_get();
+    auto sequence = si->sequence_get();
     if constexpr (split_at_wildcard)
     {
       NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
@@ -82,28 +83,17 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
       throw std::string(": cannot open file");
       /* check_err.py checked */
     }
-    GttlSeqIterator<buf_size> gttl_si(in_fp);
-    try
-    {
-      ntcard_enumerate_inner<split_at_wildcard,
-                             GttlSeqIterator<buf_size>,
-                             HashValueIterator,
-                             TableClass>
-                            (&gttl_si, &table, qgram_length);
-    }
-    catch (std::string &msg)
-    {
-      gttl_fp_type_close(in_fp);
-      throw msg;
-    }
-    gttl_fp_type_close(in_fp);
+    GttlFastAGenerator<buf_size> gttl_si(in_fp);
+    ntcard_enumerate_inner<split_at_wildcard,
+                           GttlFastAGenerator<buf_size>,
+                           HashValueIterator,
+                           TableClass>
+                          (&gttl_si, &table, qgram_length);
   } else
   {
-    GttlLineIterator<buf_size> line_iterator(inputfilename.c_str());
-    using FastQIterator = GttlFastQIterator<GttlLineIterator<buf_size>>;
-    FastQIterator fastq_it(line_iterator);
+    GttlFastQGenerator<buf_size> fastq_it(inputfilename.c_str());
     ntcard_enumerate_inner<split_at_wildcard,
-                           FastQIterator,
+                           GttlFastQGenerator<buf_size>,
                            HashValueIterator,
                            TableClass>
                           (&fastq_it, &table, qgram_length);
@@ -130,6 +120,7 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
     other_tables.push_back(new TableClass(s_value, r_value));
   }
   std::vector<std::thread> threads;
+  constexpr const size_t buf_size = size_t{1} << size_t{14};
   if (gttl_likely_fasta_format(inputfilename))
   {
     for (size_t thd_num = 0; thd_num < sequence_parts.size(); thd_num++)
@@ -137,9 +128,9 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
       threads.push_back(std::thread([&first_table, &other_tables,
                                      &sequence_parts,thd_num,qgram_length]
       {
-        GttlSeqIterator<0> gttl_si(sequence_parts[thd_num]);
+        GttlFastAGenerator<buf_size> gttl_si(sequence_parts[thd_num]);
         ntcard_enumerate_inner<split_at_wildcard,
-                               GttlSeqIterator<0>,
+                               GttlFastAGenerator<buf_size>,
                                HashValueIterator,
                                TableClass>
                               (&gttl_si,
@@ -156,11 +147,9 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
                                      &sequence_parts,thd_num,qgram_length]
       {
         const std::string_view &this_view =  sequence_parts[thd_num];
-        GttlLineIterator<0> line_iterator(this_view.data(),this_view.size());
-        using FastQIterator = GttlFastQIterator<GttlLineIterator<0>>;
-        FastQIterator fastq_it(line_iterator);
+        GttlFastQGenerator<buf_size> fastq_it(this_view.data(), this_view.size());
         ntcard_enumerate_inner<split_at_wildcard,
-                               FastQIterator,
+                               GttlFastQGenerator<buf_size>,
                                HashValueIterator,
                                TableClass>
                               (&fastq_it,
