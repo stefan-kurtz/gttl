@@ -147,7 +147,8 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
                                      &sequence_parts,thd_num,qgram_length]
       {
         const std::string_view &this_view =  sequence_parts[thd_num];
-        GttlFastQGenerator<buf_size> fastq_it(this_view.data(), this_view.size());
+        GttlFastQGenerator<buf_size> fastq_it(this_view.data(),
+                                              this_view.size());
         ntcard_enumerate_inner<split_at_wildcard,
                                GttlFastQGenerator<buf_size>,
                                HashValueIterator,
