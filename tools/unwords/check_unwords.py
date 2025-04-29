@@ -34,6 +34,7 @@ for _,seq in fasta_next(args.sequence_file):
     if seq.find(unword) != -1:
       no_unwords_found = False
       print('{} is incorrect.'.format(unword))
+      exit(1)
 
 if no_unwords_found:
   print('All unwords are correct.')
