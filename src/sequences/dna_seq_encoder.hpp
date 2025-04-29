@@ -21,7 +21,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstdint>
-#include <cinttypes>
 #include <algorithm>
 #include <map>
 #include "sequences/gttl_fasta_generator.hpp"
@@ -30,12 +29,9 @@
 #include <iostream>
 #endif
 #include "utilities/mathsupport.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
-#include "sequences/gttl_fastq_iterator.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/alphabet.hpp"
 
 template<typename StoreUnitType,bool verbose>

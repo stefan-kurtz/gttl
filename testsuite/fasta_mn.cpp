@@ -26,7 +26,6 @@
 #include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/gttl_mmap.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/format_sequence.hpp"
 #include "seq_reader_options.hpp"
 

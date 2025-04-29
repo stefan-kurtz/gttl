@@ -26,7 +26,6 @@
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/literate_multiseq.hpp"

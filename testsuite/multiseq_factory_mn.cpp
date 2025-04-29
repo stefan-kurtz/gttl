@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <cinttypes>
 #include "utilities/cxxopts.hpp"
 #include "utilities/str_format.hpp"
 #include "sequences/multiseq_factory.hpp"

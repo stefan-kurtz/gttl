@@ -25,7 +25,6 @@
 #include <iostream>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/mathsupport.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
 

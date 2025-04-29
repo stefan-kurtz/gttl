@@ -21,7 +21,6 @@
 #include "utilities/is_big_endian.hpp"
 #include "utilities/str_format.hpp"
 #include "threading/thread_pool_var.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_multiseq.hpp"

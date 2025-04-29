@@ -5,7 +5,6 @@
 #include <zlib.h>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
-#include "sequences/gttl_seq_iterator.hpp"
 #include "sequences/split_files.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
