@@ -4,6 +4,8 @@
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/gttl_line_generator.hpp"
 #include <cstddef>
+#include <cstdio>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -97,6 +99,17 @@ class GttlFastQGenerator
       return true;
     }
     lg.set_out_buffer(&out->header);
+    const char c = lg.getc();
+    if(c == EOF)
+    {
+      is_end = true;
+      return false;
+    }
+    if(c != '@')
+    {
+      throw std::runtime_error(", line " + std::to_string(lg.line_number_get())
+                               + ": corrupted sequence");
+    }
     lg.advance();
     lg.set_out_buffer(&out->sequence);
     lg.advance();

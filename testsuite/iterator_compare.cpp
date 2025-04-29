@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         runtime.reset();
         for(auto& entry : fq_it)
         {
-          pseudo_hash[1] += count_occ(entry.header_get(), '@');
+          pseudo_hash[1] += count_occ(entry.header_get(), ':');
           pseudo_hash[1] += count_occ(entry.sequence_get(), 'a');
           pseudo_hash[1] += count_occ(entry.quality_get(), 'F');
         }
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         runtime.reset();
         for(const auto *entry : fq_gen)
         {
-          pseudo_hash[0] += count_occ(entry->header, '@');
+          pseudo_hash[0] += count_occ(entry->header, ':');
           pseudo_hash[0] += count_occ(entry->sequence, 'a');
           pseudo_hash[0] += count_occ(entry->quality, 'F');
         }

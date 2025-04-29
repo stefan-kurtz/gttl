@@ -70,10 +70,10 @@ static void fastq_split_writer(size_t split_size,
       const std::string_view &sequence = (*it)->sequence_get();
       const std::string_view &header = (*it)->header_get();
       const std::string_view &quality = (*it)->quality_get();
-      out_stream << header << std::endl
-                 << sequence << std::endl
-                 << "+" << std::endl
-                 << quality << std::endl;
+      out_stream << '@' << header << '\n'
+                 << sequence << '\n'
+                 << '+' << '\n'
+                 << quality << '\n';
       ++it;
     }
     out_stream.close();
@@ -135,16 +135,16 @@ static void process_fastq_iter(bool statistics,
         {
           const std::string_view &header = fastq_entry->header_get();
           const std::string_view &quality = fastq_entry->quality_get();
-          std::cout << header << std::endl
-                    << sequence << std::endl
-                    << "+" << std::endl
-                    << quality << std::endl;
+          std::cout << '@' << header << '\n'
+                    << sequence << '\n'
+                    << '+' << '\n'
+                    << quality << '\n';
         } else
         {
           if (fasta_output > 0)
           {
             const std::string_view &header = fastq_entry->header_get();
-            std::cout << ">" << header.substr(1) << std::endl;
+            std::cout << ">" << header << '\n';
             gttl_format_sequence(sequence,fasta_output);
           }
         }
@@ -233,9 +233,9 @@ static void process_paired_files(bool statistics,
     {
       const std::string_view &header0 = (*it0)->header_get();
       const std::string_view &header1 = (*it1)->header_get();
-      std::cout << ">" << header0.substr(1) << std::endl;
+      std::cout << ">" << header0 << '\n';
       gttl_format_sequence(sequence0,fasta_output);
-      std::cout << ">" << header1.substr(1) << std::endl;
+      std::cout << ">" << header1 << '\n';
       gttl_format_sequence(sequence1,fasta_output);
     }
     total_length[0] += sequence0.size();
@@ -246,9 +246,9 @@ static void process_paired_files(bool statistics,
   }
   if (statistics)
   {
-    std::cout << "# number of sequences\t" << seqnum << std::endl;
-    std::cout << "# total length0\t" << total_length[0] << std::endl;
-    std::cout << "# total length1\t" << total_length[1] << std::endl;
+    std::cout << "# number of sequences\t" << seqnum << '\n';
+    std::cout << "# total length0\t" << total_length[0] << '\n';
+    std::cout << "# total length1\t" << total_length[1] << '\n';
   }
 }
 

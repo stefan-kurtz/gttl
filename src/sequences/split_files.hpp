@@ -46,7 +46,7 @@ void split_into_parts_length(SequenceIterator &seq_it,
     const std::string_view &sequence = si->sequence_get();
     const std::string_view &header = si->header_get();
 
-    s_out << (is_fastq_generator<SequenceIterator>::value ? "" : ">")
+    s_out << (is_fastq_generator<SequenceIterator>::value ? "@" : ">")
           << header << "\n" << sequence << "\n";
 
     if constexpr (is_fastq_generator<SequenceIterator>::value)
@@ -125,7 +125,7 @@ void split_into_num_sequences(SequenceIterator &seq_it,
     const std::string_view &sequence = si->sequence_get();
     const std::string_view &header = si->header_get();
 
-    s_out << (is_fastq_generator<SequenceIterator>::value ? "" : ">")
+    s_out << (is_fastq_generator<SequenceIterator>::value ? "@" : ">")
           << header << "\n" << sequence << "\n";
 
     if constexpr (is_fastq_generator<SequenceIterator>::value)
