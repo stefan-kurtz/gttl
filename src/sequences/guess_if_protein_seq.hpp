@@ -16,7 +16,6 @@
 */
 #ifndef GUESS_IF_PROTEIN_SEQ_HPP
 #define GUESS_IF_PROTEIN_SEQ_HPP
-#include <cstdbool>
 #include <cstddef>
 #include <cstring>
 #include <climits>

@@ -2,7 +2,6 @@
 #define MATCHING_CHARACTERS_HPP
 #include "utilities/unused.hpp"
 #include "sequences/alphabet.hpp"
-#include <cstdbool>
 
 static inline bool matching_characters_wc(char a,char b)
 {

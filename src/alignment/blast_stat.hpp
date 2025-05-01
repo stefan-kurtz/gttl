@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
-#include <cstdbool>
 #include "utilities/str_format.hpp"
 
 class BlastStatistics

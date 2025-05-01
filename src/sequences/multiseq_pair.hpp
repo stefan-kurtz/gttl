@@ -2,7 +2,6 @@
 #define MULTISEQ_PAIR_HPP
 #include <cstdio>
 #include <cstdlib>
-#include <cstdbool>
 #include <cstring>
 #include <cassert>
 #include <tuple>

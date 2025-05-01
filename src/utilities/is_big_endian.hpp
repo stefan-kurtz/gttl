@@ -3,7 +3,6 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstdbool>
 
 #if __cplusplus > 201703L
 constexpr bool is_big_endian(void)

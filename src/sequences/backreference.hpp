@@ -2,7 +2,6 @@
 #define BACKREFERENCE_HPP
 #include <cstddef>
 #include <cstdint>
-#include <cstdbool>
 #include <cassert>
 #include <string>
 

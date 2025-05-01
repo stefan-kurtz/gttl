@@ -16,7 +16,6 @@
 */
 #ifndef GTTL_LINE_ITERATOR_HPP
 #define GTTL_LINE_ITERATOR_HPP
-#include <cstdbool>
 #include <cstdlib>
 #include <cassert>
 #include <cstring>

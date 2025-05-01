@@ -1,7 +1,6 @@
 #ifndef SEQ_READER_OPTIONS_HPP
 #define SEQ_READER_OPTIONS_HPP
 #include <cstddef>
-#include <cstdbool>
 #include <string>
 #include <vector>
 

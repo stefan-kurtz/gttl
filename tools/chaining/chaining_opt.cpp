@@ -1,6 +1,5 @@
 #include "utilities/cxxopts.hpp"
 #include "chaining_opt.hpp"
-#include <cstdbool>
 #include <string>
 #include <vector>
 

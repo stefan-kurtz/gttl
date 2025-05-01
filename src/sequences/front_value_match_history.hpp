@@ -2,7 +2,6 @@
 #define FRONT_VALUE_MATCH_HISTORY_HPP
 #include <cstddef>
 #include <cstdint>
-#include <cstdbool>
 #include <cassert>
 #include <string>
 #include "utilities/bit_sequence.hpp"

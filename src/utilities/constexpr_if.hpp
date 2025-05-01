@@ -2,7 +2,6 @@
 #define CONSTEXPR_IF_HPP
 #include <type_traits>
 #include <utility>
-#include <cstdbool>
 
 /* from https://stackoverflow.com/questions/41011900/
                 equivalent-ternary-operator-for-constexpr-if */

@@ -2,7 +2,6 @@
 #define CHAR_RANGE_HPP
 #include <cassert>
 #include <iostream>
-#include <cstdbool>
 
 #define GTTL_CHAR_FINDER(VAR,INVERT,PTR)\
         if constexpr (INVERT)\

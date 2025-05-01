@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cassert>
-#include <cstdbool>
 #include <iostream>
 #include <vector>
 #include "utilities/mathsupport.hpp"

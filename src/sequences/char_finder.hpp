@@ -1,6 +1,5 @@
 #ifndef CHAR_FINDER_HPP
 #define CHAR_FINDER_HPP
-#include <cstdbool>
 
 template <const char *charset>
 static constexpr bool is_member_in_charset_rec(int i,char cc)

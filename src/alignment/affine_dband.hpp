@@ -1,6 +1,5 @@
 #ifndef AFFINE_DBAND_HPP
 #define AFFINE_DBAND_HPP
-#include <cstdbool>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>

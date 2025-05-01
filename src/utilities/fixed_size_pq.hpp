@@ -1,7 +1,6 @@
 #ifndef FIXED_SIZE_PQ_HPP
 #define FIXED_SIZE_PQ_HPP
 #include <cassert>
-#include <cstdbool>
 #include <cstdlib>
 
 template <typename BaseType, int (*compare)(const BaseType *, const BaseType *)>

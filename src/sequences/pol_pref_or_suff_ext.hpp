@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cassert>
-#include <cstdbool>
 #include "sequences/lcs_lcp_len_type.hpp"
 #include "sequences/prefix_suffix_extension.hpp"
 #include "sequences/polished_points.hpp"

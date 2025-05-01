@@ -2,7 +2,6 @@
 #define BOTTOM_UP_TRAVERSAL_HPP
 #include <cstddef>
 #include <cstdint>
-#include <cstdbool>
 #include <climits>
 
 /* This file implements the essence of the bottom up traversal, independent

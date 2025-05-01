@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <cstdbool>
 
 template <typename Basetype>
 class OrderedIntegerSequence

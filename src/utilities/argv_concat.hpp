@@ -2,7 +2,6 @@
 #define ARGV_CONCAT_HPP
 #include <string>
 #include <vector>
-#include <cstdbool>
 #include <cstring>
 #include <cassert>
 #include <iostream>

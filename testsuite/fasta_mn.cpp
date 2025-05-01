@@ -17,7 +17,6 @@
 #include <cstddef>
 #include <iostream>
 #include <fstream>
-#include <cstdbool>
 #include <typeinfo>
 #include <cassert>
 #include <algorithm>

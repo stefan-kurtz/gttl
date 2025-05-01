@@ -16,7 +16,6 @@
 */
 #ifndef QGRAMS_REC_HASH_VALUE_ITER_HPP
 #define QGRAMS_REC_HASH_VALUE_ITER_HPP
-#include <cstdbool>
 #include <cstddef>
 #include <cstdint>
 #include <cassert>

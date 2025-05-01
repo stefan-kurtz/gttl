@@ -1,5 +1,4 @@
 #include <cstddef>
-#include <cstdbool>
 #include <string>
 #include <vector>
 #include "utilities/cxxopts.hpp"

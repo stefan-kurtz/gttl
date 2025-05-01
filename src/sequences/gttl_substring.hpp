@@ -2,7 +2,6 @@
 #define GTTL_SUBSTRING_HPP
 
 #include <cstddef>
-#include <cstdbool>
 #include <cassert>
 #include "sequences/complement_uint8.hpp"
 

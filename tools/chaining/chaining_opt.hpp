@@ -1,6 +1,5 @@
 #ifndef CHAINING_OPT_HPP
 #define CHAINING_OPT_HPP
-#include <cstdbool>
 #include <string>
 #include <vector>
 

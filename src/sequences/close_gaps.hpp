@@ -1,7 +1,6 @@
 #ifndef CLOSE_GAPS_HPP
 #define CLOSE_GAPS_HPP
 #include <cstddef>
-#include <cstdbool>
 #include <tuple>
 #include <cassert>
 #include "sequences/matching_characters.hpp"

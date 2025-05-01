@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <cassert>
 #include <cstdlib>
-#include <cstdbool>
 #include <cinttypes>
 #include <string>
 #include <vector>
