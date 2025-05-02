@@ -29,7 +29,7 @@
 #include <iostream>
 #endif
 #include "utilities/mathsupport.hpp"
-#include "utilities/has_suffix_or_prefix.hpp"
+#include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/alphabet.hpp"

@@ -2,20 +2,11 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <zlib.h>
+#include "utilities/cxxopts.hpp"
+#include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/split_files.hpp"
-#include "utilities/cxxopts.hpp"
-#include "utilities/has_suffix_or_prefix.hpp"
-
-static bool has_suffix_with_extension(const std::string &to_check,
-                                      const std::string &suffix,
-                                      const std::string &extension)
-{
-  return gttl_has_suffix(to_check, suffix) or
-         gttl_has_suffix(to_check, suffix + extension);
-}
 
 int main(int argc, char *argv[])
 {
@@ -51,7 +42,6 @@ int main(int argc, char *argv[])
   auto result = options.parse(argc, argv);
 
   const size_t num_threads = result["threads"].as<size_t>();
-
 
   if (result.count("help"))
   {
@@ -112,15 +102,7 @@ int main(int argc, char *argv[])
   }
 
   constexpr const int BUF_SIZE = 1 << 14;
-
-  if (has_suffix_with_extension(ifilename, ".fasta", ".gz") ||
-      has_suffix_with_extension(ifilename, ".fas", ".gz") ||
-      has_suffix_with_extension(ifilename, ".fa", ".gz") ||
-      has_suffix_with_extension(ifilename, ".fna", ".gz") ||
-      has_suffix_with_extension(ifilename, ".ffn", ".gz") ||
-      has_suffix_with_extension(ifilename, ".faa", ".gz") ||
-      has_suffix_with_extension(ifilename, ".mpfa", ".gz") ||
-      has_suffix_with_extension(ifilename, ".frn", ".gz"))
+  if (gttl_likely_gzipped_fasta_format(ifilename))
   {
     GttlFastAGenerator<BUF_SIZE> fasta_gen(ifilename.c_str());
     if (num_parts != 0)
@@ -144,33 +126,34 @@ int main(int argc, char *argv[])
                                num_threads);
       return EXIT_SUCCESS;
     }
-  } else if (has_suffix_with_extension(ifilename, ".fastq", ".gz") ||
-             has_suffix_with_extension(ifilename, ".fq", ".gz"))
+  } else
   {
-    GttlFastQGenerator fastq_gen(ifilename.c_str());
-    if (num_parts != 0)
+    if (gttl_likely_gzipped_fastq_format(ifilename))
     {
-      split_into_num_files(fastq_gen, output_basename, num_parts,
-                           result["compression_level"].as<size_t>(),
-                           num_threads);
-      return EXIT_SUCCESS;
-    }
-    if (len_parts != 0)
-    {
-      split_into_parts_length(fastq_gen, output_basename, len_parts,
-                              result["compression_level"].as<size_t>(),
-                              num_threads);
-      return EXIT_SUCCESS;
-    }
-    if (num_sequences != 0)
-    {
-      split_into_num_sequences(fastq_gen, output_basename, num_sequences,
-                               result["compression_level"].as<size_t>(),
-                               num_threads);
-      return EXIT_SUCCESS;
+      GttlFastQGenerator fastq_gen(ifilename.c_str());
+      if (num_parts != 0)
+      {
+        split_into_num_files(fastq_gen, output_basename, num_parts,
+                             result["compression_level"].as<size_t>(),
+                             num_threads);
+        return EXIT_SUCCESS;
+      }
+      if (len_parts != 0)
+      {
+        split_into_parts_length(fastq_gen, output_basename, len_parts,
+                                result["compression_level"].as<size_t>(),
+                                num_threads);
+        return EXIT_SUCCESS;
+      }
+      if (num_sequences != 0)
+      {
+        split_into_num_sequences(fastq_gen, output_basename, num_sequences,
+                                 result["compression_level"].as<size_t>(),
+                                 num_threads);
+        return EXIT_SUCCESS;
+      }
     }
   }
-
   std::cerr << argv[0] << ": file " << ifilename
             << " does not have .fasta[.gz]|.fastq[.gz] extension!" << std::endl;
   exit(EXIT_FAILURE);

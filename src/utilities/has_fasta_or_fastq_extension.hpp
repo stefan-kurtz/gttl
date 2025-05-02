@@ -1,0 +1,39 @@
+#ifndef HAS_FASTA_OR_FASTQ_EXENTION_HPP
+#define HAS_FASTA_OR_FASTQ_EXENTION_HPP
+#include "utilities/has_suffix_or_prefix.hpp"
+
+static inline bool gttl_likely_fasta_format(const std::string &inputfilename)
+{
+  const std::vector<std::string> fq_suffixes{".fq",".fastq",
+                                             ".fq.gz",".fastq.gz"};
+  for (auto &suffix : fq_suffixes)
+  {
+    if (gttl_has_suffix(inputfilename,suffix))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+static inline bool gttl_likely_gzipped_fastq_format(
+  const std::string &inputfilename)
+{
+  return gttl_has_suffix_with_extension(inputfilename, ".fastq", ".gz") or
+         gttl_has_suffix_with_extension(inputfilename, ".fq", ".gz");
+}
+
+static inline bool gttl_likely_gzipped_fasta_format(
+  const std::string &inputfilename)
+{
+  static const std::vector<std::string> fasta_suffixes{".fasta",
+                                                       ".fas",
+                                                       ".fa",
+                                                       ".fna",
+                                                       ".ffn",
+                                                       ".faa",
+                                                       ".mpfa",
+                                                       ".frn"};
+  return gttl_has_any_suffix_with_extension(inputfilename,fasta_suffixes,".gz");
+}
+#endif
