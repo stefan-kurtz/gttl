@@ -18,6 +18,7 @@
 #define QGRAMS_HASH_NTHASH_HPP
 #include "sequences/alphabet.hpp"
 #include "sequences/nthash_fwd.hpp"
+#include "sequences/nthash_fwd_aminoacids.hpp"
 #include "sequences/qgrams_rec_hash_value_fwd_iter.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"
 
@@ -41,5 +42,22 @@ using QgramNtHashIterator4
   = QgramRecHashValueIterator<alphabet::nucleotides_upper_lower,
                               4,
                               NThashTransformer>;
+
+
+template <uint8_t undefined_rank>
+using QgramNtHashAAFwdIteratorGeneric =
+  QgramRecHashValueFwdIterator<alphabet::amino_acids,
+                               undefined_rank,
+                               NtHashAminoacidsTransformer,
+                               char>;
+
+using QgramNtHashAAFwdIterator20 = QgramNtHashAAFwdIteratorGeneric<20>;
+
+template <uint8_t undefined_rank>
+using QgramNtHashAAFwdIteratorGenericNoTransform
+= QgramRecHashValueFwdIterator<alphabet::amino_acids,
+                               undefined_rank,
+                               NtHashAminoacidsTransformer,
+                               uint8_t>;
 
 #endif

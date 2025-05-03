@@ -138,7 +138,7 @@ test_char_range:char_range_mn.x
 	@echo "Congratulations. $@ passed."
 
 test_nthash:enum_nthash.x test_nthash_wc_palindrome
-	@./check_err.py --fail_for_protein_sequence ./enum_nthash.x
+	@./check_err.py ./enum_nthash.x
 	@${VALGRIND} ./enum_nthash.x --bytes_unit ${AT1MB} | \
            grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/at1MB_nthash.tsv
 	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ${AT1MB} | \
@@ -156,6 +156,9 @@ test_nthash:enum_nthash.x test_nthash_wc_palindrome
 	@${VALGRIND} ./enum_nthash.x --with_rc --bytes_unit ../testdata/ychrIII.fna | \
            grep -v '^# TIME' | grep -v '_rc' | \
            diff --strip-trailing-cr - ../testdata/ychrIII_nthash.tsv
+	@${VALGRIND} ./enum_nthash.x --bytes_unit ../testdata/protein.fsa | \
+                     grep -v '^# TIME' | \
+                     diff --strip-trailing-cr - ../testdata/protein_nthash.tsv 
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_nthash_wc_palindrome

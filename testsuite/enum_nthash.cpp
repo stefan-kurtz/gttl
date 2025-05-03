@@ -39,7 +39,7 @@
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 class NtHashOptions
@@ -140,6 +140,24 @@ class NtHashOptions
 };
 
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
+static constexpr const char_finder::AminoacidFinder aminoacid_finder{};
+
+template <bool is_aa>
+struct RangerTraits;
+
+template<>
+struct RangerTraits<true>
+{
+  using Finder = char_finder::AminoacidFinder;
+  static constexpr const auto& instance = aminoacid_finder;
+};
+
+template<>
+struct RangerTraits<false>
+{
+  using Finder = char_finder::NucleotideFinder;
+  static constexpr const auto& instance = nucleotide_finder;
+};
 
 template<class HashValueIterator,
          bool with_rc,
@@ -237,7 +255,8 @@ template<class HashValueIterator,
          bool with_rc,
          bool show_hash_values,
          int sizeof_unit_hashed_qgrams,
-         bool create_bytes_unit>
+         bool create_bytes_unit,
+         bool is_aminoacid>
 static void enumerate_nt_hash_template(const char *inputfilename,
                                        size_t qgram_length,
                                        int hashbits,
@@ -269,9 +288,13 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   const uint64_t hashmask = gttl_bits2maxvalue<uint64_t>(hashbits);
   constexpr const int buf_size = 1 << 14;
   GttlFastAGenerator<buf_size> fasta_gen(in_fp);
-  using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
-                                         nucleotide_finder,
-                                         true,false>;
+
+
+  using NucleotideRanger =
+    GttlCharRange<typename RangerTraits<is_aminoacid>::Finder,
+                  RangerTraits<is_aminoacid>::instance,
+                  true,false>;
+
   for (auto &&si : fasta_gen)
   {
     auto sequence = si->sequence_get();
@@ -324,7 +347,8 @@ static void enumerate_nt_hash_template(const char *inputfilename,
           enumerate_nt_hash_template<HashValueIterator,\
                                      with_rc,\
                                      true,\
-                                     BYTE_UNITS,BYTE_UNITS_OPTION>\
+                                     BYTE_UNITS,BYTE_UNITS_OPTION,\
+                                     is_aminoacid>\
                                     (inputfilename,\
                                      qgram_length,\
                                      hashbits,\
@@ -335,7 +359,8 @@ static void enumerate_nt_hash_template(const char *inputfilename,
           enumerate_nt_hash_template<HashValueIterator,\
                                      with_rc,\
                                      false,\
-                                     BYTE_UNITS,BYTE_UNITS_OPTION>\
+                                     BYTE_UNITS,BYTE_UNITS_OPTION,\
+                                     is_aminoacid>\
                                     (inputfilename,\
                                      qgram_length,\
                                      hashbits,\
@@ -343,20 +368,13 @@ static void enumerate_nt_hash_template(const char *inputfilename,
                                      sequences_length_bits);\
         }
 
-template<class HashValueIterator,bool with_rc>
+template<class HashValueIterator,bool with_rc, bool is_aminoacid>
 static void enumerate_nt_hash(const char *inputfilename,
                               bool show_hash_values,
                               bool bytes_unit_option,
                               size_t qgram_length,
                               int hashbits)
 {
-  const bool is_protein = guess_if_protein_file(inputfilename);
-
-  if (is_protein)
-  {
-    throw std::runtime_error(": can only handle DNA sequences");
-    /* check_err.py checked */
-  }
   const bool store_sequences = false;
   GttlMultiseq multiseq(inputfilename,store_sequences,UINT8_MAX);
   const int sequences_number_bits = multiseq.sequences_number_bits_get();
@@ -398,7 +416,7 @@ int main(int argc,char *argv[])
   }
   catch (std::invalid_argument &e) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -411,9 +429,19 @@ int main(int argc,char *argv[])
   {
     try
     {
-      if (options.with_rc_option_is_set())
+      const bool is_protein = guess_if_protein_file(inputfile.c_str());
+      if (is_protein)
       {
-        enumerate_nt_hash<QgramNtHashIterator4,true>
+        if (options.with_rc_option_is_set())
+        {
+          // There is no such thing as a reverse-complement
+          // of an aminoacid sequence
+          std::cerr <<
+            "Cannot run reverse-complements on aminoacid sequences!\n";
+          exit(EXIT_FAILURE);
+        }
+
+        enumerate_nt_hash<QgramNtHashAAFwdIterator20, false, true>
                          (inputfile.c_str(),
                           options.show_hash_values_is_set(),
                           options.bytes_unit_option_is_set(),
@@ -421,18 +449,29 @@ int main(int argc,char *argv[])
                           options.hashbits_get());
       } else
       {
-        enumerate_nt_hash<QgramNtHashFwdIterator4,false>
-                         (inputfile.c_str(),
-                          options.show_hash_values_is_set(),
-                          options.bytes_unit_option_is_set(),
-                          options.kmer_length_get(),
-                          options.hashbits_get());
+        if (options.with_rc_option_is_set())
+        {
+          enumerate_nt_hash<QgramNtHashIterator4,true, false>
+                           (inputfile.c_str(),
+                            options.show_hash_values_is_set(),
+                            options.bytes_unit_option_is_set(),
+                            options.kmer_length_get(),
+                            options.hashbits_get());
+        } else
+        {
+          enumerate_nt_hash<QgramNtHashFwdIterator4,false, false>
+                           (inputfile.c_str(),
+                            options.show_hash_values_is_set(),
+                            options.bytes_unit_option_is_set(),
+                            options.kmer_length_get(),
+                            options.hashbits_get());
+        }
       }
     }
     catch (std::exception &msg)
     {
       std::cerr << progname << ": file \"" << inputfile << "\""
-                << msg.what() << std::endl;
+                << msg.what() << '\n';
       haserr = true;
       break;
     }
