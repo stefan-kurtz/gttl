@@ -4,8 +4,28 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include "sequences/complement_uint8.hpp"
 #include "sequences/nthash_rotation_tables.hpp"
+
+template <size_t N>
+consteval static auto make31l_table(const std::array<uint64_t, N>& input)
+{
+  return [&]<size_t... I>(std::index_sequence<I...>)
+  {
+    return std::array{ generate_31l_table(input[I])... };
+  }(std::make_index_sequence<N>{});
+}
+
+template <size_t N>
+consteval static auto make33r_table(const std::array<uint64_t, N>& input)
+{
+  return [&]<size_t... I>(std::index_sequence<I...>)
+  {
+    return std::array{ generate_33r_table(input[I])... };
+  }(std::make_index_sequence<N>{});
+}
+
 class NtHashAminoacidsTransformer
 {
   // rotate "v" to the left 1 position
@@ -34,89 +54,16 @@ class NtHashAminoacidsTransformer
     return v ^ ((x << 32) | (x << 63));
   }
 
-  static constexpr const uint64_t nt_hash_seedA = 0xE6CC5634828DE226;
-  static constexpr const uint64_t nt_hash_seedC = 0xC3916818AB69EAEF;
-  static constexpr const uint64_t nt_hash_seedD = 0x708B967AB82D90DA;
-  static constexpr const uint64_t nt_hash_seedE = 0x97EE132403084238;
-  static constexpr const uint64_t nt_hash_seedF = 0x54B5F4F96AA2B4C6;
-  static constexpr const uint64_t nt_hash_seedG = 0xA16E4815AEB82F9C;
-  static constexpr const uint64_t nt_hash_seedH = 0xD45994107632BA9E;
-  static constexpr const uint64_t nt_hash_seedI = 0x52CA8A666024FEB4;
-  static constexpr const uint64_t nt_hash_seedK = 0x4B7BE4E0445E0FB4;
-  static constexpr const uint64_t nt_hash_seedL = 0x10936D371508CFBB;
-  static constexpr const uint64_t nt_hash_seedM = 0x9845685EF8E90AC2;
-  static constexpr const uint64_t nt_hash_seedN = 0xBC57ED4598240F30;
-  static constexpr const uint64_t nt_hash_seedP = 0x4ADD75731C811286;
-  static constexpr const uint64_t nt_hash_seedQ = 0xF4EADE76635CE527;
-  static constexpr const uint64_t nt_hash_seedR = 0x725F7D219B2873BC;
-  static constexpr const uint64_t nt_hash_seedS = 0x2A90195B4166C058;
-  static constexpr const uint64_t nt_hash_seedT = 0xEABF48D47DA98AED;
-  static constexpr const uint64_t nt_hash_seedV = 0x7BE88554E92B4BF9;
-  static constexpr const uint64_t nt_hash_seedW = 0x211DFFCF403D167C;
-  static constexpr const uint64_t nt_hash_seedY = 0x8454A6A3B239AE9E;
-
-  static constexpr const uint64_t nt_hash_seed_table[] = {
-    nt_hash_seedA, nt_hash_seedC, nt_hash_seedD, nt_hash_seedE, nt_hash_seedF,
-    nt_hash_seedG, nt_hash_seedH, nt_hash_seedI, nt_hash_seedK, nt_hash_seedL,
-    nt_hash_seedM, nt_hash_seedN, nt_hash_seedP, nt_hash_seedQ, nt_hash_seedR,
-    nt_hash_seedS, nt_hash_seedT, nt_hash_seedV, nt_hash_seedW, nt_hash_seedY
+  static constexpr const std::array<uint64_t, 20> nt_hash_seed_table = {
+    0xE6CC5634828DE226, 0xC3916818AB69EAEF, 0x708B967AB82D90DA, 0x97EE132403084238,
+    0x54B5F4F96AA2B4C6, 0xA16E4815AEB82F9C, 0xD45994107632BA9E, 0x52CA8A666024FEB4,
+    0x4B7BE4E0445E0FB4, 0x10936D371508CFBB, 0x9845685EF8E90AC2, 0xBC57ED4598240F30,
+    0x4ADD75731C811286, 0xF4EADE76635CE527, 0x725F7D219B2873BC, 0x2A90195B4166C058,
+    0xEABF48D47DA98AED, 0x7BE88554E92B4BF9, 0x211DFFCF403D167C, 0x8454A6A3B239AE9E
   };
 
-  static constexpr const auto nt_hash_A33r = generate_33r_table(nt_hash_seedA);
-  static constexpr const auto nt_hash_C33r = generate_33r_table(nt_hash_seedC);
-  static constexpr const auto nt_hash_D33r = generate_33r_table(nt_hash_seedD);
-  static constexpr const auto nt_hash_E33r = generate_33r_table(nt_hash_seedE);
-  static constexpr const auto nt_hash_F33r = generate_33r_table(nt_hash_seedF);
-  static constexpr const auto nt_hash_G33r = generate_33r_table(nt_hash_seedG);
-  static constexpr const auto nt_hash_H33r = generate_33r_table(nt_hash_seedH);
-  static constexpr const auto nt_hash_I33r = generate_33r_table(nt_hash_seedI);
-  static constexpr const auto nt_hash_K33r = generate_33r_table(nt_hash_seedK);
-  static constexpr const auto nt_hash_L33r = generate_33r_table(nt_hash_seedL);
-  static constexpr const auto nt_hash_M33r = generate_33r_table(nt_hash_seedM);
-  static constexpr const auto nt_hash_N33r = generate_33r_table(nt_hash_seedN);
-  static constexpr const auto nt_hash_P33r = generate_33r_table(nt_hash_seedP);
-  static constexpr const auto nt_hash_Q33r = generate_33r_table(nt_hash_seedQ);
-  static constexpr const auto nt_hash_R33r = generate_33r_table(nt_hash_seedR);
-  static constexpr const auto nt_hash_S33r = generate_33r_table(nt_hash_seedS);
-  static constexpr const auto nt_hash_T33r = generate_33r_table(nt_hash_seedT);
-  static constexpr const auto nt_hash_V33r = generate_33r_table(nt_hash_seedV);
-  static constexpr const auto nt_hash_W33r = generate_33r_table(nt_hash_seedW);
-  static constexpr const auto nt_hash_Y33r = generate_33r_table(nt_hash_seedY);
-
-  static constexpr const auto nt_hash_A31l = generate_31l_table(nt_hash_seedA);
-  static constexpr const auto nt_hash_C31l = generate_31l_table(nt_hash_seedC);
-  static constexpr const auto nt_hash_D31l = generate_31l_table(nt_hash_seedD);
-  static constexpr const auto nt_hash_E31l = generate_31l_table(nt_hash_seedE);
-  static constexpr const auto nt_hash_F31l = generate_31l_table(nt_hash_seedF);
-  static constexpr const auto nt_hash_G31l = generate_31l_table(nt_hash_seedG);
-  static constexpr const auto nt_hash_H31l = generate_31l_table(nt_hash_seedH);
-  static constexpr const auto nt_hash_I31l = generate_31l_table(nt_hash_seedI);
-  static constexpr const auto nt_hash_K31l = generate_31l_table(nt_hash_seedK);
-  static constexpr const auto nt_hash_L31l = generate_31l_table(nt_hash_seedL);
-  static constexpr const auto nt_hash_M31l = generate_31l_table(nt_hash_seedM);
-  static constexpr const auto nt_hash_N31l = generate_31l_table(nt_hash_seedN);
-  static constexpr const auto nt_hash_P31l = generate_31l_table(nt_hash_seedP);
-  static constexpr const auto nt_hash_Q31l = generate_31l_table(nt_hash_seedQ);
-  static constexpr const auto nt_hash_R31l = generate_31l_table(nt_hash_seedR);
-  static constexpr const auto nt_hash_S31l = generate_31l_table(nt_hash_seedS);
-  static constexpr const auto nt_hash_T31l = generate_31l_table(nt_hash_seedT);
-  static constexpr const auto nt_hash_V31l = generate_31l_table(nt_hash_seedV);
-  static constexpr const auto nt_hash_W31l = generate_31l_table(nt_hash_seedW);
-  static constexpr const auto nt_hash_Y31l = generate_31l_table(nt_hash_seedY);
-
-  static constexpr const std::array<std::array<uint64_t, 31>, 20> msTab31l = {
-    nt_hash_A31l, nt_hash_C31l, nt_hash_D31l, nt_hash_E31l, nt_hash_F31l,
-    nt_hash_G31l, nt_hash_H31l, nt_hash_I31l, nt_hash_K31l, nt_hash_L31l,
-    nt_hash_M31l, nt_hash_N31l, nt_hash_P31l, nt_hash_Q31l, nt_hash_R31l,
-    nt_hash_S31l, nt_hash_T31l, nt_hash_V31l, nt_hash_W31l, nt_hash_Y31l
-  };
-
-  static constexpr const std::array<std::array<uint64_t, 33>, 20> msTab33r = {
-    nt_hash_A33r, nt_hash_C33r, nt_hash_D33r, nt_hash_E33r, nt_hash_F33r,
-    nt_hash_G33r, nt_hash_H33r, nt_hash_I33r, nt_hash_K33r, nt_hash_L33r,
-    nt_hash_M33r, nt_hash_N33r, nt_hash_P33r, nt_hash_Q33r, nt_hash_R33r,
-    nt_hash_S33r, nt_hash_T33r, nt_hash_V33r, nt_hash_W33r, nt_hash_Y33r
-  };
+  static constexpr const auto msTab31l = make31l_table(nt_hash_seed_table);
+  static constexpr const auto msTab33r = make33r_table(nt_hash_seed_table);
 
   uint64_t msTab31l_33r_or[20] = {};
 
