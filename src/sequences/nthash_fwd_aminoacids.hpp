@@ -34,24 +34,11 @@ class NtHashAminoacidsTransformer
     return (v << 1) | (v >> 63);
   }
 
-  // rotate "v" to the right 1 position
-  [[nodiscard]] static uint64_t rotate_right_1(const uint64_t v) noexcept
-  {
-    return (v >> 1) | (v << 63);
-  }
-
   // swap bit 0 with bit 33 in "v"
   [[nodiscard]] static uint64_t swapbits033(const uint64_t v) noexcept
   {
     uint64_t x = (v ^ (v >> 33)) & uint64_t{1};
     return v ^ (x | (x << 33));
-  }
-
-  // swap bit 32 with bit 63 in "v"
-  [[nodiscard]] static uint64_t swapbits3263(const uint64_t v) noexcept
-  {
-    uint64_t x = ((v >> 32) ^ (v >> 63)) & 1;
-    return v ^ ((x << 32) | (x << 63));
   }
 
   static constexpr const std::array<uint64_t, 20> nt_hash_seed_table = {
@@ -92,23 +79,6 @@ class NtHashAminoacidsTransformer
       }
       return hVal;
     }
-    static std::pair<uint64_t,uint64_t> first_hash_value_pair_get(
-      const uint8_t *t_qgram,
-      size_t qgram_length)  noexcept
-    {
-      const uint64_t fwd_code = first_fwd_hash_value_get(t_qgram,qgram_length);
-      uint64_t rev_compl_code = 0;
-      for (size_t idx = qgram_length; idx > 0; /*Nothing*/)
-      {
-        idx--;
-        rev_compl_code = rotate_left_1(rev_compl_code);
-        rev_compl_code = swapbits033(rev_compl_code);
-        const uint8_t complement_cc = complement_uint8(t_qgram[idx]);
-        rev_compl_code ^=
-          nt_hash_seed_table[static_cast<size_t>(complement_cc)];
-      }
-      return std::make_pair(fwd_code,rev_compl_code);
-    }
 
     // forward-strand ntHash for sliding k-mers
     [[nodiscard]] uint64_t next_hash_value_get(uint8_t charOut, uint64_t fhVal,
@@ -119,19 +89,6 @@ class NtHashAminoacidsTransformer
       hVal = swapbits033(hVal);
       hVal ^= nt_hash_seed_table[charIn];
       hVal ^= msTab31l_33r_or[charOut];
-      return hVal;
-    }
-    // reverse-strand ntHash for sliding k-mers
-    [[nodiscard]] uint64_t next_compl_hash_value_get(uint8_t compl_charOut,
-                                                     uint64_t rhVal,
-                                                     uint8_t compl_charIn)
-      const noexcept
-    {
-      assert(compl_charIn < uint8_t(4) && compl_charOut < uint8_t(4));
-      uint64_t hVal = rhVal ^ msTab31l_33r_or[compl_charIn];
-      hVal ^= nt_hash_seed_table[compl_charOut];
-      hVal = rotate_right_1(hVal);
-      hVal = swapbits3263(hVal);
       return hVal;
     }
 };
