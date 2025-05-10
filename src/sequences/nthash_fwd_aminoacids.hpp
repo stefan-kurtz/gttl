@@ -9,18 +9,18 @@
 #include "sequences/nthash_rotation_tables.hpp"
 
 template <size_t N>
-consteval static auto make31l_table(const std::array<uint64_t, N> input)
+consteval static auto make31l_table(const std::array<uint64_t, N>& input)
 {
-  return [&]<size_t... I>(std::index_sequence<I...>)
+  return [=]<size_t... I>(std::index_sequence<I...>)
   {
     return std::array{ generate_31l_table(input[I])... };
   }(std::make_index_sequence<N>{});
 }
 
 template <size_t N>
-consteval static auto make33r_table(const std::array<uint64_t, N> input)
+consteval static auto make33r_table(const std::array<uint64_t, N>& input)
 {
-  return [&]<size_t... I>(std::index_sequence<I...>)
+  return [=]<size_t... I>(std::index_sequence<I...>)
   {
     return std::array{ generate_33r_table(input[I])... };
   }(std::make_index_sequence<N>{});
