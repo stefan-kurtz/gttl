@@ -4,12 +4,12 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <utility>
-#include "sequences/complement_uint8.hpp"
 #include "sequences/nthash_rotation_tables.hpp"
 
 template <size_t N>
-consteval static auto make31l_table(const std::array<uint64_t, N>& input)
+consteval static auto make31l_table(const std::array<uint64_t, N> input)
 {
   return [&]<size_t... I>(std::index_sequence<I...>)
   {
@@ -18,7 +18,7 @@ consteval static auto make31l_table(const std::array<uint64_t, N>& input)
 }
 
 template <size_t N>
-consteval static auto make33r_table(const std::array<uint64_t, N>& input)
+consteval static auto make33r_table(const std::array<uint64_t, N> input)
 {
   return [&]<size_t... I>(std::index_sequence<I...>)
   {
@@ -42,11 +42,13 @@ class NtHashAminoacidsTransformer
   }
 
   static constexpr const std::array<uint64_t, 20> nt_hash_seed_table = {
-    0xE6CC5634828DE226, 0xC3916818AB69EAEF, 0x708B967AB82D90DA, 0x97EE132403084238,
-    0x54B5F4F96AA2B4C6, 0xA16E4815AEB82F9C, 0xD45994107632BA9E, 0x52CA8A666024FEB4,
-    0x4B7BE4E0445E0FB4, 0x10936D371508CFBB, 0x9845685EF8E90AC2, 0xBC57ED4598240F30,
-    0x4ADD75731C811286, 0xF4EADE76635CE527, 0x725F7D219B2873BC, 0x2A90195B4166C058,
-    0xEABF48D47DA98AED, 0x7BE88554E92B4BF9, 0x211DFFCF403D167C, 0x8454A6A3B239AE9E
+    0xE6CC5634828DE226, 0xC3916818AB69EAEF, 0x708B967AB82D90DA,
+    0x97EE132403084238, 0x54B5F4F96AA2B4C6, 0xA16E4815AEB82F9C,
+    0xD45994107632BA9E, 0x52CA8A666024FEB4, 0x4B7BE4E0445E0FB4,
+    0x10936D371508CFBB, 0x9845685EF8E90AC2, 0xBC57ED4598240F30,
+    0x4ADD75731C811286, 0xF4EADE76635CE527, 0x725F7D219B2873BC,
+    0x2A90195B4166C058, 0xEABF48D47DA98AED, 0x7BE88554E92B4BF9,
+    0x211DFFCF403D167C, 0x8454A6A3B239AE9E
   };
 
   static constexpr const auto msTab31l = make31l_table(nt_hash_seed_table);
