@@ -419,15 +419,15 @@ int main(int argc,char *argv[])
         }
 
         RunTimeClass rt{};
-        rt.reset();
         enumerate_nt_hash<QgramNtHashAAFwdIterator20, false, true>
                          (inputfile.c_str(),
                           options.show_hash_values_is_set(),
                           options.bytes_unit_option_is_set(),
                           options.kmer_length_get(),
                           options.hashbits_get());
-        rt.show("Runtime NtHash: ");
+        rt.show("NtHash with input: ");
 
+#ifdef WYHASH_STATISTICS
         GttlFpType fp = gttl_fp_type_open(inputfile.c_str(), "rb");
 
         constexpr const int buf_size = 1 << 14;
@@ -483,8 +483,8 @@ int main(int argc,char *argv[])
                gttl_required_bits<size_t>(max_sequence_length));
         printf("# count_all_qgrams\t%zu\n",count_all_qgrams);
         printf("# sum_hash_values\t%" PRIu64 "\n",sum_hash_values);
-
         rt.show("Runtime wyhash: ");
+#endif
       } else
       {
         if (options.with_rc_option_is_set())
