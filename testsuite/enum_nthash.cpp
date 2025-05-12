@@ -36,6 +36,7 @@
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
+#include "utilities/wyhash.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -441,12 +442,73 @@ int main(int argc,char *argv[])
           exit(EXIT_FAILURE);
         }
 
+        RunTimeClass rt{};
+        rt.reset();
         enumerate_nt_hash<QgramNtHashAAFwdIterator20, false, true>
                          (inputfile.c_str(),
                           options.show_hash_values_is_set(),
                           options.bytes_unit_option_is_set(),
                           options.kmer_length_get(),
                           options.hashbits_get());
+        rt.show("Runtime NtHash: ");
+
+        GttlFpType fp = gttl_fp_type_open(inputfile.c_str(), "rb");
+
+        constexpr const int buf_size = 1 << 14;
+        GttlFastAGenerator<buf_size> fasta_gen(fp);
+
+
+        using NucleotideRanger
+          = GttlCharRange<typename RangerTraits<true>::Finder,
+                          RangerTraits<true>::instance,
+                          true,false>;
+
+        rt.reset();
+        size_t total_length = 0;
+        size_t seqnum = 0;
+        size_t max_sequence_length = 0;
+        uint64_t sum_hash_values = 0;
+        size_t count_all_qgrams = 0;
+
+        for (auto &&si : fasta_gen)
+        {
+          auto sequence = si->sequence_get();
+          total_length += sequence.size();
+          max_sequence_length = std::max(max_sequence_length,sequence.size());
+          NucleotideRanger nuc_ranger(sequence.data(),sequence.size());
+          for (auto const &&range : nuc_ranger)
+          {
+            const size_t this_length = std::get<1>(range);
+            const char *substring = sequence.data() + std::get<0>(range);
+
+            if(this_length >= options.kmer_length_get())
+            {
+              for(size_t i = 0;
+                  i < this_length - options.kmer_length_get() + 1; i++)
+              {
+                if(std::strlen(substring + i) >= options.kmer_length_get())
+                {
+                  const uint64_t hash = wyhash(substring + i,
+                                               options.kmer_length_get(),
+                                               0xABCDEFABCDEF);
+                  sum_hash_values += hash;
+                  count_all_qgrams++;
+                }
+              }
+            }
+          }
+          seqnum++;
+        }
+        printf("# num_of_sequences\t%zu\n",seqnum);
+        printf("# total_length\t%zu\n",total_length);
+        printf("# max_sequence_length\t%zu\n",max_sequence_length);
+        printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(seqnum));
+        printf("# max_sequence_length.bits\t%d\n",
+               gttl_required_bits<size_t>(max_sequence_length));
+        printf("# count_all_qgrams\t%zu\n",count_all_qgrams);
+        printf("# sum_hash_values\t%" PRIu64 "\n",sum_hash_values);
+
+        rt.show("Runtime wyhash: ");
       } else
       {
         if (options.with_rc_option_is_set())
