@@ -24,6 +24,7 @@
 #include <iostream>
 #include <tuple>
 #include <cinttypes>
+#include "sequences/dna_seq_encoder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
@@ -137,26 +138,6 @@ class NtHashOptions
   {
     return inputfiles;
   }
-};
-
-static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
-static constexpr const char_finder::AminoacidFinder aminoacid_finder{};
-
-template <bool is_aa>
-struct RangerTraits;
-
-template<>
-struct RangerTraits<true>
-{
-  using Finder = char_finder::AminoacidFinder;
-  static constexpr const auto& instance = aminoacid_finder;
-};
-
-template<>
-struct RangerTraits<false>
-{
-  using Finder = char_finder::NucleotideFinder;
-  static constexpr const auto& instance = nucleotide_finder;
 };
 
 template<class HashValueIterator,
@@ -290,17 +271,12 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   GttlFastAGenerator<buf_size> fasta_gen(in_fp);
 
 
-  using NucleotideRanger =
-    GttlCharRange<typename RangerTraits<is_aminoacid>::Finder,
-                  RangerTraits<is_aminoacid>::instance,
-                  true,false>;
-
   for (auto &&si : fasta_gen)
   {
     auto sequence = si->sequence_get();
     total_length += sequence.size();
     max_sequence_length = std::max(max_sequence_length,sequence.size());
-    NucleotideRanger nuc_ranger(sequence.data(),sequence.size());
+    NtCardRanger<is_aminoacid> nuc_ranger(sequence.data(),sequence.size());
     for (auto const &&range : nuc_ranger)
     {
       const size_t this_length = std::get<1>(range);

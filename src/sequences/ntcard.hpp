@@ -8,31 +8,27 @@
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
-#include "sequences/char_range.hpp"
-#include "sequences/char_finder.hpp"
-#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/dna_seq_decoder.hpp"
+#include "utilities/runtime_class.hpp"
 
 template <bool split_at_wildcard,
           class SeqGenerator,
           class HashValueIterator,
-          class TableClass>
+          class TableClass,
+          bool is_aminoacid>
 static void ntcard_enumerate_inner(SeqGenerator* gttl_si,
                                    TableClass* table,
                                    size_t qgram_length)
 {
-  using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
-                                         ntcard_nucleotide_finder, true, false>;
-
   size_t sequences_number = 0;
   for (auto &&si : *gttl_si)
   {
     auto sequence = si->sequence_get();
     if constexpr (split_at_wildcard)
     {
-      NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
+      NtCardRanger<is_aminoacid> nuc_ranger(sequence.data(), sequence.size());
       for (auto const &&range : nuc_ranger)
       {
         const size_t this_length = std::get<1>(range);
@@ -67,7 +63,8 @@ static void ntcard_enumerate_inner(SeqGenerator* gttl_si,
 
 template <bool split_at_wildcard,
           class HashValueIterator,
-          class TableClass>
+          class TableClass,
+          bool is_aminoacid>
 static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
                                        size_t qgram_length,
                                        size_t s_value,
@@ -87,7 +84,8 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
     ntcard_enumerate_inner<split_at_wildcard,
                            GttlFastAGenerator<buf_size>,
                            HashValueIterator,
-                           TableClass>
+                           TableClass,
+                           is_aminoacid>
                           (&gttl_si, &table, qgram_length);
   } else
   {
@@ -95,7 +93,8 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
     ntcard_enumerate_inner<split_at_wildcard,
                            GttlFastQGenerator<buf_size>,
                            HashValueIterator,
-                           TableClass>
+                           TableClass,
+                           is_aminoacid>
                           (&fastq_it, &table, qgram_length);
   }
   return table;
@@ -103,7 +102,8 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
 
 template <bool split_at_wildcard,
           class HashValueIterator,
-          class TableClass>
+          class TableClass,
+          bool is_aminoacid>
 static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
                                        size_t qgram_length,
                                        size_t s_value,
@@ -132,7 +132,8 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
         ntcard_enumerate_inner<split_at_wildcard,
                                GttlFastAGenerator<buf_size>,
                                HashValueIterator,
-                               TableClass>
+                               TableClass,
+                               is_aminoacid>
                               (&gttl_si,
                                thd_num == 0 ? &first_table
                                             : other_tables[thd_num-1],
@@ -152,7 +153,8 @@ static TableClass ntcard_enumerate_thd(const std::string &inputfilename,
         ntcard_enumerate_inner<split_at_wildcard,
                                GttlFastQGenerator<buf_size>,
                                HashValueIterator,
-                               TableClass>
+                               TableClass,
+                               is_aminoacid>
                               (&fastq_it,
                                thd_num == 0 ? &first_table
                                             : other_tables[thd_num-1],
@@ -205,7 +207,8 @@ static void process_encoded_sequence_part(
 
 template <bool split_at_wildcard,
           class HashValueIterator,
-          class TableClass>
+          class TableClass,
+          bool is_aminoacid>
 static TableClass ntcard_enumerate_thd_gz(const DNAEncodingMultiLength
                                             <uint64_t,split_at_wildcard,false>
                                             &dna_encoding_multi_length,
@@ -231,6 +234,8 @@ static TableClass ntcard_enumerate_thd_gz(const DNAEncodingMultiLength
     other_tables.push_back(new TableClass(s_value, r_value));
   }
   std::vector<std::thread> threads;
+
+  threads.reserve(dna_encoding_multi_length.num_parts_get());
   for (size_t thd_num = 0;
        thd_num < dna_encoding_multi_length.num_parts_get();
        thd_num++)
@@ -265,7 +270,8 @@ static TableClass ntcard_enumerate_thd_gz(const DNAEncodingMultiLength
 template <bool split_at_wildcard,
           class HashValueIterator,
           class HashValueIteratorNoTransform,
-          class TableClass>
+          class TableClass,
+          bool is_aminoacid>
 static TableClass ntcard_enumerate(const std::string &inputfilename,
                                    size_t qgram_length,
                                    size_t s_value,
@@ -277,7 +283,8 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
     RunTimeClass rt_enumerate{};
     auto table = ntcard_enumerate_seq<split_at_wildcard,
                                       HashValueIterator,
-                                      TableClass>
+                                      TableClass,
+                                      is_aminoacid>
                                      (inputfilename,
                                       qgram_length,
                                       s_value,
@@ -295,7 +302,8 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
     RunTimeClass rt_enumerate{};
     auto table = ntcard_enumerate_thd_gz<split_at_wildcard,
                                          HashValueIteratorNoTransform,
-                                         TableClass>
+                                         TableClass,
+                                         is_aminoacid>
                                         (dna_encoding_multi_length,
                                          qgram_length,
                                          s_value,
@@ -308,7 +316,8 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
   RunTimeClass rt_enumerate{};
   auto table = ntcard_enumerate_thd<split_at_wildcard,
                                     HashValueIterator,
-                                    TableClass>
+                                    TableClass,
+                                    is_aminoacid>
                                    (inputfilename,
                                     qgram_length,
                                     s_value,
