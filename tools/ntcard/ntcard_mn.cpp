@@ -5,11 +5,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
-#include "utilities/constexpr_if.hpp"
-#include "utilities/gttl_file_open.hpp"
+#include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/nttable.hpp"
@@ -22,7 +20,9 @@ static void estimate_F_values(const NtcardOptions &options)
 {
   static constexpr const uint8_t undefined_rank = 0;
   const bool is_protein =
-    guess_if_protein_file(options.inputfile_get().c_str());
+    gttl_likely_fasta_format(options.inputfile_get())
+      ? guess_if_protein_file(options.inputfile_get().c_str())
+      : false;
 
   if (options.binary_option_is_set())
   {

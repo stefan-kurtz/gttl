@@ -363,7 +363,7 @@ class DNAEncodingForLength
   }
 };
 
-static bool decide_append_previous(const std::vector<size_t> &size_vec,
+static inline bool decide_append_previous(const std::vector<size_t> &size_vec,
                                    size_t total_size,
                                    size_t local_sum)
 {
