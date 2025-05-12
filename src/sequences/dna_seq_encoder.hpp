@@ -363,7 +363,7 @@ class DNAEncodingForLength
   }
 };
 
-static bool decide_append_previous(const std::vector<size_t> &size_vec,
+static inline bool decide_append_previous(const std::vector<size_t> &size_vec,
                                    size_t total_size,
                                    size_t local_sum)
 {
@@ -395,6 +395,29 @@ static bool decide_append_previous(const std::vector<size_t> &size_vec,
 }
 
 static constexpr const char_finder::NucleotideFinder ntcard_nucleotide_finder{};
+static constexpr const char_finder::AminoacidFinder ntcard_aminoacid_finder{};
+
+template <bool is_aminoacid>
+struct RangerTraits;
+
+template<>
+struct RangerTraits<true>
+{
+  using Finder = char_finder::AminoacidFinder;
+  static constexpr const auto& instance = ntcard_aminoacid_finder;
+};
+
+template<>
+struct RangerTraits<false>
+{
+  using Finder = char_finder::NucleotideFinder;
+  static constexpr const auto& instance = ntcard_nucleotide_finder;
+};
+
+template <bool is_aminoacid>
+using NtCardRanger = GttlCharRange<typename RangerTraits<is_aminoacid>::Finder,
+                                   RangerTraits<is_aminoacid>::instance,
+                                   true, false>;
 
 template<typename StoreUnitType,bool split_at_wildcard,bool verbose>
 class DNAEncodingMultiLength

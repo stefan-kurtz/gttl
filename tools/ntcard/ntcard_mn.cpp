@@ -5,8 +5,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <thread>
-#include "utilities/gttl_file_open.hpp"
+#include "sequences/guess_if_protein_seq.hpp"
+#include "sequences/qgrams_hash_nthash.hpp"
+#include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/nttable.hpp"
@@ -18,19 +19,37 @@ template<bool split_at_wildcard>
 static void estimate_F_values(const NtcardOptions &options)
 {
   static constexpr const uint8_t undefined_rank = 0;
+  const bool is_protein =
+    gttl_likely_fasta_format(options.inputfile_get())
+      ? guess_if_protein_file(options.inputfile_get().c_str())
+      : false;
+
   if (options.binary_option_is_set())
   {
-    BinaryNtTable table
-      = ntcard_enumerate<split_at_wildcard,
-                         QgramNtHashFwdIteratorGeneric<undefined_rank>,
-                         QgramNtHashFwdIteratorGenericNoTransform
-                           <undefined_rank>,
-                         BinaryNtTable>
-                        (options.inputfile_get(),
-                         options.qgram_length_get(),
-                         options.s_get(),
-                         options.r_get(),
-                         options.num_threads_get());
+    BinaryNtTable table = is_protein ?
+          ntcard_enumerate<split_at_wildcard,
+                           QgramNtHashAAFwdIteratorGeneric<undefined_rank>,
+                           QgramNtHashAAFwdIteratorGenericNoTransform
+                             <undefined_rank>,
+                           BinaryNtTable,
+                           true>
+                          (options.inputfile_get(),
+                           options.qgram_length_get(),
+                           options.s_get(),
+                           options.r_get(),
+                           options.num_threads_get())
+          :
+          ntcard_enumerate<split_at_wildcard,
+                           QgramNtHashFwdIteratorGeneric<undefined_rank>,
+                           QgramNtHashFwdIteratorGenericNoTransform
+                             <undefined_rank>,
+                           BinaryNtTable,
+                           false>
+                          (options.inputfile_get(),
+                           options.qgram_length_get(),
+                           options.s_get(),
+                           options.r_get(),
+                           options.num_threads_get());
     RunTimeClass rt_estimate{};
     const double F0 = table.estimate_F0();
     printf("F0\t%.0f\n", F0);
@@ -40,11 +59,25 @@ static void estimate_F_values(const NtcardOptions &options)
   } else
   {
     NtTable table
-      = ntcard_enumerate<split_at_wildcard,
+      = is_protein ?
+        ntcard_enumerate<split_at_wildcard,
+                         QgramNtHashAAFwdIteratorGeneric<undefined_rank>,
+                         QgramNtHashAAFwdIteratorGenericNoTransform
+                           <undefined_rank>,
+                         NtTable,
+                         true>
+                        (options.inputfile_get(),
+                         options.qgram_length_get(),
+                         options.s_get(),
+                         options.r_get(),
+                         options.num_threads_get())
+        :
+        ntcard_enumerate<split_at_wildcard,
                          QgramNtHashFwdIteratorGeneric<undefined_rank>,
                          QgramNtHashFwdIteratorGenericNoTransform
                            <undefined_rank>,
-                         NtTable>
+                         NtTable,
+                         false>
                         (options.inputfile_get(),
                          options.qgram_length_get(),
                          options.s_get(),
