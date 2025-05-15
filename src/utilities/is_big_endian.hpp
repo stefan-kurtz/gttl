@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #if __cplusplus > 201703L
-constexpr bool is_big_endian(void)
+consteval bool is_big_endian(void)
 {
   if constexpr (std::endian::native == std::endian::big)
   {

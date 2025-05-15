@@ -2,9 +2,6 @@
 #define QGRAM_DECODER_HPP
 #include <cstddef>
 #include <cassert>
-#include <cmath>
-#include <numeric>
-#include "utilities/mathsupport.hpp"
 #include "sequences/complement_plain.hpp"
 
 #ifndef NDEBUG
@@ -87,14 +84,14 @@ class QgramDecoder
 };
 
 template <const char *str>
-static constexpr size_t gttl_strlen(size_t i)
+static consteval size_t gttl_strlen(size_t i)
 {
   return str[i] == '\0' ? i
                         : gttl_strlen<str>(i+1);
 }
 
 template <const char *str>
-static constexpr size_t gttl_strlen(void)
+static consteval size_t gttl_strlen(void)
 {
   return gttl_strlen<str>(0);
 }

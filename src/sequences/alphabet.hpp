@@ -8,7 +8,7 @@
 #include <cassert>
 
 template <uint8_t undef,const char *str>
-static constexpr uint8_t gttl_find_index(char cc,size_t i,size_t j)
+static consteval uint8_t gttl_find_index(char cc,size_t i,size_t j)
 {
   return str[i] == '\0'
            ? undef
@@ -19,20 +19,20 @@ static constexpr uint8_t gttl_find_index(char cc,size_t i,size_t j)
 }
 
 template <uint8_t undef,const char *str>
-static constexpr uint8_t gttl_find_index (char cc)
+static consteval uint8_t gttl_find_index (char cc)
 {
   return gttl_find_index<undef,str>(cc,0,0);
 }
 
 template <const char *str>
-static constexpr size_t gttl_find_size(size_t i,size_t j)
+static consteval size_t gttl_find_size(size_t i,size_t j)
 {
   return str[i] == '\0' ? j : (str[i] == '|' ? gttl_find_size<str>(i+1,j+1)
                                              : gttl_find_size<str>(i+1,j));
 }
 
 template <const char *str>
-static constexpr size_t gttl_find_size(void)
+static consteval size_t gttl_find_size(void)
 {
   return 1 + gttl_find_size<str>(0,0);
 }

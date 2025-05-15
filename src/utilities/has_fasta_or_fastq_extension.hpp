@@ -26,6 +26,7 @@ static inline bool gttl_likely_gzipped_fastq_format(
 static inline bool gttl_likely_gzipped_fasta_format(
   const std::string &inputfilename)
 {
+  // extensions according to https://en.wikipedia.org/wiki/FASTA_format
   static const std::vector<std::string> fasta_suffixes{".fasta",
                                                        ".fas",
                                                        ".fa",

@@ -29,7 +29,7 @@
 #endif
 
 template<typename T,int bits>
-inline constexpr T gttl_bits2maxvalue(void)
+inline consteval T gttl_bits2maxvalue(void)
 {
   static_assert(static_cast<T>(-1) >= 0);
   if constexpr (bits == CHAR_BIT * sizeof(T))
