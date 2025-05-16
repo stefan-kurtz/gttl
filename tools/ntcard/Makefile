@@ -150,5 +150,7 @@ tags:
 clean:
 	@${RM} -r *.[oxd] *.x.dSYM/ gqf/*.[oxd]
 	@${RM} -r out TMP* __pycache__
+	@${RM} eco29.fasta soil_unique.fasta 70x_161nt_phred64.fastq.gz
+	@${RM} SRR19536726_1_1000.fastq
 
 -include ${wildcard *.d}
