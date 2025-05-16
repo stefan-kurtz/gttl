@@ -20,15 +20,18 @@ static consteval bool is_member_in_charset(void)
 }
 
 #define DECLARE_FIND_FUNCTIONS\
-  constexpr const char *find_forward(const char *s,const char *endptr) const noexcept\
+  constexpr const char *find_forward(const char *s,const char *endptr) \
+    const noexcept\
   {\
     return find_generic<1,true>(s,endptr);\
   }\
-  constexpr const char *find_backward(const char *s,const char *endptr) const noexcept\
+  constexpr const char *find_backward(const char *s,const char *endptr) \
+    const noexcept\
   {\
     return find_generic<-1,true>(s,endptr);\
   }\
-  constexpr const char *find_forward_not(const char *s,const char *endptr) const noexcept\
+  constexpr const char *find_forward_not(const char *s,const char *endptr) \
+    const noexcept\
   {\
     return find_generic<1,false>(s,endptr);\
   }\
@@ -174,7 +177,8 @@ class MultiCharFinder
   };
   private:
   template<int step,bool ref_value>
-  constexpr const char *find_generic(const char *s,const char *endptr) const noexcept
+  constexpr const char *find_generic(const char *s,const char *endptr)
+    const noexcept
   {
     for (const char *sptr = s; sptr != endptr; sptr += step)
     {
@@ -212,7 +216,8 @@ class SingleCharFinder
 {
   private:
   template<int step,bool ref_value>
-  constexpr const char *find_generic(const char *s,const char *endptr) const noexcept
+  constexpr const char *find_generic(const char *s,const char *endptr)
+    const noexcept
   {
     for (const char *sptr = s; sptr != endptr; sptr += step)
     {
@@ -245,7 +250,8 @@ class EncodedCharFinder
 {
   private:
   template<int step,bool ref_value>
-  constexpr const char *find_generic(const char *s,const char *endptr) const noexcept
+  constexpr const char *find_generic(const char *s,const char *endptr)
+    const noexcept
   {
     for (const char *sptr = s; sptr != endptr; sptr += step)
     {

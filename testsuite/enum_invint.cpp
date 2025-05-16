@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include <cinttypes>
+#include "utilities/str_format.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
