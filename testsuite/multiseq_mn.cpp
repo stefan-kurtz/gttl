@@ -187,26 +187,38 @@ int main(int argc, char *argv[])
   const std::vector<std::string> &inputfiles = options.inputfiles_get();
   try
   {
-    const bool store_sequences = (options.width_option_get() >= 0 ||
-                                  options.rankdist_option_is_set() ||
-                                  options.short_header_option_is_set())
-                                  ? true : false;
+    constexpr const bool store_header = true;
+    const bool store_sequence = (options.width_option_get() >= 0 ||
+                                 options.rankdist_option_is_set() ||
+                                 options.short_header_option_is_set())
+                                 ? true : false;
     const uint8_t padding_char = UINT8_MAX;
-    if (options.zipped_option_is_set() && store_sequences)
+    if (options.zipped_option_is_set() && store_sequence)
     {
       multiseq = new GttlMultiseq(inputfiles[0],inputfiles[1],
-                                  store_sequences,padding_char);
+                                  store_header,store_sequence,padding_char);
     } else
     {
-      multiseq = new GttlMultiseq(inputfiles,store_sequences,padding_char);
+      multiseq = new GttlMultiseq(inputfiles,store_header,store_sequence,
+                                  padding_char);
     }
   }
-  catch (std::string &msg)
+  catch (const std::string &msg)
   {
     for (auto &&inputfile : inputfiles)
     {
       std::cerr << argv[0] << ": file \"" << inputfile << "\""
                 << msg << std::endl;
+    }
+    delete multiseq;
+    return EXIT_FAILURE;
+  }
+  catch (const std::runtime_error &err)
+  {
+    for (auto &&inputfile : inputfiles)
+    {
+      std::cerr << argv[0] << ": file \"" << inputfile << "\""
+                << err.what() << std::endl;
     }
     delete multiseq;
     return EXIT_FAILURE;

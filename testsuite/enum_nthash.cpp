@@ -352,8 +352,9 @@ static void enumerate_nt_hash(const char *inputfilename,
                               size_t qgram_length,
                               int hashbits)
 {
-  const bool store_sequences = false;
-  GttlMultiseq multiseq(inputfilename,store_sequences,UINT8_MAX);
+  constexpr const bool store_header = false;
+  constexpr const bool store_sequence = false;
+  GttlMultiseq multiseq(inputfilename,store_header,store_sequence,UINT8_MAX);
   const int sequences_number_bits = multiseq.sequences_number_bits_get();
   const int sequences_length_bits = multiseq.sequences_length_bits_get();
   RunTimeClass rt_nthash{};

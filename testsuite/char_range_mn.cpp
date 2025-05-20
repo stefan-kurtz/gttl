@@ -278,9 +278,10 @@ int main(int argc,char *argv[])
       GttlMultiseq *multiseq = nullptr;
       try
       {
-        constexpr const bool store_sequences = true;
-        multiseq = new GttlMultiseq(inputfile.c_str(),store_sequences,
-                                    UINT8_MAX);
+        constexpr const bool store_header = true;
+        constexpr const bool store_sequence = true;
+        multiseq = new GttlMultiseq(inputfile.c_str(),
+                                    store_header,store_sequence,UINT8_MAX);
       }
       catch (std::string &msg)
       {

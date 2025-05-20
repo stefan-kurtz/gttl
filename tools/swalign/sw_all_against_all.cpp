@@ -297,10 +297,16 @@ int main(int argc,char *argv[])
                scorematrix2D,smallest_score,alphasize,blast_statistics)
         = sw_input_data(options);
     }
-    catch(std::string &msg)
+    catch(const std::string &msg)
     {
       std::cerr << program_name << ": file \"" << options.dbfile << "\""
                 << msg << std::endl;
+      haserr = true;
+    }
+    catch(const std::runtime_error &err)
+    {
+      std::cerr << program_name << ": file \"" << options.dbfile << "\""
+                << err.what() << std::endl;
       haserr = true;
     }
   }
@@ -310,7 +316,7 @@ int main(int argc,char *argv[])
   }
   if (!haserr)
   {
-    options.show(stdout,argv[0]);
+    options.show(stdout,program_name);
     options.show_fields(stdout,
                         dna_alphabet,
                         blast_statistics != nullptr);
@@ -393,7 +399,13 @@ int main(int argc,char *argv[])
     }
     catch (const std::string &msg)
     {
-      std::cerr << argv[0] << ": " << msg << std::endl;
+      std::cerr << program_name << ": " << msg << std::endl;
+      haserr = true;
+    }
+    catch(const std::runtime_error &err)
+    {
+      std::cerr << program_name << ": file \"" << options.dbfile << "\""
+                << err.what() << std::endl;
       haserr = true;
     }
   }

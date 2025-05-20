@@ -13,11 +13,13 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
 {
   GttlMultiseq *db_multiseq = NULL, *query_multiseq = NULL;
   bool is_dna_alphabet = false;
-  static constexpr const bool store_sequences = true;
+  static constexpr const bool store_header = true;
+  static constexpr const bool store_sequence = true;
   assert(dbfile != NULL);
   try
   {
-    db_multiseq = new GttlMultiseq(dbfile,store_sequences,UINT8_MAX);
+    db_multiseq = new GttlMultiseq(dbfile,store_header,store_sequence,
+                                   UINT8_MAX);
   }
   catch (std::string &msg)
   {
@@ -31,7 +33,8 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   {
     try
     {
-      query_multiseq = new GttlMultiseq(queryfile,store_sequences,UINT8_MAX-1);
+      query_multiseq = new GttlMultiseq(queryfile,store_header,store_sequence,
+                                        UINT8_MAX-1);
     }
     catch (std::string &msg)
     {
@@ -62,11 +65,5 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   }
   return std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
                    (db_multiseq,query_multiseq,is_dna_alphabet);
-}
-
-static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
-  create_multiseq_pair(const std::string &dbfile,const std::string &queryfile)
-{
-  return create_multiseq_pair(dbfile.c_str(),queryfile.c_str());
 }
 #endif

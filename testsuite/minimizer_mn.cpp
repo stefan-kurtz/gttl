@@ -50,18 +50,21 @@ void run_nt_minimizer(const MinimizerOptions &options)
   GttlMultiseq *multiseq = nullptr;
   try
   {
-    constexpr const bool store_sequences = true;
+    constexpr const bool store_header = true;
+    constexpr const bool store_sequence = true;
     constexpr const uint8_t padding_char = UINT8_MAX;
     if (options.canonical_option_is_set())
     {
-      multiseq = multiseq_with_reverse_complement<store_sequences,
-                                                  complement_plain>
+      multiseq = multiseq_with_reverse_complement<complement_plain>
                                                  (options.inputfiles_get(),
+                                                  store_header,
+                                                  store_sequence,
                                                   padding_char);
     } else
     {
       multiseq = new GttlMultiseq(options.inputfiles_get(),
-                                  store_sequences,
+                                  store_header,
+                                  store_sequence,
                                   padding_char);
     }
   }

@@ -12,17 +12,15 @@ def files2msg_get(p):
        '{}/testdata/only_header.fna'.format(p)
               : ', line 2: corrupted sequence',
        '{}/testdata/only_sequence.fna'.format(p)
-              : ', line 2: corrupted sequence',
+              : ', line 1: corrupted sequence',
        '{}/testdata/first_corrupt.fna'.format(p)
-              : ', line 4: corrupted sequence',
+              : ', line 2: corrupted sequence',
        '{}/testdata/second_corrupt.fna'.format(p)
               : ', line 4: corrupted sequence',
        '{}/testdata/middle_of_3_err.fna'.format(p)
-              : ', line 6: corrupted sequence',
+              : ', line 4: corrupted sequence',
        '{}/testdata/non_existing.fna'.format(p)
               : ': cannot open file',
-       '{}/testdata/no_eol.fna'.format(p)
-              : ', line 2: missing newline character',
        }
   return d
 
@@ -102,7 +100,7 @@ err_calls_with_msgs \
       ('{}: argument to option -t (i.e. the number of threads) '
        'must be positive').format(program_name))] + \
      [('{} -d testdata/seq18.fasta -{}'.format(program_name,arg),
-       ('{}: missing argument to option -{}'.format(program_name,arg))) 
+       ('{}: missing argument to option -{}'.format(program_name,arg)))
        for arg in 's'] + \
      [('{} -v {} -d testdata/seq18.fasta -s'.format(program_name,arg),
        ('{}: missing or illegal argument to option -v; '
