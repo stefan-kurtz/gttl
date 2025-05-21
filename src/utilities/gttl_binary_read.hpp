@@ -14,11 +14,11 @@
 
 template <typename T,
           size_t buf_size = (size_t(1) << 16)/ sizeof(T)>
-class BinaryFileIterator
+class BinaryFileReader
 {
   static_assert(buf_size > 0, "Buffer size may not be zero");
   static_assert(std::is_trivially_copyable_v<T>,
-                "BinaryFileIterator can only work with types that are "
+                "BinaryFileReader can only work with types that are "
                 "trivially copyable.");
 
   private:
@@ -145,7 +145,7 @@ class BinaryFileIterator
     }
   };
 
-  explicit BinaryFileIterator(const char* filename) : filename(filename) {}
+  explicit BinaryFileReader(const char* filename) : filename(filename) {}
   Iterator begin() { return Iterator(filename); }
   Iterator end() { return Iterator(); }
 };

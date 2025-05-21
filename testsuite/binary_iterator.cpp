@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
   {
     try
     {
-      BinaryFileIterator<char> gttl_bi(argv[1]);
-      for (const auto &entry : gttl_bi)
+      BinaryFileReader<char> binary_file_reader(argv[1]);
+      for (const auto &entry : binary_file_reader)
       {
         std::cout << entry;
       }
