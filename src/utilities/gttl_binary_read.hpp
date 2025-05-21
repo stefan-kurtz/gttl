@@ -10,10 +10,10 @@
 
 // 4KB is default page size, 8/16 might be more memory friendly,
 // but 64KB is the default of std::ifstream. I assume this is reasonable.
-constexpr const size_t default_buffer_bytes = size_t{1} << size_t{16};
+// so we set the buffer size to (size_t(1) << 16)
 
 template <typename T,
-          const size_t buf_size = (default_buffer_bytes / sizeof(T))>
+          size_t buf_size = (size_t(1) << 16)/ sizeof(T)>
 class BinaryFileIterator
 {
   static_assert(buf_size > 0, "Buffer size may not be zero");
