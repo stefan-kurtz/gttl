@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include "utilities/str_format.hpp"
 #include "utilities/split_string.hpp"
 #include "utilities/concatenate_strings.hpp"
