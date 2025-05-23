@@ -38,7 +38,7 @@ static consteval size_t gttl_find_size(void)
 }
 
 template <size_t _size,const char *str>
-static constexpr void gttl_fill_characters (std::array<char,_size> &_chars,
+static consteval void gttl_fill_characters (std::array<char,_size> &_chars,
                                             size_t i,
                                             size_t j,
                                             size_t k)
@@ -63,7 +63,7 @@ static constexpr void gttl_fill_characters (std::array<char,_size> &_chars,
 }
 
 template <size_t _size,const char *str>
-static constexpr std::array<char,_size> gttl_fill_characters (void)
+static consteval std::array<char,_size> gttl_fill_characters (void)
 {
   std::array<char,_size> _chars{};
   gttl_fill_characters<_size,str> (_chars,0,0,0);
@@ -73,7 +73,7 @@ static constexpr std::array<char,_size> gttl_fill_characters (void)
 template <const char *char_spec,uint8_t _undefined_rank>
 class GttlAlphabet
 {
-  static constexpr const uint8_t _symbolmap[UCHAR_MAX+1] =
+  constexpr static const uint8_t _symbolmap[UCHAR_MAX+1] =
   {
     /* 0 */ _undefined_rank,
     /* 1 */ _undefined_rank,
@@ -336,41 +336,43 @@ class GttlAlphabet
   static constexpr std::array<char,_size> characters
     = gttl_fill_characters<_size,char_spec>();
   public:
-  constexpr GttlAlphabet(void) { }
-  constexpr uint8_t undefined_rank(void) const noexcept
+  consteval GttlAlphabet(void) = default;
+  [[nodiscard]] consteval uint8_t undefined_rank(void) const noexcept
   {
     return _undefined_rank;
   }
-  constexpr size_t size(void) const noexcept
+  [[nodiscard]] consteval size_t size(void) const noexcept
   {
     return _size;
   }
-  constexpr uint8_t char_to_rank(char cc) const noexcept
+  [[nodiscard]] constexpr uint8_t char_to_rank(char cc) const noexcept
   {
     assert(static_cast<uint8_t>(cc) < sizeof _symbolmap/sizeof _symbolmap[0]);
     return _symbolmap[static_cast<uint8_t>(cc)];
   }
-  const uint8_t *symbolmap_reference(void) const noexcept
+  [[nodiscard]] consteval const uint8_t *symbolmap_reference(void) const noexcept
   {
     return _symbolmap;
   }
-  constexpr char rank_to_char(uint8_t r) const noexcept
+  [[nodiscard]] constexpr char rank_to_char(uint8_t r) const noexcept
   {
     assert(r < _size);
     return characters[r];
   }
   void pretty_print(void) const noexcept
   {
-    std::cout << "# alphabet size\t" << _size << std::endl;
-    std::cout << "# undefined_rank\t"
+    std::cout << "# alphabet size\t"
+              << _size
+              << '\n'
+              << "# undefined_rank\t"
               << static_cast<unsigned int>(_undefined_rank)
-              << std::endl;
+              << '\n';
     for (const char *s = char_spec; *s != '\0'; s++)
     {
       if (*s != '|')
       {
         uint8_t r = this->char_to_rank(*s);
-        std::cout << *s << "\t" << static_cast<unsigned int>(r) << std::endl;
+        std::cout << *s << "\t" << static_cast<unsigned int>(r) << '\n';
       }
     }
     for (size_t idx = 0; idx < _size; idx++)
@@ -378,12 +380,12 @@ class GttlAlphabet
       std::cout << idx << "\t" << rank_to_char(idx) << std::endl;
     }
   }
-  constexpr const char *characters_get(void) const noexcept
+  [[nodiscard]] consteval const char *characters_get(void) const noexcept
   {
     return characters.data();
   }
 
-  void char_to_rank_in_place(char *char_seq,size_t len) const noexcept
+  constexpr void char_to_rank_in_place(char *char_seq,size_t len) const noexcept
   {
     uint8_t *byte_seq = reinterpret_cast<uint8_t *>(char_seq);
     for (size_t idx = 0; idx < len; idx++)
