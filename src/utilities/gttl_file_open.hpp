@@ -4,10 +4,15 @@
 #ifndef GTTL_WITHOUT_ZLIB
 #include <cstdio>
 #include <cstring>
+#include <cstdint>
+#include <cassert>
 #include <stdexcept>
+#include <vector>
 #include <string>
 #include <zlib.h>
 #include "utilities/file_size.hpp"
+#include "utilities/has_gzip_header.hpp"
+
 using GttlFpType = gzFile;
 #define gttl_fp_type_open(FILENAME, MODE)   gzopen(FILENAME, MODE)
 #define gttl_fp_type_close(FP)              gzclose(FP)
@@ -17,89 +22,6 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_is_eof(FP)             gzeof(FP)
 #define gttl_fp_type_rewind(FP)             gzrewind(FP)
 #define gttl_fp_type_read(BUF, SIZE, COUNT, FP) gzread(FP, BUF, (COUNT)*(SIZE))
-
-static inline bool is_gzip_header(const char *file_name)
-{
-  FILE* fp = fopen(file_name, "rb");
-  if (fp == nullptr)
-  {
-    throw std::runtime_error("Failed to open file: " + std::string(file_name));
-  }
-  constexpr const unsigned char magic_bytes[] = {0x1F, 0x8B};
-  unsigned char header[sizeof(magic_bytes)];
-  if (fread(header, sizeof(unsigned char), sizeof(header), fp)
-            != sizeof(header))
-  {
-    fclose(fp);
-    // A file that does not have at least as many bytes as the GZip header
-    // cannot be a valid GZip file by definition.
-    return false;
-  }
-  fclose(fp);
-  if (memcmp(header, magic_bytes, sizeof(magic_bytes)) == 0)
-  {
-    return true;
-  }
-  return false;
-}
-
-template<typename BaseType>
-static inline std::basic_string<BaseType>
-   gttl_read_file_basic_string(const char *file_name)
-{
-  const bool is_gzip = is_gzip_header(file_name);
-
-  // Check if the file is compressed by comparing magic-bytes
-  std::basic_string<BaseType> content;
-  if (not is_gzip)
-  {
-    FILE* fp = fopen(file_name, "rb");
-    if (fp == nullptr)
-    {
-      throw std::runtime_error("Failed to open file: " +
-                               std::string(file_name));
-    }
-
-    // Not compressed
-    const size_t file_size = gttl_file_size(file_name);
-    content.resize(file_size);
-    if (fread(content.data(), sizeof(BaseType), file_size, fp) != file_size)
-    {
-      fclose(fp);
-      throw std::runtime_error("Failed to read entire file: "
-                               + std::string(file_name));
-    }
-    fclose(fp);
-  } else
-  {
-    gzFile fp = gzopen(file_name, "rb");
-    if (fp == nullptr)
-    {
-      throw std::runtime_error("Failed to gzopen file: "
-                               + std::string(file_name));
-    }
-    constexpr const size_t buf_size = 4096;
-    BaseType buffer[buf_size];
-    int bytes_read;
-
-    while((bytes_read = gzread(fp, buffer, buf_size)) > 0)
-    {
-      content.append(buffer, bytes_read);
-    }
-    gzclose(fp);
-    if (bytes_read < 0)
-    {
-      throw std::runtime_error(std::string("Error reading from gzip file: ")
-                               + file_name);
-    }
-  }
-  return content;
-}
-
-static inline std::string gttl_read_file(const char *file_name)
-{
-  return gttl_read_file_basic_string<char>(file_name);
-}
 
 #else
 using GttlFpType = FILE *;
@@ -116,27 +38,107 @@ using GttlFpType = FILE *;
 #define gttl_fp_type_is_eof(FP)             feof(FP)
 #define gttl_fp_type_rewind(FP)             rewind(FP)
 #define gttl_fp_type_read(BUF, SIZE, COUNT, FP) fread(BUF, SIZE, COUNT, FP)
+#endif
+
+template<typename BaseType>
+static inline std::basic_string<BaseType>
+  gttl_read_files(const std::vector<std::string> &inputfiles)
+{
+  std::vector<size_t> file_size_vec;
+  file_size_vec.reserve(inputfiles.size());
+  size_t sum_file_size = 0;
+  bool append_sequences = false;
+  for(auto &&inputfile : inputfiles)
+  {
+    if (has_gzip_header(inputfile.c_str()))
+    {
+#ifdef GTTL_WITHOUT_ZLIB
+      throw std::string("cannot handle gzipped file ") + inputfile;
+#else
+      append_sequences = true;
+      break;
+#endif
+    }
+    const size_t file_size = gttl_file_size(inputfile.c_str());
+    file_size_vec.push_back(file_size);
+    sum_file_size += file_size;
+  }
+  std::basic_string<BaseType> concatenated_content;
+  if (not append_sequences)
+  {
+    concatenated_content.resize(sum_file_size);
+  }
+  size_t offset = 0, file_counter = 0;
+  for (auto &&inputfile : inputfiles)
+  {
+    if (has_gzip_header(inputfile.c_str()))
+    {
+#ifndef GTTL_WITHOUT_ZLIB
+      gzFile fp = gzopen(inputfile.c_str(), "rb");
+      if (fp == nullptr)
+      {
+        throw std::runtime_error("Failed to gzopen file " + inputfile);
+      }
+      assert(append_sequences);
+      while (true)
+      {
+        constexpr const size_t buf_size = 4096;
+        concatenated_content.resize(offset + buf_size);
+        const int bytes_read = gzread(fp, concatenated_content.data() + offset,
+                                      buf_size);
+        if (bytes_read < 0)
+        {
+          throw std::runtime_error(std::string("Error reading from gzip file ")
+                                   + inputfile);
+        }
+        assert (static_cast<size_t>(bytes_read) <= buf_size);
+        if (static_cast<size_t>(bytes_read) < buf_size)
+        {
+          concatenated_content.resize(offset + bytes_read);
+        }
+        if (bytes_read == 0)
+        {
+          break;
+        }
+        offset += bytes_read;
+      }
+      gzclose(fp);
+#endif
+    } else
+    {
+      FILE *infp = fopen(inputfile.c_str(), "rb");
+      if (infp == nullptr)
+      {
+        throw std::runtime_error(std::string("Error opening file: ")
+                               + std::to_string(errno));
+      }
+      const size_t file_size = append_sequences
+                                 ? gttl_file_size(inputfile.c_str())
+                                 : file_size_vec[file_counter++];
+      if (append_sequences)
+      {
+        concatenated_content.resize(offset + file_size);
+      }
+      const size_t bytes_read = fread(concatenated_content.data() + offset,
+                                      sizeof(BaseType), file_size, infp);
+      if (bytes_read != file_size)
+      {
+        fclose(infp);
+        throw std::runtime_error(std::string("Expected ")
+                                 + std::to_string(file_size)
+                                 + " bytes, but read only "
+                                 + std::to_string(bytes_read));
+      }
+      fclose(infp);
+      offset += file_size;
+    }
+  }
+  return concatenated_content;
+}
 
 static inline std::string gttl_read_file(const char *file_name)
 {
-  std::string content;
-  size_t file_size = gttl_file_size(file_name);
-  content.resize(file_size);
-  FILE* fp = fopen(file_name, "rb");
-  if (fp == nullptr)
-  {
-    throw std::runtime_error(std::string("Error opening file: ")
-                             + std::to_string(errno));
-  }
-  size_t bytes_read = fread(content.data(), sizeof(char), content.size(), fp);
-  if (bytes_read != file_size)
-  {
-    throw std::runtime_error(std::string("Expected ")
-                             + std::to_string(file_size)
-                             + " bytes, but read only "
-                             + std::to_string(bytes_read));
-  }
-  return content;
+  std::vector<std::string> inputfiles{std::string(file_name)};
+  return gttl_read_files<char>(inputfiles);
 }
-#endif
 #endif
