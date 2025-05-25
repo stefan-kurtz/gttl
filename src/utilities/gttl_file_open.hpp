@@ -1,17 +1,18 @@
 #ifndef GTTL_FILE_OPEN_HPP
 #define GTTL_FILE_OPEN_HPP
 
-#ifndef GTTL_WITHOUT_ZLIB
 #include <cstdio>
+#include <string>
+#include <stdexcept>
+#include "utilities/file_size.hpp"
+#include "utilities/has_gzip_header.hpp"
+
+#ifndef GTTL_WITHOUT_ZLIB
 #include <cstring>
 #include <cstdint>
 #include <cassert>
-#include <stdexcept>
 #include <vector>
-#include <string>
 #include <zlib.h>
-#include "utilities/file_size.hpp"
-#include "utilities/has_gzip_header.hpp"
 
 using GttlFpType = gzFile;
 #define gttl_fp_type_open(FILENAME, MODE)   gzopen(FILENAME, MODE)
@@ -25,10 +26,6 @@ using GttlFpType = gzFile;
 
 #else
 using GttlFpType = FILE *;
-#include <cstdio>
-#include <string>
-#include <stdexcept>
-#include "utilities/file_size.hpp"
 #define gttl_fp_type_open(FILENAME, MODE)   fopen(FILENAME, MODE)
 #define gttl_fp_type_close(FP)              fclose(FP)
 #define gttl_fp_type_reset(FP)              fseek(FP, 0, SEEK_SET)

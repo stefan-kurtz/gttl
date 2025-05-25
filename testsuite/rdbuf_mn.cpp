@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     std::cout << x;
   } catch(const std::string &e)
   {
-    std::cerr << e << std::endl;
+    std::cerr << argv[0] << ": " << e << std::endl;
     exit(EXIT_FAILURE);
   }
 }

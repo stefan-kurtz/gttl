@@ -58,6 +58,10 @@ ifeq (,$(findstring g++,$(CXX)))
   CFLAGS += -Wno-psabi
 endif
 
+ifeq ($(without_zlib),yes)
+  CFLAGS += -DGTTL_WITHOUT_ZLIB
+endif
+
 MAIN_SRC=${shell grep -wl main *.cpp}
 EXECS=${subst .cpp,.x,${MAIN_SRC}}
 
@@ -343,14 +347,19 @@ test_fs_prio_store:./fs_prio_store_mn.x
 	@echo "Congratulations. $@ passed"
 
 .PHONY:test_rdbuf
-test_rdbuf:./rdbuf_mn.x
+test_rdbuf:./rdbuf_mn.x test_rdbuf_zlib
 	@${VALGRIND} ./rdbuf_mn.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
 	@${VALGRIND} ./rdbuf_mn.x ${SW175} | diff --strip-trailing-cr - ${SW175}
 	@${VALGRIND} ./rdbuf_mn.x ${Y3} | diff --strip-trailing-cr - ${Y3}
 	@${VALGRIND} ./rdbuf_mn.x ${VAC} | diff --strip-trailing-cr - ${VAC}
-	@${VALGRIND} ./rdbuf_mn.x ../testdata/SRR19536726_1_1000.fastq.gz | zdiff --strip-trailing-cr - ../testdata/SRR19536726_1_1000.fastq.gz 
-	@${VALGRIND} ./rdbuf_mn.x ../testdata/varlen_paired_both.fasta.gz | zdiff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta.gz 
+
+.PHONY:test_rdbuf_zlib
+test_rdbuf_zlib:./rdbuf_mn.x
+ifneq ($(without_zlib),yes)
+	@${VALGRIND} ./rdbuf_mn.x ../testdata/SRR19536726_1_1000.fastq.gz | zdiff --strip-trailing-cr - ../testdata/SRR19536726_1_1000.fastq.gz
+	@${VALGRIND} ./rdbuf_mn.x ../testdata/varlen_paired_both.fasta.gz | zdiff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta.gz
 	@echo "Congratulations. $@ passed"
+endif
 
 .PHONY:test_split_string
 test_split_string:split_string_mn.x
