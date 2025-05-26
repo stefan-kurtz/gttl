@@ -73,6 +73,11 @@ void run_nt_minimizer(const MinimizerOptions &options)
     delete multiseq;
     throw msg;
   }
+  catch (const std::runtime_error &err)
+  {
+    delete multiseq;
+    throw err.what();
+  }
   rt_create_multiseq.show("reading input files and creating multiseq");
   for (auto &log : multiseq->statistics())
   {
