@@ -350,7 +350,7 @@ class GttlAlphabet
     assert(static_cast<uint8_t>(cc) < sizeof _symbolmap/sizeof _symbolmap[0]);
     return _symbolmap[static_cast<uint8_t>(cc)];
   }
-  [[nodiscard]] consteval const uint8_t *symbolmap_reference(void) 
+  [[nodiscard]] consteval const uint8_t *symbolmap_reference(void)
     const noexcept
   {
     return _symbolmap;
