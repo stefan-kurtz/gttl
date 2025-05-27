@@ -35,10 +35,10 @@ class ThreadsOutputFiles
     char separator;
     if (threads_out_prefix == NULL)
     {
-      std::string dirname_path = std::string("./") +
-                                 std::string(program_prefix) +
-                                 std::string(".tmp") +
-                                 std::string(".XXXXXX");
+      const std::string dirname_path = std::string("./") +
+                                       std::string(program_prefix) +
+                                       std::string(".tmp") +
+                                       std::string(".XXXXXX");
       dirname_template = strdup(dirname_path.c_str());
       cc_threads_out_prefix = mkdtemp(dirname_template);
       separator = '/';
@@ -54,7 +54,7 @@ class ThreadsOutputFiles
       constexpr const char *file_format_string = "%s%cthread_%02zu.tsv";
       StrFormat fname(file_format_string,cc_threads_out_prefix,separator,t_idx);
       output_filenames.push_back(fname.str());
-      FILE *out_fp = fopen(fname.str().c_str(),"w");
+      FILE *out_fp = std::fopen(fname.str().c_str(),"w");
       if (out_fp == nullptr)
       {
         StrFormat msg("cannot create file \"%s\"",fname.str().c_str());
@@ -73,13 +73,13 @@ class ThreadsOutputFiles
     {
       for (auto &fname : output_filenames)
       {
-        FILE *in_fp = fopen(fname.c_str(),"r");
+        FILE *in_fp = std::fopen(fname.c_str(),"r");
         const size_t buf_size = size_t(1) << 14;
         char buf[buf_size];
         while (true)
         {
           size_t read_bytes = fread(&buf[0],1,buf_size,in_fp);
-          fwrite(&buf[0],1,read_bytes,stdout);
+          std::fwrite(&buf[0],1,read_bytes,stdout);
           if (read_bytes < buf_size)
           {
             break;

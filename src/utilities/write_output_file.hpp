@@ -20,7 +20,7 @@ static void write_to_output_file(const std::string &file_name,
   }
   if(compression_level == 0)
   {
-    FILE *f_out = fopen(file_name.c_str(), "w");
+    FILE *f_out = std::fopen(file_name.c_str(), "w");
     if(f_out == NULL)
     {
       throw std::string(": Error writing to file: ") + file_name;

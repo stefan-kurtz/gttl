@@ -21,20 +21,45 @@ class BinaryFileReader
                 "BinaryFileReader can only work with types that are "
                 "trivially copyable.");
 
-  private:
-  const char* filename;
-
   public:
   class Iterator
   {
-    public:
-    explicit Iterator(const char* filename)
-        : file(std::fopen(filename, "rb")), buffer_pos(0), buffer_size(0)
+    private:
+    FILE* in_fp;
+    T buffer[buf_size];
+    size_t buffer_pos;
+    size_t buffer_size;
+
+    void fill_buf(void)
     {
-      if (file == nullptr)
+      if (in_fp == nullptr)
       {
-        throw std::runtime_error(std::string("Failed to open file: ") +
-                                 filename);
+        buffer_size = 0;
+        return;
+      }
+      buffer_size = std::fread(buffer, sizeof(T), buf_size, in_fp);
+      buffer_pos = 0;
+      if (buffer_size == 0)
+      {
+        // In this case we reached EOF
+        if (std::fclose(in_fp) != 0)
+        {
+          throw std::runtime_error("could not close file");
+        }
+        in_fp = nullptr;
+      }
+    }
+
+    public:
+    explicit Iterator(const std::string &inputfile)
+      : in_fp(std::fopen(inputfile.c_str(), "rb"))
+      , buffer_pos(0)
+      , buffer_size(0)
+    {
+      if (in_fp == nullptr)
+      {
+        throw std::runtime_error(std::string("failed to open file: \"") +
+                                 inputfile + std::string("\""));
       }
       fill_buf();
     }
@@ -45,47 +70,51 @@ class BinaryFileReader
 
     // Though they may be moved, with the file being closed
     Iterator(Iterator&& other) noexcept
-        : file(other.file),
-          buffer_pos(other.buffer_pos),
-          buffer_size(other.buffer_size)
+      : in_fp(other.in_fp)
+      , buffer_pos(other.buffer_pos)
+      , buffer_size(other.buffer_size)
     {
       std::memcpy(buffer, other.buffer, sizeof(buffer));
-      other.file = nullptr;
+      other.in_fp = nullptr;
     }
 
     Iterator& operator=(Iterator&& other) noexcept
     {
       if (this != &other)
       {
-        if (file != nullptr)
+        if (in_fp != nullptr)
         {
-          if (std::fclose(file) != 0)
+          if (std::fclose(in_fp) != 0)
           {
-            std::cerr << "Failed to close file!\n";
+            std::cerr << "failed to close file\n";
           }
         }
-        file = other.file;
+        in_fp = other.in_fp;
         buffer_pos = other.buffer_pos;
         buffer_size = other.buffer_size;
         std::memcpy(buffer, other.buffer, sizeof(buffer));
-        other.file = nullptr;
+        other.in_fp = nullptr;
       }
       return *this;
     }
 
-    ~Iterator()
+    ~Iterator(void)
     {
-      if (file != nullptr)
+      if (in_fp != nullptr)
       {
-        if (std::fclose(file) != 0)
+        if (std::fclose(in_fp) != 0)
         {
-          std::cerr << "Failed to close file!\n";
+          std::cerr << "failed to close file\n";
         }
       }
     }
 
     // End Iterator
-    Iterator() : file(nullptr), buffer_pos(0), buffer_size(0) {}
+    Iterator(void)
+      : in_fp(nullptr)
+      , buffer_pos(0)
+      , buffer_size(0)
+    { }
 
     const T& operator*() const
     {
@@ -112,41 +141,30 @@ class BinaryFileReader
 
     bool operator==(const Iterator& other) const
     {
-      return file == other.file and buffer_pos == other.buffer_pos and
+      return in_fp == other.in_fp and
+             buffer_pos == other.buffer_pos and
              buffer_size == other.buffer_size;
     }
 
-    bool operator!=(const Iterator& other) const { return not(*this == other); }
-
-    private:
-    FILE* file;
-    T buffer[buf_size];
-    size_t buffer_pos;
-    size_t buffer_size;
-
-    void fill_buf()
+    bool operator!=(const Iterator& other) const
     {
-      if (file == nullptr)
-      {
-        buffer_size = 0;
-        return;
-      }
-      buffer_size = std::fread(buffer, sizeof(T), buf_size, file);
-      buffer_pos = 0;
-      if (buffer_size == 0)
-      {
-        // In this case we reached EOF
-        if (std::fclose(file) != 0)
-        {
-          throw std::runtime_error("Could not close file!");
-        }
-        file = nullptr;
-      }
+      return not(*this == other);
     }
   };
 
-  explicit BinaryFileReader(const char* filename) : filename(filename) {}
-  Iterator begin() { return Iterator(filename); }
-  Iterator end() { return Iterator(); }
+  private:
+  const std::string &inputfile;
+  public:
+  explicit BinaryFileReader(const std::string &_inputfile)
+    : inputfile(_inputfile)
+  { }
+  Iterator begin(void) const
+  {
+    return Iterator(inputfile);
+  }
+  Iterator end(void) const
+  {
+    return Iterator();
+  }
 };
 #endif  // GTTL_BINARY_READ_HPP

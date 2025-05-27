@@ -26,7 +26,7 @@ using GttlFpType = gzFile;
 
 #else
 using GttlFpType = FILE *;
-#define gttl_fp_type_open(FILENAME, MODE)   fopen(FILENAME, MODE)
+#define gttl_fp_type_open(FILENAME, MODE)   std::fopen(FILENAME, MODE)
 #define gttl_fp_type_close(FP)              fclose(FP)
 #define gttl_fp_type_reset(FP)              fseek(FP, 0, SEEK_SET)
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) (fgets(BUFFER, SIZE, FP) != nullptr\
@@ -103,7 +103,7 @@ static inline std::basic_string<BaseType>
 #endif
     } else
     {
-      FILE *infp = fopen(inputfile.c_str(), "rb");
+      FILE *infp = std::fopen(inputfile.c_str(), "rb");
       if (infp == nullptr)
       {
         throw std::runtime_error(std::string("Error opening file: ")

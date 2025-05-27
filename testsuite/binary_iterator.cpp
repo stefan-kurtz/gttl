@@ -8,7 +8,8 @@ int main(int argc, char *argv[])
   {
     try
     {
-      BinaryFileReader<char> binary_file_reader(argv[1]);
+      const std::string inputfile{argv[idx]};
+      BinaryFileReader<char> binary_file_reader(inputfile);
       for (const auto &entry : binary_file_reader)
       {
         std::cout << entry;
