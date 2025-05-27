@@ -35,8 +35,9 @@ class ThreadsOutputFiles
     char separator;
     if (threads_out_prefix == NULL)
     {
-      std::string dirname_path = std::string("/tmp/") +
+      std::string dirname_path = std::string("./") +
                                  std::string(program_prefix) +
+				 std::string(".tmp.") +
                                  std::string(".XXXXXX");
       dirname_template = strdup(dirname_path.c_str());
       cc_threads_out_prefix = mkdtemp(dirname_template);
