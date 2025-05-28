@@ -1,6 +1,7 @@
 #ifndef THREAD_POOL_UNKNOWN_TASKS_HPP
 #define THREAD_POOL_UNKNOWN_TASKS_HPP
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -15,9 +16,9 @@ class ThreadPoolUnknownTasks
     ThreadsafeQueue<FunctionType> tsq;
     std::mutex queue_lock;
     std::condition_variable tasks_changed;
-    bool stop;
+    std::atomic<bool> stop{false};
   public:
-    ThreadPoolUnknownTasks(const size_t num_threads
+    explicit ThreadPoolUnknownTasks(const size_t num_threads
                              = std::thread::hardware_concurrency())
       : stop(false)
     {
@@ -30,7 +31,10 @@ class ThreadPoolUnknownTasks
             FunctionType task;
             {
               std::unique_lock<std::mutex> lock(queue_lock);
-              tasks_changed.wait(lock, [this]{return (tsq.size()!=0) || stop;});
+              tasks_changed.wait(lock, [this]
+              {
+                return (tsq.size() != 0) || stop.load(std::memory_order_relaxed);
+              });
               if(stop && tsq.size() == 0)
               {
                 return;
@@ -45,7 +49,7 @@ class ThreadPoolUnknownTasks
 
     ~ThreadPoolUnknownTasks()
     {
-      stop = true;
+      stop.store(true, std::memory_order_relaxed);
       tasks_changed.notify_all();
       for(auto& t : threads)
       {
