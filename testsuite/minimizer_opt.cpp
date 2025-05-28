@@ -76,7 +76,7 @@ void MinimizerOptions::parse(int argc, char **argv)
       }
       if (inputfiles.size() < 1)
       {
-        throw cxxopts::OptionException("not enough input files");
+        throw cxxopts::exceptions::exception("not enough input files");
       }
       if (hash_bits == -1)
       {
@@ -87,18 +87,18 @@ void MinimizerOptions::parse(int argc, char **argv)
         {
           StrFormat msg("hash_bits = %d < %zu = 2 * kmer_length is "
                         "not possible",hash_bits,2 * qgram_length);
-          throw cxxopts::OptionException(msg.str());
+          throw cxxopts::exceptions::exception(msg.str());
         }
       }
       if (show_mode != 0 and show_mode != 1 and show_mode != 2)
       {
-        throw cxxopts::OptionException(std::string("option -m,--show_mode must "
+        throw cxxopts::exceptions::exception(std::string("option -m,--show_mode must "
                                                    "be used with argument "
                                                    "0, 1  or 2"));
       }
     }
   }
-  catch (const cxxopts::OptionException &e)
+  catch (const cxxopts::exceptions::exception &e)
   {
     usage(options);
     throw std::invalid_argument(e.what());

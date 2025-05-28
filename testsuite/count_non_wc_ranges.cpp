@@ -125,7 +125,7 @@ int main(int argc,char *argv[])
     {
       count_non_wildcard_ranges(argv[idx]);
     }
-    catch (std::exception &msg)
+    catch (const std::exception &msg)
     {
       std::cerr << progname << ": file \"" << argv[idx] << "\""
                 << msg.what() << std::endl;

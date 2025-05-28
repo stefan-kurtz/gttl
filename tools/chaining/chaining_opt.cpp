@@ -1,5 +1,6 @@
 #include "utilities/cxxopts.hpp"
 #include "chaining_opt.hpp"
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -81,14 +82,14 @@ void ChainingOptions::parse(int argc, char **argv)
     }
     if (inputfiles.size() < 1)
     {
-      throw cxxopts::OptionException("not enough inputfiles");
+      throw cxxopts::exceptions::exception("not enough inputfiles");
     }
     if (inputfiles.size() > 2)
     {
-      throw cxxopts::OptionException("superfluous inputfiles");
+      throw cxxopts::exceptions::exception("superfluous inputfiles");
     }
   }
-  catch (const cxxopts::OptionException &e)
+  catch (const cxxopts::exceptions::exception &e)
   {
     std::cerr << options.help() << '\n';
     if (!help_option)

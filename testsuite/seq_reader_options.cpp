@@ -98,37 +98,37 @@ void SeqReaderOptions::parse(int argc, char **argv)
     }
     if (inputfiles.size() < 1)
     {
-      throw cxxopts::OptionException("not enough input files");
+      throw cxxopts::exceptions::exception("not enough input files");
     }
     if (max_input_files > 0 and inputfiles.size() > max_input_files)
     {
-      throw cxxopts::OptionException("superfluous input files");
+      throw cxxopts::exceptions::exception("superfluous input files");
     }
     if (split_size != 0 && inputfiles.size() != 1)
     {
-      throw cxxopts::OptionException("option --splitsize is only available "
+      throw cxxopts::exceptions::exception("option --splitsize is only available "
                                      "for a single file");
     }
     if (num_threads != 0)
     {
       if (split_size != 0)
       {
-        throw cxxopts::OptionException("option -t/--threads and --splitsize "
+        throw cxxopts::exceptions::exception("option -t/--threads and --splitsize "
                                        "are not compatible");
       }
       if (echo_option)
       {
-        throw cxxopts::OptionException("option -t/--threads and --echo "
+        throw cxxopts::exceptions::exception("option -t/--threads and --echo "
                                        "are not compatible");
       }
       if (fasta_output_option)
       {
-        throw cxxopts::OptionException("option -t/--threads and "
+        throw cxxopts::exceptions::exception("option -t/--threads and "
                                        "-f/--fasta_output are not compatible");
       }
     }
   }
-  catch (const cxxopts::OptionException &e)
+  catch (const cxxopts::exceptions::exception &e)
   {
     usage(options);
     throw std::invalid_argument(e.what());

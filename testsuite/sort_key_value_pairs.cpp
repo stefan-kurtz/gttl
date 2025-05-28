@@ -137,7 +137,7 @@ class SortKeyValuePairsOptions
         }
       }
     }
-    catch (const cxxopts::OptionException &e)
+    catch (const cxxopts::exceptions::exception &e)
     {
       usage(options);
       throw std::invalid_argument(e.what());

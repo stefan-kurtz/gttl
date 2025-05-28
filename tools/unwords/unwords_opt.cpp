@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <iostream>
 #include <string>
 #include <vector>
 #include "utilities/cxxopts.hpp"
@@ -48,10 +49,10 @@ void UnwordsOptions::parse(int argc, char **argv)
     }
     if (inputfiles.size() < 1)
     {
-      throw cxxopts::OptionException("not enough inputfiles");
+      throw cxxopts::exceptions::exception("not enough inputfiles");
     }
   }
-  catch (const cxxopts::OptionException &e)
+  catch (const cxxopts::exceptions::exception &e)
   {
     std::cerr << options.help() << std::endl;
     if (!help_option)

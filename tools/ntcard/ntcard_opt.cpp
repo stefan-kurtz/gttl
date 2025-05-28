@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include "utilities/cxxopts.hpp"
@@ -46,16 +47,16 @@ void NtcardOptions::parse(int argc, char** argv)
       const std::vector<std::string>& unmatched_args = result.unmatched();
       if (unmatched_args.size() < 1)
       {
-        throw cxxopts::OptionException("missing input file");
+        throw cxxopts::exceptions::exception("missing input file");
       }
       if (unmatched_args.size() > 1)
       {
-        throw cxxopts::OptionException("superfluous input file");
+        throw cxxopts::exceptions::exception("superfluous input file");
       }
       inputfile = unmatched_args[0];
     }
   }
-  catch (const cxxopts::OptionException& e)
+  catch (const cxxopts::exceptions::exception& e)
   {
     throw std::invalid_argument(e.what());
   }

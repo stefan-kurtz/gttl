@@ -45,7 +45,7 @@ void UnzippedTarOptions::parse(int argc, char **argv)
       inputfiles.push_back(inputfile);
     }
   }
-  catch (const cxxopts::OptionException &e)
+  catch (const cxxopts::exceptions::exception &e)
   {
     usage(options);
     throw std::invalid_argument(e.what());

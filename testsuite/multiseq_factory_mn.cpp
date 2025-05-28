@@ -97,7 +97,7 @@ class MultiseqFactoryOptions
       CHECK_PAIRWISE_EXCLUDE(0,2);
       CHECK_PAIRWISE_EXCLUDE(1,2);
     }
-    catch (const cxxopts::OptionException &e)
+    catch (const cxxopts::exceptions::exception &e)
     {
       usage(options);
       throw std::invalid_argument(e.what());

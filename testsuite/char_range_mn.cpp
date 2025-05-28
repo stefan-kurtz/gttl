@@ -80,7 +80,7 @@ class CharRangeOptions
         this->inputfiles.push_back(unmatched_args[idx]);
       }
     }
-    catch (const cxxopts::OptionException &e)
+    catch (const cxxopts::exceptions::exception &e)
     {
       usage(options);
       throw std::invalid_argument(e.what());

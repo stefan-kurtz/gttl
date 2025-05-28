@@ -101,11 +101,11 @@ class NtHashOptions
         }
         if (inputfiles.size() < 1)
         {
-          throw cxxopts::OptionException("not enough input files");
+          throw cxxopts::exceptions::exception("not enough input files");
         }
       }
     }
-    catch (const cxxopts::OptionException &e)
+    catch (const cxxopts::exceptions::exception &e)
     {
       usage(options);
       throw std::invalid_argument(e.what());
