@@ -33,7 +33,8 @@ class ThreadPoolUnknownTasks
               std::unique_lock<std::mutex> lock(queue_lock);
               tasks_changed.wait(lock, [this]
               {
-                return (tsq.size() != 0) || stop.load(std::memory_order_relaxed);
+                return (tsq.size() != 0)
+                    || stop.load(std::memory_order_relaxed);
               });
               if(stop && tsq.size() == 0)
               {

@@ -426,7 +426,8 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
   hashed_qgram_vector_table->count_all_qgrams[thread_id] += this_count;
   if(this_has_wildcards)
   {
-    hashed_qgram_vector_table->has_wildcards[thread_id].store(true, std::memory_order_relaxed);
+    hashed_qgram_vector_table->has_wildcards[thread_id]
+      .store(true, std::memory_order_relaxed);
   }
 }
 

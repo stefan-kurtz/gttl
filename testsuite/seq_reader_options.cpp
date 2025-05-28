@@ -106,20 +106,23 @@ void SeqReaderOptions::parse(int argc, char **argv)
     }
     if (split_size != 0 && inputfiles.size() != 1)
     {
-      throw cxxopts::exceptions::exception("option --splitsize is only available "
-                                     "for a single file");
+      throw cxxopts::exceptions::exception(
+        "option --splitsize is only available "
+         "for a single file");
     }
     if (num_threads != 0)
     {
       if (split_size != 0)
       {
-        throw cxxopts::exceptions::exception("option -t/--threads and --splitsize "
-                                       "are not compatible");
+        throw cxxopts::exceptions::exception(
+          "option -t/--threads and --splitsize "
+          "are not compatible");
       }
       if (echo_option)
       {
-        throw cxxopts::exceptions::exception("option -t/--threads and --echo "
-                                       "are not compatible");
+        throw cxxopts::exceptions::exception(
+          "option -t/--threads and --echo "
+          "are not compatible");
       }
       if (fasta_output_option)
       {

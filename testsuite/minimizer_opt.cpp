@@ -92,9 +92,10 @@ void MinimizerOptions::parse(int argc, char **argv)
       }
       if (show_mode != 0 and show_mode != 1 and show_mode != 2)
       {
-        throw cxxopts::exceptions::exception(std::string("option -m,--show_mode must "
-                                                   "be used with argument "
-                                                   "0, 1  or 2"));
+        throw cxxopts::exceptions::exception(std::string(
+                                               "option -m,--show_mode must "
+                                               "be used with argument "
+                                               "0, 1  or 2"));
       }
     }
   }
