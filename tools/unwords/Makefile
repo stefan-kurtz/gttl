@@ -35,6 +35,21 @@ ifeq ($(valgrind),yes)
   VALGRIND=${GTTL}/scripts/valgrind.sh
 endif
 
+ifeq ($(ubsan),yes)
+  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+endif
+
+ifeq ($(tsan),yes)
+  CFLAGS += -fsanitize=thread -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=thread -fno-omit-frame-pointer
+endif
+
+ifeq ($(msan),yes)
+  CFLAGS += -fsanitize=memory -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
+endif
+
 ifeq ($(debug),yes)
   CFLAGS += -g
   LDFLAGS += -g

@@ -21,6 +21,8 @@ endif
 
 ifeq ($(optimize),no)
   CFLAGS += -O0
+else ifeq ($(optimize),debug)
+  CFLAGS += -Og
 else
   CFLAGS += -O3
 endif
@@ -32,6 +34,21 @@ endif
 
 ifeq ($(valgrind),yes)
   VALGRIND=../scripts/valgrind.sh
+endif
+
+ifeq ($(ubsan),yes)
+  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+endif
+
+ifeq ($(tsan),yes)
+  CFLAGS += -fsanitize=thread -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=thread -fno-omit-frame-pointer
+endif
+
+ifeq ($(msan),yes)
+  CFLAGS += -fsanitize=memory -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
 endif
 
 ifeq ($(debug),yes)

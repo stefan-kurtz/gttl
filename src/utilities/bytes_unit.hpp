@@ -92,7 +92,8 @@ class BytesUnit
                              &bitpacker) const noexcept
     {
       static_assert(idx >= 0 && idx < bit_groups);
-      const basetype integer = *(reinterpret_cast<const basetype *>(bytes));
+      basetype integer;
+      std::memcpy(&integer, bytes, sizeof(basetype));
 
       if constexpr (sizeof_unit == sizeof(basetype) || idx < bit_groups - 1)
       {

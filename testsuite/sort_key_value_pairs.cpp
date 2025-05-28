@@ -72,6 +72,9 @@ class SortKeyValuePairsOptions
       {
         help_option = true;
         usage(options);
+      }else
+      {
+        help_option = false;
       }
       const std::vector<std::string>& unmatched_args = result.unmatched();
       if (unmatched_args.size() < 1)

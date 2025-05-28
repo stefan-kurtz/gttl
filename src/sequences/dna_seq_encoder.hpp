@@ -59,6 +59,10 @@ class DNASeqEncoder
     const size_t endbits = bits_in_store_unit -
                            2 * (prefix_length % characters_per_unit);
     assert(endbits > 0);
+    if(endbits == bits_in_store_unit)
+    {
+      return ~static_cast<StoreUnitType>(0);
+    }
     return (static_cast<StoreUnitType>(1) << endbits) - 1;
   }
   int additional_shift_get(void) const noexcept
