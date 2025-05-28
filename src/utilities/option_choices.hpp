@@ -1,35 +1,38 @@
 #ifndef OPTION_CHOICES_HPP
 #define OPTION_CHOICES_HPP
 #include <string>
+#include <map>
 #include <vector>
 #include <iterator>
 #include <sstream>
+
 class OptionChoices
 {
   private:
-  std::vector<std::string> choices{};
+  const std::map<std::string, std::string> &choices_map;
   public:
-  OptionChoices(const std::vector<std::string> _choices)
-  {
-    for (auto &&c : _choices)
-    {
-      choices.push_back(c);
-    }
-  }
+  OptionChoices(const std::map<std::string, std::string> &_choices_map)
+    : choices_map(_choices_map)
+  { }
   std::string help_line(void) const
   {
-    const char * const delim = ", ";
+    std::vector<std::string> helpline_vec;
+    for (auto const &[opt, helpline] : choices_map)
+    {
+      helpline_vec.push_back(opt + std::string(": ") + helpline);
+    }
+    const char * const delim = "; ";
     std::ostringstream help_line_os;
-    std::copy(choices.begin(), choices.end(),
+    std::copy(helpline_vec.begin(), helpline_vec.end(),
               std::ostream_iterator<std::string>(help_line_os, delim));
     return help_line_os.str();
   }
   int choose(const std::string &choice) const
   {
     int idx = 0;
-    for (auto &&c : choices)
+    for (auto const &[opt, helpline] : choices_map)
     {
-      if (choice == c)
+      if (opt == choice)
       {
         return idx;
       }

@@ -93,7 +93,7 @@ static void process_fastq_iter(bool statistics,
          min_length = std::numeric_limits<size_t>::max(),
          max_length = 0;;
   uint64_t hash_value_sum = 0;
-  std::map<size_t,size_t> length_dist_map{};
+  std::map<size_t,size_t> length_dist_map;
   for (auto &&fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry->sequence_get();
