@@ -1,5 +1,6 @@
 #ifndef HASHED_QGRAMS_HPP
 #define HASHED_QGRAMS_HPP
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
@@ -339,13 +340,14 @@ struct HashedQgramVectorTable
 {
   /* common data */
   std::vector<size_t> count_all_qgrams;
-  std::vector<bool> has_wildcards;
+  std::vector<std::atomic<bool>> has_wildcards;
   std::vector<HashedQgramVector<sizeof_unit>> table;
   HashedQgramVectorTable(size_t number_of_threads)
     : count_all_qgrams(number_of_threads,0)
-    , has_wildcards(number_of_threads,false)
     , table(number_of_threads,HashedQgramVector<sizeof_unit>{})
   {
+    has_wildcards = std::vector<std::atomic<bool>>(number_of_threads);
+    for(auto &b : has_wildcards) b.store(false, std::memory_order_relaxed);
   }
   void concat_hashed_qgram_vectors(HashedQgramVector<sizeof_unit>
                                      *hashed_qgrams_vector) noexcept
@@ -389,7 +391,7 @@ struct HashedQgramVectorTable
   bool has_wildcards_get(void) const noexcept
   {
     size_t total_has_wildcards = false;
-    for (auto hw : has_wildcards)
+    for (const auto &hw : has_wildcards)
     {
       total_has_wildcards = total_has_wildcards || hw;
     }
@@ -422,8 +424,10 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
                         multiseq.sequence_length_get(task_num),
                         task_num);
   hashed_qgram_vector_table->count_all_qgrams[thread_id] += this_count;
-  hashed_qgram_vector_table->has_wildcards[thread_id] =
-    hashed_qgram_vector_table->has_wildcards[thread_id] || this_has_wildcards;
+  if(this_has_wildcards)
+  {
+    hashed_qgram_vector_table->has_wildcards[thread_id].store(true, std::memory_order_relaxed);
+  }
 }
 
 template<int sizeof_unit,class HashIterator>
