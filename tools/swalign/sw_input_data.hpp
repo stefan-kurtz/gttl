@@ -8,8 +8,8 @@
 
 static auto sw_input_data(const SWOptions &options)
 {
-  GttlMultiseq *db_multiseq = NULL,
-               *query_multiseq = NULL;
+  GttlMultiseq *db_multiseq = nullptr;
+  GttlMultiseq *query_multiseq = nullptr;
   bool dna_alphabet = false;
   std::tie(db_multiseq,query_multiseq,dna_alphabet)
     = create_multiseq_pair(options.dbfile,options.queryfile);

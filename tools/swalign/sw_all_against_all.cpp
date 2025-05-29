@@ -414,8 +414,7 @@ int main(int argc,char *argv[])
     delete[] scorematrix2D[0];
     delete[] scorematrix2D;
   }
-  if (db_multiseq != nullptr && query_multiseq != nullptr &&
-      db_multiseq != query_multiseq)
+  if (db_multiseq != query_multiseq)
   {
     delete query_multiseq;
   }

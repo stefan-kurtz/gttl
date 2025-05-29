@@ -56,8 +56,8 @@ else
 endif
 
 ifeq ($(debug),yes)
-  CFLAGS += -g -fsanitize=thread -fno-omit-frame-pointer -O1
-  LDFLAGS += -g -fsanitize=thread
+  CFLAGS += -g -fsanitize=address -fno-omit-frame-pointer -Og
+  LDFLAGS += -g -fsanitize=address -fno-omit-frame-pointer
 else
   CFLAGS += -DNDEBUG -O3
   ifeq ($(SYSTEM),Darwin)
