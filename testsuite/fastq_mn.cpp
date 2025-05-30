@@ -23,9 +23,9 @@
 #include <thread>
 #include <limits>
 #include <map>
+#include <filesystem>
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
-#include "utilities/basename.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
 #include "utilities/mathsupport.hpp"
@@ -50,14 +50,14 @@ static void fastq_split_writer(size_t split_size,
   int file_number = 0;
   auto it = fastq_it.begin();
   bool exhausted = false;
-  GttlBasename inputfile_base(inputfilename.c_str());
+  auto inputfile_base = std::filesystem::path(inputfilename).filename();
   while (!exhausted)
   {
     if (it == fastq_it.end())
     {
       break;
     }
-    StrFormat outfilename("%s_%02d",inputfile_base.str(),file_number++);
+    StrFormat outfilename("%s_%02d",inputfile_base.c_str(),file_number++);
     std::ofstream out_stream;
     out_stream.open(outfilename.str());
     for (size_t idx = 0; idx < split_size; idx++)

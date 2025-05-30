@@ -32,6 +32,7 @@
 // includes
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 // likely and unlikely macros
 #if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
@@ -121,46 +122,46 @@ static inline uint64_t _wymix(uint64_t A, uint64_t B)
 static inline uint64_t _wyr8(const uint8_t *p)
 {
   uint64_t v;
-  memcpy(&v, p, 8);
+  std::memcpy(&v, p, 8);
   return v;
 }
 static inline uint64_t _wyr4(const uint8_t *p)
 {
   uint32_t v;
-  memcpy(&v, p, 4);
+  std::memcpy(&v, p, 4);
   return v;
 }
 #elif defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
 static inline uint64_t _wyr8(const uint8_t *p)
 {
   uint64_t v;
-  memcpy(&v, p, 8);
+  std::memcpy(&v, p, 8);
   return __builtin_bswap64(v);
 }
 static inline uint64_t _wyr4(const uint8_t *p)
 {
   uint32_t v;
-  memcpy(&v, p, 4);
+  std::memcpy(&v, p, 4);
   return __builtin_bswap32(v);
 }
 #elif defined(_MSC_VER)
 static inline uint64_t _wyr8(const uint8_t *p)
 {
   uint64_t v;
-  memcpy(&v, p, 8);
+  std::memcpy(&v, p, 8);
   return _byteswap_uint64(v);
 }
 static inline uint64_t _wyr4(const uint8_t *p)
 {
   uint32_t v;
-  memcpy(&v, p, 4);
+  std::memcpy(&v, p, 4);
   return _byteswap_ulong(v);
 }
 #else
 static inline uint64_t _wyr8(const uint8_t *p)
 {
   uint64_t v;
-  memcpy(&v, p, 8);
+  std::memcpy(&v, p, 8);
   return (((v >> 56) & 0xff) | ((v >> 40) & 0xff00) | ((v >> 24) & 0xff0000) |
           ((v >> 8) & 0xff000000) | ((v << 8) & 0xff00000000) |
           ((v << 24) & 0xff0000000000) | ((v << 40) & 0xff000000000000) |
@@ -169,7 +170,7 @@ static inline uint64_t _wyr8(const uint8_t *p)
 static inline uint64_t _wyr4(const uint8_t *p)
 {
   uint32_t v;
-  memcpy(&v, p, 4);
+  std::memcpy(&v, p, 4);
   return (((v >> 24) & 0xff) | ((v >> 8) & 0xff00) | ((v << 8) & 0xff0000) |
           ((v << 24) & 0xff000000));
 }
