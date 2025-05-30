@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <filesystem>
 #include <ios>
 #include "utilities/file_size.hpp"
 #include "utilities/str_format.hpp"
@@ -34,6 +35,10 @@ std::vector<T> gttl_read_vector(const char *filename)
                                                   file_content.size()));
     return vec;
   }
+  if (not std::filesystem::exists(filename))
+  {
+    throw std::string("file \"") + filename + std::string("\" does not exist");
+  }
   const size_t size_of_file = gttl_file_size(filename);
   if (size_of_file % sizeof(T) != 0)
   {
@@ -57,5 +62,11 @@ std::vector<T> gttl_read_vector(const char *filename)
     throw msg.str();
   }
   return vec;
+}
+
+template<typename T>
+std::vector<T> gttl_read_vector(const std::string &filename)
+{
+  return gttl_read_vector<T>(filename.c_str());
 }
 #endif
