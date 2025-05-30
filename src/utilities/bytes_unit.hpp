@@ -92,6 +92,7 @@ class BytesUnit
                              &bitpacker) const noexcept
     {
       static_assert(idx >= 0 && idx < bit_groups);
+      static_assert(std::is_trivially_copyable_v<basetype>);
       basetype integer;
       std::memcpy(&integer, bytes, sizeof(basetype));
 
