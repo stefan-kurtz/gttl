@@ -40,7 +40,7 @@ static inline GttlMultiseq *
   catch (const std::runtime_error &err)
   {
     delete multiseq;
-    throw err.what();
+    throw std::string(err.what());
   }
   return multiseq;
 }
