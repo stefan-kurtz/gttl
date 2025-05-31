@@ -84,7 +84,7 @@ class NtHashAminoacidsTransformer
       {
         hVal = rotate_left_1(hVal);
         hVal = swapbits033(hVal);
-        assert(t_sequence[idx] < uint8_t(4));
+        assert(t_sequence[idx] < uint8_t(20));
         hVal ^= nt_hash_seed_table[t_sequence[idx]];
       }
       return hVal;
@@ -94,7 +94,7 @@ class NtHashAminoacidsTransformer
     [[nodiscard]] uint64_t next_hash_value_get(uint8_t charOut, uint64_t fhVal,
                                                uint8_t charIn) const noexcept
     {
-      assert(charIn < uint8_t{4} && charOut < uint8_t{4});
+      assert(charIn < uint8_t(20) && charOut < uint8_t(20));
       uint64_t hVal = rotate_left_1(fhVal);
       hVal = swapbits033(hVal);
       hVal ^= nt_hash_seed_table[charIn];

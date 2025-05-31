@@ -51,6 +51,7 @@ static void fastq_split_writer(size_t split_size,
   auto it = fastq_it.begin();
   bool exhausted = false;
   auto inputfile_base = std::filesystem::path(inputfilename).filename();
+  assert(not inputfile_base.empty());
   while (!exhausted)
   {
     if (it == fastq_it.end())
