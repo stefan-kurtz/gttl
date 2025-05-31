@@ -21,9 +21,10 @@
 #include <string>
 #include <algorithm>
 
-#include "sequences/complement_plain.hpp"
-#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/gttl_multiseq.hpp"
+#include "sequences/complement_plain.hpp"
+#include "sequences/inputfiles_multiseq.hpp"
+#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
 #include "minimizer_opt.hpp"
@@ -47,37 +48,16 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
 void run_nt_minimizer(const MinimizerOptions &options)
 {
   RunTimeClass rt_create_multiseq{};
-  GttlMultiseq *multiseq = nullptr;
-  try
-  {
-    constexpr const bool store_header = true;
-    constexpr const bool store_sequence = true;
-    constexpr const uint8_t padding_char = UINT8_MAX;
-    if (options.canonical_option_is_set())
-    {
-      multiseq = multiseq_with_reverse_complement<complement_plain>
-                                                 (options.inputfiles_get(),
-                                                  store_header,
-                                                  store_sequence,
-                                                  padding_char);
-    } else
-    {
-      multiseq = new GttlMultiseq(options.inputfiles_get(),
-                                  store_header,
-                                  store_sequence,
-                                  padding_char);
-    }
-  }
-  catch (std::string &msg) /* check_err.py */
-  {
-    delete multiseq;
-    throw msg;
-  }
-  catch (const std::runtime_error &err)
-  {
-    delete multiseq;
-    throw err.what();
-  }
+  constexpr const bool store_header = true;
+  constexpr const bool store_sequence = true;
+  constexpr const uint8_t padding_char = UINT8_MAX;
+  GttlMultiseq *multiseq = gttl_inputfiles_multiseq(options.inputfiles_get(),
+                                                    store_header,
+                                                    store_sequence,
+                                                    padding_char,
+                                                    options
+                                                      .canonical_option_is_set()
+                                                   );
   rt_create_multiseq.show("reading input files and creating multiseq");
   for (auto &log : multiseq->statistics())
   {
