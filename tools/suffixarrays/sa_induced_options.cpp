@@ -153,6 +153,12 @@ void SainOptions::parse(int argc, char **argv)
      ("buffered", "use buffering when inserting Sstar suffixes",
       cxxopts::value<bool>(buffered_option)->default_value("false"))
 
+     ("succinct", "create file with succinct representatin of lcp-table "
+                  "instead of the byte representation with "
+                  "saturated values stored in files with suffixes "
+                  ".ll2 and .ll4",
+      cxxopts::value<bool>(succinct_option)->default_value("false"))
+
      ("o,indexname",
       "set the name of the output files.\n"
       "option is mandatory, if more then one input file is given.",
@@ -242,6 +248,11 @@ void SainOptions::parse(int argc, char **argv)
   {
     throw std::invalid_argument("option -r/--relatative_suftab and "
                                 "--plain_input_format are not compatible");
+  }
+  if (succinct_option and lcptab_method != Lcptab_plcp5n)
+  {
+    throw std::invalid_argument("option --succinct requires to use option "
+                                "-l/--lcptab with argument plcp5n");
   }
 }
 
