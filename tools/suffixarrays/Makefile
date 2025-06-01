@@ -43,7 +43,8 @@ SA_INDUCED_OBJ=sa_induced.o\
 
 INPUTFILES=${shell ./enum_gttl_fasta_files.py ../../testdata}
 
-all:sa_induced.x
+.PHONY:all
+all:sa_induced.x lcp_checker.x
 ifndef GTTL
 	$(error GTTL is undefined. Please define the Path to the gttl sources)
 endif
@@ -55,7 +56,7 @@ endif
 sa_induced.x:${SA_INDUCED_OBJ}
 	${CXX} -o $@ ${LDFLAGS} ${SA_INDUCED_OBJ} ${LDLIBS}
 
-sa_reader.x:sa_reader.o
+lcp_checker.x:lcp_checker.o
 	${CXX} -o $@ ${LDFLAGS} $< ${LDLIBS}
 
 sa_exact_pattern_search.x:sa_exact_pattern_search.o
