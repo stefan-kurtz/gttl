@@ -50,7 +50,8 @@ static inline std::basic_string<BaseType>
     if (has_gzip_header(inputfile.c_str()))
     {
 #ifdef GTTL_WITHOUT_ZLIB
-      throw std::string("cannot handle gzipped file ") + inputfile;
+      throw std::runtime_error(std::string("cannot handle gzipped file ")
+                               + inputfile);
 #else
       append_sequences = true;
       break;
@@ -74,7 +75,8 @@ static inline std::basic_string<BaseType>
       gzFile fp = gzopen(inputfile.c_str(), "rb");
       if (fp == nullptr)
       {
-        throw std::runtime_error("Failed to gzopen file " + inputfile);
+        throw std::runtime_error(std::string("Failed to gzopen file ")
+                                 + inputfile);
       }
       assert(append_sequences);
       while (true)
@@ -107,7 +109,7 @@ static inline std::basic_string<BaseType>
       if (infp == nullptr)
       {
         throw std::runtime_error(std::string("Error opening file: ")
-                               + std::to_string(errno));
+                                 + std::to_string(errno));
       }
       const size_t file_size = append_sequences
                                  ? gttl_file_size(inputfile.c_str())
