@@ -26,3 +26,13 @@ tags
 compile_commands.json
 .cache/
 __pycache__
+
+# files from suffix array construction
+*.prj
+*.lcp
+*.ll2
+*.ll4
+*.suf
+*.tis
+*.isa
+*.bsf

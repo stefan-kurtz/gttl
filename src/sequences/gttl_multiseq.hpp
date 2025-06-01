@@ -165,7 +165,7 @@ class GttlMultiseq
                       inputfiles[0].c_str(),inputfiles[1].c_str(),
                       fst_more ? "first" : "second",
                       fst_more ? "second" : "fist");
-        throw msg.str();
+        throw std::runtime_error(msg.str());
       }
     } else
     {
@@ -586,10 +586,9 @@ class GttlMultiseq
       if (std::get<0>(header_with_seqnum[idx-1]) ==
           std::get<0>(header_with_seqnum[idx]))
       {
-        std::string msg(
-          std::string("sequence set contains a duplicated header ") +
-          std::get<0>(header_with_seqnum[idx]));
-        throw msg;
+        throw std::runtime_error(std::string("sequence set contains a "
+                                             "duplicated header ") +
+                                 std::get<0>(header_with_seqnum[idx]));
       }
     }
     for (auto &&hws : header_with_seqnum)

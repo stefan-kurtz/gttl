@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse, sys, shutil, os
-sys.path.append('../scripts')
+for directory in ['../scripts','../../scripts']:
+  if os.path.isdir(directory):
+    sys.path.append(directory)
+    break
 from mysubprocess import mysubprocess_expect
 
 def files2msg_get(fail_for_protein_sequence,p):

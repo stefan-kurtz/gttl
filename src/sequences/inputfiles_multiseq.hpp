@@ -32,15 +32,10 @@ static inline GttlMultiseq *
                                   padding_char);
     }
   }
-  catch (const std::string &msg)
-  {
-    delete multiseq;
-    throw msg;
-  }
   catch (const std::runtime_error &err)
   {
     delete multiseq;
-    throw std::string(err.what());
+    throw err;
   }
   return multiseq;
 }
