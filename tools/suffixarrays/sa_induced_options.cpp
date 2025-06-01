@@ -315,9 +315,9 @@ bool SainOptions::buffered_option_is_set(void) const noexcept
   return buffered_option;
 }
 
-bool SainOptions::succint_option_is_set(void) const noexcept
+bool SainOptions::succinct_option_is_set(void) const noexcept
 {
-  return succint_option;
+  return succinct_option;
 }
 
 std::string SainOptions::indexname_get(void) const noexcept

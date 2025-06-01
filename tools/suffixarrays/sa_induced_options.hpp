@@ -48,7 +48,7 @@ class SainOptions
        tistab_show_opt = false,
        buffered_option = false,
        reverse_complement_option = false,
-       succint_option = false;
+       succinct_option = false;
 
   LcptabMethod lcptab_method = Lcptab_no;
   int intset_sizeof = -1;
@@ -69,7 +69,7 @@ class SainOptions
   bool reverse_complement_option_is_set(void) const noexcept;
   bool buffered_option_is_set(void) const noexcept;
   bool lcptab_show_opt_is_set(void) const noexcept;
-  bool succint_option_is_set(void) const noexcept;
+  bool succinct_option_is_set(void) const noexcept;
   LcptabMethod lcptab_method_get(void) const noexcept;
   std::string indexname_get(void) const noexcept;
   const std::vector<std::string> &inputfiles_get(void) const noexcept;

@@ -120,10 +120,10 @@ static void lcptab_output_saturated(const std::string &indexname,
 }
 
 template<class Generator>
-static void lcptab_output_succint(GTTL_UNUSED const std::string &indexname,
-                                  GTTL_UNUSED Generator &lcp_generator)
+static void lcptab_output_succinct(GTTL_UNUSED const std::string &indexname,
+                                   GTTL_UNUSED Generator &lcp_generator)
 {
-  throw std::runtime_error(std::string(": output of lcptable in succint "
+  throw std::runtime_error(std::string(": output of lcptable in succinct "
                                        "represenation not implemented yet"));
 }
 
@@ -146,7 +146,7 @@ static void create_and_output_lcptab(GttlMemoryTracker *memory_tracker,
                                      size_t var_alphasize,
                                      bool print_stdout,
                                      SainOptions::LcptabMethod lcptab_method,
-                                     bool succint_lcptab)
+                                     bool succinct_lcptab)
 {
   if (suftab != nullptr or
       lcptab_method == SainOptions::LcptabMethod::Lcptab_kasai9n)
@@ -165,9 +165,9 @@ static void create_and_output_lcptab(GttlMemoryTracker *memory_tracker,
                                             var_alphasize);
     assert(lcptab[0] == 0);
     assert(lcptab[totallength] == 0);
-    if (succint_lcptab)
+    if (succinct_lcptab)
     {
-      lcptab_output_succint(indexname, lcptab);
+      lcptab_output_succinct(indexname, lcptab);
     } else
     {
       lcptab_output_saturated(indexname, lcptab);
@@ -183,9 +183,9 @@ static void create_and_output_lcptab(GttlMemoryTracker *memory_tracker,
     PlcpTable<SuftabBaseType> plcp_table(memory_tracker,
                                          seq, totallength,
                                          indexname, var_alphasize);
-    if (succint_lcptab)
+    if (succinct_lcptab)
     {
-      lcptab_output_succint(indexname, plcp_table);
+      lcptab_output_succinct(indexname, plcp_table);
     } else
     {
       lcptab_output_saturated(indexname, plcp_table);
@@ -293,8 +293,8 @@ static void enhanced_suffixarray_plain_input_format(GttlMemoryTracker
                                              sainoptions
                                                .lcptab_show_opt_is_set(),
                                              sainoptions.lcptab_method_get(),
-                                             sainoptions.succint_option_is_set()
-                                            );
+                                             sainoptions
+                                               .succinct_option_is_set());
   }
   if (sainoptions.verbose_opt_is_set() and
       (sainoptions.lcptab_method_get() != SainOptions::Lcptab_no or
@@ -460,8 +460,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
                                              sainoptions
                                                .lcptab_show_opt_is_set(),
                                              sainoptions.lcptab_method_get(),
-                                             sainoptions.succint_option_is_set()
-                                            );
+                                             sainoptions
+                                               .succinct_option_is_set());
   }
   if (sainoptions.verbose_opt_is_set() and
       (sainoptions.lcptab_method_get() != SainOptions::Lcptab_no or
