@@ -100,7 +100,7 @@ then
     echo "$0: FAILURE: ${cmd}"
     exit 1
   fi
-  cmd="diff ${sfx}.llv.txt ${sain}.llv.txt"
+  cmd="diff --strip-trailing-cr ${sfx}.llv.txt ${sain}.llv.txt"
   ${cmd}
   if test $? -ne 0
   then

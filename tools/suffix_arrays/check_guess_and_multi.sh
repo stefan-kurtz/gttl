@@ -15,6 +15,6 @@ options="--lcptab kasai13n --check_suftab --relative_suftab"
 
 for suffix in bsf lcp ll2 ll4
 do
-  diff ${outname}.${suffix} ${outname}_parts.${suffix}
+  diff --strip-trailing-cr ${outname}.${suffix} ${outname}_parts.${suffix}
 done
 rm -f ${outname}.* ${outname}_parts.* ${cat_file}
