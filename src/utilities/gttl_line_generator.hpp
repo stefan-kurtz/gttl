@@ -8,8 +8,10 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
-template <const size_t buf_size = (size_t{1} << size_t{14})>
+template <const size_t buf_size = (size_t{1} << size_t{14}),
+          const bool skip_empty_lines = false>
 class GttlLineGenerator
 {
   public:
@@ -184,6 +186,7 @@ private:
         }
 
         out->append(file_buf + file_buf_pos, line_len);
+        len += line_len;
         file_buf_pos += line_len + 1 + static_cast<size_t>(removed_cr);
         break;
       }
@@ -191,6 +194,7 @@ private:
       // so we copy everything and continue reading
       size_t remaining = file_buf_end - file_buf_pos;
       out->append(file_buf + file_buf_pos, remaining);
+      len += remaining;
       file_buf_pos = file_buf_end;
     }
 
@@ -250,17 +254,36 @@ public:
 
     if(out != nullptr and not append) out->clear();
 
+    size_t local_len = 0;
+    bool ok = false;
+
     if(input_string != nullptr)
     {
-      return read_from_mapped_string(length, append);
-    }
-
-    if(out == nullptr)
+      ok = read_from_mapped_string(&local_len, append);
+    }else if (out == nullptr)
     {
-      return discard_line(length);
+      ok = discard_line(&local_len);
+    }else
+    {
+      ok = read_from_file(&local_len);
     }
 
-    return read_from_file(length);
+    if(not ok) return false;
+
+    if constexpr (skip_empty_lines)
+    {
+      if (local_len == 0 and not is_end and not line_partly_read)
+      {
+        return advance(length, append);
+      }
+      line_partly_read = false;
+    }
+
+    if (length != nullptr)
+    {
+      *length = local_len;
+    }
+    return true;
   }
 
   void reset()
@@ -348,6 +371,7 @@ public:
         is_end = true;
         return EOF;
       }
+      if constexpr (skip_empty_lines) line_partly_read = true;
       return *current_ptr++;
     }
 
@@ -359,6 +383,7 @@ public:
         return EOF;
       }
     }
+    if constexpr (skip_empty_lines) line_partly_read = true;
     return file_buf[file_buf_pos++];
   }
 
@@ -417,6 +442,8 @@ public:
 
   const std::vector<std::string>* file_list = nullptr;
   size_t file_index = 0;
+
+  bool line_partly_read = false;
 };
 
 #endif  // GTTL_LINE_GENERATOR_HPP

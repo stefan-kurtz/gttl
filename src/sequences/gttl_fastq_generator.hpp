@@ -183,7 +183,7 @@ class GttlFastQGenerator
   GttlFastQEntry<buf_size> default_buffer;
   GttlFastQEntry<buf_size>* out;
   bool is_end;
-  GttlLineGenerator<buf_size> lg;
+  GttlLineGenerator<buf_size, true> lg;
 };
 
 #endif  // GTTL_FASTQ_GENERATOR_HPP

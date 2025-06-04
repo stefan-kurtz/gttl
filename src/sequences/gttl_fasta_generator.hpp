@@ -218,6 +218,6 @@ class GttlFastAGenerator
   GttlFastAEntry<buf_size>* out;
   bool is_end;
   bool is_first_entry = true;
-  GttlLineGenerator<buf_size> lg;
+  GttlLineGenerator<buf_size, true> lg;
 };
 #endif // GTTL_FASTA_GENERATOR_HPP
