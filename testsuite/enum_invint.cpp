@@ -86,8 +86,8 @@ static void verify_hashvalues_for_file(const char *inputfilename,
 
 int main(int argc,char *argv[])
 {
-  long read_long;
-  if (argc != 3 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
+  int64_t read_long;
+  if (argc != 3 || sscanf(argv[1],"%" PRIi64,&read_long) != 1 || read_long <= 0)
   {
     std::cerr << "Usage: " << argv[0] << ": <kmer_length> <inputfile>"
               << std::endl;
