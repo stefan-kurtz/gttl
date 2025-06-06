@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <cinttypes>
 #include <type_traits>
 #include <algorithm>
 #include <iterator>
@@ -88,15 +89,15 @@ class SortKeyValuePairsOptions
           throw std::invalid_argument("superfluous positional argument");
         } else
         {
-          long read_long;
-          if (std::sscanf(unmatched_args[0].c_str(),"%ld",&read_long) != 1 or
-              read_long < 0)
+          int64_t read_i64;
+          if (std::sscanf(unmatched_args[0].c_str(),"%" PRIi64,&read_i64) != 1
+              or read_i64 < 0)
           {
             throw std::invalid_argument("positional argument must be positive "
                                         "integer specifying the number of "
                                         "values to sort");
           }
-          number_of_values = static_cast<size_t>(read_long);
+          number_of_values = static_cast<size_t>(read_i64);
         }
       }
       if (data_type_option != 'i' and data_type_option != 'p' and
@@ -412,7 +413,7 @@ int main(int argc, char *argv[])
   {
     options.parse(argc,argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (const std::invalid_argument &e) /* check_err.py */
   {
     std::cerr << argv[0] << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
