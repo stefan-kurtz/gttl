@@ -127,7 +127,7 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
   catch (const std::exception &err)
   {
     delete unwords;
-    throw err;
+    throw;
   }
   return unwords;
 }
@@ -239,7 +239,7 @@ size_t estimate_qgram_length_max(const std::vector<std::string> &inputfiles)
   }
   catch (const std::exception &err)
   {
-    throw err;
+    throw;
   }
   if constexpr (reverse_complement)
   {

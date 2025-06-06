@@ -122,7 +122,7 @@ class GttlFastAGenerator
       int ch = lg.getc();
       if(ch != '>')
       {
-        throw std::ios_base::failure(", line "
+        throw std::ios_base::failure(std::string(", line ")
                                      + std::to_string(lg.line_number_get())
                                      + ": corrupted sequence");
       }
@@ -151,7 +151,7 @@ class GttlFastAGenerator
 
     if(out->sequence_get().empty() or out->sequence_get()[0] == '>')
     {
-      throw std::ios_base::failure(", line "
+      throw std::ios_base::failure(std::string(", line ")
                                    + std::to_string(lg.line_number_get())
                                    + ": corrupted sequence");
     }

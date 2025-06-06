@@ -108,7 +108,7 @@ class GttlFastQGenerator
     }
     if(c != '@')
     {
-      throw std::ios_base::failure(", line "
+      throw std::ios_base::failure(std::string(", line ")
                                    + std::to_string(lg.line_number_get())
                                    + ": corrupted sequence");
     }

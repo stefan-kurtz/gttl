@@ -52,7 +52,7 @@ static auto sw_input_data(const SWOptions &options)
     {
       if (options.min_bit_score > 0)
       {
-        throw err;
+        throw;
       }
     }
   }

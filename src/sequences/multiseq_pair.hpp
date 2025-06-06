@@ -24,7 +24,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   }
   catch (const std::exception &err)
   {
-    throw err;
+    throw;
   }
   assert(queryfile != NULL);
   if (dbfile == queryfile || strcmp(dbfile,queryfile) == 0)
@@ -41,7 +41,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     {
       if(db_multiseq != query_multiseq) delete query_multiseq;
       delete db_multiseq;
-      throw err;
+      throw;
     }
   }
   if (guess_if_protein_multiseq(db_multiseq))

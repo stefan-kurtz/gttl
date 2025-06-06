@@ -77,7 +77,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
   catch (const std::exception &err)
   {
     delete multiseq;
-    throw err;
+    throw;
   }
   assert(var_sizeof_unit_hashed_qgram == 8 or
          var_sizeof_unit_hashed_qgram == 9);

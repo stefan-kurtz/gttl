@@ -280,7 +280,7 @@ static void enhanced_suffixarray_plain_input_format(GttlMemoryTracker
     GTTL_UNTRACK_ALLOC(suftab);
     free(suftab);
     suftab = nullptr;
-    throw err;
+    throw;
   }
   RunTimeClass rt_construct_lcp{};
   if (sainoptions.lcptab_method_get() != SainOptions::Lcptab_no)
@@ -438,7 +438,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
     GTTL_UNTRACK_ALLOC(suftab);
     free(suftab);
     suftab = nullptr;
-    throw err;
+    throw;
   }
   RunTimeClass rt_construct_lcp{};
   if (sainoptions.lcptab_method_get() != SainOptions::LcptabMethod::Lcptab_no)
@@ -530,7 +530,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
                 GTTL_UNTRACK_ALLOC(suftab);
                 free(suftab);
                 suftab = nullptr;
-                throw err;
+                throw;
               }
             }
           }
@@ -605,7 +605,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
                 free(suftab);
                 suftab = nullptr;
               }
-              throw err;
+              throw;
             }
             std::fwrite(bu_suftab,sizeof *bu_suftab,totallength + 1,out_fp);
             fclose(out_fp);
@@ -751,7 +751,7 @@ int main(int argc, char *argv[])
       catch (const std::exception &err)
       {
         memory_tracker.untrack(filecontents.data(),__FILE__,__LINE__);
-        throw err;
+        throw;
       }
       memory_tracker.untrack(filecontents.data(),__FILE__,__LINE__);
     } else
@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
       {
         memory_tracker.untrack(multiseq,__FILE__,__LINE__);
         delete multiseq;
-        throw err;
+        throw;
       }
       memory_tracker.untrack(multiseq,__FILE__,__LINE__);
       delete multiseq;

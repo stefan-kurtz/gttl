@@ -35,7 +35,7 @@ static inline GttlMultiseq *
   catch (const std::exception &err)
   {
     delete multiseq;
-    throw err;
+    throw;
   }
   return multiseq;
 }

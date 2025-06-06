@@ -196,7 +196,7 @@ struct SWOptions
               }
               catch(const std::exception &err)
               {
-                throw err;
+                throw;
               }
             } else
             {
