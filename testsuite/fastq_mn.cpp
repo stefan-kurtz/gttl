@@ -50,7 +50,7 @@ static void fastq_split_writer(size_t split_size,
   int file_number = 0;
   auto it = fastq_it.begin();
   bool exhausted = false;
-  auto inputfile_basename_str{std::filesystem::path(inputfilename).filename()};
+  auto inputfile_basename_str{std::filesystem::path(inputfilename).filename().string()};
   const char *inputfile_basename_ptr
     = static_cast<const char *>(inputfile_basename_str.c_str());
   assert(not inputfile_base.empty());
