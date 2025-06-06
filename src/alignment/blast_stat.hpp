@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
+#include <numbers>
 #include <stdexcept>
 #include "utilities/str_format.hpp"
 
