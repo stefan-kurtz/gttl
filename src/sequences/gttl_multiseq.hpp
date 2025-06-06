@@ -22,7 +22,7 @@
 
 /* A class to store various sequences and their header information.
  the inputfile is read in using fasta_reader.
- Constructor may throw std::string
+ Constructor may throw std::runtime_error
  - std::range_error */
 
 class GttlMultiseq

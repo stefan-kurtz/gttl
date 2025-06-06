@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << e.what() << '\n';
+    std::cerr << argv[0] << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
   {
     guessed_protein_sequences = guess_if_protein_file(inputfiles);
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << msg << '\n';
+    std::cerr << argv[0] << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (guessed_protein_sequences &&
@@ -97,9 +97,9 @@ int main(int argc, char *argv[])
     }
     rt_unwords_finder.show("total");
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << msg << '\n';
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     haserr = true;
   }
   if (!haserr)

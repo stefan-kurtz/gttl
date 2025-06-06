@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdexcept>
 #include <unordered_set>
 #include <unordered_map>
 #include <tuple>
@@ -108,7 +109,8 @@ class Restrict2Pairs
     }
     if (local_pairs.size() == 0)
     {
-      throw std::string("file specified with option -r cannot be empty");
+      throw std::invalid_argument(
+        "file specified with option -r cannot be empty");
     }
     std::cout << "# local_pairs\t" << local_pairs.size() << std::endl;
     return local_pairs;
@@ -274,9 +276,9 @@ int main(int argc,char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << program_name << ": " << msg << std::endl;
+    std::cerr << program_name << ": " << err.what() << std::endl;
     haserr = true;
   }
   RunTimeClass timer{};
@@ -297,13 +299,7 @@ int main(int argc,char *argv[])
                scorematrix2D,smallest_score,alphasize,blast_statistics)
         = sw_input_data(options);
     }
-    catch(const std::string &msg)
-    {
-      std::cerr << program_name << ": file \"" << options.dbfile << "\""
-                << msg << std::endl;
-      haserr = true;
-    }
-    catch(const std::runtime_error &err)
+    catch(const std::exception &err)
     {
       std::cerr << program_name << ": file \"" << options.dbfile << "\""
                 << err.what() << std::endl;
@@ -397,15 +393,9 @@ int main(int argc,char *argv[])
         }
       }
     }
-    catch (const std::string &msg)
+    catch (const std::exception &err)
     {
-      std::cerr << program_name << ": " << msg << std::endl;
-      haserr = true;
-    }
-    catch(const std::runtime_error &err)
-    {
-      std::cerr << program_name << ": file \"" << options.dbfile << "\""
-                << err.what() << std::endl;
+      std::cerr << program_name << ": " << err.what() << std::endl;
       haserr = true;
     }
   }

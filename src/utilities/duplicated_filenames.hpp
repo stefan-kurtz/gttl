@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include "utilities/str_format.hpp"
@@ -32,7 +33,7 @@ static inline void gttl_duplicated_filenames(const std::vector<std::string>
                       "each other (e.g. to search for repeats), then run "
                       "the program only with this single filename",
                       input_files[i].c_str());
-        throw msg.str();
+        throw std::runtime_error(msg.str());
       }
     }
   }

@@ -1,5 +1,6 @@
 #ifndef TAGGED_LINES_HPP
 #define TAGGED_LINES_HPP
+#include <ios>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -11,7 +12,8 @@ static inline std::vector<std::string> gttl_read_tagged_lines(
   std::ifstream infile_stream(inputfile);
   if (infile_stream.fail())
   {
-    throw std::string("cannot open file ") + std::string(inputfile);
+    throw std::ios_base::failure(
+            std::string("cannot open file ") + std::string(inputfile));
   }
   std::string line_buffer{};
   std::vector<std::string> tagged_lines{};

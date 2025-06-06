@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -120,9 +121,9 @@ int main(int argc, char **argv)
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -139,9 +140,9 @@ int main(int argc, char **argv)
       estimate_F_values<true>(options);
     }
   }
-  catch (const std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   StrFormat msg("ntcard.all\t%c\t%zu\t\t%s",

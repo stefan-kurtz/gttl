@@ -26,10 +26,10 @@ int main(int argc,char *argv[])
         buffer.clear();
       }
     }
-    catch (std::string &msg)
+    catch (const std::exception &err)
     {
       std::cerr << argv[0] << ": file \"" << argv[2] << "\""
-                << msg << std::endl;
+                << err.what() << std::endl;
       haserr = true;
     }
     if (!haserr && all_empty_files)
@@ -53,10 +53,10 @@ int main(int argc,char *argv[])
           buffer.clear();
         }
       }
-      catch (std::string &msg)
+      catch (const std::exception &err)
       {
         std::cerr << argv[0] << ": file \"" << argv[1] << "\""
-                  << msg << std::endl;
+                  << err.what() << std::endl;
         haserr = true;
         break;
       }

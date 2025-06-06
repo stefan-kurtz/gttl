@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -203,17 +203,7 @@ int main(int argc, char *argv[])
                                   padding_char);
     }
   }
-  catch (const std::string &msg)
-  {
-    for (auto &&inputfile : inputfiles)
-    {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << msg << std::endl;
-    }
-    delete multiseq;
-    return EXIT_FAILURE;
-  }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     for (auto &&inputfile : inputfiles)
     {

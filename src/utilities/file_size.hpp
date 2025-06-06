@@ -11,6 +11,7 @@
   #include <unistd.h>
 #endif
 #include <fcntl.h>
+#include <ios>
 #include <sys/types.h>  // for fstat() and open()
 #include <sys/stat.h>
 #include <string>
@@ -21,13 +22,14 @@ inline size_t gttl_file_size(const char *filename)
   int filedesc = open(filename,O_RDONLY);
   if (filedesc == -1)       // check for error code
   {
-    throw std::string(": cannot open file ") + std::string(filename);
+    throw std::ios_base::failure(": cannot open file " + std::string(filename));
   }
   struct stat buf;
   if (fstat(filedesc,&buf) == -1) // get status of file
   {
-    throw std::string(": cannot access status of file ") +
-          std::string(filename);
+    throw std::ios_base::failure(
+          std::string(": cannot access status of file ") +
+          std::string(filename));
   }
   close(filedesc);
   return static_cast<size_t>(buf.st_size);

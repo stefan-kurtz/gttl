@@ -105,10 +105,10 @@ class NtHashOptions
         }
       }
     }
-    catch (const cxxopts::exceptions::exception &e)
+    catch (const cxxopts::exceptions::exception &err)
     {
       usage(options);
-      throw std::invalid_argument(e.what());
+      throw std::invalid_argument(err.what());
     }
   }
   bool help_option_is_set(void) const noexcept
@@ -392,9 +392,9 @@ int main(int argc,char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << '\n';
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -507,10 +507,10 @@ int main(int argc,char *argv[])
         }
       }
     }
-    catch (std::exception &msg)
+    catch (const std::exception &err)
     {
       std::cerr << progname << ": file \"" << inputfile << "\""
-                << msg.what() << '\n';
+                << err.what() << '\n';
       haserr = true;
       break;
     }

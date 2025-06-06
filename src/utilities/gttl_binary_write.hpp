@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cassert>
+#include <ios>
 #include <string>
 
 template <typename T,
@@ -15,16 +16,17 @@ class BinaryFileWriter
                 "trivially copyable.");
   T buffer[buf_size];
   FILE *out_fp;
-  size_t nextfree;
+  size_t nextfree = 0;
   public:
   BinaryFileWriter(const std::string &outfilename)
     : out_fp(fopen(outfilename.c_str(), "wb"))
-    , nextfree(0)
   {
-    if (out_fp == NULL)
+    if (out_fp == nullptr)
     {
-      throw std::string(": cannot create file \"") +
-            std::string(outfilename) + std::string("\"");
+      throw std::ios_base::failure(
+              std::string(": cannot create file \"") +
+              std::string(outfilename) +
+              std::string("\""));
     }
   }
   void append(T value)

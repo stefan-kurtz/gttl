@@ -33,6 +33,11 @@ ifeq ($(msan),yes)
   LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
 endif
 
+ifeq ($(debug),yes)
+  CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
+endif
+
 OBJ=ntcard_mn.o ntcard_opt.o
 
 all:ntcard_mn.x

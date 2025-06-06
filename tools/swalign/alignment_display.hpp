@@ -1,5 +1,6 @@
 #ifndef ALIGNMENT_DISPLAY_HPP
 #define ALIGNMENT_DISPLAY_HPP
+#include <stdexcept>
 #include <string>
 #include <cassert>
 #include "utilities/split_string.hpp"
@@ -22,7 +23,7 @@ class AlignmentDisplay
     switch (readint)
     {
       case 0:
-        throw std::string("argument to option -a must be positive");
+        throw std::invalid_argument("argument to option -a must be positive");
         break;
       case 1:
         flag = Verify;
@@ -120,27 +121,30 @@ class AlignmentDisplay
       int readint;
       if (std::sscanf(s.c_str(),"%d",&readint) != 1 or readint < 1)
       {
-        throw std::string("illegal argument \"") +
+        throw std::invalid_argument(
+              std::string("illegal argument \"") +
               arg_opt +
               std::string("\" to option -a: + separated positive "
-                          "numbers expected");
+                          "numbers expected"));
       }
       const size_t current_number = static_cast<size_t>(readint);
       if (previous_number >= current_number)
       {
-        throw std::string("illegal argument ") +
+        throw std::invalid_argument(
+              std::string("illegal argument ") +
               arg_opt +
-              std::string(" to option -a: numbers must be strictly ordered");
+              std::string(" to option -a: numbers must be strictly ordered"));
       }
       if (current_number >= min_alignment_width)
       {
         if (alignment_width_set)
         {
-          throw std::string("illegal argument ") +
+          throw std::invalid_argument(
+                std::string("illegal argument ") +
                 arg_opt +
                 std::string(" to option -a: alignment width >= ") +
                 std::to_string(min_alignment_width) +
-                std::string(" can only be set once");
+                std::string(" can only be set once"));
         }
         alignment_width_set = true;
       }

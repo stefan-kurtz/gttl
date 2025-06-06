@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <cstdio>
 #include "utilities/split_string.hpp"
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
   {
     options.parse(argc,argv);
   }
-  catch (std::invalid_argument &e)
+  catch (const std::invalid_argument &e)
   {
     std::cerr << argv[0] << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
@@ -57,9 +58,9 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (const std::string& msg)
+  catch (const std::exception& err)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.store_option_is_set())

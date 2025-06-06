@@ -13,6 +13,7 @@
 #include <ios>
 #include <deque>
 #include <type_traits>
+#include <stdexcept>
 
 #include "utilities/ska_lsb_radix_sort.hpp"
 #include "utilities/mathsupport.hpp"
@@ -69,7 +70,7 @@ static void validate_minimizers(
     if (minimizer_set.count(min_hash) == 0)
     {
       StrFormat msg("cannot find minimizer %zu",static_cast<size_t>(min_hash));
-      throw msg.str();
+      throw std::runtime_error(msg.str());
     }
   }
 }

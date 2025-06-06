@@ -32,7 +32,7 @@ static void verify_hash_value_pair(HashValuePairIterator &qgiter,
                     "hash_value=%" PRIu64 "\tcompl_hash_value=%" PRIu64,
                     hash_value, compl_hash_value);
       delete[] qgram_direct;
-      throw msg.str();
+      throw std::runtime_error{msg.str()};
     }
   }
   delete[] qgram_direct;
@@ -49,7 +49,7 @@ static void verify_hashvalues_for_file(const char *inputfilename,
                                          true,false>;
   if (in_fp == nullptr)
   {
-    throw (std::string("cannot open file ") + inputfilename);
+    throw std::runtime_error(std::string("cannot open file ") + inputfilename);
   }
   GttlFastAGenerator fasta_gen(in_fp);
     size_t ranges_total_length = 0,
@@ -100,9 +100,9 @@ int main(int argc,char *argv[])
     verify_hashvalues_for_file<InvertibleIntegercode2Iterator4>
                               (inputfilename,qgram_length);
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

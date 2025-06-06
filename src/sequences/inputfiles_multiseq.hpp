@@ -32,7 +32,7 @@ static inline GttlMultiseq *
                                   padding_char);
     }
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     delete multiseq;
     throw err;

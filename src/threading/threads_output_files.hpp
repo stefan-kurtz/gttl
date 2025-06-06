@@ -58,7 +58,7 @@ class ThreadsOutputFiles
       if (out_fp == nullptr)
       {
         StrFormat msg("cannot create file \"%s\"",fname.str().c_str());
-        throw msg.str();
+        throw std::ios_base::failure(msg.str());
       }
       output_filepointers.push_back(out_fp);
     }

@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include "utilities/runtime_class.hpp"
 #include "indexes/gttl_suffixarray.hpp"
@@ -37,7 +38,7 @@ int main(int argc,char *argv[])
   {
     suffixarray = new GttlSuffixArray(indexname,{LCPTAB_file});
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     std::cerr << argv[0] << ": indexname \"" << indexname << "\": "
               << err.what() << std::endl;

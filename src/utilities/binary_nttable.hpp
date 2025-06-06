@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <stdexcept>
 #include "utilities/multibitvector.hpp"
 
 class BinaryNtTable
@@ -53,7 +54,7 @@ class BinaryNtTable
 
     if (p0 == 0)
     {
-      throw std::string("a count of zero leads to undefined values");
+      throw std::runtime_error("a count of zero leads to undefined values");
     }
     return -std::log(static_cast<double>(p0) / (uint64_t(1) << r_value)) *
            (uint64_t(1) << (s_value + r_value));

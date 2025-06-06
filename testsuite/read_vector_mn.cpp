@@ -32,9 +32,9 @@ int main(int argc,char *argv[])
                 << " and " << argv[2] << " differ" << std::endl;
       return EXIT_FAILURE;
     }
-  } catch(const std::string &msg)
+  } catch(const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << msg << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

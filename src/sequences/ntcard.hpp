@@ -2,6 +2,7 @@
 #define NTCARD_HPP
 
 #include <cstddef>
+#include <ios>
 #include <thread>
 #include <vector>
 #include "sequences/gttl_fasta_generator.hpp"
@@ -77,7 +78,7 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
     GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
     if (in_fp == nullptr)
     {
-      throw std::string(": cannot open file");
+      throw std::ios_base::failure(": cannot open file");
       /* check_err.py checked */
     }
     GttlFastAGenerator<buf_size> gttl_si(in_fp);

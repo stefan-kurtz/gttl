@@ -124,10 +124,10 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
       }
     }
   }
-  catch (std::exception &msg)
+  catch (const std::exception &err)
   {
     delete unwords;
-    throw msg;
+    throw err;
   }
   return unwords;
 }
@@ -237,9 +237,9 @@ size_t estimate_qgram_length_max(const std::vector<std::string> &inputfiles)
       sequences_length += si.sequence_get().length();
     }
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    throw msg;
+    throw err;
   }
   if constexpr (reverse_complement)
   {

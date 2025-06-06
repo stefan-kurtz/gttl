@@ -12,8 +12,11 @@ class non_empty_queue : public std::exception
 {
   std::string what_;
  public:
-  explicit non_empty_queue(std::string msg) { what_ = std::move(msg); }
-  const char* what(void) const noexcept override  { return what_.c_str(); }
+  explicit non_empty_queue(std::string msg) : what_(std::move(msg)) {}
+  [[nodiscard]] const char* what(void) const noexcept override
+  {
+    return what_.c_str();
+  }
 };
 
 template<typename T>

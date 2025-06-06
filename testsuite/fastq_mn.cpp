@@ -261,7 +261,7 @@ static void char_distribution_seq(const std::string &inputfilename)
   GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error{": cannot open file"};
     /* check_err.py checked */
   }
   constexpr const int buf_size = 1 << 14;
@@ -291,7 +291,7 @@ static void char_distribution_thd_gz(size_t num_threads,
   GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error(": cannot open file");
     /* check_err.py checked */
   }
   constexpr const int buf_size = 1 << 12;
@@ -543,9 +543,9 @@ int main(int argc,char *argv[])
               char_distribution_thd_gz(options.num_threads_get(),
                                        inputfiles[0]);
             }
-            catch (std::string &msg)
+            catch (const std::exception &err)
             {
-              std::cerr << argv[0] << ": " << msg << std::endl;
+              std::cerr << argv[0] << ": " << err.what() << std::endl;
               return EXIT_FAILURE;
             }
           } else
@@ -662,13 +662,13 @@ int main(int argc,char *argv[])
       process_paired_files(statistics,fasta_output,inputfiles[0],inputfiles[1]);
     }
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
     for (auto &&inputfile : inputfiles)
     {
       std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << msg << std::endl;
+                << err.what() << std::endl;
     }
     return EXIT_FAILURE;
   }

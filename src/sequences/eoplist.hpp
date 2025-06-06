@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cctype>
 #include <cassert>
+#include <stdexcept>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -419,8 +420,9 @@ class Eoplist
                 match_add(iteration);
               } else
               {
-                throw "illegal symbol '" + std::to_string(cc) +
-                      "' in cigar string";
+                throw std::runtime_error(
+                  "illegal symbol '" + std::to_string(cc) +
+                  "' in cigar string");
               }
             }
           }

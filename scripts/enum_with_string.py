@@ -49,9 +49,10 @@ class {classname}
     }}
     if (idx == num_values)
     {{
-      throw(std::string("illegal argument ") + str +
-            std::string(", possible values are: ") +
-            string_values_joined(", ", start_index));
+      throw std::runtime_error(
+        std::string("illegal argument ") + str +
+        std::string(", possible values are: ") +
+        string_values_joined(", ", start_index));
     }}
   }}
   bool is(Enum{classname} param) const noexcept

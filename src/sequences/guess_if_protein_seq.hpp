@@ -20,7 +20,7 @@
 #include <cstring>
 #include <climits>
 #include <algorithm>
-#include <stdexcept>
+#include <ios>
 #include <vector>
 #include <string>
 #include "sequences/gttl_fasta_generator.hpp"
@@ -58,7 +58,7 @@ bool guess_if_protein_file_generic(const char *filename)
 
   if (in_fp == nullptr)
   {
-    throw std::runtime_error(": cannot open file");
+    throw std::ios_base::failure(": cannot open file");
   }
   ReaderClass reader(in_fp);
   size_t total_length = 0;

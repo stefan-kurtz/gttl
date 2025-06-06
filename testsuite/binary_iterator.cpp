@@ -1,6 +1,6 @@
 #include "utilities/gttl_binary_read.hpp"
+#include <exception>
 #include <iostream>
-#include <stdexcept>
 
 int main(int argc, char *argv[])
 {
@@ -15,13 +15,7 @@ int main(int argc, char *argv[])
         std::cout << entry;
       }
     }
-    catch (const std::out_of_range &err)
-    {
-      std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what()
-                << '\n';
-      return EXIT_FAILURE;
-    }
-    catch (const std::runtime_error &err)
+    catch (const std::exception &err)
     {
       std::cerr << argv[0] << ": file \"" << argv[idx] << "\": " << err.what()
                 << '\n';

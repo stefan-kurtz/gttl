@@ -1,5 +1,7 @@
 #include <cstddef>
+#include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include "utilities/str_format.hpp"
@@ -12,8 +14,9 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
 {
   constexpr const int buf_size = 1 << 14;
   GttlLineGenerator<buf_size> gttl_li(inputfile);
-  size_t line_count = 0, column_count = 0;
-  for (auto &buffer : gttl_li)
+  size_t line_count = 0;
+  size_t column_count = 0;
+  for (const auto &buffer : gttl_li)
   {
     if (buffer.size() > 0 and buffer[0] != '#')
     {
@@ -26,7 +29,7 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
       if (buffer != line_from_vec)
       {
         StrFormat msg(": '%s' != '%s'",buffer.c_str(),line_from_vec.c_str());
-        throw msg.str();
+        throw std::runtime_error{msg.str()};
       }
     }
     line_count++;
@@ -38,25 +41,26 @@ int main(int argc,char *argv[])
 {
   if (argc != 3)
   {
-    std::cerr << "Usage: " << argv[0] << " <sep> <filename>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <sep> <filename>\n";
     return EXIT_FAILURE;
   }
   const char *inputfile = argv[2];
   if (std::string(argv[1]).size() > 1)
   {
-    std::cerr << argv[0] << ": seperator must be single character" << std::endl;
+    std::cerr << argv[0] << ": seperator must be single character\n";
     return EXIT_FAILURE;
   }
   try
   {
-    size_t line_count, column_count;
+    size_t line_count = 0;
+    size_t column_count = 0;
     std::tie(line_count,column_count) = test_split_string(inputfile,argv[1][0]);
     std::cout << "processed " << column_count << " columns in " << line_count
-              << " lines" << std::endl;
+              << " lines\n";
   }
-  catch (const std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << msg << " " << inputfile << std::endl;
+    std::cerr << argv[0] << err.what() << " " << inputfile << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

@@ -1,6 +1,7 @@
 #ifndef OPTIONS_LINE2POSITIONAL_ARGS_HPP
 #define OPTIONS_LINE2POSITIONAL_ARGS_HPP
 
+#include <stdexcept>
 #include <vector>
 #include <string>
 #include <cassert>
@@ -23,8 +24,9 @@ static inline std::vector<std::string>
   }
   if (idx >= argv.size())
   {
-    throw std::string("missing separator ") + sep + " in \"" +
-          options_line + "\"";
+    throw std::invalid_argument(
+            std::string("missing separator ") + sep + " in \"" +
+            options_line + "\"");
   }
   idx++;
   std::vector<std::string> positional_args{};

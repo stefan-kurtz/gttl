@@ -1,6 +1,7 @@
 #ifndef SPLIT_HPP
 #define SPLIT_HPP
 #include <cstring>
+#include <ios>
 #include <string_view>
 #include <stdexcept>
 #include "utilities/has_suffix_or_prefix.hpp"
@@ -53,7 +54,7 @@ class SequencesSplit
   {
     if (gttl_has_suffix(inputfilename,std::string(".gz")))
     {
-      throw std::string("cannot process .gz");
+      throw std::ios_base::failure("cannot process .gz");
     }
     assert(num_parts > 0 && mapped_file.size() > 0);
     if (num_parts > mapped_file.size())

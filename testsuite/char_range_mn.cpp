@@ -120,13 +120,13 @@ static void display_char_ranges(const char *inputfilename)
 
   if (is_protein)
   {
-    throw std::string(": can only handle DNA sequences");
+    throw std::runtime_error(": can only handle DNA sequences");
     /* check_err.py checked */
   }
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)
   {
-    throw std::string(": cannot open file");
+    throw std::runtime_error(": cannot open file");
     /* check_err.py checked */
   }
   GttlFastAGenerator fasta_gen(in_fp);
@@ -182,10 +182,10 @@ static bool display_char_ranges_cases(const char *progname,
         }
       }
     }
-    catch (std::string &msg)
+    catch (const std::exception &err)
     {
       std::cerr << progname << ": file \"" << inputfile << "\""
-                << msg << std::endl;
+                << err.what() << std::endl;
       haserr = true;
       break;
     }
@@ -260,9 +260,9 @@ int main(int argc,char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -283,10 +283,10 @@ int main(int argc,char *argv[])
         multiseq = new GttlMultiseq(inputfile.c_str(),
                                     store_header,store_sequence,UINT8_MAX);
       }
-      catch (std::string &msg)
+      catch (const std::exception &err)
       {
         std::cerr << argv[0] << ": file \"" << argv[optind] << "\""
-                    << msg << std::endl;
+                    << err.what() << std::endl;
         haserr = true;
       }
       if (!haserr)

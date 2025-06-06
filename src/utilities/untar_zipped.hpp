@@ -68,8 +68,9 @@ class TarReader
   {
     if (current_file_pos != current_file_size)
     {
-      throw std::string("current file ") + current_filename +
-            std::string("not read until its end");
+      throw std::runtime_error(
+              std::string("current file ") + current_filename +
+              std::string("not read until its end"));
     }
     std::string line;
     while (true)
@@ -88,13 +89,15 @@ class TarReader
     std::vector<std::string> line_vector = gttl_split_string(line,' ');
     if (line_vector.size() < 6)
     {
-      throw std::string("line \"") + line +
-            std::string("\" does not consist of exactly 6 columns");
+      throw std::ios_base::failure(
+            std::string("line \"") + line +
+            std::string("\" does not consist of exactly 6 columns"));
     }
     if (std::sscanf(line_vector[2].data(),"%zu",&current_file_size) != 1)
     {
-      throw std::string("cannot extract byte number from \"") +
-            line_vector[2] + std::string("\"");
+      throw std::ios_base::failure(
+              std::string("cannot extract byte number from \"") +
+              line_vector[2] + std::string("\""));
     }
     line.clear();
     current_filename = std::string(line_vector[5]);
@@ -122,7 +125,8 @@ class TarReader
                                                            bytes2read);
       if (read_bytes != bytes2read)
       {
-        throw std::string("Error reading file: Could not read to finish.");
+        throw std::ios_base::failure(
+          "Error reading file: Could not read to finish.");
       }
       if (append_0_byte)
       {
@@ -147,10 +151,11 @@ class TarReader
     {
       return "-Oxvvf";
     }
-    throw std::string("illegal filename ") +
-          filename +
-          std::string(", can only handle files with suffix "
-                      ".tar.gz or .tar.bz2 or .tar");
+    throw std::ios_base::failure(
+            std::string("illegal filename ") +
+            filename +
+            std::string(", can only handle files with suffix "
+                        ".tar.gz or .tar.bz2 or .tar"));
   }
 
   public:

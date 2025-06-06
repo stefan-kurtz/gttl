@@ -97,10 +97,10 @@ class MultiseqFactoryOptions
       CHECK_PAIRWISE_EXCLUDE(0,2);
       CHECK_PAIRWISE_EXCLUDE(1,2);
     }
-    catch (const cxxopts::exceptions::exception &e)
+    catch (const cxxopts::exceptions::exception &err)
     {
       usage(options);
-      throw std::invalid_argument(e.what());
+      throw std::invalid_argument(err.what());
     }
     if (inputfiles.size() == 2 and num_sequences > 0 and
         num_sequences % size_t(2) != 0)
@@ -189,9 +189,9 @@ int main(int argc, char *argv[])
   {
     options.parse(argc,argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -207,9 +207,9 @@ int main(int argc, char *argv[])
                           options.statistics_option_is_set(),
                           options.inputfiles_get());
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << msg << std::endl;
+    std::cerr << argv[0] << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

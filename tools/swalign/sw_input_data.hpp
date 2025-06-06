@@ -1,5 +1,6 @@
 #ifndef SW_INPUT_DATA_HPP
 #define SW_INPUT_DATA_HPP
+#include <exception>
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/multiseq_pair.hpp"
 #include "alignment/blast_stat.hpp"
@@ -47,11 +48,11 @@ static auto sw_input_data(const SWOptions &options)
                                        options.gap_extension_penalty,
                                        scaled);
     }
-    catch (std::string &msg)
+    catch (const std::exception &err)
     {
       if (options.min_bit_score > 0)
       {
-        throw msg;
+        throw err;
       }
     }
   }

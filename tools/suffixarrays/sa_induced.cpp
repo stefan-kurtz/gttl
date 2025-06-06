@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <ios>
 #include <tuple>
 #include <stdexcept>
 #include <filesystem>
@@ -73,10 +74,10 @@ static FILE *outstream_create(const std::string &indexname,
   const std::string outfilename{indexname + filenamesuffix};
 
   FILE *out_fp = fopen(outfilename.c_str(), "wb");
-  if (out_fp == NULL)
+  if (out_fp == nullptr)
   {
-    throw std::runtime_error(std::string(": cannot create file \"") +
-                             outfilename + std::string("\""));
+    throw std::ios_base::failure(std::string(": cannot create file \"") +
+                                 outfilename + std::string("\""));
   }
   return out_fp;
 }
@@ -274,7 +275,7 @@ static void enhanced_suffixarray_plain_input_format(GttlMemoryTracker
                                           filecontents,
                                           totallength);
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     GTTL_UNTRACK_ALLOC(suftab);
     free(suftab);
@@ -432,7 +433,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
                             (multiseq->sequence_ptr_get()),
                           totallength);
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     GTTL_UNTRACK_ALLOC(suftab);
     free(suftab);
@@ -524,7 +525,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
                 output_suftab<SainBytesUnit>(bu_suftab, totallength, indexname,
                                              ".bsf");
               }
-              catch (const std::runtime_error &err)
+              catch (const std::exception &err)
               {
                 GTTL_UNTRACK_ALLOC(suftab);
                 free(suftab);
@@ -591,7 +592,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
             {
               out_fp = outstream_create(indexname,".bsf");
             }
-            catch (const std::runtime_error &err)
+            catch (const std::exception &err)
             {
               if (bu_suftab_own)
               {
@@ -747,7 +748,7 @@ int main(int argc, char *argv[])
                filecontents.data(),
                totallength);
       }
-      catch (const std::runtime_error &err)
+      catch (const std::exception &err)
       {
         memory_tracker.untrack(filecontents.data(),__FILE__,__LINE__);
         throw err;
@@ -761,9 +762,9 @@ int main(int argc, char *argv[])
         = guess_if_protein_file(sainoptions.inputfiles_get());
       if (is_protein and sainoptions.reverse_complement_option_is_set())
       {
-        throw std::runtime_error(std::string(": option --reverse_complement is "
-                                             "only possible for DNA sequences")
-                                );
+        throw std::invalid_argument(
+          std::string(": option --reverse_complement is "
+                      "only possible for DNA sequences"));
       }
       constexpr const bool store_header = false;
       constexpr const bool store_sequence = true;
@@ -794,7 +795,7 @@ int main(int argc, char *argv[])
                                                      totallength,
                                                      is_protein);
       }
-      catch (const std::runtime_error &err)
+      catch (const std::exception &err)
       {
         memory_tracker.untrack(multiseq,__FILE__,__LINE__);
         delete multiseq;
@@ -812,7 +813,7 @@ int main(int argc, char *argv[])
               static_cast<double>(peak_in_bytes)/totallength);
     }
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     std::cerr << argv[0] << ": file \"" << sainoptions.inputfiles_get()[0]
               << "\"" << err.what() << std::endl;

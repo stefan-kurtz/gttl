@@ -33,7 +33,7 @@ def mysubprocess_expect(cmd_line,expected_err_code,expected_err_msg = None):
   if expected_err_msg:
     n_stderr_str = normalize_err_msg(stderr_str)
     n_expected_err_msg = normalize_err_msg(expected_err_msg)
-    if n_stderr_str != n_expected_err_msg:
+    if not n_stderr_str.startswith(n_expected_err_msg):
       sys.stderr.write(\
         '{}: cmd_line="{}",\nstderr_str = "{}" !=\n       \
         "{}" = expected_err_msg\n'

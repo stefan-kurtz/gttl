@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 #include <string>
 
 #ifndef __has_builtin         // Optional of course.
@@ -111,11 +112,12 @@ static T gttl_safe_power(T a, T b)
     static constexpr const T max_value = std::numeric_limits<T>::max();
     if (a > max_value/prod)
     {
-      throw std::string("overflow when evaluating ")
+      throw std::overflow_error(
+              std::string("overflow when evaluating ")
             + std::to_string(prod) + " * " + std::to_string(a)
             + std::string(" to compute pow(")
             + std::to_string(a) + std::string(", ")
-            + std::to_string(b) + std::string(")");
+            + std::to_string(b) + std::string(")"));
     }
     prod *= a;
   }

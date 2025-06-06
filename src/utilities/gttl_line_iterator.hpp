@@ -144,7 +144,7 @@ class GttlLineIterator
       in_fp = gttl_fp_type_open(inputfile,"rb");
       if (in_fp == nullptr)
       {
-        throw std::string(": cannot open file");
+        throw std::ios_base::failure(": cannot open file");
       }
     }
     GttlLineIterator(const std::vector<std::string> *_inputfiles)
@@ -163,7 +163,7 @@ class GttlLineIterator
       in_fp = gttl_fp_type_open(inputfiles->at(0).c_str(),"rb");
       if (in_fp == nullptr)
       {
-        throw std::string(": cannot open file");
+        throw std::ios_base::failure(": cannot open file");
       }
     }
     ~GttlLineIterator(void)
@@ -205,7 +205,7 @@ class GttlLineIterator
           in_fp = gttl_fp_type_open(inputfiles->at(file_index).c_str(),"rb");
           if (in_fp == nullptr)
           {
-            throw std::string(": cannot open file");
+            throw std::ios_base::failure(": cannot open file");
           }
           return true;
         }
@@ -255,7 +255,7 @@ class GttlLineIterator
           {
             StrFormat msg(", line %zu: missing newline character",
                           line_number+1);
-            throw msg.str();
+            throw std::ios_base::failure(msg.str());
           }
           endofunit = true;
           line_number++;

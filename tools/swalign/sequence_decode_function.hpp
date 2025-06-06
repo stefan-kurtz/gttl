@@ -2,6 +2,7 @@
 #ifndef SEQUENCE_DECODE_FUNCTION_HPP
 #define SEQUENCE_DECODE_FUNCTION_HPP
 #include <cstddef>
+#include <stdexcept>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -48,7 +49,7 @@ static auto sequence_decode_function_get(
             "sequences; the following choices are available: %s",
             score_matrix_id,
             score_matrix_name_instance.string_values_joined(", ").c_str());
-        throw msg.str();
+        throw std::runtime_error{msg.str()};
       }
     }
   } else
@@ -86,7 +87,7 @@ static auto sequence_decode_function_get(
                 "available: %s",
                 score_matrix_id,
                 score_matrix_name_instance.string_values_joined(", ").c_str());
-            throw msg.str();
+            throw std::runtime_error(msg.str());
           }
         }
       }

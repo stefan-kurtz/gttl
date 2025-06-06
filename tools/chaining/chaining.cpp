@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
                            std::stoul(vec[4]));
     }
   }
-  catch (std::string &msg)
+  catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << msg << '\n';
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
 

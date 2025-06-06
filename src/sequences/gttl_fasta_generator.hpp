@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdio>
+#include <ios>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -121,9 +122,9 @@ class GttlFastAGenerator
       int ch = lg.getc();
       if(ch != '>')
       {
-        throw std::runtime_error(", line "
-                                 + std::to_string(lg.line_number_get())
-                                 + ": corrupted sequence");
+        throw std::ios_base::failure(", line "
+                                     + std::to_string(lg.line_number_get())
+                                     + ": corrupted sequence");
       }
       is_first_entry = false;
     }
@@ -150,8 +151,9 @@ class GttlFastAGenerator
 
     if(out->sequence_get().empty() or out->sequence_get()[0] == '>')
     {
-      throw std::runtime_error(", line " + std::to_string(lg.line_number_get())
-                               + ": corrupted sequence");
+      throw std::ios_base::failure(", line "
+                                   + std::to_string(lg.line_number_get())
+                                   + ": corrupted sequence");
     }
     return true;
   }

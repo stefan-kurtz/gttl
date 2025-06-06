@@ -20,6 +20,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <algorithm>
 #include <iostream>
@@ -37,6 +38,7 @@
 #include "utilities/remove_duplicates.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "sequences/matching_characters.hpp"
+#include "utilities/str_format.hpp"
 
 template<bool check_bounds,bool (*matching_method)(char,char)>
 static inline std::pair<size_t,size_t> maximize_on_both_ends(
@@ -315,13 +317,13 @@ class SortedMatchList
                             "resort to using %d bytes of space for each MEM",
                             this_match_length,sizeof_unit_match,
                                               sizeof_unit_match+1);
-              throw msg.str();
+              throw std::runtime_error(msg.str());
             } else
             {
               StrFormat msg(": cannot store match of length %zu in 10 bytes, "
                             "please inform the developer",
                             this_match_length);
-              throw msg.str();
+              throw std::runtime_error(msg.str());
             }
           } else
           {

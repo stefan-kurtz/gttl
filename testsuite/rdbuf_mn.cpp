@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <iostream>
 #include "utilities/gttl_file_open.hpp"
@@ -13,9 +14,9 @@ int main(int argc, char* argv[])
   {
     std::string x = gttl_read_file(argv[1]);
     std::cout << x;
-  } catch(const std::string &e)
+  } catch(const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << e << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << std::endl;
     exit(EXIT_FAILURE);
   }
 }

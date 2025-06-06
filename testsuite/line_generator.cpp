@@ -27,7 +27,7 @@ int main(int argc,char *argv[])
         buffer.clear();
       }
     }
-    catch (std::exception &msg)
+    catch (const std::exception &msg)
     {
       std::cerr << argv[0] << ": file \"" << argv[2] << "\""
                 << msg.what() << '\n';
@@ -54,7 +54,7 @@ int main(int argc,char *argv[])
           buffer.clear();
         }
       }
-      catch (std::exception &msg)
+      catch (const std::exception &msg)
       {
         std::cerr << argv[0] << ": file \"" << argv[1] << "\""
                   << msg.what() << '\n';

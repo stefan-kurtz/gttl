@@ -25,6 +25,7 @@ using GttlFpType = gzFile;
 #define gttl_fp_type_read(BUF, SIZE, COUNT, FP) gzread(FP, BUF, (COUNT)*(SIZE))
 
 #else
+#include <ios>
 using GttlFpType = FILE *;
 #define gttl_fp_type_open(FILENAME, MODE)   std::fopen(FILENAME, MODE)
 #define gttl_fp_type_close(FP)              fclose(FP)
@@ -50,8 +51,8 @@ static inline std::basic_string<BaseType>
     if (has_gzip_header(inputfile.c_str()))
     {
 #ifdef GTTL_WITHOUT_ZLIB
-      throw std::runtime_error(std::string("cannot handle gzipped file ")
-                               + inputfile);
+      throw std::ios_base::failure(std::string("cannot handle gzipped file ")
+                                   + inputfile);
 #else
       append_sequences = true;
       break;

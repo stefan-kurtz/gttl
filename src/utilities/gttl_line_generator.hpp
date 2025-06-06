@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -23,7 +22,7 @@ class GttlLineGenerator
   {
     if(file == nullptr)
     {
-      throw std::runtime_error(": cannot open file");
+      throw std::ios_base::failure(": cannot open file");
     }
   }
 
@@ -35,7 +34,7 @@ class GttlLineGenerator
   {
     if(file == nullptr)
     {
-      throw std::runtime_error(": cannot open file");
+      throw std::ios_base::failure(": cannot open file");
     }
   }
 
@@ -49,7 +48,7 @@ class GttlLineGenerator
     {
       if(file == nullptr)
       {
-        throw std::runtime_error(": cannot open file");
+        throw std::ios_base::failure(": cannot open file");
       }
     }
 
@@ -63,7 +62,7 @@ class GttlLineGenerator
     {
       if(file == nullptr)
       {
-        throw std::runtime_error(": cannot open file");
+        throw std::ios_base::failure(": cannot open file");
       }
     }
 
@@ -91,7 +90,7 @@ class GttlLineGenerator
         file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");
         if(file == nullptr)
         {
-          throw std::runtime_error(": cannot open file");
+          throw std::ios_base::failure(": cannot open file");
         }
       }
     }
@@ -424,7 +423,7 @@ public:
         file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");
         if(file == nullptr)
         {
-          throw std::runtime_error(": cannot open file");
+          throw std::ios_base::failure(": cannot open file");
         }
       }
     }

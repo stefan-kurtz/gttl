@@ -1,5 +1,6 @@
 #ifndef SW_OPTION_PARSER_HPP
 #define SW_OPTION_PARSER_HPP
+#include <stdexcept>
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -76,14 +77,14 @@ struct SWOptions
         case 'd':
           if (optind > argc - 1)
           {
-            throw std::string("missing argument to option -d");
+            throw std::invalid_argument("missing argument to option -d");
           }
           dbfile = argv[optind++];
           break;
         case 'q':
           if (optind > argc - 1)
           {
-            throw std::string("missing argument to option -q");
+            throw std::invalid_argument("missing argument to option -q");
           }
           queryfile = argv[optind++];
           break;
@@ -92,18 +93,20 @@ struct SWOptions
             int readint;
             if (optind + 1 > argc - 1)
             {
-              throw std::string("missing arguments to option -g");
+              throw std::invalid_argument("missing arguments to option -g");
             }
             if (std::sscanf(argv[optind],"%d",&readint) != 1 || readint < 0 ||
                             readint > INT8_MAX)
             {
-              throw std::string("illegal first argument to option -g");
+              throw std::invalid_argument(
+                "illegal first argument to option -g");
             }
             gap_open_penalty = static_cast<int8_t>(readint);
             if (std::sscanf(argv[optind+1],"%d",&readint) != 1 || readint < 0 ||
                             readint > INT8_MAX)
             {
-              throw std::string("illegal second argument to option -g");
+              throw std::invalid_argument(
+                "illegal second argument to option -g");
             }
             gap_extension_penalty = static_cast<int8_t>(readint);
             optind += 2;
@@ -118,14 +121,15 @@ struct SWOptions
                 std::sscanf(argv[optind],"%d",&readint) != 1)
             {
               StrFormat msg("missing or illegal argument to option -%c",c_opt);
-              throw msg.str();
+              throw std::invalid_argument{msg.str()};
             }
             if (c_opt == 't')
             {
               if (readint < 1)
               {
-                throw std::string("argument to option -t (i.e. the number of "
-                                  "threads) must be positive");
+                throw std::invalid_argument(
+                  "argument to option -t (i.e. the number of "
+                  "threads) must be positive");
               }
               num_threads = static_cast<size_t>(readint);
             } else
@@ -134,14 +138,16 @@ struct SWOptions
               {
                 if (readint < 1)
                 {
-                  throw std::string("argument to option -b must be positive");
+                  throw std::invalid_argument(
+                    "argument to option -b must be positive");
                 }
                 best = static_cast<size_t>(readint);
               } else
               {
                 if (readint < 1)
                 {
-                  throw std::string("argument to option -c must be positive");
+                  throw std::invalid_argument(
+                    "argument to option -c must be positive");
                 }
                 assert(c_opt == 'c');
                 min_bit_score = static_cast<uint32_t>(readint);
@@ -162,13 +168,13 @@ struct SWOptions
               {
                 if (strlen(argv[optind]) > 0 and argv[optind][0] == '-')
                 {
-                  throw std::string("missing argument to option -a");
+                  throw std::invalid_argument("missing argument to option -a");
                 }
               }
               optind++;
             } else
             {
-              throw std::string("missing argument to option -a");
+              throw std::invalid_argument("missing argument to option -a");
             }
             break;
           }
@@ -179,7 +185,7 @@ struct SWOptions
             if (optind > argc - 1)
             {
               StrFormat msg("missing argument to option -%c",c_opt);
-              throw msg.str();
+              throw std::invalid_argument{msg.str()};
             }
             if (c_opt == 's')
             {
@@ -188,9 +194,9 @@ struct SWOptions
               {
                 score_matrix_name.set(std::string(score_matrix_id));
               }
-              catch(std::string &msg)
+              catch(const std::exception &err)
               {
-                throw msg;
+                throw err;
               }
             } else
             {
@@ -216,7 +222,7 @@ struct SWOptions
               std::string msg{"missing or illegal argument to option -v; "
                               "argument must be either "};
               msg += sw_all_against_all ? "1 or 2" :  "0, 1, or 2";
-              throw msg;
+              throw std::invalid_argument(msg);
             }
             vectorized_alignment = readint;
             optind++;
@@ -240,19 +246,19 @@ struct SWOptions
         default:
           {
             StrFormat msg("illegal option -%c",c_opt);
-            throw msg.str();
+            throw std::invalid_argument(msg.str());
           }
       }
     }
     if (optind < argc)
     {
       StrFormat msg("superfluous arguments %s",argv[optind]);
-      throw msg.str();
+      throw std::invalid_argument(msg.str());
     }
     assert (optind == argc);
     if (dbfile == nullptr)
     {
-      throw std::string("option -d is mandatory");
+      throw std::invalid_argument("option -d is mandatory");
     }
     if (vectorized_alignment == 1 && alignment_display.need_alignment())
     {
@@ -262,15 +268,15 @@ struct SWOptions
     {
       if (best > 0)
       {
-        throw std::string("option -p and -b are incompatible");
+        throw std::invalid_argument("option -p and -b are incompatible");
       }
       if (queryfile != nullptr)
       {
-        throw std::string("option -p and -q are incompatible");
+        throw std::invalid_argument("option -p and -q are incompatible");
       }
       if (num_threads > 1)
       {
-        throw std::string("option -p and -t are incompatible");
+        throw std::invalid_argument("option -p and -t are incompatible");
       }
     }
     if (queryfile == nullptr)

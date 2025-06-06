@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/gttl_line_iterator.hpp"
@@ -43,11 +44,11 @@ static void process_file(const char *filename)
   const char *next_newline = static_cast<const char *>
                              (memchr(file_contents + mid,'\n',
                                      mapped_file.size() - mid));
-  if (next_newline == NULL)
+  if (next_newline == nullptr)
   {
     StrFormat msg(": second part of file beginning at offset %zu "
                   " does not contain new line character",mid);
-    throw msg.str();
+    throw std::runtime_error{msg.str()};
   }
   size_t start_part2
     = static_cast<size_t>(next_newline + 1 - file_contents);
@@ -62,7 +63,7 @@ static void process_file(const char *filename)
     StrFormat msg(": inconsistent number of lines: lines_all = %zu != %zu = "
                   "%zu + %zu = lines1 + lines2",lines_all,lines1+lines2,
                                                 lines1,lines2);
-    throw msg.str();
+    throw std::runtime_error{msg.str()};
   }
 }
 
@@ -70,8 +71,7 @@ int main(int argc,char *argv[])
 {
   if (argc < 2)
   {
-    std::cerr << "Usage: " << argv[0] << " <inputfile> [inpufile ..]"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <inputfile> [inpufile ..]\n";
     return EXIT_FAILURE;
   }
   for (int file_idx = 1; file_idx < argc; file_idx++)
@@ -80,9 +80,9 @@ int main(int argc,char *argv[])
     {
       process_file(argv[file_idx]);
     }
-    catch (std::string &msg)
+    catch (const std::exception &err)
     {
-      std::cerr << argv[0] << ": " << msg << std::endl;
+      std::cerr << argv[0] << ": " << err.what() << '\n';
       return EXIT_FAILURE;
     }
   }

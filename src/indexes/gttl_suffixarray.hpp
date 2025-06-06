@@ -158,7 +158,7 @@ class GttlSuffixArray
     in_file.open(prj_filename, std::ifstream::in);
     if (in_file.fail() )
     {
-      throw std::runtime_error(std::string("file ") + prj_filename +
+      throw std::ios_base::failure(std::string("file ") + prj_filename +
                                std::string(": cannot open; possibly index "
                                            "needs to be created"));
     }
@@ -167,17 +167,17 @@ class GttlSuffixArray
     {
       if ((sep_pos = line.find("\t")) == std::string::npos)
       {
-        throw std::runtime_error(std::string("file ") + prj_filename +
-                                 std::string(": missing tabulator in line ")
-                                 + line);
+        throw std::ios_base::failure(std::string("file ") + prj_filename +
+                                     std::string(": missing tabulator in line ")
+                                     + line);
       }
       const std::string this_key = line.substr(0, sep_pos);
       const int idx = key2index(this_key);
       if (idx == -1)
       {
-        throw std::runtime_error(std::string("file ") + prj_filename +
-                                 std::string(": illegal key ") + this_key +
-                                 std::string(" in line ") + line);
+        throw std::ios_base::failure(std::string("file ") + prj_filename +
+                                     std::string(": illegal key ") + this_key +
+                                     std::string(" in line ") + line);
       }
       if (idx < num_integer_keys)
       {
@@ -185,9 +185,10 @@ class GttlSuffixArray
         if (sscanf(line.substr(sep_pos + 1).c_str(),"%" PRId64, &read_int) != 1
             || read_int < 0)
         {
-          throw std::runtime_error(std::string("file ") + prj_filename +
-                                   std::string(": value for key ") + this_key +
-                                   std::string(" must be a positive integer"));
+          throw std::ios_base::failure(std::string("file ") + prj_filename
+                                    + std::string(": value for key ")
+                                    + this_key +
+                                    std::string(" must be a positive integer"));
         }
         int_values[idx] = static_cast<size_t>(read_int);
         int_values_set[idx] = true;
@@ -201,17 +202,17 @@ class GttlSuffixArray
     {
       if (!int_values_set[idx])
       {
-        throw std::runtime_error(std::string("file ") + prj_filename +
-                                 std::string(": missing line for integer "
-                                             "key \"") +
-                                 keys[idx] + std::string("\""));
+        throw std::ios_base::failure(std::string("file ") + prj_filename +
+                                     std::string(": missing line for integer "
+                                                 "key \"") +
+                                     keys[idx] + std::string("\""));
       }
     }
     if (inputfiles.empty())
     {
-      throw std::runtime_error(std::string("file ") + prj_filename +
-                               std::string(": missing lines with key "
-                                           "\"inputfile\""));
+      throw std::ios_base::failure(std::string("file ") + prj_filename +
+                                   std::string(": missing lines with key "
+                                               "\"inputfile\""));
     }
   }
   public:

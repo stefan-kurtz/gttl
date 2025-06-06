@@ -43,7 +43,7 @@ static {{ return_type }} {{ function_name }}
                       score_matrix_id,
                       score_matrix_name_instance.string_values_joined(", ")
                                                 .c_str());
-        throw msg.str();
+        throw std::runtime_error(msg.str());
       }
     }
   } else
@@ -77,7 +77,7 @@ static {{ return_type }} {{ function_name }}
                           score_matrix_id,
                           score_matrix_name_instance.string_values_joined(", ")
                                                     .c_str());
-            throw msg.str();
+            throw std::runtime_error(msg.str());
           }
         }
       }

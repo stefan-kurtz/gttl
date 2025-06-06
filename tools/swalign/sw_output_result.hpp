@@ -123,7 +123,7 @@ class SWOutputResultShared
                                        score_matrix_name,
                                        dna_alphabet);
     }
-    catch (std::string &msg)
+    catch (const std::exception &err)
     {
       assert(false); /* This should not happen as reason for exception must
                         have been detected in scoring_info_and_seq_trans */

@@ -102,7 +102,7 @@ class GttlSeqIterator
           {
             StrFormat msg(", line %zu: corrupted sequence",
                            gttl_li.line_number_get()+1);
-            throw msg.str(); /* check_err.py checked */
+            throw std::ios_base::failure(msg.str()); /* check_err.py checked */
           }
           if (!found_end)
           {
@@ -115,7 +115,7 @@ class GttlSeqIterator
         {
           StrFormat msg(", line %zu: corrupted sequence",
                            gttl_li.line_number_get()+1);
-          throw msg.str(); /* check_err.py checked */
+          throw std::ios_base::failure(msg.str()); /* check_err.py checked */
         }
         return sequence_entry;
       }

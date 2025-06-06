@@ -48,8 +48,8 @@ class InverseSuftabReader
       FILE *out_fp = std::fopen(inverse_suftab_filename.c_str(),"wb");
       if (out_fp == nullptr)
       {
-        throw std::runtime_error(std::string("cannot create file ") +
-                                 inverse_suftab_filename);
+        throw std::ios_base::failure(std::string("cannot create file ") +
+                                     inverse_suftab_filename);
       }
       std::fwrite(inverse_suftab, sizeof *inverse_suftab, totallength + 1,
                   out_fp);

@@ -1,5 +1,6 @@
 #include <cmath>
 #include <algorithm>
+#include <exception>
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
@@ -216,10 +217,10 @@ int main(int argc,char *argv[])
       {
         eoplist_decode = new Eoplist(distinguish_mismatch_match,cigar_string);
       }
-      catch (std::string &msg) /* check_err.py */
+      catch (const std::exception &err) /* check_err.py */
       {
         std::cerr << argv[0] << " " << trials << " failed: "
-                  << msg << std::endl;
+                  << err.what() << std::endl;
         delete eoplist_decode;
         return EXIT_FAILURE;
       }

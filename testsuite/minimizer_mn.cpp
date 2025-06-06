@@ -18,6 +18,8 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <cstdint>
+#include <exception>
+#include <stdexcept>
 #include <string>
 #include <algorithm>
 
@@ -42,7 +44,7 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
   }
   StrFormat msg("cannot handle sequences_bits + hash_bits = %d + %d > 72",
                 sequences_bits,requested_hash_bits);
-  throw msg;
+  throw std::runtime_error{msg.str()};
 }
 
 void run_nt_minimizer(const MinimizerOptions &options)
@@ -72,10 +74,10 @@ void run_nt_minimizer(const MinimizerOptions &options)
       = determine_hash_bits(multiseq->sequences_bits_get(),
                             options.hash_bits_get());
   }
-  catch (const std::string &msg)
+  catch (const std::exception &err)
   {
     delete multiseq;
-    throw msg;
+    throw err;
   }
   assert(var_sizeof_unit_hashed_qgram == 8 or
          var_sizeof_unit_hashed_qgram == 9);
@@ -151,9 +153,9 @@ int main(int argc, char *argv[])
   {
     options.parse(argc, argv);
   }
-  catch (std::invalid_argument &e) /* check_err.py */
+  catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": file " << e.what() << std::endl;
+    std::cerr << argv[0] << ": file " << err.what() << std::endl;
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -164,12 +166,12 @@ int main(int argc, char *argv[])
   {
     run_nt_minimizer(options);
   }
-  catch (const std::string &msg)
+  catch (const std::exception &err)
   {
     for (auto &&inputfile : options.inputfiles_get())
     {
       std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << msg << std::endl;
+                << err.what() << std::endl;
     }
     return EXIT_FAILURE;
   }

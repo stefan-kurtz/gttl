@@ -5,6 +5,7 @@
 #define SCORE_MATRIX_NAME_HPP
 
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <cassert>
@@ -56,9 +57,10 @@ class ScoreMatrixName
     }
     if (idx == num_values)
     {
-      throw(std::string("illegal argument ") + str +
-            std::string(", possible values are: ") +
-            string_values_joined(", ", start_index));
+      throw std::runtime_error(
+        std::string("illegal argument ") + str +
+        std::string(", possible values are: ") +
+        string_values_joined(", ", start_index));
     }
   }
   bool is(EnumScoreMatrixName param) const noexcept { return value == param; }

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
+#include <stdexcept>
 #include "utilities/str_format.hpp"
 
 class BlastStatistics
@@ -68,13 +69,13 @@ class BlastStatistics
                     "available for blosum62 matrix and gap parameters %d/%d",
                     gap_open_penalty,
                     gap_extension_penalty);
-      throw msg.str();
+      throw std::runtime_error(msg.str());
     }
     assert(idx >= 0 && idx < static_cast<int>(items));
     const double lambda = stat[idx].lambda,
                  kappa = stat[idx].kappa;
-    log_kappa_d_log2 = log(kappa)/log(2.0);
-    lambda_d_log2 = lambda/log(2.0);
+    log_kappa_d_log2 = log(kappa)/std::numbers::ln2;
+    lambda_d_log2 = lambda/std::numbers::ln2;
 #ifdef GUMBLE_OUT
     printf("lambda_d_log2=%.6e\n",blast_stat->lambda_d_log2);
 #endif

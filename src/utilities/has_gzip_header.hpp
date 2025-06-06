@@ -1,7 +1,7 @@
 #ifndef HAS_GZIP_HEADER_HPP
 #define HAS_GZIP_HEADER_HPP
 #include <cstdio>
-#include <stdexcept>
+#include <ios>
 #include <string>
 #include <cstring>
 
@@ -10,8 +10,8 @@ static inline bool has_gzip_header(const char *file_name)
   FILE *fp = std::fopen(file_name, "rb");
   if (fp == nullptr)
   {
-    throw std::runtime_error(": cannot open file "
-                             + std::string(file_name));
+    throw std::ios_base::failure(": cannot open file "
+                                 + std::string(file_name));
   }
   constexpr const unsigned char magic_bytes[] = {0x1F, 0x8B};
   unsigned char header[sizeof(magic_bytes)];

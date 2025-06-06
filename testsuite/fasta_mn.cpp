@@ -96,12 +96,7 @@ int main(int argc,char *argv[])
       }
     }
   }
-  catch (const std::string &msg)
-  {
-    std::cerr << argv[0] << ": " << msg << std::endl;
-    return EXIT_FAILURE;
-  }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     std::cerr << argv[0] << ": " << err.what() << std::endl;
     return EXIT_FAILURE;

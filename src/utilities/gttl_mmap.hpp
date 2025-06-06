@@ -29,7 +29,7 @@ class Gttlmmap
          num_values;
   void *memorymap;
   public:
-  Gttlmmap(const char *filename) :
+  explicit Gttlmmap(const char *filename) :
     filedesc(0),
     size_of_file(gttl_file_size(filename)),
     num_values(size_of_file/sizeof(T)),
@@ -39,24 +39,24 @@ class Gttlmmap
     {
       StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
                     filename,size_of_file,sizeof(T));
-      throw msg.str();
+      throw std::ios_base::failure(msg.str());
     }
     filedesc = open(filename, O_RDONLY);
     if (filedesc < 0)
     {
       StrFormat msg("cannot open file %s",filename);
-      throw msg.str();
+      throw std::ios_base::failure(msg.str());
     }
-    memorymap = mmap(NULL, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED,
+    memorymap = mmap(nullptr, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED,
                      filedesc, 0);
     if (memorymap == MAP_FAILED)
     {
       StrFormat msg("cannot memory map %zu elements from file %s",
                     num_values,filename);
-      throw msg.str();
+      throw std::ios_base::failure(msg.str());
     }
   }
-  public:
+
   ~Gttlmmap(void)
   {
     assert(memorymap != nullptr);
@@ -69,7 +69,7 @@ class Gttlmmap
     assert(memorymap != nullptr);
     return reinterpret_cast<const T *>(memorymap);
   }
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     return num_values;
   }

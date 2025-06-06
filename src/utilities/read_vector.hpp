@@ -28,7 +28,7 @@ std::vector<T> gttl_read_vector(const char *filename)
     {
       StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
                     filename,file_content.size(),sizeof(T));
-      throw msg.str();
+      throw std::ios_base::failure(msg.str());
     }
     std::vector<T> vec(reinterpret_cast<const T*>(file_content.data()),
                        reinterpret_cast<const T*>(file_content.data() +
@@ -37,21 +37,22 @@ std::vector<T> gttl_read_vector(const char *filename)
   }
   if (not std::filesystem::exists(filename))
   {
-    throw std::string("file \"") + filename + std::string("\" does not exist");
+    throw std::ios_base::failure(std::string("file \"") + filename
+                                 + std::string("\" does not exist"));
   }
   const size_t size_of_file = gttl_file_size(filename);
   if (size_of_file % sizeof(T) != 0)
   {
     StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
                   filename,size_of_file,sizeof(T));
-    throw msg.str();
+    throw std::ios_base::failure(msg.str());
   }
   // Open the stream to 'lock' the file.
   std::ifstream instream(filename, std::ios::in | std::ios::binary);
   if (instream.fail())
   {
     StrFormat msg("cannot open file %s",filename);
-    throw msg.str();
+    throw std::ios_base::failure(msg.str());
   }
   const size_t num_values = size_of_file/sizeof(T);
   std::vector<T> vec(num_values);
@@ -59,7 +60,7 @@ std::vector<T> gttl_read_vector(const char *filename)
   {
     StrFormat msg("cannot only read %zu bytes from file %s",
                   instream.gcount(),filename);
-    throw msg.str();
+    throw std::ios_base::failure(msg.str());
   }
   return vec;
 }
