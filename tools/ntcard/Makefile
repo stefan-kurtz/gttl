@@ -161,11 +161,6 @@ code_check:
 	code_check.py -wt `find . -name '*.[hc]pp'`
 	${GTTL}/scripts/check_ifndef.py `find . -name '*.hpp'`
 
-.PHONY:tags
-tags:
-	@ctags -w --c++-kinds=+p --fields=+iaSKlm --extra=+q `ls *.[hc]pp` \
-	`find ${GTTL}/src -name '*.hpp'` > $@
-
 .PHONY:clean
 clean:
 	@${RM} -r *.[oxd] *.x.dSYM/ gqf/*.[oxd]
