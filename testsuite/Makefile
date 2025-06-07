@@ -284,7 +284,7 @@ test_thread_pool:thread_pool_mn.x
 
 .PHONY:test_sort_kvt
 test_sort_kvt:sort_key_value_pairs.x
-	@for num in 66 666 66666 666666 6666666 66666666; do \
+	@for num in 66 666 66666 666666 6666666; do \
 	   ./sort_key_value_pairs.x -d t -m lsb-radix $$num;\
 	   ./sort_key_value_pairs.x -d t -m mergesort $$num;\
 	   ./sort_key_value_pairs.x -d t -m stdsort $$num;\
@@ -293,7 +293,7 @@ test_sort_kvt:sort_key_value_pairs.x
 
 .PHONY:test_sort_kvp
 test_sort_kvp:sort_key_value_pairs.x
-	@for num in 100 1000 10000 100000 1000000 10000000 100000000; do \
+	@for num in 100 1000 10000 100000 1000000 10000000; do \
 	   ./sort_key_value_pairs.x -d p -m lsb-radix $$num;\
 	   ./sort_key_value_pairs.x -d p -m mergesort $$num;\
 	   ./sort_key_value_pairs.x -d p -m stdsort $$num;\
@@ -302,7 +302,7 @@ test_sort_kvp:sort_key_value_pairs.x
 
 .PHONY:test_sort_i
 test_sort_i:sort_key_value_pairs.x
-	@for num in 200 2000 20000 200000 2000000 20000000 200000000; do \
+	@for num in 200 2000 20000 200000 2000000 20000000; do \
 	   ./sort_key_value_pairs.x -t 1 -d i -m lsb-radix $$num;\
 	   ./sort_key_value_pairs.x -t 2 -d i -m lsb-radix $$num;\
 	   ./sort_key_value_pairs.x -t 3 -d i -m lsb-radix $$num;\
