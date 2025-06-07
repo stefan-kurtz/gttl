@@ -314,7 +314,7 @@ test_sort_i:sort_key_value_pairs.x
 .PHONY:test_eoplist
 test_eoplist:eoplist_mn.x
 	@${VALGRIND} ./eoplist_mn.x silent 100000
-	@${VALGRIND} ./eoplist_mn.x display 1000
+	@${VALGRIND} ./eoplist_mn.x display 10
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_invint
