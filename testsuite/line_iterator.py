@@ -3,7 +3,7 @@
 import sys, re
 
 print('#!/bin/sh')
-print('set -e -x')
+print('set -e')
 print('TMPFILE_src=`mktemp --tmpdir=.` || exit 1')
 print('TMPFILE_target=`mktemp --tmpdir=.` || exit 1')
 for filename in sys.argv[1:]:
