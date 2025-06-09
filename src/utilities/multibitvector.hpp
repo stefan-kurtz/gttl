@@ -7,36 +7,21 @@ class Multibitvector
 {
   static constexpr const size_t bitvector_mask = size_t(63);
   static constexpr const int bitvector_log = 6;
-  size_t bits,
-         set_bits,
-         num_bitvectors;
+  const size_t num_bits,
+               num_bitvectors;
+  size_t set_bits;
   Bitvector *multibitvector;
-  using DivResult = struct
-  {
-    size_t quot;
-    size_t rem;
-  };
-  DivResult quot_rem_get(size_t idx) const noexcept
-  {
-    DivResult divresult;
-    divresult.quot = idx >> bitvector_log;
-    divresult.rem = idx & bitvector_mask;
-    return divresult;
-  }
-
   public:
   Multibitvector(size_t _bits)
-    : bits(_bits)
+    : num_bits(_bits)
+    , num_bitvectors((num_bits + 63) >> bitvector_log)
     , set_bits(0)
-  {
-    DivResult divresult = quot_rem_get(bits);
-    num_bitvectors = divresult.quot + ((divresult.rem > 0) ? 1 : 0);
-    multibitvector = new Bitvector[num_bitvectors];
-  }
+    , multibitvector(new Bitvector [num_bitvectors])
+  { }
   Multibitvector(const Multibitvector& m) // Copy constructor
-    : bits(m.bits)
-    , set_bits(m.set_bits)
+    : num_bits(m.num_bits)
     , num_bitvectors(m.num_bitvectors)
+    , set_bits(m.set_bits)
     , multibitvector(new Bitvector[m.num_bitvectors])
   {
     for (size_t idx = 0; idx < num_bitvectors; idx++)
@@ -50,34 +35,37 @@ class Multibitvector
   }
   void set(size_t idx)
   {
-    DivResult divresult = quot_rem_get(idx);
     if constexpr (track_count)
     {
-      set_bits += !(multibitvector[divresult.quot][divresult.rem]);
+      set_bits += not (multibitvector[idx >> bitvector_log]
+                                     [idx & bitvector_mask]);
     }
-    multibitvector[divresult.quot].set(divresult.rem);
+    multibitvector[idx >> bitvector_log].set(idx & bitvector_mask);
   }
   void reset(size_t idx) noexcept
   {
-    DivResult divresult = quot_rem_get(idx);
-    assert(idx < bits &&
-           (!multibitvector[divresult.quot][divresult.rem] ||
+    assert(idx < num_bits and
+           (not multibitvector[idx >> bitvector_log][idx & bitvector_mask] or
             set_bits > 0));
     if constexpr (track_count)
     {
-      set_bits -= multibitvector[divresult.quot][divresult.rem];
+      set_bits -= multibitvector[idx >> bitvector_log][idx & bitvector_mask];
     }
-    multibitvector[divresult.quot].reset(divresult.rem);
+    multibitvector[idx >> bitvector_log].reset(idx & bitvector_mask);
   }
   bool operator[](size_t idx) const noexcept
   {
-    assert(idx < bits);
-    DivResult divresult = quot_rem_get(idx);
-    return multibitvector[divresult.quot][divresult.rem];
+    assert(idx < num_bits);
+    return multibitvector[idx >> bitvector_log][idx & bitvector_mask];
   }
   size_t size(void) const noexcept
   {
-    return bits;
+    return num_bits;
+  }
+
+  size_t size_in_bytes(void) const
+  {
+    return num_bitvectors * sizeof(Bitvector);
   }
   void operator |=(const Multibitvector &other) noexcept
   {
@@ -89,16 +77,21 @@ class Multibitvector
   }
   bool operator==(const Multibitvector<track_count> &rhs) const noexcept
   {
-    if (bits != rhs.bits) {
+    if (num_bits != rhs.num_bits)
+    {
       return false;
     }
-    if constexpr (track_count) {
-      if (set_bits != rhs.set_bits) {
+    if constexpr (track_count)
+    {
+      if (set_bits != rhs.set_bits)
+      {
         return false;
       }
     }
-    for (size_t idx = 0; idx < num_bitvectors; idx++) {
-      if (multibitvector[idx] != rhs.multibitvector[idx]) {
+    for (size_t idx = 0; idx < num_bitvectors; idx++)
+    {
+      if (multibitvector[idx] != rhs.multibitvector[idx])
+      {
         return false;
       }
     }
