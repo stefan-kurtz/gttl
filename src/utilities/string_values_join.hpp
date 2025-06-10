@@ -22,7 +22,7 @@ static inline std::string string_values_join(const char *sep,
   {
     auto v = *it;
     using T = decltype(v);
-    if constexpr (std::is_same_v<T, std::string> or 
+    if constexpr (std::is_same_v<T, std::string> or
                   std::is_same_v<T, const char *>)
     {
       out_string += std::string(sep) + v;
