@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <string>
+#include <type_traits>
 
 template<class FwdIter>
 static inline std::string string_values_join(const char *sep,
@@ -18,7 +20,16 @@ static inline std::string string_values_join(const char *sep,
   ++it;
   for (; it  != end; ++it)
   {
-    out_string += std::string(sep) + *it;
+    auto v = *it;
+    using T = decltype(v);
+    if constexpr (std::is_same_v<T, std::string> or 
+                  std::is_same_v<T, const char *>)
+    {
+      out_string += std::string(sep) + v;
+    } else
+    {
+      out_string += std::string(sep) + std::to_string(v);
+    }
   }
   return out_string;
 }
