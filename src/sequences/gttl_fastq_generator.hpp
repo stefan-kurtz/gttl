@@ -185,7 +185,8 @@ class GttlFastQGenerator
   GttlFastQEntry<buf_size> default_buffer;
   GttlFastQEntry<buf_size>* out;
   bool is_end;
-  GttlLineGenerator<buf_size, true> lg;
+  static constexpr const bool skip_empty_lines = true;
+  GttlLineGenerator<buf_size, skip_empty_lines> lg;
 };
 
 #endif  // GTTL_FASTQ_GENERATOR_HPP

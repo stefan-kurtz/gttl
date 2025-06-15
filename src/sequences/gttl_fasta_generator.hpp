@@ -220,6 +220,7 @@ class GttlFastAGenerator
   GttlFastAEntry<buf_size>* out;
   bool is_end;
   bool is_first_entry = true;
-  GttlLineGenerator<buf_size, true> lg;
+  static constexpr const bool skip_empty_lines = true;
+  GttlLineGenerator<buf_size, skip_empty_lines> lg;
 };
 #endif // GTTL_FASTA_GENERATOR_HPP
