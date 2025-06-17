@@ -79,7 +79,7 @@ endif
 
 # We usually want this enabled. So we explicitly have to set debug=yes to disable it.
 ifneq ($(debug),yes)
-  CXXFLAGS += -Og
+  CXXFLAGS += -O3
   CPPFLAGS += -DNDEBUG
   ifneq ($(SYSTEM),Darwin)
 	 ifneq ($(OS),Windows_NT)
@@ -87,7 +87,7 @@ ifneq ($(debug),yes)
 	 endif
   endif
 else
-  CXXFLAGS += -O3
+  CXXFLAGS += -Og
 endif
 
 # Do not treat linking against outdated ABI-incompatible objects as an error.
