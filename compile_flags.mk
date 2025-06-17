@@ -23,7 +23,7 @@ LDFLAGS = -g -m64
 # Show compilation time
 ifeq (,$(findstring g++-,$(CXX)))
   ifneq ($(SYSTEM),Darwin)
-    ifneq ($(OS,Windows_NT)
+    ifneq ($(OS),Windows_NT)
       TIME_OPTION=-time
     endif
   endif
