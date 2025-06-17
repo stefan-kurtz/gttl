@@ -203,7 +203,7 @@ class SuccinctBitvector
       fprintf(stderr, "Acceleration structure not build.\n");
       exit(1);
     }
-    // printf("count: %lu\n", count);
+    // printf("count: %zu\n", count);
     if (not value) {
       return 0;
     }
@@ -217,7 +217,7 @@ class SuccinctBitvector
       min = 0;
     }
 
-    // printf("rank_min %lu\n", get_rank(min, true));
+    // printf("rank_min %zu\n", get_rank(min, true));
 
 
     size_t max;
@@ -231,13 +231,13 @@ class SuccinctBitvector
     size_t superblock_l = min / SUPERBLOCKBITS;
     size_t superblock_r = (max + SUPERBLOCKBITS - 1) / SUPERBLOCKBITS;
 
-    // printf("t: %lu %lu %lu %lu %lu\n",
+    // printf("t: %zu %zu %zu %zu %zu\n",
     //        select_index, min, max, superblock_l, superblock_r);
 
     while (superblock_l < superblock_r) {
       size_t m = (superblock_l + superblock_r) / 2;
       size_t superblock_count = get_superblock_count(m);
-    // printf("superblock_count: %lu\n", superblock_count);
+    // printf("superblock_count: %zu\n", superblock_count);
 
       if (superblock_count >= count) {
         superblock_r = m;
@@ -252,7 +252,7 @@ class SuccinctBitvector
     // size_t block_l = (min % SUPERBLOCKBITS) / BLOCKBITS;
     // size_t block_r = (max %SUPERBLOCKBITS) / BLOCKBITS;
 
-    // printf("superblock_l: %lu\n", superblock_l);
+    // printf("superblock_l: %zu\n", superblock_l);
 
     size_t block_l = 0;
     size_t block_r = 7;
@@ -264,7 +264,7 @@ class SuccinctBitvector
     } else {
       superblock_count = 0;
     }
-    // printf("superblock_count: %lu\n", superblock_count);
+    // printf("superblock_count: %zu\n", superblock_count);
     while (block_l < block_r) {
       size_t m = (block_l + block_r) / 2;
 
@@ -275,15 +275,15 @@ class SuccinctBitvector
       }
     }
 
-    // printf("superblock_l: %lu, block_l: %lu\n", superblock_l, block_l);
+    // printf("superblock_l: %zu, block_l: %zu\n", superblock_l, block_l);
 
     size_t block_count = get_block_count(superblock_l, block_l);
-    // printf("block_count: %lu\n", superblock_count + block_count);
+    // printf("block_count: %zu\n", superblock_count + block_count);
 
     size_t local_count = 0;
     for (int i = 0; i < 8; i++) {
       size_t index = superblock_l * 64 + block_l * 8 + i;
-      // printf("index: %lu\n", index);
+      // printf("index: %zu\n", index);
       size_t pop;
       if (index >= data_vector.size()) {
         pop = 0;
@@ -291,14 +291,14 @@ class SuccinctBitvector
         pop = std::__popcount(data_vector[index]);
       }
       local_count += pop;
-      // printf("complete_count: %lu\n",
+      // printf("complete_count: %zu\n",
       // superblock_count + block_count + local_count);
 
       if (superblock_count + block_count + local_count >= count) {
 
         const size_t rem = count - (superblock_count + block_count +
                                     local_count - pop);
-        // printf("rem: %lu\n", rem);
+        // printf("rem: %zu\n", rem);
 
         return index * 64 + select_uint64_t(data_vector[index], rem, true);
       }
@@ -321,10 +321,10 @@ class SuccinctBitvector
     //   printf("%064lb %064lb\n", v.first, v.second);
     // }
 
-    // printf("select_1: (%lu)\n", select_1.size());
+    // printf("select_1: (%zu)\n", select_1.size());
 
     // for (auto v : select_1) {
-    //   printf("%lu\n", v);
+    //   printf("%zu\n", v);
     // }
   }
 
