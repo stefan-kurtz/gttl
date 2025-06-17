@@ -16,11 +16,14 @@
 */
 
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 #include "utilities/runtime_class.hpp"
 #include "indexes/gttl_suffixarray.hpp"
+#include "indexes/succinct_bitvector.hpp"
+#include "succinct_plcp_table.hpp"
 
 int main(int argc,char *argv[])
 {
@@ -36,7 +39,7 @@ int main(int argc,char *argv[])
   bool haserr = false;
   try
   {
-    suffixarray = new GttlSuffixArray(indexname,{LCPTAB_file});
+    suffixarray = new GttlSuffixArray(indexname,{LCPTAB_file, SUFTAB_file});
   }
   catch (const std::exception &err)
   {
@@ -50,6 +53,12 @@ int main(int argc,char *argv[])
     std::cout << "read the succinct representaton from file " << indexname
               << ".lls" << std::endl;
   }
+  std::string filename = std::string(indexname) + ".lls";
+  SuccinctBitvector succinctlcp = SuccinctBitvector(filename.c_str());
+
+  std::string indexstring(indexname);
+  SuccinctPlcpTable<uint32_t> succinctplcptable(indexstring);
+  auto succinctplcpiter = succinctplcptable.begin();
   if (!haserr)
   {
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
@@ -61,6 +70,19 @@ int main(int argc,char *argv[])
       const uint32_t lcpvalue = *it; /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
+
+      uint32_t suffix = suffixarray->get_suftab_abspos().at(idx +1 ) + 1;
+      size_t select_1 = succinctlcp.get_select(suffix, 1);
+      size_t lcp = succinctlcp.get_rank(select_1, 0) + 1 - suffix;
+
+
+      uint32_t succinct_lcp = *succinctplcpiter;
+      if (lcp != lcpvalue || succinct_lcp != lcpvalue) {
+        printf("lcpmismatch: %zu, %d, %zu, %d\n",
+               idx, lcpvalue, lcp, succinct_lcp);
+      }
+
+      ++succinctplcpiter;
       lcpvalue_sum += static_cast<size_t>(lcpvalue);
       idx++;
       if (idx == nonspecial_suffixes)
@@ -71,6 +93,11 @@ int main(int argc,char *argv[])
         break;
       }
     }
+
+    // printf("%zu\n", idx);
+    // for (; succinctplcpiter != succinctplcptable.end(); ++succinctplcpiter) {
+    //   printf("additional %d\n", *succinctplcpiter);
+    // }
     std::cout << "# reverse_complement\t"
               << (suffixarray->with_reverse_complement() ? "true" : "false")
               << std::endl;

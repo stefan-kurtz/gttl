@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstddef>
 #include <cstdint>
@@ -36,6 +37,7 @@
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/literate_multiseq.hpp"
 #include "sequences/inputfiles_multiseq.hpp"
+#include "indexes/succinct_bitvector.hpp"
 
 #include "sa_induced_options.hpp"
 #include "fill_bu_suftab.hpp"
@@ -120,12 +122,34 @@ static void lcptab_output_saturated(const std::string &indexname,
   }
 }
 
-template<class Generator>
-static void lcptab_output_succinct(GTTL_UNUSED const std::string &indexname,
-                                   GTTL_UNUSED Generator &lcp_generator)
+template<class SuftabBaseType>
+static void lcptab_output_succinct(const std::string &indexname,
+                                   PlcpTable<SuftabBaseType>
+                                     &plcp_table)
 {
-  throw std::runtime_error(std::string(": output of lcptable in succinct "
-                                       "represenation not implemented yet"));
+  SuccinctBitvector b;
+  size_t last = size_t(1);
+  for (size_t pos = 0; pos < plcp_table.get_total_length(); pos++){
+    const size_t cur = plcp_table.plcp_value_get(pos);
+    const size_t unary = cur - last + 1;
+    /* Implement method to construct unary coding by single function call */
+    for (size_t i = 0; i < unary; i++)
+    {
+      b.push(false);
+    }
+    // printf("%zu; %zu %zu %zu %zu\n", pos, cur, cur + pos, cur - last + 1,
+    //         b.get_length());
+
+    b.push(true);
+    last = cur;
+  }
+
+  b.buildAccelerationStructures();
+  // printf("%zu, %zu\n", plcp_table.get_total_length(),
+  //                      b.get_rank(b.get_length(), 1));
+  const std::string lls_filename(indexname + ".lls");
+  b.serialize(lls_filename);
+  // b.print();
 }
 
 template<class Generator>
@@ -166,13 +190,7 @@ static void create_and_output_lcptab(GttlMemoryTracker *memory_tracker,
                                             var_alphasize);
     assert(lcptab[0] == 0);
     assert(lcptab[totallength] == 0);
-    if (succinct_lcptab)
-    {
-      lcptab_output_succinct(indexname, lcptab);
-    } else
-    {
-      lcptab_output_saturated(indexname, lcptab);
-    }
+    lcptab_output_saturated(indexname, lcptab);
     if (print_stdout)
     {
       lcptab_print(lcptab);

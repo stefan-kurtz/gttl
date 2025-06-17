@@ -106,6 +106,14 @@ class PlcpTable
       lcpvalue -= (lcpvalue > 0);
     }
   }
+  uint32_t plcp_value_get(size_t index) const
+  {
+    return plcp_table[index];
+  }
+  size_t get_total_length() const
+  {
+    return totallength;
+  }
   ~PlcpTable(void)
   {
     memory_tracker->untrack(phi_table, __FILE__, __LINE__);

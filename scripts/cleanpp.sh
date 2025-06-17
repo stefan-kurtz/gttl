@@ -10,3 +10,4 @@ rm -f *.suf
 rm -f *.tis 
 rm -f *.isa
 rm -f *.bsf
+rm -f *.lls
