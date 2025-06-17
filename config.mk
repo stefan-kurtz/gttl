@@ -1,4 +1,4 @@
-GTTL ?= $(shell sh -c 'git rev-parse --show-toplevel 2>/dev/null || pwd | sed -n "s#^\(.*gttl\)/.*#\1#p"')
+GTTL ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd | awk -F'gttl' '/gttl/ {print $$1 "gttl"}')
 export PYTHONPATH=${GTTL}/scripts
 
 include ${GTTL}/compile_flags.mk
