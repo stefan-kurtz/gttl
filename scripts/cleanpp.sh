@@ -11,3 +11,5 @@ rm -f *.tis
 rm -f *.isa
 rm -f *.bsf
 rm -f *.lls
+rm -f .*.prj
+rm -f .*.bsf

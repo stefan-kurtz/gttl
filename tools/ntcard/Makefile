@@ -1,42 +1,5 @@
-CXX?=g++
-LD=${CXX}
-CFLAGS=-g -Wall -Werror -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3
 GTTL=../..
-CPPFLAGS=-I ${GTTL}/src
-CXXFLAGS=-std=c++20
-LDFLAGS=-g
-
-ifeq ($(OS),Windows_NT)
-	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
-	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
-else
-	LDLIBS+=-lm -lz -lpthread -lstdc++
-endif
-
-
-ifneq ($(debug),yes)
-  CFLAGS+=-DNDEBUG
-endif
-
-ifeq ($(ubsan),yes)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-endif
-
-ifeq ($(tsan),yes)
-  CFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-endif
-
-ifeq ($(msan),yes)
-  CFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-endif
-
-ifeq ($(debug),yes)
-  CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
-endif
+include ${GTTL}/config.mk
 
 OBJ=ntcard_mn.o ntcard_opt.o
 
@@ -44,9 +7,6 @@ all:ntcard_mn.x
 
 ntcard_mn.x:${OBJ}
 	$(LD) ${LDFLAGS} ${OBJ} -o $@ ${LDLIBS}
-
-%.o:%.cpp
-	$(CXX) ${TIME_OPTION} -o $@ -c $< ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 .PHONY:test
 test:test_random test_fastq test_large
@@ -155,17 +115,3 @@ test_random:ntcard_mn.x
 	@./test_cases.py -l 100 -r 3 './ntcard_mn.x'
 	@rm -rf TMP*
 	@echo "$@ passed"
-
-.PHONY:code_check
-code_check:
-	code_check.py -wt `find . -name '*.[hc]pp'`
-	${GTTL}/scripts/check_ifndef.py `find . -name '*.hpp'`
-
-.PHONY:clean
-clean:
-	@${RM} -r *.[oxd] *.x.dSYM/ gqf/*.[oxd]
-	@${RM} -r out TMP* __pycache__
-	@${RM} eco29.fasta soil_unique.fasta 70x_161nt_phred64.fastq.gz
-	@${RM} SRR19536726_1_1000.fastq
-
--include ${wildcard *.d}

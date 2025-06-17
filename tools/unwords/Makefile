@@ -1,87 +1,13 @@
-CXX?=g++
-LD=${CXX}
-CFLAGS=-m64 -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -O3 -pedantic
 GTTL=../..
-CPPFLAGS=-I ${GTTL}/src
-CXXFLAGS=-std=c++20
-LDFLAGS=-g -m64
-SYSTEM?=$(shell uname -s)
-MACHINE?=$(shell uname -m)
+include ${GTTL}/config.mk
+
 OBJ=unwords_mn.o unwords_opt.o
-AT1MB=${GTTL}/testdata/at1MB.fna
-VAC=${GTTL}/testdata/vaccg.fna
-Y3=${GTTL}/testdata/ychrIII.fna
-PROTEIN_FILE=${GTTL}/testdata/protein.fsa
-SW_175=${GTTL}/testdata/sw175.fna
 IRC_OPTION?=--ignore_rc
-PYTHONPATH=../../scripts
-
-ifeq ($(OS),Windows_NT)
-	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
-	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
-else
-	LDLIBS+=-lm -lz -lpthread -lstdc++
-  SHELL=/bin/bash
-endif
-
-export PYTHONPATH=../../scripts
-
-ifeq (,$(findstring g++-,$(CXX)))
-  CFLAG += -march=native
-  TIME_OPTIONS=-time
-endif
-
-ifeq ($(valgrind),yes)
-  VALGRIND=${GTTL}/scripts/valgrind.sh
-endif
-
-ifeq ($(ubsan),yes)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-endif
-
-ifeq ($(tsan),yes)
-  CFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-endif
-
-ifeq ($(msan),yes)
-  CFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-endif
-
-ifeq ($(debug),yes)
-  CFLAGS += -g
-  LDFLAGS += -g
-  ifneq (${sanitize},no)
-    ifneq (${MACHINE},arm64)
-      CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-      LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
-    endif
-  endif
-else
-  CFLAGS += -DNDEBUG
-  ifeq ($(SYSTEM),Darwin)
-  else
-    ifeq ($(OS),Windows_NT)
-    else
-      LDLIBS+=-ldl
-    endif
-  endif
-endif
-
-ifeq ($(prof),yes)
-  CFLAGS += -pg
-  LDFLAGS += -pg
-endif
 
 SRC=${wildcard *.cpp}
 
 unwords_mn.x:${OBJ}
 	$(LD) ${LDFLAGS} ${OBJ} -o $@ ${LDLIBS}
-
-%.o:%.cpp
-	$(CXX) ${TIME_OPTION} -o $@ -c $< ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 .PHONY:test
 test: check_unwords_sw175 test_unwords_length check_unwords_p check_unwords_vac check_unwords_y3 check_unwords_at \
@@ -157,8 +83,8 @@ check_unwords_p:unwords_mn.x
 .PHONY:check_unwords_sw175
 check_unwords_sw175:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@${VALGRIND} ./unwords_mn.x ${SW_175} > ${TMPFILE}
-	@./check_unwords.py ${TMPFILE} ${SW_175}
+	@${VALGRIND} ./unwords_mn.x ${SW175} > ${TMPFILE}
+	@./check_unwords.py ${TMPFILE} ${SW175}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
 
@@ -208,19 +134,3 @@ compare_runtime: unwords_mn.x
 test_unwords_length: unwords_mn.x
 	@./test_unwords_length.py ${GTTL}/testdata
 	@echo "$@ passed"
-
-.PHONY:tags
-tags:
-	@ctags -w --c++-kinds=+p --fields=+iaSKlm --extra=+q `ls *.[hc]pp` \
-        `find ${GTTL}/src -name '*.hpp'` > $@
-
-.PHONY:code_check
-code_check:
-	@${GTTL}/scripts/code_check.py -wt `find . -name '*.[hc]pp'`
-	@${GTTL}/scripts/code_check.py -wt `find . -name '*.py'`
-
-.PHONY:clean
-clean:
-	${RM} -r *.[oxd] *.x.dSYM/ tmp.*
-
--include ${wildcard *.d}

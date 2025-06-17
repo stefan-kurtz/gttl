@@ -1,37 +1,12 @@
-CC?=gcc
-CXX?=g++
-CXX_PURE=$(shell echo ${CXX} | sed -e 's/^ccache //')
-CXX_VERSION=$(shell basename ${CXX_PURE})
+GTTL ?= ../..
+include ${GTTL}/config.mk
+
 # PROFFLAGS= -DTEXT_OUTPUT -DSAINSHOWSTATEBU -DSAINSHOWSTATE
 # PROFFLAGS= -DTEXT_OUTPUT
 # PROFFLAGS= -DSAINSHOWSTATE
 PROFFLAGS=
-SYSTEM?=$(shell uname -s)
-MACHINE?=$(shell uname -m)
 
-CFLAGS=-Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -funroll-loops -O3 -g
-LDFLAGS=-g ${PROFFLAGS} -ldl
-GTTL=../..
-CPPFLAGS=-I ${GTTL}/src
-CXXFLAGS=-std=c++20
-LDLIBS=-lz -lstdc++
-
-ifeq ($(debug),yes)
-  ifneq (${sanitize},no)
-    ifneq (${MACHINE},arm64)
-      ifneq (,$(findstring clang++,$(CXX)),clang++)
-        CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-        LDFLAGS += -fsanitize=address -fno-omit-frame-pointer
-      endif
-    endif
-  endif
-else
-  CFLAGS += -DNDEBUG
-  ifeq ($(SYSTEM),Darwin)
-  else
-    LDLIBS+=-ldl
-  endif
-endif
+LDFLAGS += ${PROFFLAGS}
 
 ifeq (${divsufsort},yes)
   DIVSUFSORTPATH=${PACKAGES}/libdivsufsort
@@ -42,17 +17,11 @@ endif
 SA_INDUCED_OBJ=sa_induced.o\
                sa_induced_options.o
 
-INPUTFILES=${shell ./enum_gttl_fasta_files.py ../../testdata}
-
 .PHONY:all
 all:sa_induced.x lcp_checker.x
 ifndef GTTL
 	$(error GTTL is undefined. Please define the Path to the gttl sources)
 endif
-
-# generic compilation rule which creates dependency file on the fly
-%.o: %.cpp
-	$(CXX) -DCXX_VERSION=\"${CXX_VERSION}\" -DCXX_FLAGS=\"'${CXXFLAGS} ${CFLAGS}'\" -c $< -o $@ $(CXXFLAGS) $(CFLAGS) ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 sa_induced.x:${SA_INDUCED_OBJ}
 	${CXX} -o $@ ${LDFLAGS} ${SA_INDUCED_OBJ} ${LDLIBS}
@@ -66,16 +35,6 @@ sa_exact_pattern_search.x:sa_exact_pattern_search.o
 .PHONY:install
 install:sa_induced.x
 	mv $< ${HOME}/bin-ops/${CONFIGGUESS}/.
-
-.PHONY:code_check
-code_check:
-	code_check.py -wt `find . -name '*.[ch]pp'`
-	${GTTL}/scripts/check_ifndef.py `find . -name '*.hpp'`	
-
-.PHONY:tags
-tags:
-	@ctags -w --c++-kinds=+p --fields=+iaSKlm --extra=+q \
-	`find ${GTTL}/src -name '*.hpp'` *.[hc]pp > $@
 
 .PHONY:text
 test:test_error \
@@ -131,7 +90,7 @@ test_saincheck:sa_induced.x
 	@echo "$@ passed"
 
 test_plcp:sa_induced.x
-	@for filename in ${INPUTFILES} ; do \
+	@for filename in ${GTTL_FASTA_FILES} ; do \
 	   echo "test_plcp.sh $${filename}"; \
 	   ./test_plcp.sh $${filename}; \
 	done
@@ -143,7 +102,7 @@ test_plcp:sa_induced.x
 
 test_sfx_compare:sa_induced.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@for filename in ${INPUTFILES}; do \
+	@for filename in ${GTTL_FASTA_FILES}; do \
 	   cp $$filename ${TMPFILE}; \
 	   echo "sfx-compare.sh $$filename"; \
 	   ./sfx-compare.sh ${TMPFILE}; \
@@ -161,12 +120,3 @@ test_big:sa_induced.x
 .PHONY:run_big
 run_big:sa_induced.x
 	@./run_big.py Protocols/*.tsv
-
-# read dependencies
--include $(wildcard *.d)
-
-.PHONY:clean
-clean:
-	@${RM} *.[odx] *.tis *.suf *.prj *.bsf .*.prj .*.bsf tmp.*
-	@${RM} -r sa_induced.x.dSYM __pycache__
-	@../../scripts/cleanpp.sh

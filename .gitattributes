@@ -12,6 +12,7 @@
 *.md           text diff=markdown
 *.yml          text
 Makefile       text
+*.mk           text
 *.txt          text
 .clang-format  text
 

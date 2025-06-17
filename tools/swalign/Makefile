@@ -1,70 +1,11 @@
-CXX?=g++
-LD=${CXX}
-CFLAGS=-g -Wall -Werror -Wextra -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -march=native -pedantic
-CPPFLAGS=-I ../../src
-CXXFLAGS=-std=c++20
-LDFLAGS=-g
-SYSTEM?=$(shell uname -s)
-MACHINE?=$(shell uname -m)
+GTTL := ../..
+include ${GTTL}/config.mk
+
 SWAGAOBJ=sw_all_against_all.o
-AT1MB=../../testdata/at1MB.fna
+
 SSW_SIMD_DEBUG?=0
-
-ifeq ($(memcheck),yes)
-  ifeq (${SYSTEM},Darwin)
-    MEMCHECK=check_leaks.sh
-  else
-    MEMCHECK=valgrind.sh
-  endif
-endif
-
-ifeq ($(ubsan),yes)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-endif
-
-ifeq ($(tsan),yes)
-  CFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=thread -fno-omit-frame-pointer
-endif
-
-ifeq ($(msan),yes)
-  CFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-  LDFLAGS += -fsanitize=memory -fno-omit-frame-pointer
-endif
-
-ifneq ($(findstring clang++,$(CXX)),clang++)
-  ifneq ($(SYSTEM),Darwin)
-    TIME_OPTION=-time
-    CFLAGS += -march=native
-  endif
-endif
-
-ifeq ($(OS),Windows_NT)
-	CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
-	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
-else
-	LDLIBS+=-lm -lz -lpthread -lstdc++
-  SHELL?=/bin/bash
-endif
-
-ifeq ($(debug),yes)
-  CFLAGS += -g -fsanitize=address -fno-omit-frame-pointer -Og
-  LDFLAGS += -g -fsanitize=address -fno-omit-frame-pointer
-else
-  CFLAGS += -DNDEBUG -O3
-  ifeq ($(SYSTEM),Darwin)
-  else
-	  ifeq ($(OS),Windows_NT)
-	  else
-      LDLIBS+=-ldl
-	  endif
-  endif
-endif
-
-ifeq ($(prof),yes)
-  CFLAGS += -pg
-  LDFLAGS += -pg
+ifneq ($(SSW_SIMD_DEBUG),0)
+  CPPFLAGS += -DSSW_SIMD_DEBUG=${SSW_SIMD_DEBUG}
 endif
 
 ifeq (${MACHINE},x86_64)
@@ -143,9 +84,6 @@ score_matrix_list_update:../../src/alignment/scoring_info_and_seq_trans.hpp \
 	../../src/utilities/runtime_class.hpp
 	make alignment_output_function.hpp
 	make sequence_decode_function.hpp
-
-%.o:%.cpp
-	$(CXX) ${TIME_OPTION} -o $@ -c $<  -DSSW_SIMD_DEBUG=${SSW_SIMD_DEBUG} ${CXXFLAGS} ${CFLAGS} ${CPPFLAGS} -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 .PHONY:test-agc
 test-agc: test-agc-proteins test-agc-DNA test-best-threads test-against-0 
@@ -390,18 +328,6 @@ test_mmseq_FP:sw_all_against_all.x
 simd32_seqs:
 	@tar -xvjf testdata/simd32_seqs.tar.bz2
 
-.PHONY:code_check
-code_check:
-	@../../scripts/code_check.py -wt `ls *.[ch]pp`
-
 .PHONY:include_list
 include_list:
 	 @gcc -I ../../src -M sw_all_against_all.cpp | grep -v gttl | grep -v 'usr\/include' | grep -v 'usr\/lib'
-
-.PHONY:clean
-clean:
-	@${RM} sw_all_against_all.x *.[od] tmp.*
-	@${RM} -r __pycache__ *.x.dSYM/ simd32_seqs
-
-
--include ${wildcard *.d}
