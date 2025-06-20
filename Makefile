@@ -1,5 +1,3 @@
-include config.mk
-
 .PHONY:all
 all:
 	@make -C testsuite test
