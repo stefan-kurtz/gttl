@@ -13,7 +13,7 @@
 ** compression_level=0 will result in uncompressed output.
 ** .gz file extensions will be automatically added where appropriate.
  */
-static void write_to_output_file(const std::string &file_name,
+static inline void write_to_output_file(const std::string &file_name,
                                  const std::string &content,
                                  size_t compression_level)
 {

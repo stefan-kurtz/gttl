@@ -24,7 +24,7 @@ static std::string sequence_decode(const SeqClass &seq)
   return s;
 }
 
-static auto sequence_decode_function_get(
+static inline auto sequence_decode_function_get(
     const char *score_matrix_id, const ScoreMatrixName &score_matrix_name,
     bool dna_alphabet)
 {

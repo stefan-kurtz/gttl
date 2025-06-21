@@ -14,7 +14,7 @@
 #include "sequences/alignment_output.hpp"
 #include "sequences/gttl_substring.hpp"
 
-static auto alignment_output_function_get(
+static inline auto alignment_output_function_get(
     const char *score_matrix_id, const ScoreMatrixName &score_matrix_name,
     bool dna_alphabet)
 {
