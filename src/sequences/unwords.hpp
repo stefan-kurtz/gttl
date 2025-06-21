@@ -214,7 +214,8 @@ static Unwords *unwords_finder(bool is_protein_sequence,
   return unwords;
 }
 
-static size_t estimate_qgram_length_max(size_t upper_bound_sequence_length,
+static inline size_t estimate_qgram_length_max(
+                                        size_t upper_bound_sequence_length,
                                         size_t alphabetsize)
 {
   const size_t qgram_length

@@ -10,7 +10,7 @@
 #include "utilities/mathsupport.hpp"
 #include "utilities/bits2split.hpp"
 
-static int real_byte_index(bool reversed_byte_order,int byte_index)
+static inline int real_byte_index(bool reversed_byte_order,int byte_index)
 {
   if (reversed_byte_order && byte_index < 8)
   {
@@ -89,11 +89,11 @@ using SinglePassSorter = bool (*) (int, basetype *,const basetype *, size_t);
         lsb_radix_sort_single_pass<uint64_t,NUM_BITS,1,\
                                    radix_key_uint64<NUM_BITS>>
 
-static void lsb_radix_sort(uint64_t *array,
-                           uint64_t *buffer,
-                           size_t array_len,
-                           int bits_already_sorted,
-                           int remaining_bits)
+static inline void lsb_radix_sort(uint64_t *array,
+                                  uint64_t *buffer,
+                                  size_t array_len,
+                                  int bits_already_sorted,
+                                  int remaining_bits)
 {
   static constexpr const SinglePassSorter<uint64_t> sorter_table_uint64[] =
   {

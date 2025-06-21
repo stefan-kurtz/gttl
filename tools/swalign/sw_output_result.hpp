@@ -16,7 +16,7 @@
 
 #include "sequence_decode_function.hpp"
 
-static bool adpr_simple_matching_chars(uint8_t a,uint8_t b)
+static inline bool adpr_simple_matching_chars(uint8_t a,uint8_t b)
 {
   return a == b;
 }

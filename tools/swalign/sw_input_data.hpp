@@ -7,7 +7,7 @@
 #include "alignment/scoring_info_and_seq_trans.hpp"
 #include "sw_option_parser.hpp"
 
-static auto sw_input_data(const SWOptions &options)
+inline auto sw_input_data(const SWOptions &options)
 {
   GttlMultiseq *db_multiseq = nullptr;
   GttlMultiseq *query_multiseq = nullptr;
