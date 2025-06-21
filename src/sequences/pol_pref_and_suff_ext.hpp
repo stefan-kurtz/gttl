@@ -6,6 +6,7 @@
 #include <cassert>
 #include "sequences/polished_points.hpp"
 #include "sequences/align_polish.hpp"
+#include "sequences/matching_characters.hpp"
 #include "sequences/pol_pref_or_suff_ext.hpp"
 
 template<class MatchClass>
