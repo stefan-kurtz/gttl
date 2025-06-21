@@ -1,5 +1,6 @@
 #ifndef VIRTUAL_QUEUE_HPP
 #define VIRTUAL_QUEUE_HPP
+#include <cassert>
 #include <cstdlib>
 #include <atomic>
 

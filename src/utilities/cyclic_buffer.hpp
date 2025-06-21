@@ -17,6 +17,7 @@
 #ifndef CYCLIC_BUFFER_HPP
 #define CYCLIC_BUFFER_HPP
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <cassert>
 template<typename Basetype,size_t max_size>

@@ -1,6 +1,7 @@
 #ifndef BIT_SEQUENCE_HPP
 #define BIT_SEQUENCE_HPP
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <climits>

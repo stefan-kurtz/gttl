@@ -19,6 +19,7 @@
 #include <fstream>
 #include <cassert>
 #include <algorithm>
+#include <stdexcept>
 #include "utilities/cxxopts.hpp"
 #include "seq_reader_options.hpp"
 
@@ -205,5 +206,5 @@ hash_mode_type SeqReaderOptions::hash_mode_get(void) const
     return hash_mode_xx;
   }
 #endif
-  throw "illegal hash mode " + hash_method;
+  throw std::invalid_argument("illegal hash mode " + hash_method);
 }

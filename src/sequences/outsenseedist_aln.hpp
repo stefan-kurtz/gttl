@@ -8,6 +8,7 @@
 #include "sequences/prefix_suffix_extension.hpp"
 #include "sequences/front_value_trace.hpp"
 #include "sequences/eoplist.hpp"
+#include "utilities/unused.hpp"
 
 class TrackEditoperations
 {

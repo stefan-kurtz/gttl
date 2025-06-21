@@ -19,7 +19,9 @@
 
 #include <cassert>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <iostream>
 
 /* Class Uint64Encoding
  * handling the encoding and decoding of given numbers in one uint64_t (64bits)

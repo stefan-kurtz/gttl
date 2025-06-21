@@ -21,7 +21,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <climits>
+#include <vector>
 #include "utilities/multibitvector.hpp"
 #include "utilities/unused.hpp"
 

@@ -1,6 +1,10 @@
 #ifndef DNA_SEQ_DECODER_HPP
 #define DNA_SEQ_DECODER_HPP
 
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 class DNAQgramDecoder
 {
   class Iterator

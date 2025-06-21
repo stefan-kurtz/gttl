@@ -6,7 +6,8 @@ import jinja2
 # https://realpython.com/primer-on-jinja-templating/#install-jinja
 
 environment = jinja2.Environment()
-template = environment.from_string('''template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_uint{{ width }} (
+template = environment.from_string('''#include <alignment/ssw.hpp>
+template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_uint{{ width }} (
                                  GTTL_UNUSED const uint8_t *original_dbseq,
                                  GTTL_UNUSED size_t original_dbseq_len,
                                  size_t dbseq_len,

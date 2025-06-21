@@ -18,6 +18,7 @@
 #ifndef NON_WILDCARD_RANGES_HPP
 #define NON_WILDCARD_RANGES_HPP
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <cstddef>
 #include <vector>

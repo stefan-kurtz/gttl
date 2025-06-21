@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cassert>
+#include <string>
 #include "sequences/complement_uint8.hpp"
 
 template<typename CharType>

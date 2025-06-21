@@ -1,5 +1,6 @@
 #ifndef UNIT_SCORE_NUC_HPP
 #define UNIT_SCORE_NUC_HPP
+#include <cstddef>
 #include <cstdint>
 struct Unit_score_nuc
 {

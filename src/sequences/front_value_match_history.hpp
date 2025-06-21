@@ -5,6 +5,7 @@
 #include <cassert>
 #include <string>
 #include "utilities/bit_sequence.hpp"
+#include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"
 
 class FrontValueMatchHistory

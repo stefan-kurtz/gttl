@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <string>
 #include <tuple>
 #include <climits>

@@ -1,11 +1,12 @@
 #ifndef LOCAL_CHAINER_HPP
 #define LOCAL_CHAINER_HPP
+#include <cassert>
 #include <vector>
 #include <cstdint>
 #include <climits>
-#include <cinttypes>
 #include <cstdlib>
 #include <algorithm>
+#include "utilities/unused.hpp"
 
 template<typename GapType,typename ScoreType,typename PredecessorType>
 class LocalChainElemInfo

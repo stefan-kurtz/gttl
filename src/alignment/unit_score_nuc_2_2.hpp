@@ -1,5 +1,6 @@
 #ifndef UNIT_SCORE_NUC_2_2_HPP
 #define UNIT_SCORE_NUC_2_2_HPP
+#include <cstddef>
 #include <cstdint>
 /* score matrix corresponding to affine cost function
    0,4,6.2 */

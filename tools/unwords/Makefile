@@ -9,6 +9,9 @@ SRC=${wildcard *.cpp}
 unwords_mn.x:${OBJ}
 	$(LD) ${LDFLAGS} ${OBJ} -o $@ ${LDLIBS}
 
+.PHONY:all
+all: unwords_mn.x
+
 .PHONY:test
 test: check_unwords_sw175 test_unwords_length check_unwords_p check_unwords_vac check_unwords_y3 check_unwords_at \
       compare_unwords_vac compare_unwords_y3 compare_unwords_at check_deBruijn

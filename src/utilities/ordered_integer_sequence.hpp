@@ -1,5 +1,7 @@
 #ifndef ORDERED_INTEGER_SEQUENCE_HPP
 #define ORDERED_INTEGER_SEQUENCE_HPP
+#include <climits>
+#include <cstdint>
 #include <iostream>
 #include <cassert>
 #include <cstddef>

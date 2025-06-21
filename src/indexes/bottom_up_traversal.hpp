@@ -1,8 +1,10 @@
 #ifndef BOTTOM_UP_TRAVERSAL_HPP
 #define BOTTOM_UP_TRAVERSAL_HPP
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <climits>
+#include <iostream>
 
 /* This file implements the essence of the bottom up traversal, independent
    of the specific needs for the maxpair computation. */

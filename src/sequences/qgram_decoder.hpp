@@ -2,6 +2,7 @@
 #define QGRAM_DECODER_HPP
 #include <cstddef>
 #include <cassert>
+#include <cstdint>
 #include "sequences/complement_plain.hpp"
 
 #ifndef NDEBUG
