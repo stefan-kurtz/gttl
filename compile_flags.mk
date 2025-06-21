@@ -21,7 +21,7 @@ CXXFLAGS = -std=c++20
 LDFLAGS = -g -m64
 
 # Show compilation time
-ifeq (,$(findstring g++-,$(CXX)))
+ifeq ($(filter g++%,$(CXX)), $(CXX))
   ifneq ($(SYSTEM),Darwin)
     ifneq ($(OS),Windows_NT)
       TIME_OPTION=-time
