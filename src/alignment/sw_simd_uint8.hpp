@@ -140,6 +140,11 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
 
     /* Lazy_F loop: has been revised to disallow adjacent insertion and
        then deletion, so do not update E(i, segment_pos), learn from SWPS3 */
+#ifndef AVX2
+#define SSW_MAX_CMP_VALUE UINT16_MAX
+#else
+#define SSW_MAX_CMP_VALUE UINT32_MAX
+#endif /* AVX2 */
 #if 8 == 8
 
     /* reset pointers to the start of the saved data */
@@ -153,11 +158,6 @@ static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
     vTemp = simdui8_subs(vF, vTemp);
     vTemp = simdi8_eq(vTemp, vZero);
 
-#ifndef AVX2
-#define SSW_MAX_CMP_VALUE UINT16_MAX
-#else
-#define SSW_MAX_CMP_VALUE UINT32_MAX
-#endif /* AVX2 */
     for (cmp = simdi8_movemask(vTemp), segment_pos = 0;
          cmp != SSW_MAX_CMP_VALUE; cmp = simdi8_movemask(vTemp))
     {
