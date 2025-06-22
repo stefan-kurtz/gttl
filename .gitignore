@@ -21,6 +21,8 @@
 # Temporary files
 tmp.*
 TMP.*
+*.tmp
+*.TMP
 
 tags
 compile_commands.json

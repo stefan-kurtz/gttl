@@ -46,7 +46,7 @@ class ThreadsafeQueue
     the_queue = std::move(other.the_queue);
   }
 
-  virtual ~ThreadsafeQueue(void) noexcept(false)
+  ~ThreadsafeQueue(void) noexcept(false)
   {
     std::lock_guard<std::mutex> lock(q_mutex);
     if (not empty())
