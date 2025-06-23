@@ -5,6 +5,13 @@ all:
 	@make -C tools/ntcard test
 	@make -C tools/unwords test
 
+.PHONY:build
+build:
+	@make -C testsuite
+	@make -C tools/chaining
+	@make -C tools/ntcard
+	@make -C tools/unwords
+
 .PHONY:debug
 debug:
 	@make -C testsuite debug=yes test
