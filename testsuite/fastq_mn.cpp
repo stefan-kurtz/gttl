@@ -14,7 +14,6 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#include <bits/chrono.h>
 #include <array>
 #include <cstddef>
 #include <fstream>
@@ -331,7 +330,9 @@ static void char_distribution_thd_gz(size_t num_threads,
     {
       size_t *local_dist = dist + 4 * (thd_num-1);
       using namespace std::chrono_literals;
-      std::this_thread::sleep_for(400ms);
+      // The "ms" operator is defined in a header that is not to
+      // be included directly.
+      std::this_thread::sleep_for(400ms); // NOLINT(misc-include-cleaner)
       while (true)
       {
         std::optional<std::string> opt_sequence = sequence_queue.dequeue();
