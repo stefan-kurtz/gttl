@@ -6,7 +6,6 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
-#include "utilities/unused.hpp"
 
 template<typename T,T convert(size_t, const std::string &)>
 static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
@@ -47,8 +46,9 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
    the strings are put into a vector without applying a conversion
    function */
 
-static inline std::string split_string_identity(GTTL_UNUSED size_t column_idx,
-                                                const std::string &s)
+static inline std::string split_string_identity([[maybe_unused]]
+                                                 size_t column_idx,
+                                                 const std::string &s)
 {
   return std::ref(s);
 }

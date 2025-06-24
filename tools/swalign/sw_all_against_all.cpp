@@ -34,7 +34,6 @@
 #include "utilities/matrix_partition.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/all_vs_all2.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/split_string.hpp"
 #include "utilities/string_of_digits.hpp"
@@ -56,7 +55,7 @@ class Restrict2Pairs
     if (string_of_digits(s))
     {
       uint32_t number;
-      GTTL_UNUSED int ret = std::sscanf(s.c_str(),"%" PRIu32,&number);
+      [[maybe_unused]] int ret = std::sscanf(s.c_str(),"%" PRIu32,&number);
       assert(ret == 1);
       return number;
     }

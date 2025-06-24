@@ -9,7 +9,6 @@
 #include "sequences/backreference.hpp"
 #include "sequences/front_value_trace.hpp"
 #include "sequences/eoplist.hpp"
-#include "utilities/unused.hpp"
 
 class TrackEditoperations
 {
@@ -25,7 +24,7 @@ class TrackEditoperations
     TrackEditoperations(void)
       : trace({})
      {}
-  size_t evaluate(GTTL_UNUSED size_t d,int32_t lo_diag, int32_t hi_diag,
+  size_t evaluate([[maybe_unused]] size_t d,int32_t lo_diag, int32_t hi_diag,
                   const FrontValueTrace *front)
   {
     for (int32_t idx = lo_diag; idx <= hi_diag; idx++)

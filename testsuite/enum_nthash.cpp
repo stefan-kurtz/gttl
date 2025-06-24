@@ -33,7 +33,6 @@
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
@@ -150,10 +149,10 @@ template<class HashValueIterator,
 static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
                       uint64_t hashmask,
-                      GTTL_UNUSED
+                      [[maybe_unused]]
                       const GttlBitPacker<sizeof_unit_hashed_qgrams,3>
                         *hashed_qgram_packer,
-                      GTTL_UNUSED size_t seqnum,
+                      [[maybe_unused]] size_t seqnum,
                       const char *substring,
                       size_t this_length)
 {
@@ -165,10 +164,10 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
 #endif
 
   uint64_t sum_hash_values = 0;
-  GTTL_UNUSED uint64_t sum_rc_hash_values = 0;
+  [[maybe_unused]] uint64_t sum_rc_hash_values = 0;
   size_t seqpos = 0;
-  GTTL_UNUSED size_t bytes_unit_sum = 0;
-  GTTL_UNUSED size_t bytes_unit_sum_rc = 0;
+  [[maybe_unused]] size_t bytes_unit_sum = 0;
+  [[maybe_unused]] size_t bytes_unit_sum_rc = 0;
   for (auto const &&code_pair : qgiter)
   {
     uint64_t this_hash = std::get<0>(code_pair);
@@ -243,8 +242,10 @@ template<class HashValueIterator,
 static void enumerate_nt_hash_template(const char *inputfilename,
                                        size_t qgram_length,
                                        int hashbits,
-                                       GTTL_UNUSED int sequences_number_bits,
-                                       GTTL_UNUSED int sequences_length_bits)
+                                       [[maybe_unused]]
+                                       int sequences_number_bits,
+                                       [[maybe_unused]]
+                                       int sequences_length_bits)
 {
   GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
   if (in_fp == nullptr)

@@ -22,7 +22,6 @@
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/str_format.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cycle_of_numbers.hpp"
 
@@ -94,7 +93,8 @@ class GttlMultiseq
               const std::string_view sequence,
               bool store_header,
               bool store_sequence,
-              GTTL_UNUSED /* if !store_sequence */ uint8_t this_padding_char)
+              [[maybe_unused]] /* if !store_sequence */
+              uint8_t this_padding_char)
   {
     if (store_header)
     {

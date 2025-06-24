@@ -7,7 +7,6 @@
 #include <string>
 #include "utilities/bit_sequence.hpp"
 #include "utilities/mathsupport.hpp"
-#include "utilities/unused.hpp"
 
 class FrontValueMatchHistory
 {
@@ -69,7 +68,7 @@ class FrontValueMatchHistory
   }
   size_t row_get(size_t ulen) const noexcept { return std::min(row, ulen); }
   size_t aligned_len_get(int32_t diag_idx,size_t ulen,
-                         GTTL_UNUSED size_t vlen) const noexcept
+                         [[maybe_unused]] size_t vlen) const noexcept
   {
     const size_t dest_row = row_get(ulen);
     assert(diag_idx >= 0 || static_cast<size_t>(-diag_idx) <= 2 * dest_row);

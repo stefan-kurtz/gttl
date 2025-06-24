@@ -35,7 +35,6 @@
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sufcheck.hpp"
-#include "utilities/unused.hpp"
 
 #ifdef ACCESS_STATISTICS
 static std::map<int,size_t> accesses_per_line;
@@ -364,7 +363,7 @@ class GttlSainseq
   size_t this_size;
 
   template <bool special_as_pos,bool sequential = false>
-  size_t sainseq_getchar(size_t position,GTTL_UNUSED int line)
+  size_t sainseq_getchar(size_t position,[[maybe_unused]] int line)
     WITH_BRANCHINGconst
     noexcept
   {

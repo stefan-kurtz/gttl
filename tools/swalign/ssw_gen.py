@@ -13,10 +13,10 @@ template = environment.from_string('''#include <alignment/ssw.hpp>
 #include "alignment/simd.hpp"
 #include "sequences/complement_uint8.hpp"
 #include "utilities/gcc_builtin.hpp"
-#include "utilities/unused.hpp"
 template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_uint{{ width }} (
-                                 GTTL_UNUSED const uint8_t *original_dbseq,
-                                 GTTL_UNUSED size_t original_dbseq_len,
+                                 [[maybe_unused]]
+                                 const uint8_t *original_dbseq,
+                                 [[maybe_unused]] size_t original_dbseq_len,
                                  size_t dbseq_len,
                                  size_t query_len,
                                  const uint8_t weight_gapO,

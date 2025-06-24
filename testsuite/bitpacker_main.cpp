@@ -10,13 +10,12 @@
 #include "utilities/bitpacker.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "utilities/constexpr_for.hpp"
 #include "utilities/str_format.hpp"
 #include "uint64_encoding.hpp"
 
-static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
+static void show_uint64_t_bytes([[maybe_unused]] uint64_t value)
 {
 #undef SHOWUINT64
 #ifdef SHOWUINT64
@@ -58,7 +57,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
         }
 
 template<typename basetype,int overflow>
-static void runner(GTTL_UNUSED bool direct,size_t num_values)
+static void runner([[maybe_unused]] bool direct,size_t num_values)
 {
   size_t successes = 0;
   std::mt19937_64 rgen_first;

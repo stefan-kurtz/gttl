@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <cstddef>
 #include <cassert>
-#include "utilities/unused.hpp"
 #include "sequences/alphabet.hpp"
 
 static inline bool matching_characters_wc(char a,char b)
@@ -63,10 +62,10 @@ static inline size_t count_mismatches(const CharType *seq0,
 template<bool (*match_method)(char,char),bool respect_length>
 static inline size_t lcplen_fwd(const char *seq0,size_t start0,
                                 const char *seq1,size_t start1,
-                                GTTL_UNUSED size_t len0,
-                                GTTL_UNUSED size_t len1,
-                                GTTL_UNUSED size_t seqnum0,
-                                GTTL_UNUSED size_t seqnum1)
+                                [[maybe_unused]] size_t len0,
+                                [[maybe_unused]] size_t len1,
+                                [[maybe_unused]] size_t seqnum0,
+                                [[maybe_unused]] size_t seqnum1)
 {
   if constexpr (respect_length)
   {
@@ -96,8 +95,8 @@ static inline size_t lcslen_bwd(const char *seq0,size_t start0,
                                 const char *seq1,size_t start1,
                                 size_t len0,
                                 size_t len1,
-                                GTTL_UNUSED size_t seqnum0,
-                                GTTL_UNUSED size_t seqnum1)
+                                [[maybe_unused]] size_t seqnum0,
+                                [[maybe_unused]] size_t seqnum1)
 {
   assert(start0 < len0 && start1 < len1);
   const char *ptr0 = seq0 + len0 - 1 - start0;
@@ -116,10 +115,10 @@ static inline size_t lcslen_bwd(const char *seq0,size_t start0,
 
 static inline size_t block_wise_lcplen_fwd(const char *seq0,size_t start0,
                                            const char *seq1,size_t start1,
-                                           GTTL_UNUSED size_t len0,
-                                           GTTL_UNUSED size_t len1,
-                                           GTTL_UNUSED size_t seqnum0,
-                                           GTTL_UNUSED size_t seqnum1)
+                                           [[maybe_unused]] size_t len0,
+                                           [[maybe_unused]] size_t len1,
+                                           [[maybe_unused]] size_t seqnum0,
+                                           [[maybe_unused]] size_t seqnum1)
 {
   // Fetch pattern/text blocks
   const uint64_t* block_ptr0 = reinterpret_cast<const uint64_t*>(seq0+start0);
@@ -141,8 +140,8 @@ static inline size_t block_wise_lcplen_fwd(const char *seq0,size_t start0,
 static inline size_t block_wise_lcslen_bwd(const char *seq0, size_t start0,
                                            const char *seq1, size_t start1,
                                            size_t len0, size_t len1,
-                                           GTTL_UNUSED size_t seqnum0,
-                                           GTTL_UNUSED size_t seqnum1)
+                                           [[maybe_unused]] size_t seqnum0,
+                                           [[maybe_unused]] size_t seqnum1)
 {
   assert(start0 < len0 && start1 < len1);
   const char *ptr0 = seq0 + len0 - 8 - start0;

@@ -25,7 +25,6 @@
 #include <cstring>
 #include <vector>
 #include "utilities/multibitvector.hpp"
-#include "utilities/unused.hpp"
 
 class Rangewithchar
 {
@@ -35,7 +34,7 @@ class Rangewithchar
 #endif
   const uint8_t firstchar;
   public:
-  Rangewithchar(size_t _start, GTTL_UNUSED size_t _end, uint8_t _firstchar)
+  Rangewithchar(size_t _start, [[maybe_unused]] size_t _end, uint8_t _firstchar)
     : start(_start)
 #ifndef NDEBUG
     , end(_end)
@@ -89,8 +88,8 @@ static inline bool isspecial(uint8_t padding_char, uint8_t cc, uint8_t wildcard)
 template <typename SuftabBaseType, typename SequenceType, bool is_multiseq>
 static void gttl_suftab_bk_suffixorder(const SequenceType *sequence,
                                        size_t totallength,
-                                       GTTL_UNUSED uint8_t wildcard,
-                                       GTTL_UNUSED uint8_t padding_char,
+                                       [[maybe_unused]] uint8_t wildcard,
+                                       [[maybe_unused]] uint8_t padding_char,
                                        size_t numofchars,
                                        const SuftabBaseType *suftab,
                                        const std::vector<Rangewithchar>
@@ -149,11 +148,12 @@ static void gttl_suftab_bk_suffixorder(const SequenceType *sequence,
 template <typename SuftabBaseType,typename SequenceType, bool is_multiseq>
 static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
                                          size_t totallength,
-                                         GTTL_UNUSED uint8_t wildcard,
-                                         GTTL_UNUSED uint8_t padding_char,
+                                         [[maybe_unused]] uint8_t wildcard,
+                                         [[maybe_unused]] uint8_t padding_char,
                                          const SuftabBaseType *suftab,
                                          size_t numofchars,
-                                         GTTL_UNUSED const size_t *charcount)
+                                         [[maybe_unused]]
+                                         const size_t *charcount)
 {
   size_t count_bits_set = 0;
   size_t previouspos = 0;

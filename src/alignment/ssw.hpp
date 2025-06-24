@@ -10,14 +10,13 @@
 #include <string>
 #include <tuple>
 #include <climits>
-#include "utilities/unused.hpp"
 #include "utilities/gcc_builtin.hpp"
 /* the following is used in sw_simd_uint8|16.hpp */
 #include "alignment/simd.hpp"
 
 template<typename basetype, bool do_print = false>
-static void print_simd_int(GTTL_UNUSED const char *tag,
-                           GTTL_UNUSED const simd_int &vec)
+static void print_simd_int([[maybe_unused]] const char *tag,
+                           [[maybe_unused]] const simd_int &vec)
 {
   if constexpr (do_print)
   {
@@ -157,7 +156,7 @@ template <typename Basetype, size_t (&sequence_index)(size_t, size_t)>
 static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
                                             /* this is not used for
                                                sizeof(Basetype) == 2 */
-                                            GTTL_UNUSED
+                                            [[maybe_unused]]
                                               uint8_t abs_smallest_score,
                                             size_t alphasize,
                                             const uint8_t *seq,
@@ -217,7 +216,7 @@ static inline bool ssw_check_valid_sequence(const uint8_t *seq, size_t seq_len,
 }
 #endif
 
-static inline size_t sequence_index_forward(GTTL_UNUSED size_t seq_len,
+static inline size_t sequence_index_forward([[maybe_unused]] size_t seq_len,
                                             size_t seq_pos)
 {
   return seq_pos;

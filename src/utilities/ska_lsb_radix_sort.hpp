@@ -16,7 +16,6 @@
 #include <iostream>
 #endif
 #include "utilities/constexpr_for.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/buckets.hpp"
 #include "utilities/lsb_radix_sort.hpp"
 #include "utilities/span.hpp"
@@ -256,7 +255,7 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
 }
 
 template<typename Counttype>
-static Buckets<Counttype> *countingsort_skarupke(GTTL_UNUSED int num_bits,
+static Buckets<Counttype> *countingsort_skarupke([[maybe_unused]] int num_bits,
                                                  int shift,
                                                  uint64_t *array,
                                                  size_t array_len)
@@ -310,7 +309,7 @@ static std::pair<Buckets<Counttype> *,int> radixsort_ska_template(
                                                    basetype *array,
                                                    size_t num_units,
                                                    /* for sizeof_unit>1 */
-                                                   GTTL_UNUSED
+                                                   [[maybe_unused]]
                                                    bool reversed_byte_order)
 {
   int bits_already_sorted = byte_index * first_pass_msb_bits;

@@ -8,7 +8,6 @@
 #include <climits>
 #include <cstdlib>
 #include <algorithm>
-#include "utilities/unused.hpp"
 
 template<typename GapType,typename ScoreType,typename PredecessorType>
 class LocalChainElemInfo

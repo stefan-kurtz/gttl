@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cmath>
 #include <cassert>
-#include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"
 
 template<class SeqClass_u,class SeqClass_v>
@@ -207,7 +206,7 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
                              size_t low_reference,
                              size_t one_off,
                              bool subject_first,
-                             GTTL_UNUSED bool distinguish_mismatch_match,
+                             [[maybe_unused]] bool distinguish_mismatch_match,
                              size_t width_alignment,
                              bool forward_strand,
                              size_t low_seq_length,

@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
-#include "utilities/unused.hpp"
 #include "threading/thread_pool.hpp"
 #include "threading/thread_pool_var.hpp"
 
@@ -12,7 +11,7 @@ static size_t fibonacci(size_t n)
   return n<=1 ? 1 : (fibonacci(n-1) + fibonacci(n-2));
 }
 
-static void sum_fibonacci_var(size_t thread_id, GTTL_UNUSED size_t task_id,
+static void sum_fibonacci_var(size_t thread_id, [[maybe_unused]] size_t task_id,
                               size_t n, size_t *thread_sums)
 {
   thread_sums[thread_id] += fibonacci(n);
@@ -40,7 +39,7 @@ class SumFibThreadData
   ~SumFibThreadData(void) { }
 };
 
-static void sum_fibonacci(size_t thread_id, GTTL_UNUSED size_t task_id,
+static void sum_fibonacci(size_t thread_id, [[maybe_unused]] size_t task_id,
                           SumFibThreadData *thread_data)
 {
   thread_data->thread_sums[thread_id] += fibonacci(thread_data->n);
