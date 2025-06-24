@@ -685,7 +685,8 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
       threads.push_back(std::thread([&part_info_tab, array,
                                      num_sort_bits, thd_num]
       {
-        size_t left, width;
+        size_t left;
+        size_t width;
         std::tie(left,width) = part_info_tab[thd_num];
         LSBuint64Sorter lsb_uint64_sorter(num_sort_bits);
         ska_large_lsb_small_radix_sort_generic<Counttype,uint64_t,1,
@@ -704,7 +705,8 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
     Span<uint64_t> span(array,num_units);
     for (size_t idx = 1; idx < part_info_tab.size(); idx++)
     {
-      size_t left, width;
+      size_t left;
+      size_t width;
       std::tie(left,width) = part_info_tab[idx];
 #ifndef NDEBUG
       check_order(span.begin(),span.begin() + left);

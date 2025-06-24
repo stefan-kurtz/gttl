@@ -47,7 +47,8 @@ void inline enumerate_minimizer(size_t qgram_length,
     for (auto const &&code_pair : qgiter)
     {
       uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
-      size_t stored_seqnum, stored_seqpos;
+      size_t stored_seqnum;
+      size_t stored_seqpos;
       if constexpr (HashIterator::handle_both_strands)
       {
         const uint64_t rc_hash = std::get<1>(code_pair) & hash_mask;

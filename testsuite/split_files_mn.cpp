@@ -65,7 +65,9 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  size_t num_parts, len_parts, num_sequences;
+  size_t num_parts;
+  size_t len_parts;
+  size_t num_sequences;
   if (result.count("num_parts"))
   {
     num_parts = result["num_parts"].as<size_t>();

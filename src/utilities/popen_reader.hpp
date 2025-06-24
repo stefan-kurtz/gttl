@@ -26,7 +26,8 @@ class PopenReader
     : stdout_ptr(nullptr)
     , stderr_ptr(nullptr)
   {
-    int stdout_tab[2], stderr_tab[2];
+    int stdout_tab[2];
+    int stderr_tab[2];
 #ifdef _WIN32
     int pipe_error = _pipe(stdout_tab, 4096UL * 1024 * 1024, 0);
 #else

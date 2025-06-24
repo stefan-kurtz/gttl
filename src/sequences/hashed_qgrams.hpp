@@ -131,7 +131,8 @@ static std::pair<size_t,bool> append_minimizers(
     for (auto const &&code_pair : qgiter)
     {
       uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
-      size_t stored_seqnum, stored_seqpos;
+      size_t stored_seqnum;
+      size_t stored_seqpos;
       if constexpr (HashIterator::handle_both_strands)
       {
         const uint64_t rc_hash = std::get<1>(code_pair) & hash_mask;
@@ -301,7 +302,8 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
       if (steps == 0)
       {
         uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
-        size_t stored_seqnum, stored_seqpos;
+        size_t stored_seqnum;
+        size_t stored_seqpos;
         if constexpr (HashIterator::handle_both_strands)
         {
           const uint64_t rc_hash = std::get<1>(code_pair) & hash_mask;
@@ -354,8 +356,10 @@ struct HashedQgramVectorTable
   void concat_hashed_qgram_vectors(HashedQgramVector<sizeof_unit>
                                      *hashed_qgrams_vector) noexcept
   {
-    size_t current_idx = 0, max_size_idx = 0, max_size = 0,
-           total_number_of_hashed_qgrams = 0;
+    size_t current_idx = 0;
+    size_t max_size_idx = 0;
+    size_t max_size = 0;
+    size_t total_number_of_hashed_qgrams = 0;
     for (auto const &mv : table)
     {
       total_number_of_hashed_qgrams += mv.size();
@@ -414,7 +418,8 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
                                           HashedQgramVectorTable<sizeof_unit>
                                             *hashed_qgram_vector_table)
 {
-  size_t this_count, this_has_wildcards;
+  size_t this_count;
+  size_t this_has_wildcards;
   std::tie(this_count,this_has_wildcards)
     = append_minimizers<sizeof_unit,HashIterator>
                        (qgram_length,
@@ -546,7 +551,8 @@ class HashedQgramsGeneric
       for (size_t seqnum = 0; seqnum < multiseq.sequences_number_get();
            seqnum++)
       {
-        size_t this_count, this_has_wildcards;
+        size_t this_count;
+        size_t this_has_wildcards;
         std::tie(this_count,this_has_wildcards)
           = (at_constant_distance
                ? append_constant_distance_hashed_qgrams

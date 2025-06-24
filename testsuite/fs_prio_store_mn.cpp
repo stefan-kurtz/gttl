@@ -58,7 +58,10 @@ static void run_trial_iter(size_t trials, size_t num_elements,
 
 int main(int argc,char *argv[])
 {
-  int trials, num_elements, max_value, capacity;
+  int trials;
+  int num_elements;
+  int max_value;
+  int capacity;
   if (argc != 5 or
       std::sscanf(argv[1],"%d",&trials) != 1 or trials < 1 or
       std::sscanf(argv[2],"%d",&num_elements) != 1 or num_elements < 1 or

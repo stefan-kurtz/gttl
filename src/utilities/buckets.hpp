@@ -76,7 +76,8 @@ class Buckets
   }
   basetype maximum_width_get(void) const noexcept
   {
-    basetype bucket_start = 0, maximum_bucket_width = 0;
+    basetype bucket_start = 0;
+    basetype maximum_bucket_width = 0;
     for (size_t idx = 0; idx < num_buckets; idx++)
     {
       assert(bucket_start <= bucket_ends[idx]);

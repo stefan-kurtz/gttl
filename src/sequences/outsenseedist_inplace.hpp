@@ -246,7 +246,8 @@ static size_t fastedist_inplace_continue(const FrontValue *previousfront,
                                          size_t seqnum1)
 {
   assert(ulen > 0 && vlen > 0);
-  size_t d, allocated = 0;
+  size_t d;
+  size_t allocated = 0;
 
   if constexpr (d_max_defined)
   {

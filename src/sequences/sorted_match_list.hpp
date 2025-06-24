@@ -58,7 +58,8 @@ static inline std::pair<size_t,size_t> maximize_on_both_ends(
 
   assert(ref_seq_abs_start_pos + seed_size - 1 < ref_seq_len &&
          query_seq_abs_start_pos + seed_size - 1 < query_seq_len);
-  const char *ref_seq_bwd, *query_seq_bwd;
+  const char *ref_seq_bwd;
+  const char *query_seq_bwd;
   for (ref_seq_bwd = ref_seq + ref_seq_abs_start_pos - 1,
        query_seq_bwd = query_seq + query_seq_abs_start_pos - 1;
        pointers_leq(ref_seq,ref_seq_bwd) &&
@@ -71,7 +72,8 @@ static inline std::pair<size_t,size_t> maximize_on_both_ends(
     = static_cast<size_t>(ref_seq + ref_seq_abs_start_pos - 1
                                   - (ref_seq_bwd+1) + 1);
 
-  const char *ref_seq_fwd, *query_seq_fwd;
+  const char *ref_seq_fwd;
+  const char *query_seq_fwd;
   for (ref_seq_fwd = ref_seq + ref_seq_abs_start_pos + seed_size,
        query_seq_fwd = query_seq + query_seq_abs_start_pos + seed_size;
        pointers_leq(ref_seq_fwd,ref_seq + ref_seq_len - 1) &&
@@ -177,8 +179,8 @@ class SortedMatchList
        same name to deliver the sequence and their
        length, but depending on the sequence number.
     */
-    uint64_t seqnum0 = 0,
-             seqnum1 = 0;
+    uint64_t seqnum0 = 0;
+    uint64_t seqnum1 = 0;
     if constexpr (SeedEnumeratorClass::delivers_length_value)
     {
       encoded_match_list.reserve(seed_enumerator.number_of_MEMs_get());
@@ -220,8 +222,10 @@ class SortedMatchList
     } else
     {
       const size_t length_threshold = minimum_mem_length - qgram_length;
-      const char *ref_seq, *query_seq;
-      size_t ref_seq_len, query_seq_len;
+      const char *ref_seq;
+      const char *query_seq;
+      size_t ref_seq_len;
+      size_t query_seq_len;
       if constexpr (from_same_sequence)
       {
         ref_seq = ref_multiseq.sequence_ptr_get();
@@ -256,7 +260,8 @@ class SortedMatchList
           ref_seq_len = ref_multiseq.sequence_length_get(pp.seqnum0);
           query_seq_len = query_multiseq.sequence_length_get(pp.seqnum1);
         }
-        size_t left_extend, right_extend;
+        size_t left_extend;
+        size_t right_extend;
 
         if constexpr (self_match)
         {
@@ -436,8 +441,8 @@ class SortedMatchList
     const size_t j_match_length = this->length_get(j);
     assert(ref_endpos_j + 1 >= j_match_length &&
            query_endpos_j + 1 >= j_match_length);
-    const uint64_t ref_startpos_j = ref_endpos_j + 1 - j_match_length,
-                   query_startpos_j = query_endpos_j + 1 - j_match_length;
+    const uint64_t ref_startpos_j = ref_endpos_j + 1 - j_match_length;
+    const uint64_t query_startpos_j = query_endpos_j + 1 - j_match_length;
 
     const uint64_t ref_endpos_i = this->ref_endpos_get(i);
     if (ref_endpos_i < ref_startpos_j)
@@ -445,8 +450,8 @@ class SortedMatchList
       const uint64_t query_endpos_i = this->query_endpos_get(i);
       if (query_endpos_i < query_startpos_j)
       {
-        const uint64_t ref_gap = ref_startpos_j - ref_endpos_i - 1,
-                       query_gap = query_startpos_j - query_endpos_i - 1;
+        const uint64_t ref_gap = ref_startpos_j - ref_endpos_i - 1;
+        const uint64_t query_gap = query_startpos_j - query_endpos_i - 1;
         assert(ref_gap > 0 || query_gap > 0);
         return std::make_pair(ref_gap,query_gap);
       }
@@ -485,8 +490,8 @@ class SortedMatchList
       = m.template decode_at<query_pos_idx>(match_packer);
     const uint64_t m_match_length
       = minimum_mem_length + m.template decode_at<4>(match_packer);
-    const uint64_t ref_startpos_m = ref_endpos_m - m_match_length + 1,
-                   query_startpos_m = query_endpos_m - m_match_length + 1;
+    const uint64_t ref_startpos_m = ref_endpos_m - m_match_length + 1;
+    const uint64_t query_startpos_m = query_endpos_m - m_match_length + 1;
     assert(ref_endpos_p < ref_startpos_m && query_endpos_p < query_startpos_m);
     return std::make_pair(static_cast<size_t>(ref_startpos_m - ref_endpos_p
                                                              - 1),

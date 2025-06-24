@@ -443,7 +443,8 @@ class GttlMultiseq
   std::pair<size_t,size_t> short_header_get(size_t seqnum) const noexcept
   {
     assert(seqnum < short_header_cache.size());
-    uint16_t sh_offset, sh_len;
+    uint16_t sh_offset;
+    uint16_t sh_len;
     std::tie(sh_offset,sh_len) = short_header_cache[seqnum];
     return std::make_pair(static_cast<size_t>(sh_offset),
                           static_cast<size_t>(sh_len));
@@ -496,7 +497,8 @@ class GttlMultiseq
                                                         bool short_header) const
   {
     const std::string_view header = header_get(seqnum);
-    size_t header_offset, header_len;
+    size_t header_offset;
+    size_t header_len;
     if (short_header)
     {
       std::tie(header_offset,header_len) = short_header_get(seqnum);
@@ -627,7 +629,8 @@ class GttlMultiseq
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       const std::string_view header = header_get(seqnum);
-      size_t sh_offset, sh_len;
+      size_t sh_offset;
+      size_t sh_len;
       std::tie(sh_offset,sh_len)
         = short_header_substring<first_delim,second_delim>(header);
       assert(sh_offset <= UINT16_MAX && sh_len <= UINT16_MAX);
@@ -643,7 +646,8 @@ class GttlMultiseq
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
       const std::string_view header = header_get(seqnum);
-      size_t sh_offset, sh_len;
+      size_t sh_offset;
+      size_t sh_len;
       std::tie(sh_offset,sh_len)
         = short_header_substring(header);
       assert(sh_offset <= UINT16_MAX && sh_len <= UINT16_MAX);

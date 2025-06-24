@@ -447,12 +447,13 @@ class Eoplist
     , previous_was_gap(false)
     , distinguish_mismatch_match(_distinguish_mismatch_match)
   {
-    size_t upos = 0, vpos = 0;
+    size_t upos = 0;
+    size_t vpos = 0;
 
     for (auto cigar_operation : cigar_string_encoding)
     {
-      uint32_t iteration = cigar_operation >> 4,
-               edit_operation_number = cigar_operation & 0xf;
+      uint32_t iteration = cigar_operation >> 4;
+      uint32_t edit_operation_number = cigar_operation & 0xf;
       assert(edit_operation_number < 3);
       if (edit_operation_number == 0) /* replacement */
       {
@@ -496,8 +497,8 @@ class Eoplist
                            int8_t gap_extension_penalty,
                            const int8_t * const *scorematrix2D) const
   {
-    size_t idx_u = 0,
-           idx_v = 0;
+    size_t idx_u = 0;
+    size_t idx_v = 0;
     ScoreType sum_score = 0;
 #ifndef NDEBUG
     bool last_was_indel = false;

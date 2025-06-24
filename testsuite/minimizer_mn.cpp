@@ -71,8 +71,8 @@ void run_nt_minimizer(const MinimizerOptions &options)
   {
     std::cout << "# " << log << '\n';
   }
-  int hash_bits = -1,
-      var_sizeof_unit_hashed_qgram;
+  int hash_bits = -1;
+  int var_sizeof_unit_hashed_qgram;
   assert(options.hash_bits_get() != -1);
   try
   {

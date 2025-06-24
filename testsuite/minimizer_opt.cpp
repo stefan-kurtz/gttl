@@ -27,8 +27,8 @@ MinimizerOptions::MinimizerOptions(void)
 
 void MinimizerOptions::parse(int argc, char **argv)
 {
-  const std::string default_window_size = "1",
-                    default_qgram_length = "18";
+  const std::string default_window_size = "1";
+  const std::string default_qgram_length = "18";
 
   cxxopts::Options options(argv[0],"generate minimizers of DNA sequences "
                                    "in given input files");

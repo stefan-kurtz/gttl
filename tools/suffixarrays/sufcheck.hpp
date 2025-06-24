@@ -155,10 +155,10 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
                                          size_t numofchars,
                                          GTTL_UNUSED const size_t *charcount)
 {
-  size_t count_bits_set = 0,
-         previouspos = 0,
-         firstspecial = totallength,
-         rangestart = 0;
+  size_t count_bits_set = 0;
+  size_t previouspos = 0;
+  size_t firstspecial = totallength;
+  size_t rangestart = 0;
   uint8_t previouscc = 0;
   Multibitvector<false> startposoccurs(totallength + 1);
   std::vector<Rangewithchar> rangestore;

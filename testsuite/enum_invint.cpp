@@ -57,9 +57,9 @@ static void verify_hashvalues_for_file(const char *inputfilename,
     throw std::runtime_error(std::string("cannot open file ") + inputfilename);
   }
   GttlFastAGenerator fasta_gen(in_fp);
-    size_t ranges_total_length = 0,
-           hash_value_sum = 0,
-           compl_hash_value_sum = 0;
+    size_t ranges_total_length = 0;
+    size_t hash_value_sum = 0;
+    size_t compl_hash_value_sum = 0;
   for (const auto *si : fasta_gen)
   {
     auto sequence = si->sequence_get();
@@ -71,8 +71,8 @@ static void verify_hashvalues_for_file(const char *inputfilename,
       HashValuePairIterator qgiter(qgram_length,substring, this_length);
       for (auto const &&code_pair : qgiter)
       {
-        uint64_t hash_value = std::get<0>(code_pair),
-                 compl_hash_value = std::get<1>(code_pair);
+        uint64_t hash_value = std::get<0>(code_pair);
+        uint64_t compl_hash_value = std::get<1>(code_pair);
         hash_value_sum += hash_value;
         compl_hash_value_sum += compl_hash_value;
 #ifndef NDEBUG

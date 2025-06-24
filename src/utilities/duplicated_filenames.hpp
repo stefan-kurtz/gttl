@@ -13,8 +13,8 @@
 static inline bool gttl_files_with_same_path(const std::string &path0,
                                              const std::string &path1)
 {
-  char *fullpath_0 = realpath(path0.c_str(),NULL),
-       *fullpath_1 = realpath(path1.c_str(),NULL);
+  char *fullpath_0 = realpath(path0.c_str(),NULL);
+  char *fullpath_1 = realpath(path1.c_str(),NULL);
   const bool same_files = (std::strcmp(fullpath_0,
                                        fullpath_1) == 0) ? true : false;
   free(fullpath_0);

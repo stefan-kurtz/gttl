@@ -222,15 +222,15 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
     = forward_strand ? (low_reference == 0 ? asi.vstart
                                            : (low_reference - asi.vstart))
                      : (low_seq_length - asi.vstart - low_match_length);
-  size_t pos = 0,
-         idx_u = 0,
-         idx_v = 0,
-         top_start_pos = asi.ustart,
-         low_start_pos = low_start_base;
+  size_t pos = 0;
+  size_t idx_u = 0;
+  size_t idx_v = 0;
+  size_t top_start_pos = asi.ustart;
+  size_t low_start_pos = low_start_base;
 
-  char *topbuf = new char [3 * width_alignment],
-       *midbuf = topbuf + width_alignment,
-       *lowbuf = midbuf + width_alignment;
+  char *topbuf = new char [3 * width_alignment];
+  char *midbuf = topbuf + width_alignment;
+  char *lowbuf = midbuf + width_alignment;
 
   const SeqClass_u &useq = *(asi.useq);
   const SeqClass_v &vseq = *(asi.vseq);
@@ -243,7 +243,8 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
         for (size_t j = 0; j < co.iteration && idx_u < useq.size() &&
                                                idx_v < vseq.size(); j++)
         {
-          char cc_a, cc_b;
+          char cc_a;
+          char cc_b;
           bool is_match;
 
           is_match = match_method(useq[idx_u],vseq[idx_v]);

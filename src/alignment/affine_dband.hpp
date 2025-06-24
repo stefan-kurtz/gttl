@@ -52,9 +52,9 @@ class GttlAffineDPbanded
                       AffineAlignEditOp dmaxedge,
                       AffineAlignEditOp imaxedge)
     {
-      constexpr const int shift_r = 2 * (AFFINE_DBAND_REPLACEMENT-1),
-                          shift_d = 2 * (AFFINE_DBAND_DELETION-1),
-                          shift_i = 2 * (AFFINE_DBAND_INSERTION-1);
+      constexpr const int shift_r = 2 * (AFFINE_DBAND_REPLACEMENT-1);
+      constexpr const int shift_d = 2 * (AFFINE_DBAND_DELETION-1);
+      constexpr const int shift_i = 2 * (AFFINE_DBAND_INSERTION-1);
       trace = (rmaxedge << shift_r) |
               (dmaxedge << shift_d) |
               (imaxedge << shift_i);
@@ -348,8 +348,8 @@ class GttlAffineDPbanded
   {
     assert(eoplist != nullptr && bitmatrix != nullptr);
     AffineAlignEditOp edge = AFFINE_DBAND_REPLACEMENT;
-    size_t i = usubstring.size(),
-           j = vsubstring.size();
+    size_t i = usubstring.size();
+    size_t j = vsubstring.size();
     while (i > 0 || j > 0)
     {
       const AffineAlignTraceBits trace_bits = bitmatrix[j][i];
@@ -423,8 +423,8 @@ class GttlAffineDPbanded
     assert(eoplist != nullptr && dpmatrix != nullptr);
     AffineAlignEditOp edge = AFFINE_DBAND_REPLACEMENT;
     const AffineAlignScoreTriple *previous;
-    size_t i = usubstring.size(),
-           j = vsubstring.size();
+    size_t i = usubstring.size();
+    size_t j = vsubstring.size();
     while (i > 0 || j > 0)
     {
       if (edge == AFFINE_DBAND_REPLACEMENT)
@@ -719,8 +719,8 @@ class GttlAffineDPbanded
     assert(smallest_score < 0 && min_align_score > INT_MIN/2);
     for (/*Nothing*/; /* Nothing */; /*Nothing*/)
     {
-      int64_t left_dist = -static_cast<int64_t>(band_width),
-              right_dist = static_cast<int64_t>(band_width);
+      int64_t left_dist = -static_cast<int64_t>(band_width);
+      int64_t right_dist = static_cast<int64_t>(band_width);
 
       assert(left_dist <= std::min(int64_t(0),lendiff) &&
              right_dist >= std::max(int64_t(0),lendiff));

@@ -152,7 +152,8 @@ class QgramRecHashValueIterator
     }
     Iterator begin(void)
     {
-      uint64_t this_hash_value, this_compl_hash_value;
+      uint64_t this_hash_value;
+      uint64_t this_compl_hash_value;
       if (qgram_length <= seqlen)
       {
         for (const SequenceBaseType *qgram_ptr = sequence + qgram_length - 1;
@@ -187,7 +188,8 @@ class QgramRecHashValueIterator
     /* The following functions are for qgram invertible integer codes only */
     uint64_t qgram_encode(const SequenceBaseType *qgram)
     {
-      uint64_t code = 0, mult= 1;
+      uint64_t code = 0;
+      uint64_t mult= 1;
       for (const SequenceBaseType *qgram_ptr = qgram + qgram_length - 1;
            qgram_ptr >= qgram; qgram_ptr--)
       {
@@ -200,7 +202,8 @@ class QgramRecHashValueIterator
     }
     uint64_t qgram_encode_complement(const SequenceBaseType *qgram)
     {
-      uint64_t code = 0, mult= 1;
+      uint64_t code = 0;
+      uint64_t mult= 1;
       for (const SequenceBaseType *qgram_ptr = qgram;
            qgram_ptr < qgram + qgram_length; qgram_ptr++)
       {

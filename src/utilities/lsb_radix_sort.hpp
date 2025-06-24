@@ -28,8 +28,8 @@ static bool lsb_radix_sort_single_pass(
                                 size_t array_len)
 {
   constexpr const size_t num_buckets = size_t(1) << num_bits;
-  size_t count_zero = 0,
-         count[num_buckets] = {0};
+  size_t count_zero = 0;
+  size_t count[num_buckets] = {0};
 
   assert(array_len > 1);
   for (size_t idx = 0; idx < array_len; ++idx)
@@ -112,8 +112,8 @@ static inline void lsb_radix_sort(uint64_t *array,
   constexpr const int max_bits = 64;
   assert(bits_already_sorted + remaining_bits <= max_bits);
   int shift = max_bits - (bits_already_sorted + remaining_bits);
-  uint64_t *src_ptr = array,
-           *dest_ptr = buffer;
+  uint64_t *src_ptr = array;
+  uint64_t *dest_ptr = buffer;
   for (size_t idx = 0; idx < num_ranges; idx++)
   {
     const int bits = bit_groups[idx];
@@ -145,8 +145,8 @@ static void lsb_radix_sort(uint8_t *array,
   SinglePassSorter<uint8_t> func
     = lsb_radix_sort_single_pass<uint8_t,first_pass_msb_bits,sizeof_unit,
                                  radix_key_uint8<sizeof_unit>>;
-  uint8_t *src_ptr = array,
-          *dest_ptr = buffer;
+  uint8_t *src_ptr = array;
+  uint8_t *dest_ptr = buffer;
   assert(bits_already_sorted % 8 == 0);
   for (int byte_index = last_byte_index;
        byte_index >= bits_already_sorted/8; byte_index--)

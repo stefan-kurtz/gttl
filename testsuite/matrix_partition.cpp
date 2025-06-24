@@ -6,7 +6,9 @@
 
 int main(int argc,char *argv[])
 {
-  int cutlen, rows, cols;
+  int cutlen;
+  int rows;
+  int cols;
   if (argc != 4 ||
       sscanf(argv[1],"%d",&cutlen) != 1 || cutlen < 1 ||
       sscanf(argv[2],"%d",&rows) != 1 || rows < 1 ||

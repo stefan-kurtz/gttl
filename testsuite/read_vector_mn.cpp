@@ -14,8 +14,8 @@ int main(int argc,char *argv[])
   }
   try
   {
-    const auto file_content = gttl_read_vector<uint8_t>(argv[1]),
-               file_content_from_zipped = gttl_read_vector<uint8_t>(argv[2]);
+    const auto file_content = gttl_read_vector<uint8_t>(argv[1]);
+    const auto file_content_from_zipped = gttl_read_vector<uint8_t>(argv[2]);
     if (file_content.size() != file_content_from_zipped.size())
     {
       std::cerr << argv[0] << ": "

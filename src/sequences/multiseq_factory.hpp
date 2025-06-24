@@ -162,8 +162,8 @@ class GttlMultiseqFactory
     {
       number_of_units_in_split = num_sequences;
     }
-    size_t seqnum = 0,
-           current_part_number_of_units = 0;
+    size_t seqnum = 0;
+    size_t current_part_number_of_units = 0;
     for (auto &&si : fasta_it)
     {
       if (current_part_number_of_units < number_of_units_in_split)
@@ -247,7 +247,8 @@ class GttlMultiseqFactory
   }
   void statistics(void) const noexcept
   {
-    size_t total_length = 0, part_num = 0;
+    size_t total_length = 0;
+    size_t part_num = 0;
     for (auto &&ms_ptr : multiseq_vector)
     {
       total_length += ms_ptr->sequences_total_length_get();

@@ -367,7 +367,10 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
     }
   }
   /* Find the beginning position of the best alignment. */
-  size_t ustart, usubstringlength, vstart, vsubstringlength;
+  size_t ustart;
+  size_t usubstringlength;
+  size_t vstart;
+  size_t vsubstringlength;
   if (compute_only_end)
   {
     ustart = forward_ec.on_query;

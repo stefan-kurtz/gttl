@@ -29,7 +29,8 @@ template<size_t alpha_size>
 static uint64_t first_fwd_qgram_integer_code(const uint8_t *t_qgram,
                                              size_t qgram_length)
 {
-  uint64_t code = 0, mult= 1;
+  uint64_t code = 0;
+  uint64_t mult= 1;
   for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
        t_qgram_ptr >= t_qgram; t_qgram_ptr--)
   {
@@ -56,8 +57,10 @@ class InvertibleIntegercodeTransformer4
                                     const uint8_t *t_qgram,
                                     size_t qgram_length) const noexcept
   {
-    uint64_t fwd_code = 0, fwd_mult = 1, rev_compl_code = 0,
-             rev_compl_mult= uint64_t(1) << (2 * (qgram_length - 1));
+    uint64_t fwd_code = 0;
+    uint64_t fwd_mult = 1;
+    uint64_t rev_compl_code = 0;
+    uint64_t rev_compl_mult= uint64_t(1) << (2 * (qgram_length - 1));
     for (const uint8_t *t_qgram_ptr = t_qgram + qgram_length - 1;
          t_qgram_ptr >= t_qgram; t_qgram_ptr--)
     {

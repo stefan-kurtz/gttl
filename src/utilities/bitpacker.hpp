@@ -60,7 +60,8 @@ struct GttlBitPacker
                     sizeof_unit >= sizeof(basetype) &&
                     sizeof_unit <= sizeof(basetype) + 7);
       static constexpr const int bits_basetype = CHAR_BIT * sizeof(basetype);
-      int count = 0, idx;
+      int count = 0;
+      int idx;
       for (idx = 0; idx < bit_groups; idx++)
       {
         bit_group_sizes[idx] = _bit_group_sizes[idx];

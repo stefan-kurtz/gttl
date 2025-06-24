@@ -19,8 +19,8 @@
 
 class Unwords
 {
-  size_t qgram_length,
-         number_of_all_qgrams;
+  size_t qgram_length;
+  size_t number_of_all_qgrams;
   Multibitvector<true> multibitvector;
   public:
   size_t sequences_total_length;
@@ -143,8 +143,8 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
                                       SeqGenerator &seq_generator)
 {
   Unwords *last_successful_unwords = nullptr;
-  size_t l = 1,
-         r = qgram_length_max;
+  size_t l = 1;
+  size_t r = qgram_length_max;
   while (l <= r)
   {
     const size_t qgram_length = (l+r)/2;

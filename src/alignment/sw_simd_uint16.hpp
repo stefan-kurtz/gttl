@@ -29,13 +29,14 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
   uint64_t column_max_move_count = 0;
 #endif
   SWsimdResult sw_simd_result(0, query_len - 1, UINT16_MAX);
-  const size_t simd_size = SIMD_VECSIZE_INT * 2,
-               segment_len = (query_len + simd_size - 1) / simd_size;
+  const size_t simd_size = SIMD_VECSIZE_INT * 2;
+  const size_t segment_len = (query_len + simd_size - 1) / simd_size;
   uint16_t max_align_score = 0;
   int step;
   bool own_resources;
-  const simd_int vZero = simdi32_set(0), vGapO = simdi16_set(weight_gapO),
-                 vGapE = simdi16_set(weight_gapE);
+  const simd_int vZero = simdi32_set(0);
+  const simd_int vGapO = simdi16_set(weight_gapO);
+  const simd_int vGapE = simdi16_set(weight_gapE);
   print_simd_int<uint16_t>("vGapO: ", vGapO);
   simd_int vTemp;
   uint32_t cmp;
@@ -57,7 +58,8 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
   simd_int *pvHStoreNext = pvHLoad;
   simd_int *pvHStoreNextNext = pvHStore;
 
-  int64_t dbseq_pos, dbseq_pos_end;
+  int64_t dbseq_pos;
+  int64_t dbseq_pos_end;
   assert(dbseq_len > 0);
   if constexpr (forward_reading)
   {
@@ -93,8 +95,11 @@ static SWsimdResult sw_simd_uint16(GTTL_UNUSED const uint8_t *original_dbseq,
     }
     // printf("Current_char %d\n", current_char);
     size_t segment_pos;
-    simd_int e, *pv, vF = vZero, vMaxColumn = vZero,
-                     vH = pvHStore[segment_len - 1];
+    simd_int e;
+    simd_int *pv;
+    simd_int vF = vZero;
+    simd_int vMaxColumn = vZero;
+    simd_int vH = pvHStore[segment_len - 1];
     const simd_int *vP =
         vProfile + segment_len * static_cast<size_t>(current_char);
 

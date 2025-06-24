@@ -68,7 +68,8 @@ class SWOutputResultShared
     if (header_display)
     {
       assert(db_multiseq != nullptr && query_multiseq != nullptr);
-      size_t sh_offset, sh_len;
+      size_t sh_offset;
+      size_t sh_len;
       std::tie(sh_offset,sh_len) = db_multiseq->short_header_get(i);
       const std::string_view db_header = db_multiseq->header_get(i);
       std::fwrite(db_header.data() + sh_offset,sizeof(char),sh_len,fpout);
@@ -251,11 +252,11 @@ class SWOutputResultShared
                                     db_multiseq->sequences_maximum_length_get(),
                                     query_multiseq
                                       ->sequences_maximum_length_get());
-          static constexpr const size_t top_seqlength = 0,
-                                        low_reference = 0,
-                                        one_off = 0;
-          static constexpr const bool subject_first = true,
-                                      distinguish_mismatch_match = true;
+          static constexpr const size_t top_seqlength = 0;
+          static constexpr const size_t low_reference = 0;
+          static constexpr const size_t one_off = 0;
+          static constexpr const bool subject_first = true;
+          static constexpr const bool distinguish_mismatch_match = true;
           alignment_output_function(alignment_sequence_info,
                                     *eoplist,
                                     top_seqlength,

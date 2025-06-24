@@ -70,7 +70,8 @@ static inline size_t lcplen_fwd(const char *seq0,size_t start0,
 {
   if constexpr (respect_length)
   {
-    size_t i, j;
+    size_t i;
+    size_t j;
     for (i = start0, j = start1; i < len0 && j < len1; i++, j++)
     {
       if (not match_method(seq0[i],seq1[j]))
@@ -82,8 +83,8 @@ static inline size_t lcplen_fwd(const char *seq0,size_t start0,
   } else
   {
     size_t idx;
-    const char *ptr0 = seq0 + start0,
-               *ptr1 = seq1 + start1;
+    const char *ptr0 = seq0 + start0;
+    const char *ptr1 = seq1 + start1;
     for (idx = 0; match_method(ptr0[idx],ptr1[idx]); idx++)
         /* Nothing */;
     return idx;
@@ -99,8 +100,8 @@ static inline size_t lcslen_bwd(const char *seq0,size_t start0,
                                 GTTL_UNUSED size_t seqnum1)
 {
   assert(start0 < len0 && start1 < len1);
-  const char *ptr0 = seq0 + len0 - 1 - start0,
-             *ptr1 = seq1 + len1 - 1 - start1;
+  const char *ptr0 = seq0 + len0 - 1 - start0;
+  const char *ptr1 = seq1 + len1 - 1 - start1;
   while (match_method(*ptr0,*ptr1))
   {
     ptr0--;

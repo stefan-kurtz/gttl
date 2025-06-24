@@ -82,7 +82,8 @@ class Restrict2Pairs
          seqnum < static_cast<uint32_t>(multiseq->sequences_number_get());
          seqnum++)
     {
-      size_t sh_offset, sh_len;
+      size_t sh_offset;
+      size_t sh_len;
       std::tie(sh_offset,sh_len) = multiseq->short_header_get(seqnum);
       const std::string_view header = multiseq->header_get(seqnum);
       std::string key(header.data() + sh_offset,sh_len);
@@ -286,8 +287,8 @@ int main(int argc,char *argv[])
   }
   RunTimeClass timer{};
 
-  GttlMultiseq *db_multiseq = nullptr,
-               *query_multiseq = nullptr;
+  GttlMultiseq *db_multiseq = nullptr;
+  GttlMultiseq *query_multiseq = nullptr;
   bool dna_alphabet = false;
   int8_t **scorematrix2D = nullptr;
   int8_t smallest_score = INT8_MAX;

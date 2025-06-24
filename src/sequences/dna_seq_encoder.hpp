@@ -120,7 +120,8 @@ class DNASeqEncoder
        const noexcept
   {
     assert(a_val <= additional_value_max);
-    size_t encoding_index = 0, char_idx = 0;
+    size_t encoding_index = 0;
+    size_t char_idx = 0;
 
     if (prefix_length >= characters_per_unit)
     {
@@ -485,7 +486,8 @@ class DNAEncodingMultiLength
       std::cout << "# num_parts\t" << num_parts << '\n';
       std::cout << "# mean " << mean << '\n';
     }
-    size_t local_sum = 0, idx = 0;
+    size_t local_sum = 0;
+    size_t idx = 0;
     std::vector<size_t> size_vec;
     assert(end_idx_of_part_vec.size() == 0);
     for (auto &kv : expanded_vec)
@@ -517,7 +519,8 @@ class DNAEncodingMultiLength
         size_vec.push_back(local_sum);
       }
     }
-    size_t local_sum_sum = 0, begin_idx = 0;
+    size_t local_sum_sum = 0;
+    size_t begin_idx = 0;
     assert(size_vec.size() == end_idx_of_part_vec.size());
     for (size_t j = 0; j < size_vec.size(); j++)
     {

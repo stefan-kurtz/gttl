@@ -73,8 +73,8 @@ class BlastStatistics
       throw std::runtime_error(msg.str());
     }
     assert(idx >= 0 && idx < static_cast<int>(items));
-    const double lambda = stat[idx].lambda,
-                 kappa = stat[idx].kappa;
+    const double lambda = stat[idx].lambda;
+    const double kappa = stat[idx].kappa;
     log_kappa_d_log2 = log(kappa)/std::numbers::ln2;
     lambda_d_log2 = lambda/std::numbers::ln2;
 #ifdef GUMBLE_OUT

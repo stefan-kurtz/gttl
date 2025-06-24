@@ -31,9 +31,10 @@ static void display_alignment(const Eoplist &eoplist)
   const size_t vlen = eoplist.count_insertions_get() +
                       eoplist.count_mismatches_get() +
                       eoplist.count_matches_get();
-  char *useq = new char [ulen],
-       *vseq = new char [vlen];
-  size_t i = 0, j = 0;
+  char *useq = new char [ulen];
+  char *vseq = new char [vlen];
+  size_t i = 0;
+  size_t j = 0;
   const char characters[] = "ACGT";
   size_t char_idx = 0;
   for (auto &&co : eoplist)
@@ -77,15 +78,15 @@ static void display_alignment(const Eoplist &eoplist)
   }
   assert(i == ulen);
   assert(j == vlen);
-  const std::string ustring(useq,ulen),
-                    vstring(vseq,vlen);
+  const std::string ustring(useq,ulen);
+  const std::string vstring(vseq,vlen);
   AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0,
                                                       ulen,vlen);
-  static constexpr const size_t top_seqlength = 0,
-                                low_reference = 0,
-                                one_off = 0;
-  static constexpr const bool subject_first = true,
-                              distinguish_mismatch_match = true;
+  static constexpr const size_t top_seqlength = 0;
+  static constexpr const size_t low_reference = 0;
+  static constexpr const size_t one_off = 0;
+  static constexpr const bool subject_first = true;
+  static constexpr const bool distinguish_mismatch_match = true;
   static constexpr const bool forward_strand = true;
   alignment_output<std::string,std::string,char,
                    simple_matching_characters,to_char_identity>
@@ -125,9 +126,9 @@ int main(int argc,char *argv[])
     match_length_array[idx]
       = static_cast<size_t>(ceil(10 * exp(static_cast<double>((idx+1)/10))));
   }
-  const double boundary_distinguish_mismatch_match[] = {0.25, 0.5, 0.75},
-               boundary_identify_mismatch_match[] = {0.33, 0.67, 1.0},
-               *boundary = nullptr;
+  const double boundary_distinguish_mismatch_match[] = {0.25, 0.5, 0.75};
+  const double boundary_identify_mismatch_match[] = {0.33, 0.67, 1.0};
+  const double *boundary = nullptr;
   for (size_t trial = 0; trial < static_cast<size_t>(trials); trial++)
   {
     for (int mode = 0; mode < 2; mode++)

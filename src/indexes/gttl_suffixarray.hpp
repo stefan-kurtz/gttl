@@ -384,8 +384,8 @@ class GttlSuffixArray
     const size_t nonspecial_suffixes = nonspecial_suffixes_get();
 
     assert(nonspecial_suffixes > 0 and nonspecial_suffixes <= UINT32_MAX);
-    SuftabBaseType left = 0,
-                   right = nonspecial_suffixes - 1;
+    SuftabBaseType left = 0;
+    SuftabBaseType right = nonspecial_suffixes - 1;
     size_t idx;
     for (idx = 0; idx < querylen; idx++)
     {

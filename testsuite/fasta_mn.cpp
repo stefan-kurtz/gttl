@@ -34,7 +34,8 @@ static void process_iterator(Iterator &iterator,
                              bool statistics,
                              size_t line_width)
 {
-  size_t seqnum = 0, total_length = 0;
+  size_t seqnum = 0;
+  size_t total_length = 0;
   for (auto &&si : iterator)
   {
     const std::string_view &sequence = si->sequence_get();

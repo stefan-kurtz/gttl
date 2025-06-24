@@ -67,7 +67,8 @@ static inline std::basic_string<BaseType>
   {
     concatenated_content.resize(sum_file_size);
   }
-  size_t offset = 0, file_counter = 0;
+  size_t offset = 0;
+  size_t file_counter = 0;
   for (auto &&inputfile : inputfiles)
   {
     if (has_gzip_header(inputfile.c_str()))

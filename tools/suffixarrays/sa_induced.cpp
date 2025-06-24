@@ -522,8 +522,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
           {
             if (sainoptions.abs_suftab_out_opt_is_set())
             {
-              const std::string suftab_path(indexname + ".suf"),
-                                bu_suftab_path(indexname + ".bsf");
+              const std::string suftab_path(indexname + ".suf");
+              const std::string bu_suftab_path(indexname + ".bsf");
               assert(std::filesystem::exists(suftab_path));
               if (std::filesystem::is_symlink(bu_suftab_path) or
                   std::filesystem::exists(bu_suftab_path))

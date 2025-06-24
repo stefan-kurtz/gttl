@@ -190,7 +190,8 @@ static inline uint64_t wyhash(const void *key, size_t len, uint64_t seed)
 
   const uint8_t *p = (const uint8_t *) key;
   seed ^= _wymix(seed ^ secret[0], secret[1]);
-  uint64_t a, b;
+  uint64_t a;
+  uint64_t b;
   if (_likely_(len <= 16))
   {
     if (_likely_(len >= 4))
@@ -208,7 +209,8 @@ static inline uint64_t wyhash(const void *key, size_t len, uint64_t seed)
     size_t i = len;
     if (_unlikely_(i >= 48))
     {
-      uint64_t see1 = seed, see2 = seed;
+      uint64_t see1 = seed;
+      uint64_t see2 = seed;
       do
       {
         seed = _wymix(_wyr8(p) ^ secret[1], _wyr8(p + 8) ^ seed);

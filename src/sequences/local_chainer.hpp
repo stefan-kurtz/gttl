@@ -292,7 +292,8 @@ class LocalChainer
         while (true)
         {
           assert(i < segment_length);
-          uint64_t ref_gap_length, query_gap_length;
+          uint64_t ref_gap_length;
+          uint64_t query_gap_length;
           if constexpr (upwards_chaining)
           {
             std::tie(ref_gap_length,query_gap_length)

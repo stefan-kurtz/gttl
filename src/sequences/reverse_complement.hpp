@@ -31,7 +31,8 @@ template<uint8_t (&complement_function)(uint8_t)>
 static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
                                                            size_t len)
 {
-  uint8_t *fwd, *bck;
+  uint8_t *fwd;
+  uint8_t *bck;
 
   for (fwd = sequence, bck = sequence + len -1; fwd <= bck; fwd++, bck--)
   {

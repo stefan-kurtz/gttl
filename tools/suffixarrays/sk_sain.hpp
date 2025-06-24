@@ -118,8 +118,8 @@ class Sainbuffer
     } else
     {
       const size_t fillptr_offset = fillptr[charidx] - 1;
-      SuftabBaseType *writeptr = suftab + fillptr_offset,
-                     *readptr = values + offset;
+      SuftabBaseType *writeptr = suftab + fillptr_offset;
+      SuftabBaseType *readptr = values + offset;
       const SuftabBaseType *readend = readptr + sain_buffer_key_values.buf_size;
 
       while (readptr < readend)
@@ -141,8 +141,8 @@ class Sainbuffer
 
       if (bufleft > 0)
       {
-        SuftabBaseType *writeptr = suftab + fillptr[charidx] - 1,
-                       *readptr = values + (charidx <<
+        SuftabBaseType *writeptr = suftab + fillptr[charidx] - 1;
+        SuftabBaseType *readptr = values + (charidx <<
                                             sain_buffer_key_values.log_bufsize);
         const SuftabBaseType *readend = readptr + bufleft;
 
@@ -425,7 +425,8 @@ class GttlSainseq
 
   size_t sain_insertSstarsuffixes(SuftabBaseType *suftab)
   {
-    size_t nextcc = pos2unique_int(totallength), countSstartype = 0;
+    size_t nextcc = pos2unique_int(totallength);
+    size_t countSstartype = 0;
     SuftabBaseType *fillptr = bucketfillptr;
     bool nextisStype = true;
 #ifdef SAINSHOWSTATE
@@ -491,7 +492,8 @@ class GttlSainseq
 #endif
 
     sain_endbuckets();
-    size_t nextcc = pos2unique_int(totallength), countSstartype = 0;
+    size_t nextcc = pos2unique_int(totallength);
+    size_t countSstartype = 0;
     for (size_t position = totallength - 1; /* Nothing */; position--)
     {
       constexpr const bool special_as_pos = T_seqtype == GTTL_SAIN_MULTISEQ;
@@ -829,7 +831,8 @@ class GttlSainseq
     // first
     static_assert(T_seqtype == GTTL_SAIN_MULTISEQ);
     assert(seq->sequences_number_get() > 0);
-    constexpr const bool forward = false, invert = true;
+    constexpr const bool forward = false;
+    constexpr const bool invert = true;
 
     if constexpr (T_alphasize == size_t(4))
     {
@@ -1077,8 +1080,8 @@ class GttlSainseq
   void sain_assignSstarlength(SuftabBaseType *lentab)
   {
     bool nextisStype = true;
-    size_t nextSstartypepos = totallength,
-           nextcc = pos2unique_int(totallength);
+    size_t nextSstartypepos = totallength;
+    size_t nextcc = pos2unique_int(totallength);
 
     for (size_t position = totallength - 1; /* Nothing */; position--)
     {
@@ -1110,7 +1113,8 @@ class GttlSainseq
     assert(start1 <= totallength && start2 <= totallength && start1 != start2);
     while (start1 < end1)
     {
-      size_t cc1, cc2;
+      size_t cc1;
+      size_t cc2;
 
       if (start1 == totallength)
       {
@@ -1141,17 +1145,17 @@ class GttlSainseq
 
   size_t sain_assignSstarnames(size_t countSstartype, SuftabBaseType *suftab)
   {
-    SuftabBaseType *secondhalf = suftab + countSstartype,
-                   previouspos = suftab[0],
-                   previouslen = secondhalf[previouspos/2];
+    SuftabBaseType *secondhalf = suftab + countSstartype;
+    SuftabBaseType previouspos = suftab[0];
+    SuftabBaseType previouslen = secondhalf[previouspos/2];
     size_t currentname = static_cast<size_t>(1);
 
     secondhalf[previouspos/2] = static_cast<SuftabBaseType>(currentname);
     for (size_t suftab_idx = size_t(1); suftab_idx < countSstartype;
          suftab_idx++)
     {
-      const SuftabBaseType position = suftab[suftab_idx],
-                           currentlen = secondhalf[position/2];
+      const SuftabBaseType position = suftab[suftab_idx];
+      const SuftabBaseType currentlen = secondhalf[position/2];
 
       currentname += (previouslen != currentlen) ||
                      (sain_compare_Sstarstrings(previouspos,position,currentlen)
@@ -1538,7 +1542,8 @@ class GttlSainseq
 
     // get the position of the padding chars and wildcards from second last to
     // first
-    constexpr const bool forward = false, invert = true;
+    constexpr const bool forward = false;
+    constexpr const bool invert = true;
     if constexpr (T_alphasize == size_t(4))
     {
       using ThisCharRange = GttlCharRange<char_finder::EncodedNucleotideFinder,
@@ -1600,7 +1605,8 @@ class GttlSainseq
 
   void sain_moveSstar2front(size_t countSstartype, Sint *suftab)
   {
-    size_t readidx, writeidx = 0;
+    size_t readidx;
+    size_t writeidx = 0;
     Sint position;
 
     for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
@@ -1641,7 +1647,9 @@ class GttlSainseq
 
   size_t sain_fast_moveSstar2front(size_t countSstartype, Sint *suftab)
   {
-    size_t readidx, namecount = 0, writeidx = 0;
+    size_t readidx;
+    size_t namecount = 0;
+    size_t writeidx = 0;
     Sint position;
 
     for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
@@ -1771,8 +1779,8 @@ class GttlSainseq
   {
     assert(T_seqtype == GTTL_SAIN_MULTISEQ);
     assert(seq->sequences_number_get() > 0);
-    constexpr const bool forward = true,
-                         invert = true;
+    constexpr const bool forward = true;
+    constexpr const bool invert = true;
     size_t countspecial = 0;
     if constexpr (T_alphasize == size_t(4))
     {

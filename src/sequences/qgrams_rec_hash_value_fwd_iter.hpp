@@ -87,7 +87,8 @@ class QgramRecHashValueFwdIterator
       {
         if (not last_qgram_was_processed)
         {
-          uint8_t new_rank,  old_rank;;
+          uint8_t new_rank;
+          uint8_t old_rank;
           if constexpr (std::is_same_v<SequenceBaseType,char>)
           {
             new_rank = alphabet.char_to_rank(*next_char_ptr);
@@ -186,7 +187,8 @@ class QgramRecHashValueFwdIterator
     std::pair<uint64_t,uint8_t> qgram_encode(const SequenceBaseType *qgram)
     {
       uint8_t wc = 0;
-      uint64_t code = 0, mult= 1;
+      uint64_t code = 0;
+      uint64_t mult= 1;
       for (const SequenceBaseType *qgram_ptr = qgram + qgram_length - 1;
            qgram_ptr >= qgram; qgram_ptr--)
       {

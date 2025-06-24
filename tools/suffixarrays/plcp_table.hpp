@@ -95,8 +95,8 @@ class PlcpTable
       while (pos + lcpvalue < totallength &&
              previousstart + lcpvalue < totallength)
       {
-        const uint8_t cc0 = sequence[pos + lcpvalue],
-                      cc1 = sequence[previousstart + lcpvalue];
+        const uint8_t cc0 = sequence[pos + lcpvalue];
+        const uint8_t cc1 = sequence[previousstart + lcpvalue];
         if (cc0 != cc1 or cc0 >= static_cast<uint8_t>(alphasize))
         {
           break;

@@ -17,8 +17,8 @@ class InverseSuftabReader
   const BinaryFileReader<SuftabBaseType> inverse_suftab_reader;
   bool isa_file_is_up_to_date(const std::string &indexname) const
   {
-    const std::string suftab_inputfile(indexname + ".suf"),
-                      inverse_suftab_inputfile(indexname + ".isa");
+    const std::string suftab_inputfile(indexname + ".suf");
+    const std::string inverse_suftab_inputfile(indexname + ".isa");
     return std::filesystem::exists(suftab_inputfile) and
            std::filesystem::exists(inverse_suftab_inputfile) and
            std::filesystem::last_write_time(suftab_inputfile) <

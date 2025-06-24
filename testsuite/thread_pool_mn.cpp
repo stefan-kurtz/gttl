@@ -48,7 +48,8 @@ static void sum_fibonacci(size_t thread_id, GTTL_UNUSED size_t task_id,
 
 int main(int argc, char *argv[])
 {
-  long readlong1, readlong2;
+  long readlong1;
+  long readlong2;
 
   if (argc != 3 || sscanf(argv[1], "%ld", &readlong1) != 1 || readlong1 < 0 ||
       sscanf(argv[2], "%ld", &readlong2) != 1 || readlong2 < 0)

@@ -104,10 +104,10 @@ static void process_fastq_iter(bool statistics,
                                const std::string &inputfilename,
                                FastQGenerator &fastq_it)
 {
-  size_t seqnum = 0,
-         total_length = 0,
-         min_length = std::numeric_limits<size_t>::max(),
-         max_length = 0;;
+  size_t seqnum = 0;
+  size_t total_length = 0;
+  size_t min_length = std::numeric_limits<size_t>::max();
+  size_t max_length = 0;;
   uint64_t hash_value_sum = 0;
   std::map<size_t,size_t> length_dist_map;
   for (auto &&fastq_entry : fastq_it)
@@ -234,10 +234,11 @@ static void process_paired_files(bool statistics,
 {
   constexpr const int buf_size = 1 << 14;
   using FastQGenerator = GttlFastQGenerator<buf_size>;
-  FastQGenerator fastq_it0(filename0.c_str()),
-                 fastq_it1(filename1.c_str());
+  FastQGenerator fastq_it0(filename0.c_str());
+  FastQGenerator fastq_it1(filename1.c_str());
 
-  size_t seqnum = 0, total_length[2] = {0};
+  size_t seqnum = 0;
+  size_t total_length[2] = {0};
   auto it0 = fastq_it0.begin();
   auto it1 = fastq_it1.begin();
   while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
@@ -382,8 +383,8 @@ static void char_distribution_thd_gz(size_t num_threads,
 static void char_distribution_thd(const SequencesSplit &sequences_split)
 {
   size_t *count_entries = static_cast<size_t *>(calloc(sequences_split.size(),
-                                                       sizeof *count_entries)),
-         *dist = static_cast<size_t *>(calloc(4 * sequences_split.size(),
+                                                       sizeof *count_entries));
+  size_t *dist = static_cast<size_t *>(calloc(4 * sequences_split.size(),
                                               sizeof *dist));
   std::vector<std::thread> threads{};
   for (size_t thd_num = 0; thd_num < sequences_split.size(); thd_num++)
@@ -460,8 +461,8 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
     {
       for (size_t idx = 0; idx < qgram_length-1; idx++)
       {
-        const char p_cc = previous_qgram[idx+1],
-                     cc = qgram[idx];
+        const char p_cc = previous_qgram[idx+1];
+        const char cc = qgram[idx];
         if (p_cc != cc)
         {
           std::cerr << "p_cc = " << p_cc << " != " << cc << '\n';
@@ -633,7 +634,8 @@ int main(int argc,char *argv[])
                     }
                   } else
                   {
-                    int bits, r_qgram_length;
+                    int bits;
+                    int r_qgram_length;
                     if (std::sscanf(options.encoding_type_get().c_str(),"%d,%d",
                                     &bits,&r_qgram_length) != 2
                         or bits != 64

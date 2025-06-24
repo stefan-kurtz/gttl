@@ -200,12 +200,12 @@ static size_t close_gaps_between_chain_elements(const SeedTable &seed_table,
   {
     return 0;
   }
-  size_t j = from_element,
-         distance = 0;
+  size_t j = from_element;
+  size_t distance = 0;
   for (size_t current_length = 1; current_length < chain_len; current_length++)
   {
-    const size_t ulen = local_chainer.ref_gap_length_get(j),
-                 vlen = local_chainer.query_gap_length_get(j);
+    const size_t ulen = local_chainer.ref_gap_length_get(j);
+    const size_t vlen = local_chainer.query_gap_length_get(j);
     j = static_cast<size_t>(local_chainer.predecessor_get(j));
     distance += all_sequence_types_edist<SeedTable,CharType,match_method>
                                         (seed_table,

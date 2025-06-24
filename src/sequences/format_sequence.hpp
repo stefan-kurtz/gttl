@@ -12,8 +12,8 @@ static inline void gttl_format_sequence(const std::string_view &sequence,
     std::cout << sequence << '\n';
   } else
   {
-    size_t remain = sequence.size(),
-           offset = 0;
+    size_t remain = sequence.size();
+    size_t offset = 0;
     while (true)
     {
       if (line_width < remain)

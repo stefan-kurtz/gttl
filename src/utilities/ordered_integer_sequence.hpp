@@ -49,9 +49,9 @@ class OrderedIntegerSequence
   private:
   size_t binarysearch_sec_idx_largest_leq(size_t idx) const noexcept
   {
-    const size_t *secstart_begin = sectionstart,
-                 *secstart_end = sectionstart + numofsections - 1,
-                 *found = nullptr;
+    const size_t *secstart_begin = sectionstart;
+    const size_t *secstart_end = sectionstart + numofsections - 1;
+    const size_t *found = nullptr;
     while (secstart_begin <= secstart_end)
     {
       const size_t *midptr
@@ -119,7 +119,8 @@ class OrderedIntegerSequence
       return static_cast<size_t>(rightptr - leftptr);
     }
     assert(pos > *leftptr && pos < *rightptr);
-    const Basetype *found = nullptr, *leftorig = leftptr;
+    const Basetype *found = nullptr;
+    const Basetype *leftorig = leftptr;
     while (leftptr <= rightptr)
     {
       const Basetype *midptr
@@ -336,8 +337,8 @@ size_t ordered_integer_sequence_size(size_t sizeofBasetype,
 size_t ordered_integer_sequence_sizeof_smallest(size_t maxelement,
                                                 size_t nofelements)
 {
-  size_t sizeof_basetype = 0,
-         smallest_size = ~size_t(0);
+  size_t sizeof_basetype = 0;
+  size_t smallest_size = ~size_t(0);
   for (size_t this_sizeof = 1; this_sizeof <= 4; this_sizeof *= 2)
   {
     const size_t this_size

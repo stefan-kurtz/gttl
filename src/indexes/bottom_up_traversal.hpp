@@ -14,7 +14,9 @@ class BottomUpTraversalStack
 {
   private:
   Basetype *space;
-  size_t allocated, nextfree, max_stack_size;
+  size_t allocated;
+  size_t nextfree;
+  size_t max_stack_size;
   public:
   BottomUpTraversalStack(void)
     : space(nullptr)
@@ -177,9 +179,9 @@ static void bottomup_generic(StateClass *bu_state,
     {
       if (last_interval != nullptr)
       {
-        const size_t last_interval_lb = last_interval->lb,
-                     last_interval_lcp = last_interval->lcp,
-                     last_interval_rb = last_interval->rb;
+        const size_t last_interval_lb = last_interval->lb;
+        const size_t last_interval_lcp = last_interval->lcp;
+        const size_t last_interval_rb = last_interval->rb;
         stack.push_back(lcpvalue,last_interval_lb);
         static constexpr const bool first_edge = true;
         process_branchingedge(bu_state,
