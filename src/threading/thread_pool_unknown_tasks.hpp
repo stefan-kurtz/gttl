@@ -3,8 +3,10 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
 #include <mutex>
 #include <thread>
+#include <vector>
 #include "threading/threadsafe_queue.hpp"
 
 

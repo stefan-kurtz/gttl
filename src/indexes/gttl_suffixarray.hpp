@@ -18,17 +18,18 @@
 #define GTTL_SUFFIXARRAY_HPP
 
 #include <cassert>
+#include <cstddef>
+#include <string>
+#include <fstream>
+#include <ios>
+#include <cstdio>
 #include <vector>
 #include <cstdint>
 #include <cinttypes>
 #include <tuple>
-#include <iterator>
 #include <algorithm>
-#include <stdexcept>
-#include <climits>
 
 #include "utilities/read_vector.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
 
 class LCPtable

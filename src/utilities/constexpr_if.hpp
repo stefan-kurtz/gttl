@@ -1,6 +1,5 @@
 #ifndef CONSTEXPR_IF_HPP
 #define CONSTEXPR_IF_HPP
-#include <type_traits>
 #include <utility>
 
 /* from https://stackoverflow.com/questions/41011900/

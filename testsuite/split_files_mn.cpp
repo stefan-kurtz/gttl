@@ -7,6 +7,7 @@
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/split_files.hpp"
+#include "utilities/has_suffix_or_prefix.hpp"
 
 int main(int argc, char *argv[])
 {

@@ -1,10 +1,10 @@
 #ifndef NTHASH_FWD_AMINOACIDS_HPP
 #define NTHASH_FWD_AMINOACIDS_HPP
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <utility>
 #include "sequences/nthash_rotation_tables.hpp"
 

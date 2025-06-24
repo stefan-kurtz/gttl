@@ -1,6 +1,7 @@
 #ifndef PLCP_TABLE_HPP
 #define PLCP_TABLE_HPP
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>

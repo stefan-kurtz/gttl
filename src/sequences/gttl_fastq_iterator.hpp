@@ -1,6 +1,7 @@
 #ifndef GTTL_FASTQ_ITERATOR_HPP
 #define GTTL_FASTQ_ITERATOR_HPP
 #include <array>
+#include <cstddef>
 #include <ios>
 #include <string>
 #include <type_traits>

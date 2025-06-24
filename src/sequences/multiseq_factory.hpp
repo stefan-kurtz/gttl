@@ -1,11 +1,14 @@
 #ifndef MULTISEQ_FACTORY_HPP
 #define MULTISEQ_FACTORY_HPP
+#include <cassert>
+#include <utility>
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <cmath>
 #include <cstdio>
 #include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/gttl_multiseq.hpp"
 
 class GttlMultiseqFactory

@@ -1,5 +1,6 @@
 #ifndef CYCLE_OF_NUMBERS_HPP
 #define CYCLE_OF_NUMBERS_HPP
+#include <cstddef>
 #include <cstdint>
 #include <cassert>
 #include <vector>

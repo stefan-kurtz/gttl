@@ -1,5 +1,7 @@
 #ifndef BYTES_UNIT_HPP
 #define BYTES_UNIT_HPP
+#include <array>
+#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <iostream>

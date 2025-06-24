@@ -21,6 +21,7 @@
 #include <climits>
 #include <cassert>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <string>

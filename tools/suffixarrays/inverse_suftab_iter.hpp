@@ -3,9 +3,9 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <ios>
 #include <string>
 #include <cassert>
-#include <stdexcept>
 #include <filesystem>
 #include "utilities/gttl_binary_read.hpp"
 #include "utilities/memory_tracker.hpp"

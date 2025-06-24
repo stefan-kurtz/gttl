@@ -1,11 +1,12 @@
 #ifndef OUTSENSEEDIST_ALN_HPP
 #define OUTSENSEEDIST_ALN_HPP
+#include <cassert>
 #include <cstdint>
 #include <vector>
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-#include "sequences/prefix_suffix_extension.hpp"
+#include "sequences/backreference.hpp"
 #include "sequences/front_value_trace.hpp"
 #include "sequences/eoplist.hpp"
 #include "utilities/unused.hpp"

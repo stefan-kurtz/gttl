@@ -6,9 +6,9 @@
 #include <cstddef>
 #include <cstdio>
 #include <ios>
-#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 template <const size_t buf_size = (size_t{1} << size_t{14})>
 struct GttlFastQEntry

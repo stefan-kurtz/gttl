@@ -1,16 +1,22 @@
 #ifndef SW_OPTION_PARSER_HPP
 #define SW_OPTION_PARSER_HPP
-#include <stdexcept>
 #ifndef _WIN32
-#include <unistd.h>
+  // we only include getopt_core.h after it has already
+  // been included in unistd. This saves us having to repeatedly
+  // disable include-linting when using optind/getopt
+  #include <unistd.h> // NOLINT(misc-include-cleaner)
+  #include <bits/getopt_core.h>
 #else
-#define NOMINMAX
-#include <io.h>
-#include "utilities/windows_getopt.hpp"
+  #define NOMINMAX
+  #include <io.h>
+  #include "utilities/windows_getopt.hpp"
 #endif
 #include <cstdint>
 #include <cassert>
 #include <cstdio>
+#include <cstring>
+#include <exception>
+#include <stdexcept>
 #include "utilities/str_format.hpp"
 #include "threading/threads_output_files.hpp"
 #include "alignment/score_matrix_name.hpp"

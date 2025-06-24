@@ -18,22 +18,24 @@
 #ifndef SK_SAIN_HPP
 #define SK_SAIN_HPP
 
+#include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <cstdio>
 #include <climits>
 #include <cstdint>
-#include <iostream>
-#include <array>
+#include <utility>
 #include <vector>
-#include <map>
 #include <type_traits>
 
+#include "utilities/mathsupport.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/memory_tracker.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sufcheck.hpp"
+#include "utilities/unused.hpp"
 
 #ifdef ACCESS_STATISTICS
 static std::map<int,size_t> accesses_per_line;

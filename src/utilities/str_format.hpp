@@ -17,6 +17,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <cstdarg>
+#include <cstdio>
 #include <string>
 
 #define STR_FORMAT_VARIABLE(OPERATOR)\

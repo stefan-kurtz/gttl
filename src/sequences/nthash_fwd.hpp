@@ -40,8 +40,10 @@ SOFTWARE.
 #ifndef NTHASH_FWD_HPP
 #define NTHASH_FWD_HPP
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cassert>
+#include <utility>
 #include "sequences/complement_uint8.hpp"
 #include "sequences/nthash_rotation_tables.hpp"
 

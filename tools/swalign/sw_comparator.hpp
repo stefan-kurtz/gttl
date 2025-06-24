@@ -1,8 +1,11 @@
 #ifndef SW_COMPARATOR_HPP
 #define SW_COMPARATOR_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <cassert>
+#include <string_view>
+#include <tuple>
 #include "alignment/loc_align_coords.hpp"
 #include "alignment/ssw.hpp"
 

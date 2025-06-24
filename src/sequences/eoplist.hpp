@@ -1,5 +1,6 @@
 #ifndef EOPLIST_HPP
 #define EOPLIST_HPP
+#include <cstddef>
 #include <cstdint>
 #include <cctype>
 #include <cassert>

@@ -1,7 +1,7 @@
 /* created by ./score_class_choices.py --alignment_output DO NOT EDIT */
 #ifndef ALIGNMENT_OUTPUT_FUNCTION_HPP
 #define ALIGNMENT_OUTPUT_FUNCTION_HPP
-#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
@@ -13,6 +13,7 @@
 #include "alignment/score_matrix_name.hpp"
 #include "sequences/alignment_output.hpp"
 #include "sequences/gttl_substring.hpp"
+#include "utilities/str_format.hpp"
 
 static inline auto alignment_output_function_get(
     const char *score_matrix_id, const ScoreMatrixName &score_matrix_name,

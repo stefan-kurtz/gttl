@@ -17,11 +17,11 @@
 
 #ifndef BYTES_UNIT_SUFTAB_HPP
 #define BYTES_UNIT_SUFTAB_HPP
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
-#include <tuple>
-#include <algorithm>
 #include <climits>
 #include "utilities/bitpacker.hpp"
 #include "utilities/bytes_unit.hpp"

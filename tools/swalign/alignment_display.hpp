@@ -1,8 +1,11 @@
 #ifndef ALIGNMENT_DISPLAY_HPP
 #define ALIGNMENT_DISPLAY_HPP
+#include <cstddef>
+#include <cstdio>
 #include <stdexcept>
 #include <string>
 #include <cassert>
+#include <vector>
 #include "utilities/split_string.hpp"
 
 class AlignmentDisplay

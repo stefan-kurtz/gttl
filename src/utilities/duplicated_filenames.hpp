@@ -1,6 +1,7 @@
 #ifndef DUPLICATED_FILENAMES_HPP
 #define DUPLICATED_FILENAMES_HPP
 
+#include <stdlib.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

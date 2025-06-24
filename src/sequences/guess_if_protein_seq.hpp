@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include "sequences/gttl_fasta_generator.hpp"
+#include "utilities/gttl_file_open.hpp"
 
 /* checks first chars of sequence, returns true if sequence is
    definitely a protein sequence */

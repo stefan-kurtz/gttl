@@ -1,5 +1,9 @@
+#include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <cstring>
+#include <string>
+#include <vector>
 #include "utilities/gttl_line_iterator.hpp"
 
 int main(int argc,char *argv[])

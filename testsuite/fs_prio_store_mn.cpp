@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <algorithm>
+#include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <cassert>

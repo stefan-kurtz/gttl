@@ -2,6 +2,7 @@
 #define ALL_VS_ALL2_HPP
 #include "utilities/matrix_partition.hpp"
 #include <cstddef>
+#include <vector>
 
 template<class PairWiseComparator,class ContainerClass>
 static inline void compare_pairs_in_range(bool triangle,

@@ -1,10 +1,13 @@
 #ifndef THREADSAFE_QUEUE_HPP
 #define THREADSAFE_QUEUE_HPP
 #include <algorithm>
+#include <exception>
+#include <cstddef>
 #include <mutex>
 #include <optional>
 #include <queue>
 #include <string>
+#include <utility>
 
 // Source from https://bitbucket.org/marco/samples.git queue.cpp
 

@@ -18,7 +18,8 @@
 #define QGRAMS_REC_HASH_VALUE_FWD_ITER_HPP
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
+#include <iterator>
+#include <utility>
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"

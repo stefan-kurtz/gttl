@@ -1,5 +1,5 @@
-#include <iostream>
 #include "sequences/alphabet.hpp"
+#include <cstdlib>
 
 int main(void)
 {

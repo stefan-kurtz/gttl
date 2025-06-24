@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include "sequences/gttl_multiseq.hpp"
 
 struct LocalAlignmentCoordinates

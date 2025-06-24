@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
-#include <cstdio>
-#include "utilities/split_string.hpp"
+#include <stdexcept>
+#include <vector>
 #include "utilities/is_in_PATH.hpp"
 #include "utilities/untar_zipped.hpp"
 #include "untar_zipped_op.hpp"

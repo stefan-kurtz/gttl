@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <cstdint>
 #include "utilities/read_vector.hpp"

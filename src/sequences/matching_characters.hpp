@@ -1,5 +1,8 @@
 #ifndef MATCHING_CHARACTERS_HPP
 #define MATCHING_CHARACTERS_HPP
+#include <cstdint>
+#include <cstddef>
+#include <cassert>
 #include "utilities/unused.hpp"
 #include "sequences/alphabet.hpp"
 

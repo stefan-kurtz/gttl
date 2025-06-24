@@ -1,9 +1,13 @@
 #ifndef GTTL_SEQ_ITERATOR_HPP
 #define GTTL_SEQ_ITERATOR_HPP
+#include <cstddef>
 #include <iostream>
 #include <string>
-#include <tuple>
+#include <string_view>
+#include "utilities/gttl_file_open.hpp"
+#include <vector>
 #include "utilities/gttl_line_iterator.hpp"
+#include "utilities/str_format.hpp"
 
 struct SequenceEntry
 {

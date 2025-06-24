@@ -1,8 +1,6 @@
 #ifndef IS_BIG_ENDIAN_HPP
 #define IS_BIG_ENDIAN_HPP
 #include <bit>
-#include <cstddef>
-#include <cstdint>
 
 #if __cplusplus > 201703L
 consteval bool is_big_endian(void)

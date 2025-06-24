@@ -1,6 +1,8 @@
 #include "utilities/gttl_binary_read.hpp"
+#include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <string>
 
 int main(int argc, char *argv[])
 {

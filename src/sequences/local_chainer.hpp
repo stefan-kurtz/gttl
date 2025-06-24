@@ -1,6 +1,8 @@
 #ifndef LOCAL_CHAINER_HPP
 #define LOCAL_CHAINER_HPP
 #include <cassert>
+#include <utility>
+#include <tuple>
 #include <vector>
 #include <cstdint>
 #include <climits>

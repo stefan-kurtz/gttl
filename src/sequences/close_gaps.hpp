@@ -1,7 +1,7 @@
 #ifndef CLOSE_GAPS_HPP
 #define CLOSE_GAPS_HPP
 #include <cstddef>
-#include <tuple>
+#include <cstdint>
 #include <cassert>
 #include "sequences/matching_characters.hpp"
 #include "sequences/outsenseedist_unr.hpp"

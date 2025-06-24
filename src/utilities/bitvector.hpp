@@ -2,6 +2,7 @@
 #define BITVECTOR_HPP
 #include <cassert>
 #include <climits>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include "utilities/mathsupport.hpp"

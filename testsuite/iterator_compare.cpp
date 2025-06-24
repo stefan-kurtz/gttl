@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <string_view>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/gttl_fastq_iterator.hpp"

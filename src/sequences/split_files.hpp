@@ -5,6 +5,8 @@
 #include <cmath>
 #include <functional>
 #include <sstream>
+#include <string>
+#include <string_view>
 #include <type_traits>
 #include "sequences/gttl_fastq_generator.hpp"
 #include "threading/thread_pool_unknown_tasks.hpp"

@@ -1,6 +1,7 @@
 #ifndef BINARY_NTTABLE_HPP
 #define BINARY_NTTABLE_HPP
 
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>

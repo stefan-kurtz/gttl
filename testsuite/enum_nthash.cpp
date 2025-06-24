@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
 #include <cstdint>
 #include <exception>
@@ -24,20 +25,20 @@
 #include <iostream>
 #include <tuple>
 #include <cinttypes>
+#include <vector>
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
+#include "utilities/bitpacker.hpp"
+#include "utilities/gttl_file_open.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/unused.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/bytes_unit.hpp"
-#include "sequences/char_range.hpp"
-#include "sequences/char_finder.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
-#include "utilities/wyhash.hpp"
 
 static void usage(const cxxopts::Options &options)
 {

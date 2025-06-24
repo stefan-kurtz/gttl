@@ -1,9 +1,13 @@
 #ifndef SPLIT_HPP
 #define SPLIT_HPP
+#include <cassert>
+#include <algorithm>
+#include <cstdio>
 #include <cstring>
 #include <ios>
+#include <string>
 #include <string_view>
-#include <stdexcept>
+#include <vector>
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/gttl_mmap.hpp"
 

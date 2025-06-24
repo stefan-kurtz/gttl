@@ -2,7 +2,9 @@
 #ifndef SEQUENCE_DECODE_FUNCTION_HPP
 #define SEQUENCE_DECODE_FUNCTION_HPP
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
+#include <string>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -12,6 +14,7 @@
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
 #include "sequences/gttl_substring.hpp"
+#include "utilities/str_format.hpp"
 
 template <class SeqClass, typename CharType, char (&to_char)(CharType)>
 static std::string sequence_decode(const SeqClass &seq)

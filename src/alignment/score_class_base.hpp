@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include "sequences/gttl_multiseq.hpp"
 #include "sequences/literate_multiseq.hpp"
 
 template<int alphasize>

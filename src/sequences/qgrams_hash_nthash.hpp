@@ -16,6 +16,7 @@
 */
 #ifndef QGRAMS_HASH_NTHASH_HPP
 #define QGRAMS_HASH_NTHASH_HPP
+#include <cstdint>
 #include "sequences/alphabet.hpp"
 #include "sequences/nthash_fwd.hpp"
 #include "sequences/nthash_fwd_aminoacids.hpp"

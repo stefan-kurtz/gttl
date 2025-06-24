@@ -1,8 +1,8 @@
 #ifndef INPUTFILES_MULTISEQ_HPP
 #define INPUTFILES_MULTISEQ_HPP
 #include <cstdint>
+#include <exception>
 #include <vector>
-#include <tuple>
 #include <string>
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/complement_plain.hpp"

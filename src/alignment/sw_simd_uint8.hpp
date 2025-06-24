@@ -2,6 +2,13 @@
 #ifndef SW_SIMD_UINT8_HPP
 #define SW_SIMD_UINT8_HPP
 #include <alignment/ssw.hpp>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include "alignment/simd.hpp"
+#include "sequences/complement_uint8.hpp"
+#include "utilities/gcc_builtin.hpp"
+#include "utilities/unused.hpp"
 template <bool forward_reading, bool forward_strand>
 static SWsimdResult sw_simd_uint8(GTTL_UNUSED const uint8_t *original_dbseq,
                                   GTTL_UNUSED size_t original_dbseq_len,

@@ -1,6 +1,8 @@
 #ifndef PREFIX_SUFFIX_EXTENSION_HPP
 #define PREFIX_SUFFIX_EXTENSION_HPP
+#include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include "sequences/lcs_lcp_len_type.hpp"
 #include "sequences/outsenseedist_inplace.hpp"

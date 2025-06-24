@@ -1,14 +1,10 @@
 #ifndef GTTL_MMAP_HPP
 #define GTTL_MMAP_HPP
 
-#include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include <vector>
 #include <ios>
 #include <cassert>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include "utilities/file_size.hpp"
 #include "utilities/str_format.hpp"

@@ -1,5 +1,8 @@
 #ifndef NON_REDUNDANT_MATCHES_HPP
 #define NON_REDUNDANT_MATCHES_HPP
+#include <cstdint>
+#include <utility>
+#include <cstddef>
 #include <vector>
 #include <set>
 #include <algorithm>

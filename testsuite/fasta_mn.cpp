@@ -15,15 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <cstddef>
+#include <cstdlib>
+#include <exception>
 #include <iostream>
-#include <fstream>
-#include <typeinfo>
+#include <stdexcept>
+#include <string>
 #include <cassert>
-#include <algorithm>
 #include <string_view>
 #include <cstdio>
+#include <vector>
 #include "sequences/gttl_fasta_generator.hpp"
-#include "utilities/unused.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "sequences/format_sequence.hpp"
 #include "seq_reader_options.hpp"

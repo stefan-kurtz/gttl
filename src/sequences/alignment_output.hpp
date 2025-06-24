@@ -1,11 +1,11 @@
 #ifndef ALIGNMENT_OUTPUT_HPP
 #define ALIGNMENT_OUTPUT_HPP
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstddef>
 #include <cmath>
 #include <cassert>
-#include <iostream>
 #include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"
 

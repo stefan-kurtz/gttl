@@ -1,10 +1,10 @@
 #ifndef ALIGN_POLISH_HPP
 #define ALIGN_POLISH_HPP
+#include <algorithm>
 #include <cstddef>
 #include <cassert>
 #include <string>
 #include <cstdint>
-#include <climits>
 #include <iostream>
 
 class AlignmentPolishing

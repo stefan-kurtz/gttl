@@ -1,6 +1,8 @@
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <vector>
 #include "utilities/cycle_of_numbers.hpp"
 
 int main(void)

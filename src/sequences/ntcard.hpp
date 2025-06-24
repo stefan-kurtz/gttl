@@ -1,13 +1,19 @@
 #ifndef NTCARD_HPP
 #define NTCARD_HPP
 
+#include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <ios>
+#include <string>
+#include <string_view>
 #include <thread>
+#include <tuple>
 #include <vector>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
+#include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"

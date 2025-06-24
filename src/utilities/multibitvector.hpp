@@ -1,5 +1,7 @@
 #ifndef MULTIBITVECTOR_HPP
 #define MULTIBITVECTOR_HPP
+#include <cstddef>
+#include <cassert>
 #include "utilities/bitvector.hpp"
 
 template<bool track_count>

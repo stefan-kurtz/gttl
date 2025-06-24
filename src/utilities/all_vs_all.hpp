@@ -1,6 +1,6 @@
 #ifndef ALL_VS_ALL_HPP
 #define ALL_VS_ALL_HPP
-#include <iostream>
+#include <cassert>
 #include <cstddef>
 #include "threading/thread_pool.hpp"
 

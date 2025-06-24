@@ -13,7 +13,6 @@
 #include "utilities/unused.hpp"
 #include "utilities/gcc_builtin.hpp"
 /* the following is used in sw_simd_uint8|16.hpp */
-#include "sequences/complement_uint8.hpp"
 #include "alignment/simd.hpp"
 
 template<typename basetype, bool do_print = false>

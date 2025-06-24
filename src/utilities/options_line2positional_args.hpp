@@ -1,6 +1,7 @@
 #ifndef OPTIONS_LINE2POSITIONAL_ARGS_HPP
 #define OPTIONS_LINE2POSITIONAL_ARGS_HPP
 
+#include <cstddef>
 #include <stdexcept>
 #include <vector>
 #include <string>

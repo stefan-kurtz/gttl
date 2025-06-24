@@ -1,4 +1,12 @@
+#include <cstddef>
+#include <cstdint>
+#include <cassert>
+#include <cstdlib>
+#include <exception>
 #include <iostream>
+#include <string>
+#include <stdexcept>
+#include <utility>
 #include <vector>
 #include "utilities/cxxopts.hpp"
 #include "utilities/str_format.hpp"

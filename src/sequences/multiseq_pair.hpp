@@ -1,13 +1,16 @@
 #ifndef MULTISEQ_PAIR_HPP
 #define MULTISEQ_PAIR_HPP
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <exception>
 #include <stdexcept>
 #include <tuple>
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
+#include "utilities/str_format.hpp"
 
 static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   create_multiseq_pair(const char *dbfile,const char*queryfile)

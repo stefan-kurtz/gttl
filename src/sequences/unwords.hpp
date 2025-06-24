@@ -1,6 +1,10 @@
 #ifndef UNWORDS_HPP
 #define UNWORDS_HPP
+#include <cstddef>
+#include <cstdint>
+#include <cassert>
 #include <exception>
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include "utilities/access_maybe_pointer.hpp"

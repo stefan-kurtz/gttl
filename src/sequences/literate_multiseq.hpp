@@ -2,6 +2,9 @@
 #define LITERATE_MULTISEQ_HPP
 #include <cstddef>
 #include <array>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <mutex>
 #include <iostream>
 #include "sequences/alphabet.hpp"

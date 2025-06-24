@@ -10,9 +10,9 @@
 #else
   #include <unistd.h>
 #endif
+#include <cstddef>
 #include <fcntl.h>
 #include <ios>
-#include <sys/types.h>  // for fstat() and open()
 #include <sys/stat.h>
 #include <string>
 #include <vector>

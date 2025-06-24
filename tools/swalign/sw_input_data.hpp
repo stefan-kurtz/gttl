@@ -1,6 +1,11 @@
 #ifndef SW_INPUT_DATA_HPP
 #define SW_INPUT_DATA_HPP
+#include <cassert>
+#include <cstdint>
+#include <cstddef>
 #include <exception>
+#include <tuple>
+#include "alignment/score_matrix_name.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/multiseq_pair.hpp"
 #include "alignment/blast_stat.hpp"

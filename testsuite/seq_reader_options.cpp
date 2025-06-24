@@ -16,10 +16,9 @@
 */
 #include <cstddef>
 #include <iostream>
-#include <fstream>
 #include <cassert>
-#include <algorithm>
 #include <stdexcept>
+#include <vector>
 #include "utilities/cxxopts.hpp"
 #include "seq_reader_options.hpp"
 

@@ -1,8 +1,13 @@
+#include <climits>
+#include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstdio>
 #include <cstring>
 #include <random>
 #include <iostream>
-#include <iomanip>
+#include "utilities/bitpacker.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/unused.hpp"

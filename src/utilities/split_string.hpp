@@ -1,5 +1,7 @@
 #ifndef SPLIT_STRING_HPP
 #define SPLIT_STRING_HPP
+#include <cstddef>
+#include <functional>
 #include <string>
 #include <cassert>
 #include <algorithm>

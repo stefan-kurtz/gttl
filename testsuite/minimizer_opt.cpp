@@ -1,8 +1,9 @@
 #include <cstddef>
 #include <iostream>
-#include <fstream>
 #include <cassert>
-#include <algorithm>
+#include <string>
+#include <vector>
+#include <stdexcept>
 #include "utilities/str_format.hpp"
 #include "utilities/cxxopts.hpp"
 #include "minimizer_opt.hpp"

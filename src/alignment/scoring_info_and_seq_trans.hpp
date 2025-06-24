@@ -2,7 +2,9 @@
 #ifndef SCORING_INFO_AND_SEQ_TRANS_HPP
 #define SCORING_INFO_AND_SEQ_TRANS_HPP
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
+#include <tuple>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -11,6 +13,8 @@
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
+#include "sequences/gttl_multiseq.hpp"
+#include "utilities/str_format.hpp"
 
 static inline std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
     const char *score_matrix_id, const ScoreMatrixName &score_matrix_name,

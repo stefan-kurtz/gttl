@@ -1,9 +1,11 @@
 #ifndef SUCCINCT_BITVECTOR_HPP
 #define SUCCINCT_BITVECTOR_HPP
 
+#include <bit>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 #include <vector>
 #include <stdexcept>
 

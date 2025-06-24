@@ -1,6 +1,8 @@
 #ifndef IS_IN_PATH_HPP
 #define IS_IN_PATH_HPP
+#include <cstdlib>
 #include <filesystem>
+#include <string>
 #include "utilities/split_string.hpp"
 
 static inline bool gttl_is_in_PATH(const std::string &prog)

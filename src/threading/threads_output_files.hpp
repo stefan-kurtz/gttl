@@ -1,7 +1,12 @@
 #ifndef THREADS_OUTPUT_FILES_HPP
 #define THREADS_OUTPUT_FILES_HPP
+#include <string.h>
+#include <stdlib.h>
 #include <cassert>
 #include <cstddef>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
 #include <cstring>
 #include <iostream>

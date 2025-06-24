@@ -18,8 +18,6 @@
 #ifndef SA_INDUCED_OPTIONS_HPP
 #define SA_INDUCED_OPTIONS_HPP
 
-#include <cstdint>
-#include <cstdlib>
 #include <string>
 #include <vector>
 

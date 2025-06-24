@@ -1,6 +1,7 @@
 #ifndef GTTL_FILE_OPEN_HPP
 #define GTTL_FILE_OPEN_HPP
 
+#include <cerrno>
 #include <cstdio>
 #include <string>
 #include <stdexcept>
@@ -9,7 +10,6 @@
 
 #ifndef GTTL_WITHOUT_ZLIB
 #include <cstring>
-#include <cstdint>
 #include <cassert>
 #include <vector>
 #include <zlib.h>

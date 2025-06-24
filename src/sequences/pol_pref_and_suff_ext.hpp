@@ -8,6 +8,7 @@
 #include "sequences/align_polish.hpp"
 #include "sequences/matching_characters.hpp"
 #include "sequences/pol_pref_or_suff_ext.hpp"
+#include "utilities/mathsupport.hpp"
 
 template<class MatchClass>
 static bool combine_suffix_prefix_extensions(

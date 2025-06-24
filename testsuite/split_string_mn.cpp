@@ -1,9 +1,12 @@
 #include <cstddef>
+#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <utility>
+#include <vector>
 #include "utilities/str_format.hpp"
 #include "utilities/split_string.hpp"
 #include "utilities/concatenate_strings.hpp"

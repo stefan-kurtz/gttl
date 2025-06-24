@@ -1,10 +1,10 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"

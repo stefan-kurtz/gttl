@@ -1,5 +1,7 @@
 #ifndef HAS_FASTA_OR_FASTQ_EXTENSION_HPP
 #define HAS_FASTA_OR_FASTQ_EXTENSION_HPP
+#include <string>
+#include <vector>
 #include "utilities/has_suffix_or_prefix.hpp"
 
 static inline bool gttl_likely_fasta_format(const std::string &inputfilename)

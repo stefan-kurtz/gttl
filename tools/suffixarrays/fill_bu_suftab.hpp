@@ -16,7 +16,12 @@
 */
 #ifndef FILL_BU_SUFTAB_HPP
 #define FILL_BU_SUFTAB_HPP
-#include "utilities/mathsupport.hpp"
+#include <cstddef>
+#include <cassert>
+#include <string>
+#include <cstdint>
+#include <vector>
+#include <cstdlib>
 #include "utilities/read_vector.hpp"
 #include "utilities/ordered_integer_sequence.hpp"
 #include "utilities/gttl_binary_write.hpp"

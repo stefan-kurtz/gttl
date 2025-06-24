@@ -1,5 +1,7 @@
+#include <stdexcept>
 #include <string>
 #include <iostream>
+#include <vector>
 #include "utilities/cxxopts.hpp"
 #include "untar_zipped_op.hpp"
 

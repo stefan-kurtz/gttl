@@ -15,12 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include <cstdint>
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <filesystem>
+#include <vector>
+#include <string>
 
 #include "utilities/cxxopts.hpp"
 #include "utilities/string_values_join.hpp"

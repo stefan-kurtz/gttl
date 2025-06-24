@@ -1,11 +1,17 @@
 #ifndef GTTL_MULTISEQ_HPP
 #define GTTL_MULTISEQ_HPP
 
+#include <cstdint>
+#include <cassert>
+#include <stdexcept>
+#include <cctype>
+#include <cstdlib>
 #include <tuple>
 #include <iostream>
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 #include <map>
 #include <tuple>

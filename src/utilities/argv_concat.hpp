@@ -1,5 +1,7 @@
 #ifndef ARGV_CONCAT_HPP
 #define ARGV_CONCAT_HPP
+#include <string.h>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <cstring>

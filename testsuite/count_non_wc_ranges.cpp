@@ -15,14 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
-#include <cstdint>
 #include <exception>
 #include <stdexcept>
-#include <string>
 #include <algorithm>
 #include <iostream>
+#include <vector>
+#include <utility>
 #include "sequences/gttl_fasta_generator.hpp"
+#include "utilities/gttl_file_open.hpp"
 #include "utilities/mathsupport.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"

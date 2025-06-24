@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstddef>
+#include <utility>
 #include <vector>
 #define GTTL_UNALIGNED(X) (size_t(X) & (sizeof (long) - 1))
 #define GTTL_UINT64_BYTES  sizeof(uint64_t)

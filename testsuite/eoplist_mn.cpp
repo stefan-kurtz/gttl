@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <algorithm>
 #include <exception>
@@ -6,7 +7,6 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <string_view>
 #include "utilities/uniform_random_double.hpp"
 #include "sequences/eoplist.hpp"
 #include "sequences/alignment_output.hpp"

@@ -7,6 +7,13 @@ import jinja2
 
 environment = jinja2.Environment()
 template = environment.from_string('''#include <alignment/ssw.hpp>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include "alignment/simd.hpp"
+#include "sequences/complement_uint8.hpp"
+#include "utilities/gcc_builtin.hpp"
+#include "utilities/unused.hpp"
 template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_uint{{ width }} (
                                  GTTL_UNUSED const uint8_t *original_dbseq,
                                  GTTL_UNUSED size_t original_dbseq_len,

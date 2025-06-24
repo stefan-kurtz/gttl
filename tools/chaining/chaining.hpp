@@ -3,9 +3,12 @@
 #include "utilities/constexpr_if.hpp"
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <set>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 template <typename ElementClass, bool local = false>

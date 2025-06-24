@@ -1,6 +1,7 @@
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
-#include <thread>
-#include <memory>
 #include <iostream>
 #include "utilities/unused.hpp"
 #include "threading/thread_pool.hpp"

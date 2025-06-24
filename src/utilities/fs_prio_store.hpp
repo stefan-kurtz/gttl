@@ -1,10 +1,9 @@
 #ifndef FS_PRIO_STORE_HPP
 #define FS_PRIO_STORE_HPP
+#include <functional>
 #include <vector>
-#include <queue>
 #include <cstdlib>
 #include <cassert>
-#include <iterator>
 #include <algorithm>
 #include <iostream>
 #include <string>

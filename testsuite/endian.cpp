@@ -1,4 +1,5 @@
 #include <climits>
+#include <cstdint>
 #include <iostream>
 #include "utilities/is_big_endian.hpp"
 

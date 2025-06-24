@@ -19,7 +19,9 @@
 #define SUFCHECK_HPP
 
 #include <cassert>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 #include "utilities/multibitvector.hpp"

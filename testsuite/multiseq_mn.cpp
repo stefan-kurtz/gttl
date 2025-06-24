@@ -1,11 +1,17 @@
+#include <cstddef>
+#include <cstdlib>
+#include <cstdint>
+#include <exception>
 #include <iostream>
-#include <algorithm>
 #include <stdexcept>
+#include <string>
 #include <vector>
+#include "sequences/gttl_multiseq.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "sequences/literate_multiseq.hpp"
 #include "utilities/random_sample.hpp"
+#include "utilities/str_format.hpp"
 
 static void usage(const cxxopts::Options &options)
 {

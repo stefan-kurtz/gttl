@@ -1,3 +1,5 @@
+#include <cstddef>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include "sequences/stored_match.hpp"

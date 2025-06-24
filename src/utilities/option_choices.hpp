@@ -1,5 +1,6 @@
 #ifndef OPTION_CHOICES_HPP
 #define OPTION_CHOICES_HPP
+#include <algorithm>
 #include <string>
 #include <map>
 #include <vector>

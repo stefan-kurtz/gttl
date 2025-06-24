@@ -1,5 +1,6 @@
 #ifndef STORED_MATCH_HPP
 #define STORED_MATCH_HPP
+#include <cstddef>
 #include <string>
 #include <cstdint>
 #include <cassert>

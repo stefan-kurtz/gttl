@@ -1,7 +1,6 @@
 #ifndef CONCATENATE_STRINGS_HPP
 #define CONCATENATE_STRINGS_HPP
 
-#include <vector>
 #include <string>
 
 template<class Iter>

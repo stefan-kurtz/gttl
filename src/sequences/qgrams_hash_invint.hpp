@@ -16,6 +16,11 @@
 */
 #ifndef QGRAMS_HASH_INVINT_HPP
 #define QGRAMS_HASH_INVINT_HPP
+#include <cstddef>
+#include <cstdint>
+#include <utility>
+#include <cassert>
+#include <cmath>
 #include "sequences/alphabet.hpp"
 #include "sequences/qgrams_rec_hash_value_fwd_iter.hpp"
 #include "sequences/qgrams_rec_hash_value_iter.hpp"

@@ -1,5 +1,6 @@
 #ifndef FRONT_VALUE_MATCH_HISTORY_HPP
 #define FRONT_VALUE_MATCH_HISTORY_HPP
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cassert>

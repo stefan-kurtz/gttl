@@ -20,7 +20,9 @@
 #include <cstdint>
 #include <cassert>
 #include <cmath>
+#include <iterator>
 #include <tuple>
+#include <utility>
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"

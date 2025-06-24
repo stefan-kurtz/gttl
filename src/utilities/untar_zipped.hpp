@@ -1,11 +1,16 @@
 #ifndef UNTAR_ZIPPED_HPP
 #define UNTAR_ZIPPED_HPP
 
+#include <cassert>
+#include <cstdio>
+#include <algorithm>
 #include <iostream>
 #include <cstddef>
 #include <cstdlib>
+#include <stdexcept>
 #include <string>
 #include <cstdint>
+#include <vector>
 #include "utilities/split_string.hpp"
 #include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/popen_reader.hpp"

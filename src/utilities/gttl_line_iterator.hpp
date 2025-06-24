@@ -16,11 +16,12 @@
 */
 #ifndef GTTL_LINE_ITERATOR_HPP
 #define GTTL_LINE_ITERATOR_HPP
+#include <cstdio>
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
+#include <ios>
 #include <string>
-#include <algorithm>
 #include <vector>
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_file_open.hpp"

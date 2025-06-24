@@ -16,6 +16,7 @@
 */
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
@@ -24,6 +25,7 @@
 #include "indexes/gttl_suffixarray.hpp"
 #include "indexes/succinct_bitvector.hpp"
 #include "succinct_plcp_table.hpp"
+#include "utilities/str_format.hpp"
 
 int main(int argc,char *argv[])
 {

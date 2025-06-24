@@ -1,8 +1,13 @@
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <cinttypes>
-#include "utilities/str_format.hpp"
+#include "utilities/gttl_file_open.hpp"
+#include <stdexcept>
+#include <string>
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"

@@ -1,4 +1,7 @@
+#include <cassert>
 #include <cstdlib>
+#include <cstring>
+#include <exception>
 #include <iostream>
 #include <stdexcept>
 #include "utilities/str_format.hpp"

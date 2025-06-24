@@ -14,16 +14,29 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <bits/chrono.h>
+#include <array>
 #include <cstddef>
+#include <fstream>
+#include <cstdint>
+#include <cstdlib>
+#include <exception>
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include <cassert>
-#include <chrono>
 #include <algorithm>
+#include <string>
+#include <string_view>
+#include <optional>
+#include <stdexcept>
 #include <thread>
 #include <limits>
 #include <map>
 #include <filesystem>
+#include "utilities/gttl_file_open.hpp"
+#include <vector>
+#include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"

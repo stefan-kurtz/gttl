@@ -18,11 +18,19 @@
 #ifndef DNA_SEQ_ENCODER_HPP
 #define DNA_SEQ_ENCODER_HPP
 
+#include <array>
 #include <cassert>
+#include <climits>
 #include <cstdlib>
 #include <cstdint>
 #include <algorithm>
 #include <map>
+#include <ostream>
+#include <string>
+#include <vector>
+#include <tuple>
+#include <string_view>
+#include <utility>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #ifndef NDEBUG

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cassert>
 #include <cstdio>
+#include <cstdlib>
 #include "sequences/lcs_lcp_len_type.hpp"
 #include "sequences/outsenseedist_inplace.hpp"
 #ifndef MAX2

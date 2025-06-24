@@ -1,6 +1,8 @@
 #ifndef MEMORY_TRACKER_HPP
 #define MEMORY_TRACKER_HPP
+#include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 #include <map>
 #include <cassert>
 #include <cstdio>

@@ -1,9 +1,19 @@
+#include <exception>
+#include <cstdlib>
+#include <cstddef>
+#include <cassert>
 #include <string>
 #include <iostream>
+#include <vector>
+#include "sequences/char_finder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
+#include "sequences/qgrams_hash_invint.hpp"
 #include "sequences/unwords.hpp"
 #include "unwords_opt.hpp"
+#include "utilities/file_size.hpp"
+#include "utilities/runtime_class.hpp"
+#include "utilities/str_format.hpp"
 
 int main(int argc, char *argv[])
 {

@@ -1,8 +1,14 @@
 #ifndef SW_OUTPUT_RESULT_HPP
 #define SW_OUTPUT_RESULT_HPP
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <string>
+#include <tuple>
+#include <string_view>
+#include "alignment/score_matrix_name.hpp"
+#include <exception>
 #include "threading/threads_output_files.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/eoplist.hpp"

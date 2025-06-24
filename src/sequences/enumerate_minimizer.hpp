@@ -1,7 +1,7 @@
 #ifndef ENUMERATE_MINIMIZER_HPP
 #define ENUMERATE_MINIMIZER_HPP
+#include <cassert>
 #include <cstddef>
-#include <tuple>
 #include <cstdint>
 #include <vector>
 #include <deque>

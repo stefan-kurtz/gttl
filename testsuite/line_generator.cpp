@@ -1,7 +1,10 @@
 #include "utilities/gttl_line_generator.hpp"
+#include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <iostream>
+#include <string>
+#include <vector>
 
 int main(int argc,char *argv[])
 {

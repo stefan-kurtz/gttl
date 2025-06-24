@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 #include <vector>
 #include "utilities/memory_tracker.hpp"
 #include "utilities/read_vector.hpp"

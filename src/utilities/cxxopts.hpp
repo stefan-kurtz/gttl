@@ -27,16 +27,20 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP
 #define CXXOPTS_HPP
 
+#include <cctype>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <functional>
+#include <iterator>
 #include <limits>
 #include <initializer_list>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>

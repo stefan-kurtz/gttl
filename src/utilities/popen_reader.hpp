@@ -6,6 +6,7 @@
   #include "utilities/windows_fork.hpp"
 #else
   #include <unistd.h>
+  #include <stdio.h>
 #endif
 #include <cstdio>
 #include <cstdlib>

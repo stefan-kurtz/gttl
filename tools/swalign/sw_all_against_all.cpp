@@ -15,7 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <cstdint>
+#include <exception>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <unordered_set>
 #include <unordered_map>
 #include <tuple>
@@ -25,8 +29,9 @@
 #include <utility>
 #include <algorithm>
 #include <iostream>
-#include <cctype>
 #include <cinttypes>
+#include <vector>
+#include "utilities/matrix_partition.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/all_vs_all2.hpp"
 #include "utilities/unused.hpp"
@@ -36,8 +41,6 @@
 #include "threading/thread_pool_var.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "alignment/blast_stat.hpp"
-#include "alignment/loc_align_coords.hpp"
-#include "alignment/scoring_info_and_seq_trans.hpp"
 #include "sw_option_parser.hpp"
 #include "sw_input_data.hpp"
 #include "sw_comparator.hpp"

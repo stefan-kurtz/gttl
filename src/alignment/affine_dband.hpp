@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <cstddef>
 #include <cassert>
-#include <climits>
 #include <algorithm>
 #include "utilities/unused.hpp"
 #include "sequences/eoplist.hpp"

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cassert>
-#include <iostream>
+#include <string>
 #include <vector>
 #include "utilities/mathsupport.hpp"
 #include "sequences/align_polish.hpp"
