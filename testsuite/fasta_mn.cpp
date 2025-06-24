@@ -83,7 +83,7 @@ int main(int argc,char *argv[])
     {
       if (options.mapped_option_is_set())
       {
-        Gttlmmap<char> mapped_file(inputfile.c_str());
+        const Gttlmmap<char> mapped_file(inputfile.c_str());
         GttlFastAGenerator<buf_size> gttl_si(std::string_view(
                                                mapped_file.ptr(),
                                                mapped_file.size()));

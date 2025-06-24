@@ -44,7 +44,7 @@ class NonRedundantMatches
       return;
     }
     // BST of segment ids, ordered by their weights
-    CmpIds cmp_ids(elements);
+    const CmpIds cmp_ids(elements);
     std::set<uint32_t, CmpIds> status(cmp_ids);
 
     // vector of pairs <endposition, id incl. event type>

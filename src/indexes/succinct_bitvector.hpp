@@ -173,12 +173,12 @@ class SuccinctBitvector
 
     size_t r = 0;
 
-    size_t superblock_index = index / SUPERBLOCKBITS;
+    const size_t superblock_index = index / SUPERBLOCKBITS;
 
     if (superblock_index > 0) {
       r += get_superblock_count(superblock_index - 1);
     }
-    size_t block_index = (index % SUPERBLOCKBITS) / BLOCKBITS;
+    const size_t block_index = (index % SUPERBLOCKBITS) / BLOCKBITS;
 
     r += get_block_count(superblock_index, block_index);
     for (size_t i = superblock_index * 64 + block_index * 8; i < index / 64;
@@ -210,7 +210,7 @@ class SuccinctBitvector
       return 0;
     }
 
-    size_t select_index = count / INDEXINTERVAL;
+    const size_t select_index = count / INDEXINTERVAL;
 
     size_t min;
     if (select_index > 0) {
@@ -237,9 +237,9 @@ class SuccinctBitvector
     //        select_index, min, max, superblock_l, superblock_r);
 
     while (superblock_l < superblock_r) {
-      size_t m = (superblock_l + superblock_r) / 2;
-      size_t superblock_count = get_superblock_count(m);
-    // printf("superblock_count: %zu\n", superblock_count);
+      const size_t m                = (superblock_l + superblock_r) / 2;
+      const size_t superblock_count = get_superblock_count(m);
+      // printf("superblock_count: %zu\n", superblock_count);
 
       if (superblock_count >= count) {
         superblock_r = m;
@@ -268,7 +268,7 @@ class SuccinctBitvector
     }
     // printf("superblock_count: %zu\n", superblock_count);
     while (block_l < block_r) {
-      size_t m = (block_l + block_r) / 2;
+      const size_t m = (block_l + block_r) / 2;
 
       if (get_block_count(superblock_l, m + 1) + superblock_count >= count) {
         block_r = m;
@@ -279,12 +279,12 @@ class SuccinctBitvector
 
     // printf("superblock_l: %zu, block_l: %zu\n", superblock_l, block_l);
 
-    size_t block_count = get_block_count(superblock_l, block_l);
+    const size_t block_count = get_block_count(superblock_l, block_l);
     // printf("block_count: %zu\n", superblock_count + block_count);
 
     size_t local_count = 0;
     for (int i = 0; i < 8; i++) {
-      size_t index = superblock_l * 64 + block_l * 8 + i;
+      const size_t index = superblock_l * 64 + block_l * 8 + i;
       // printf("index: %zu\n", index);
       size_t pop;
       if (index >= data_vector.size()) {
@@ -394,10 +394,10 @@ private:
     size_t r = 63;
 
     while (l < r) {
-      size_t m = (l + r) / 2;
+      const size_t m = (l + r) / 2;
 
-      size_t shift = 63 - m;
-      uint64_t shifted = d << shift;
+      const size_t shift     = 63 - m;
+      const uint64_t shifted = d << shift;
 
       size_t pop;
       if (value) {

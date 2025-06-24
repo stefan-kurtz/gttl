@@ -18,7 +18,7 @@ static void run_trial(size_t num_elements,size_t max_value,size_t capacity)
     {
       fspq.show();
     }
-    int v = rand() % (max_value+1);
+    const int v = rand() % (max_value + 1);
     if (debug)
     {
       printf("new=%d\n",v);

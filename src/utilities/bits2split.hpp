@@ -167,9 +167,9 @@ static inline const int *bit_counts_get(size_t *num_ranges, int numbits)
   assert(numbits <= MAX_NUM_SPLIT);
   assert(split_group_start[num_groups-2] + BIT_COUNTS_LAST_NUM_RANGE
            == num_split_elems);
-  int start = split_group_start[numbits - MIN_NUM_SPLIT];
+  const int start = split_group_start[numbits - MIN_NUM_SPLIT];
   assert(static_cast<size_t>(numbits + 1 - MIN_NUM_SPLIT) < num_groups);
-  int end = split_group_start[numbits + 1 - MIN_NUM_SPLIT];
+  const int end = split_group_start[numbits + 1 - MIN_NUM_SPLIT];
   *num_ranges = static_cast<size_t>(end - start);
   return bits2split + start;
 }

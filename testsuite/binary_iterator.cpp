@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     try
     {
       const std::string inputfile{argv[idx]};
-      BinaryFileReader<char> binary_file_reader(inputfile);
+      const BinaryFileReader<char> binary_file_reader(inputfile);
       for (const auto &entry : binary_file_reader)
       {
         std::cout << entry;

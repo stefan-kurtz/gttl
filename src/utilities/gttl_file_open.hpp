@@ -139,7 +139,7 @@ static inline std::basic_string<BaseType>
 
 static inline std::string gttl_read_file(const char *file_name)
 {
-  std::vector<std::string> inputfiles{std::string(file_name)};
+  const std::vector<std::string> inputfiles{std::string(file_name)};
   return gttl_read_files<char>(inputfiles);
 }
 #endif

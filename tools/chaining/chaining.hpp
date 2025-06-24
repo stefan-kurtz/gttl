@@ -111,7 +111,7 @@ class Chain
   , scores(elements.size(), 0)
   {
     // BST of element ids
-    CmpIds cmp_ids(elements,scores);
+    const CmpIds cmp_ids(elements, scores);
     std::set<size_t, CmpIds> status(cmp_ids);
 
     auto prio = [&] (const size_t id)
@@ -140,7 +140,7 @@ class Chain
       if (current < 0) // process start point
       {
         current = -current - 1;
-        uint32_t weight = elements[current].weight_get();
+        const uint32_t weight = elements[current].weight_get();
 
         auto pred_it = status.lower_bound(ElementValue(elements[current]
                                           .secondary_startpos_get()));
@@ -154,8 +154,10 @@ class Chain
           auto previous = *std::prev(pred_it);
           if constexpr (local)
           {
-            int32_t score = static_cast<int32_t>(scores[previous] + weight)
-                            - elements[current].gap_score(elements[previous]);
+            const int32_t score = static_cast<int32_t>(scores[previous]
+                                                       + weight)
+                                         - elements[current].gap_score(
+                                               elements[previous]);
             if (score > static_cast<int32_t>(weight))
             {
               scores[current] = static_cast<uint32_t>(score);

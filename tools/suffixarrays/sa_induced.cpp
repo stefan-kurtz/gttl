@@ -239,7 +239,7 @@ static void show_bu_suftab(const std::string &indexname, const T_bp &bp)
 {
   std::cout << "# Suftab:\n";
   const std::string bu_suftab_filename{indexname + ".bsf"};
-  BinaryFileReader<T_suf> bu_suftab_reader(bu_suftab_filename);
+  const BinaryFileReader<T_suf> bu_suftab_reader(bu_suftab_filename);
   for (auto &bu_suftab_entry : bu_suftab_reader)
   {
     std::cout << bu_suftab_entry.template decode_at<0>(bp) << "\t";
@@ -513,7 +513,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
           assert(sequences_number_bits > 0);
           first_group_bits = sequences_number_bits;
         }
-        SainBitPacker bp({first_group_bits, sequences_length_bits});
+        const SainBitPacker bp({first_group_bits, sequences_length_bits});
 
         RunTimeClass rt_construct_bu_suftab{};
         if (sequences_number_bits == 0 and req_size == sizeof(SuftabBaseType))

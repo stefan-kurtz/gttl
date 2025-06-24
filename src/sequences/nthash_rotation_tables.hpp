@@ -11,14 +11,14 @@ constexpr uint64_t MASK_TOP_31 = ~((uint64_t{1} << uint64_t{33}) - 1);
 consteval uint64_t rolR33(uint64_t value)
 {
   // Using a shorter type here would lead to implicit conversions
-  uint64_t first_bit = value >> uint64_t{32};
+  const uint64_t first_bit = value >> uint64_t{32};
   return ((value << uint64_t{1}) | first_bit) & MASK_33;
 }
 
 consteval uint64_t rolL31(uint64_t value)
 {
-  uint64_t first_bit = value >> uint64_t{63};
-  uint64_t moved_bit = first_bit << uint64_t{33};
+  const uint64_t first_bit = value >> uint64_t{63};
+  const uint64_t moved_bit = first_bit << uint64_t{33};
   return ((value << uint64_t{1}) | moved_bit) & MASK_TOP_31;
 }
 

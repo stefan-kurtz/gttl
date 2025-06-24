@@ -839,7 +839,7 @@ class GttlSainseq
         = GttlCharRange<char_finder::EncodedNucleotideFinder,
                         encoded_nucleotide_finder, forward, invert>;
       assert(multiseq_seq_ptr != nullptr);
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         if (std::get<0>(range) > 1)
@@ -855,7 +855,7 @@ class GttlSainseq
       assert(multiseq_seq_ptr != nullptr);
       using ThisCharRange = GttlCharRange<char_finder::EncodeAminoAcidFinder,
                                           encoded_aa_finder, forward, invert>;
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         if (std::get<0>(range) > 1)
@@ -1285,7 +1285,7 @@ class GttlSainseq
   {
     for (size_t idx = start + 1; idx <= end; idx++)
     {
-      int cmp = sain_compare_suffixes(suftab[idx - 1], suftab[idx]);
+      const int cmp = sain_compare_suffixes(suftab[idx - 1], suftab[idx]);
 
       if (cmp != -1)
       {
@@ -1549,7 +1549,7 @@ class GttlSainseq
                                           encoded_nucleotide_finder,
                                           forward,
                                           invert>;
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         if (std::get<0>(range) > 0)
@@ -1564,7 +1564,7 @@ class GttlSainseq
       static_assert(T_alphasize == size_t(20));
       using ThisCharRange = GttlCharRange<char_finder::EncodeAminoAcidFinder,
                                           encoded_aa_finder, forward, invert>;
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         if (std::get<0>(range) > 0)
@@ -1787,7 +1787,7 @@ class GttlSainseq
                                           encoded_nucleotide_finder,
                                           forward,
                                           invert>;
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         for (size_t idx = 0; idx < std::get<1>(range); idx++)
@@ -1800,7 +1800,7 @@ class GttlSainseq
       static_assert(T_alphasize == size_t(20));
       using ThisCharRange = GttlCharRange<char_finder::EncodeAminoAcidFinder,
                                           encoded_aa_finder, forward, invert>;
-      ThisCharRange ranger(multiseq_seq_ptr, totallength);
+      const ThisCharRange ranger(multiseq_seq_ptr, totallength);
       for (auto &&range : ranger)
       {
         for (size_t idx = 0; idx < std::get<1>(range); idx++)
@@ -2012,8 +2012,10 @@ class GttlSainseq
               static_cast<double>(numofchars) / totallength);
     }
     size_t countSstartype;
-    SainbufferKeyValues sain_buffer_key_values(sizeof(SuftabBaseType),
-                                               numofchars,totallength);
+    const SainbufferKeyValues sain_buffer_key_values(
+                                 sizeof(SuftabBaseType),
+                                 numofchars,
+                                 totallength);
     if (buffered && sain_buffer_key_values.has_own_memory())
     {
       if (out_fp != nullptr)

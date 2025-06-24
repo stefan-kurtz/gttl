@@ -31,11 +31,11 @@ static inline void gttl_duplicated_filenames(const std::vector<std::string>
     {
       if (gttl_files_with_same_path(input_files[i],input_files[j]))
       {
-        StrFormat msg("%s appears twice in list of input files; if you "
-                      "want to compare each sequence of a file against "
-                      "each other (e.g. to search for repeats), then run "
-                      "the program only with this single filename",
-                      input_files[i].c_str());
+        const StrFormat msg("%s appears twice in list of input files; if you "
+                            "want to compare each sequence of a file against "
+                            "each other (e.g. to search for repeats), then run "
+                            "the program only with this single filename",
+                            input_files[i].c_str());
         throw std::runtime_error(msg.str());
       }
     }

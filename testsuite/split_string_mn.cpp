@@ -26,12 +26,13 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
       std::vector<std::string> vec = gttl_split_string(buffer, sep);
       column_count += vec.size();
       const std::string sep_string{sep};
-      std::string line_from_vec = gttl_concatenate_strings(vec.begin(),
-                                                           vec.end(),
-                                                           sep_string);
+      const std::string line_from_vec = gttl_concatenate_strings(
+                                   vec.begin(), vec.end(), sep_string);
       if (buffer != line_from_vec)
       {
-        StrFormat msg(": '%s' != '%s'",buffer.c_str(),line_from_vec.c_str());
+        const StrFormat msg(": '%s' != '%s'",
+                            buffer.c_str(),
+                            line_from_vec.c_str());
         throw std::runtime_error{msg.str()};
       }
     }

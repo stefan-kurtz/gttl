@@ -80,8 +80,8 @@ static void display_alignment(const Eoplist &eoplist)
   assert(j == vlen);
   const std::string ustring(useq,ulen);
   const std::string vstring(vseq,vlen);
-  AlignmentSequenceInfo<std::string, std::string> asi(&ustring,0,&vstring,0,
-                                                      ulen,vlen);
+  const AlignmentSequenceInfo<std::string, std::string> asi(
+                               &ustring, 0, &vstring, 0, ulen, vlen);
   static constexpr const size_t top_seqlength = 0;
   static constexpr const size_t low_reference = 0;
   static constexpr const size_t one_off = 0;
@@ -210,8 +210,8 @@ int main(int argc,char *argv[])
         std::cout << "# number of editoperations\t" << count_edit_operations
                   << '\n';
       }
-      std::string cigar_string
-        = eoplist.cigar_string_get(distinguish_mismatch_match);
+      const std::string cigar_string = eoplist.cigar_string_get(
+                                   distinguish_mismatch_match);
       Eoplist *eoplist_decode = nullptr;
       try
       {

@@ -15,7 +15,7 @@ static void byte_order(void)
   {
     bytes[idx] = static_cast<uint8_t>(idx);
   }
-  uint64_t integer = *(reinterpret_cast<uint64_t *>(bytes));
+  const uint64_t integer = *(reinterpret_cast<uint64_t *>(bytes));
   int shift = 56;
   std::cout << "# byte index (left to right)\tinteger order\n";
   for (int idx = 0; idx < 8; idx++)

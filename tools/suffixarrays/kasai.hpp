@@ -84,8 +84,8 @@ static inline std::vector<uint32_t> gttl_lcp9_kasai(
                                       const std::string &indexname,
                                       size_t alphasize)
 {
-  InverseSuftabReader<SuftabBaseType>
-    inverse_suftab_reader(memory_tracker,indexname,totallength);
+  const InverseSuftabReader<SuftabBaseType> inverse_suftab_reader(
+                               memory_tracker, indexname, totallength);
   auto inverse_suftab_iter = inverse_suftab_reader.begin();
   std::vector<uint32_t> lcptab;
   lcptab.resize(totallength+1);

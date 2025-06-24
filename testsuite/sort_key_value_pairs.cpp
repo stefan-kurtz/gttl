@@ -359,9 +359,12 @@ static void sort_values(unsigned int seed,
                                        num_threads);
       }
     }
-    StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort and %zu "
-                  "thread%s",
-                  values.size(),tag,num_threads,num_threads == 1 ? "" : "s");
+    const StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort "
+                        "and %zu thread%s",
+                        values.size(),
+                        tag,
+                        num_threads,
+                        num_threads == 1 ? "" : "s");
     rt_sorting.show(msg.str());
   } else
   {
@@ -370,12 +373,12 @@ static void sort_values(unsigned int seed,
       const unsigned int n_threads = 1;
       merge_sort<decltype(values.begin())>(values.begin(),values.end(),
                                            n_threads);
-      StrFormat msg("sort %zu %s with mergesort",values.size(),tag);
+      const StrFormat msg("sort %zu %s with mergesort", values.size(), tag);
       rt_sorting.show(msg.str());
     } else
     {
       std::sort(values.begin(),values.end());
-      StrFormat msg("sort %zu %s with std::sort",values.size(),tag);
+      const StrFormat msg("sort %zu %s with std::sort", values.size(), tag);
       rt_sorting.show(msg.str());
     }
   }
@@ -428,7 +431,7 @@ int main(int argc, char *argv[])
   }
   const bool show = false;
   const int sort_mode = options.sort_mode_get();
-  unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
+  const unsigned int seed = 0; /* use some fixed value > 0 for a fixed seed */
   if (options.data_type_option_get() == 'p')
   {
     static constexpr const int num_sort_bits

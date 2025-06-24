@@ -140,9 +140,10 @@ void split_into_num_sequences(SequenceIterator &seq_it,
 
     if (seqs_iterated >= seqs_per_file)
     {
-      std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
-                              std::to_string(part_number) +
-                              (seq_it.is_fastq_generator ? ".fastq" : ".fasta");
+      const std::string fname_out = base_name + (part_number <= 9 ? "0" : "")
+                                   + std::to_string(part_number)
+                                   + (seq_it.is_fastq_generator ? ".fastq" :
+                                                                  ".fasta");
       if(n_threads == 1)
       {
         write_to_output_file(fname_out, s_out.str(), compression_level);
@@ -159,9 +160,10 @@ void split_into_num_sequences(SequenceIterator &seq_it,
   }
   if (!s_out.str().empty())
   {
-    std::string fname_out = base_name + (part_number <= 9 ? "0" : "") +
-                            std::to_string(part_number) +
-                            (seq_it.is_fastq_generator ? ".fastq" : ".fasta");
+    const std::string fname_out = base_name + (part_number <= 9 ? "0" : "")
+                                 + std::to_string(part_number)
+                                 + (seq_it.is_fastq_generator ? ".fastq" :
+                                                                ".fasta");
     if(n_threads == 1)
     {
       write_to_output_file(fname_out, s_out.str(), compression_level);

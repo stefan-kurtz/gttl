@@ -452,8 +452,8 @@ class Eoplist
 
     for (auto cigar_operation : cigar_string_encoding)
     {
-      uint32_t iteration = cigar_operation >> 4;
-      uint32_t edit_operation_number = cigar_operation & 0xf;
+      const uint32_t iteration             = cigar_operation >> 4;
+      const uint32_t edit_operation_number = cigar_operation & 0xf;
       assert(edit_operation_number < 3);
       if (edit_operation_number == 0) /* replacement */
       {

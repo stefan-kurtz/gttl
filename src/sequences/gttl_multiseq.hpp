@@ -166,11 +166,12 @@ class GttlMultiseq
       const bool snd_more = (it0 == fastq_it0.end() && it1 != fastq_it1.end());
       if (fst_more || snd_more)
       {
-        StrFormat msg("processing readpair files %s and %s: %s file contains "
-                      "more sequences than %s file",
-                      inputfiles[0].c_str(),inputfiles[1].c_str(),
-                      fst_more ? "first" : "second",
-                      fst_more ? "second" : "fist");
+        const StrFormat msg("processing readpair files %s and %s: %s file"
+                            " contains more sequences than %s file",
+                            inputfiles[0].c_str(),
+                            inputfiles[1].c_str(),
+                            fst_more ? "first" : "second",
+                            fst_more ? "second" : "fist");
         throw std::runtime_error(msg.str());
       }
     } else
@@ -240,7 +241,7 @@ class GttlMultiseq
     , has_reverse_complement(false)
     , has_read_pairs(false)
   {
-    std::vector<std::string> inputfiles{std::string(inputfile)};
+    const std::vector<std::string> inputfiles{std::string(inputfile)};
     multiseq_reader(inputfiles,store_header, store_sequence, false);
   }
 
@@ -252,7 +253,7 @@ class GttlMultiseq
     , has_reverse_complement(false)
     , has_read_pairs(false)
   {
-    std::vector<std::string> inputfiles{inputfile};
+    const std::vector<std::string> inputfiles{inputfile};
     multiseq_reader(inputfiles,store_header,store_sequence,false);
   }
 
@@ -275,7 +276,7 @@ class GttlMultiseq
     , has_reverse_complement(false)
     , has_read_pairs(true)
   {
-    std::vector<std::string> inputfiles{readpair_file1,readpair_file2};
+    const std::vector<std::string> inputfiles{readpair_file1, readpair_file2};
     constexpr const bool zip_readpair_files = true;
     multiseq_reader(inputfiles,store_header,store_sequence,zip_readpair_files);
   }
@@ -582,7 +583,7 @@ class GttlMultiseq
       size_t header_len;
       std::tie(header_ptr,header_len)
         = header_ptr_with_length(seqnum,short_header);
-      std::string header_substring(header_ptr,header_len);
+      const std::string header_substring(header_ptr, header_len);
       header_with_seqnum.push_back(std::make_pair(header_substring,seqnum));
     }
     std::sort(header_with_seqnum.begin(),header_with_seqnum.end());

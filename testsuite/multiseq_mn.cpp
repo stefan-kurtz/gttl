@@ -239,10 +239,10 @@ int main(int argc, char *argv[])
       } else
       {
         RunTimeClass rt_sample{};
-        std::vector<size_t> sample
-          = gttl_random_sample<size_t>(multiseq->sequences_number_get(),
-                                       options.sample_size_get(),
-                                       options.seed_get());
+        const std::vector<size_t> sample = gttl_random_sample<size_t>(
+                                     multiseq->sequences_number_get(),
+                                     options.sample_size_get(),
+                                     options.seed_get());
         for (auto &seqnum : sample)
         {
           multiseq->show_single_sequence(
@@ -250,11 +250,12 @@ int main(int argc, char *argv[])
                       options.short_header_option_is_set(),
                       seqnum);
         }
-        StrFormat msg("create a sample of %zu (%.2f%%) from %zu sequences",
-                      options.sample_size_get(),
-                      100.0 * options.sample_size_get()/
-                              multiseq->sequences_number_get(),
-                      multiseq->sequences_number_get());
+        const StrFormat msg("create a sample of %zu (%.2f%%)"
+                            "from %zu sequences",
+                            options.sample_size_get(),
+                            100.0 * options.sample_size_get()
+                                  / multiseq->sequences_number_get(),
+                            multiseq->sequences_number_get());
         rt_sample.show(msg.str());
       }
     } else
@@ -288,12 +289,13 @@ int main(int argc, char *argv[])
     {
       static constexpr const char amino_acids[]
         = "A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y";
-      LiterateMultiseq<amino_acids,20> literate_multiseq(multiseq);
+      const LiterateMultiseq<amino_acids, 20> literate_multiseq(multiseq);
       literate_multiseq.show_rank_dist(nullptr); /* no mutex necessary */
     } else
     {
       static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
-      LiterateMultiseq<nucleotides_upper_lower,4> literate_multiseq(multiseq);
+      const LiterateMultiseq<nucleotides_upper_lower, 4> literate_multiseq(
+                                   multiseq);
       literate_multiseq.show_rank_dist(nullptr); /* no mutex necessary */
     }
   }

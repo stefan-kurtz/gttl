@@ -35,8 +35,8 @@ class MatrixPartition
       = static_cast<const MatrixPartitionIntervalPair *>(va);
     const MatrixPartitionIntervalPair *b
       = static_cast<const MatrixPartitionIntervalPair *>(vb);
-    size_t anti_a = matrix_partition_antidiagonal(a);
-    size_t anti_b = matrix_partition_antidiagonal(b);
+    const size_t anti_a = matrix_partition_antidiagonal(a);
+    const size_t anti_b = matrix_partition_antidiagonal(b);
     if (anti_a < anti_b) { return -1; }
     if (anti_a > anti_b) { return 1; }
     if (std::get<0>(*a) < std::get<0>(*b)) { return -1; }

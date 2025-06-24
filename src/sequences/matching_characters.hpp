@@ -36,8 +36,8 @@ static inline bool matching_characters_template(char a, char b)
   if constexpr (wildcards)
   {
     static constexpr const alphabet::GttlAlphabet_UL_4 dna_alpha{};
-    uint8_t a_rank = dna_alpha.char_to_rank(a);
-    uint8_t b_rank = dna_alpha.char_to_rank(b);
+    const uint8_t a_rank = dna_alpha.char_to_rank(a);
+    const uint8_t b_rank = dna_alpha.char_to_rank(b);
     return a_rank == b_rank && a_rank != dna_alpha.undefined_rank();
   }
   else

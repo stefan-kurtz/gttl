@@ -33,22 +33,26 @@ class Gttlmmap
   {
     if (size_of_file % sizeof(T) != 0)
     {
-      StrFormat msg("file %s contains %zu bytes which is not a multiple of %zu",
-                    filename,size_of_file,sizeof(T));
+      const StrFormat msg("file %s contains %zu bytes which is not a "
+                          "multiple of %zu",
+                          filename,
+                          size_of_file,
+                          sizeof(T));
       throw std::ios_base::failure(msg.str());
     }
     filedesc = open(filename, O_RDONLY);
     if (filedesc < 0)
     {
-      StrFormat msg("cannot open file %s",filename);
+      const StrFormat msg("cannot open file %s", filename);
       throw std::ios_base::failure(msg.str());
     }
     memorymap = mmap(nullptr, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED,
                      filedesc, 0);
     if (memorymap == MAP_FAILED)
     {
-      StrFormat msg("cannot memory map %zu elements from file %s",
-                    num_values,filename);
+      const StrFormat msg("cannot memory map %zu elements from file %s",
+                          num_values,
+                          filename);
       throw std::ios_base::failure(msg.str());
     }
   }

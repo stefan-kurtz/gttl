@@ -38,12 +38,14 @@ static inline std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
                 literate_multiseqs<Unit_score_aa>(db_multiseq, query_multiseq)};
       } else
       {
-        ScoreMatrixName score_matrix_name_instance{};
-        StrFormat msg(
-            ": score matrix %s is not possible for protein "
-            "sequences; the following choices are available: %s",
-            score_matrix_id,
-            score_matrix_name_instance.string_values_joined(", ").c_str());
+        const ScoreMatrixName score_matrix_name_instance{};
+        const StrFormat msg(": score matrix %s is not possible for protein "
+                            "sequences; the following choices are available:"
+                            "%s",
+                            score_matrix_id,
+                            score_matrix_name_instance
+                              .string_values_joined(", ")
+                              .c_str());
         throw std::runtime_error(msg.str());
       }
     }
@@ -86,13 +88,14 @@ static inline std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
                                                              query_multiseq)};
           } else
           {
-            ScoreMatrixName score_matrix_name_instance{};
-            StrFormat msg(
-                ": score matrix %s is not possible for DNA "
-                "sequences; the following choices are "
-                "available: %s",
-                score_matrix_id,
-                score_matrix_name_instance.string_values_joined(", ").c_str());
+            const ScoreMatrixName score_matrix_name_instance{};
+            const StrFormat msg(": score matrix %s is not possible for DNA "
+                                "sequences; the following choices are "
+                                "available: %s",
+                                score_matrix_id,
+                                score_matrix_name_instance
+                                  .string_values_joined(", ")
+                                  .c_str());
             throw std::runtime_error(msg.str());
           }
         }

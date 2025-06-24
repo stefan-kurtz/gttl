@@ -64,14 +64,14 @@ class NThashTransformer
   // swap bit 0 with bit 33 in "v"
   [[nodiscard]] static uint64_t swapbits033(const uint64_t v) noexcept
   {
-    uint64_t x = (v ^ (v >> 33)) & uint64_t{1};
+    const uint64_t x = (v ^ (v >> 33)) & uint64_t{1};
     return v ^ (x | (x << 33));
   }
 
   // swap bit 32 with bit 63 in "v"
   [[nodiscard]] static uint64_t swapbits3263(const uint64_t v) noexcept
   {
-    uint64_t x = ((v >> 32) ^ (v >> 63)) & 1;
+    const uint64_t x = ((v >> 32) ^ (v >> 63)) & 1;
     return v ^ ((x << 32) | (x << 63));
   }
 

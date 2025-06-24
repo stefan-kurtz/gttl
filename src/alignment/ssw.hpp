@@ -167,7 +167,7 @@ static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
   static constexpr const size_t simd_size
     = SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
   const size_t segment_len = ssw_len2segment_len<Basetype>(seq_len);
-  SimdIntVector vProfile(alphasize * segment_len);
+  const SimdIntVector vProfile(alphasize * segment_len);
   Basetype *ptr = reinterpret_cast<Basetype *>(vProfile.get());
   const int8_t *score_vector_end = score_vector + alphasize * alphasize;
 
@@ -380,12 +380,14 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
   {
     if (used_uint_bytes == 1)
     {
-      SimdIntVector vP = ssw_seq_profile<uint8_t, sequence_index_backward>
-                                        (prof.score_vector,
-                                         prof.abs_smallest_score,
-                                         prof.alphasize,
-                                         prof.query,
-                                         forward_ec.on_query + 1);
+      const SimdIntVector vP = ssw_seq_profile<
+                                   uint8_t,
+                                   sequence_index_backward>(
+                                   prof.score_vector,
+                                   prof.abs_smallest_score,
+                                   prof.alphasize,
+                                   prof.query,
+                                   forward_ec.on_query + 1);
       reverse_ec = sw_simd_uint8<!forward_reading, forward_strand>
                                 (original_dbseq,
                                  dbseq_len,
@@ -402,12 +404,14 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
     {
       if (used_uint_bytes == 2)
       {
-        SimdIntVector vP = ssw_seq_profile<uint16_t, sequence_index_backward>
-                                          (prof.score_vector,
-                                           prof.abs_smallest_score,
-                                           prof.alphasize,
-                                           prof.query,
-                                           forward_ec.on_query + 1);
+        const SimdIntVector vP = ssw_seq_profile<
+                                     uint16_t,
+                                     sequence_index_backward>(
+                                     prof.score_vector,
+                                     prof.abs_smallest_score,
+                                     prof.alphasize,
+                                     prof.query,
+                                     forward_ec.on_query + 1);
         reverse_ec = sw_simd_uint16<!forward_reading, forward_strand>
                                    (original_dbseq,
                                     dbseq_len,
@@ -422,12 +426,14 @@ static inline std::tuple<uint32_t, size_t, size_t, size_t, size_t>
         } else
         {
           assert(used_uint_bytes == 4);
-          SimdIntVector vP = ssw_seq_profile<uint32_t, sequence_index_backward>
-                                            (prof.score_vector,
-                                             prof.abs_smallest_score,
-                                             prof.alphasize,
-                                             prof.query,
-                                             forward_ec.on_query + 1);
+          const SimdIntVector vP = ssw_seq_profile<
+                                       uint32_t,
+                                       sequence_index_backward>(
+                                       prof.score_vector,
+                                       prof.abs_smallest_score,
+                                       prof.alphasize,
+                                       prof.query,
+                                       forward_ec.on_query + 1);
           reverse_ec = sw_simd_uint32<!forward_reading, forward_strand>
                                      (original_dbseq,
                                       dbseq_len,

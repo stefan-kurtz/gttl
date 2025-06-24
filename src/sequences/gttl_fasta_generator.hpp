@@ -109,7 +109,7 @@ class GttlFastAGenerator
 
       while(true)
       {
-        int ch = lg.getc();
+        const int ch = lg.getc();
         if(ch == EOF or ch == '>') break;
         lg.advance();
       }
@@ -120,7 +120,7 @@ class GttlFastAGenerator
 
     if(is_first_entry)
     {
-      int ch = lg.getc();
+      const int ch = lg.getc();
       if(ch != '>')
       {
         throw std::ios_base::failure(std::string(", line ")
@@ -143,7 +143,7 @@ class GttlFastAGenerator
     lg.set_out_buffer(&out->sequence);
     while(true)
     {
-      int ch = lg.getc();
+      const int ch = lg.getc();
       if(ch == EOF or ch == '>') break;
 
       out->sequence.push_back(static_cast<char>(ch));

@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         sequences.emplace_back(std::string(""),
                                std::string(si->sequence_get()));
       }
-      StrFormat msg("storing %zu sequences",sequences.size());
+      const StrFormat msg("storing %zu sequences", sequences.size());
       rt_sequence_storing.show(msg.str());
       unwords = unwords_finder<std::vector<GttlFastAEntry<buf_size>>>
                               (guessed_protein_sequences,

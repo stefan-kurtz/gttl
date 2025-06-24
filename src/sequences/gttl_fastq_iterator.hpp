@@ -70,8 +70,9 @@ class GttlFastQIterator
           }
           if (state != 3)
           {
-            StrFormat msg(", line %zu: state=%d, corrupted sequence",
-                          line_iterator.line_number_get()+1,state);
+            const StrFormat msg(", line %zu: state=%d, corrupted sequence",
+                                line_iterator.line_number_get() + 1,
+                                state);
             throw std::ios_base::failure(msg.str()); /* check_err.py checked */
           }
           if (!found_end)
@@ -82,8 +83,8 @@ class GttlFastQIterator
         }
         if (fastq_entry.seqbufs[0].size() == 0)
         {
-          StrFormat msg(", line %zu: corrupted sequence",
-                           line_iterator.line_number_get()+1);
+          const StrFormat msg(", line %zu: corrupted sequence",
+                              line_iterator.line_number_get() + 1);
           throw std::ios_base::failure(msg.str()); /* check_err.py checked */
         }
         return fastq_entry;

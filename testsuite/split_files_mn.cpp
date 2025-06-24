@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     num_sequences = result["num_sequences"].as<size_t>();
   }
 
-  std::string ifilename = result["file"].as<std::string>();
+  const std::string ifilename = result["file"].as<std::string>();
 
   std::string output_basename;
   if (result.count("output"))

@@ -55,7 +55,8 @@ class Restrict2Pairs
     if (string_of_digits(s))
     {
       uint32_t number;
-      [[maybe_unused]] int ret = std::sscanf(s.c_str(),"%" PRIu32,&number);
+      [[maybe_unused]] const int ret =
+                                   std::sscanf(s.c_str(), "%" PRIu32, &number);
       assert(ret == 1);
       return number;
     }
@@ -85,7 +86,7 @@ class Restrict2Pairs
       size_t sh_len;
       std::tie(sh_offset,sh_len) = multiseq->short_header_get(seqnum);
       const std::string_view header = multiseq->header_get(seqnum);
-      std::string key(header.data() + sh_offset,sh_len);
+      const std::string key(header.data() + sh_offset, sh_len);
       header_id2idx[key] = seqnum;
     }
     return header_id2idx;
@@ -170,8 +171,10 @@ static void sw_all_against_all(const SWOptions &options,
   const size_t max_seq_len
     = std::max(db_multiseq->sequences_maximum_length_get(),
                query_multiseq->sequences_maximum_length_get());
-  Restrict2Pairs restrict2pairs(db_multiseq,query_multiseq,
-                                options.restrict_to_pairs_file);
+  const Restrict2Pairs restrict2pairs(
+                               db_multiseq,
+                               query_multiseq,
+                               options.restrict_to_pairs_file);
   for (size_t t = 0; t < options.num_threads; t++)
   {
     comparator_vector.push_back(new ThisSWcomparator
@@ -193,10 +196,11 @@ static void sw_all_against_all(const SWOptions &options,
                                  std::max(db_sequences_number,
                                           query_sequences_number)
                                    /seqnum_divisor);
-  MatrixPartition mp = db_multiseq == query_multiseq
-                         ? MatrixPartition(cutlen,db_sequences_number)
-                         : MatrixPartition(cutlen,db_sequences_number,
-                                                  query_sequences_number);
+  const MatrixPartition mp = db_multiseq == query_multiseq ?
+                               MatrixPartition(cutlen, db_sequences_number) :
+                               MatrixPartition(cutlen,
+                                               db_sequences_number,
+                                               query_sequences_number);
   GttlThreadPoolVar(options.num_threads,
                     mp.size(),
                     all_against_all_compare_pairs<ThisSWcomparator,
@@ -250,8 +254,8 @@ static void multiway_merge_results(
   }
   for (size_t b = 0; b < best and not all_best.empty(); b++)
   {
-    std::vector<BestFromThread>::iterator next_best
-      = std::min_element(all_best.begin(),all_best.end());
+    const std::vector<BestFromThread>::iterator next_best = std::min_element(
+                                 all_best.begin(), all_best.end());
     const StoredLocalAlignmentCoordinates &slac = *(next_best->it);
     sw_output_result_shared.process(stdout,slac.coords,
                                     slac.u_seqnum,slac.v_seqnum);
@@ -321,32 +325,34 @@ int main(int argc,char *argv[])
                         blast_statistics != nullptr);
 
     using ScoreType = int32_t;
-    SWOutputResultShared<ScoreType>
-      sw_output_result_shared(alphasize,
-                              options.score_matrix_id,
-                              options.score_matrix_name,
-                              static_cast<const int8_t *const *>(scorematrix2D),
-                              smallest_score,
-                              options.gap_open_penalty,
-                              options.gap_extension_penalty,
-                              options.min_bit_score,
-                              db_multiseq,
-                              query_multiseq,
-                              blast_statistics,
-                              options.alignment_display,
-                              dna_alphabet,
-                              options.header_display,
-                              options.opt_memory,
-                              options.stop_after_first);
+    const SWOutputResultShared<ScoreType> sw_output_result_shared(
+                                 alphasize,
+                                 options.score_matrix_id,
+                                 options.score_matrix_name,
+                                 static_cast<const int8_t *const *>(
+                                                              scorematrix2D),
+                                 smallest_score,
+                                 options.gap_open_penalty,
+                                 options.gap_extension_penalty,
+                                 options.min_bit_score,
+                                 db_multiseq,
+                                 query_multiseq,
+                                 blast_statistics,
+                                 options.alignment_display,
+                                 dna_alphabet,
+                                 options.header_display,
+                                 options.opt_memory,
+                                 options.stop_after_first);
     const size_t seqnum_divisor = options.stop_after_first ? size_t(1)
                                                            : size_t(10);
     try
     {
       if (options.best == 0)
       {
-        SWOutputResultGetThreadRelated
-          sw_output_result_get_thread_related(options.num_threads,
-                                              options.threads_out_prefix);
+        const SWOutputResultGetThreadRelated
+          sw_output_result_get_thread_related(
+                                     options.num_threads,
+                                     options.threads_out_prefix);
 
         sw_all_against_all<SWOutputResultShared<ScoreType>,FILE,
                            SWOutputResultGetThreadRelated>
@@ -361,10 +367,11 @@ int main(int argc,char *argv[])
                            sw_output_result_get_thread_related);
       } else
       {
-        SWStoreBestResultsShared sw_store_best_results_shared{};
-        SWStoreBestResultsGetThreadRelated
-          sw_store_best_results_get_thread_related(options.num_threads,
-                                                   options.best);
+        const SWStoreBestResultsShared sw_store_best_results_shared{};
+        const SWStoreBestResultsGetThreadRelated
+                                     sw_store_best_results_get_thread_related(
+                                                        options.num_threads,
+                                                        options.best);
         sw_all_against_all<SWStoreBestResultsShared,SWResultVector,
                            SWStoreBestResultsGetThreadRelated>
                           (options,

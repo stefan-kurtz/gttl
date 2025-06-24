@@ -63,7 +63,8 @@ class Unwords
   template<size_t alphabetsize>
   void show(const char *alphabet) const noexcept
   {
-    QgramDecoder<alphabetsize,false> qgram_decoder(alphabet,qgram_length);
+    const QgramDecoder<alphabetsize, false> qgram_decoder(
+                                 alphabet, qgram_length);
     std::cout << "# alphabet size:\t" << alphabetsize << '\n';
     std::cout << "# length of qgrams:\t" << qgram_length << '\n';
     std::cout << "# number of all qgrams:\t" << number_of_all_qgrams
@@ -157,7 +158,7 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
                                               (qgram_length,
                                                alphabetsize,
                                                seq_generator);
-    StrFormat msg("count number of different %zu-grams", qgram_length);
+    const StrFormat msg("count number of different %zu-grams", qgram_length);
     compute_unwords_runtime.show(msg.str());
     if (unwords->size() > 0)
     {

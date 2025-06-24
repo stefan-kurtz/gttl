@@ -49,9 +49,10 @@ class SuccinctPlcpTable
       if (idx < totallength)
       {
         const SuftabBaseType current_suftab = *suftab_iter;
-        uint32_t suffix = current_suftab + 1;
-        size_t select_1 = succinct_plcp_table->get_select(suffix, 1);
-        size_t lcp = succinct_plcp_table->get_rank(select_1, 0) + 1 - suffix;
+        const uint32_t suffix               = current_suftab + 1;
+        const size_t select_1 = succinct_plcp_table->get_select(suffix, 1);
+        const size_t lcp      = succinct_plcp_table->get_rank(select_1, 0) + 1
+                                     - suffix;
         current_lcpvalue = lcp;
       } else
       {

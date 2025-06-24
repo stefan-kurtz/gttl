@@ -272,19 +272,19 @@ typedef __m512i simd_int;
 
 inline __m256i _mm256_shift_left1(__m256i a)
 {
-  __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
+  const __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
   return _mm256_alignr_epi8(a, mask, 16 - 1);
 }
 
 inline __m256i _mm256_shift_left2(__m256i a)
 {
-  __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
+  const __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
   return _mm256_alignr_epi8(a, mask, 16 - 2);
 }
 
 inline __m256i _mm256_shift_left4(__m256i a)
 {
-  __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
+  const __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
   return _mm256_alignr_epi8(a, mask, 16 - 4);
 }
 inline uint16_t simd_hmax16_avx(const __m256i buffer);
@@ -520,17 +520,19 @@ uint8_t simd_hmax8(const __m128i buffer);
 #ifdef SSE_OR_AVX
 inline uint16_t simd_hmax16(const __m128i buffer)
 {
-  __m128i tmp1 = _mm_subs_epu16(_mm_set1_epi16((short) UINT16_MAX), buffer);
-  __m128i tmp3 = _mm_minpos_epu16(tmp1);
+  const __m128i tmp1 = _mm_subs_epu16(
+                               _mm_set1_epi16((short) UINT16_MAX), buffer);
+  const __m128i tmp3 = _mm_minpos_epu16(tmp1);
   return UINT16_MAX - _mm_cvtsi128_si32(tmp3);
 }
 
 inline uint8_t simd_hmax8(const __m128i buffer)
 {
-  __m128i tmp1 = _mm_subs_epu8(_mm_set1_epi8(static_cast<char>(UINT8_MAX)),
+  const __m128i tmp1 = _mm_subs_epu8(
+                               _mm_set1_epi8(static_cast<char>(UINT8_MAX)),
                                buffer);
-  __m128i tmp2 = _mm_min_epu8(tmp1, _mm_srli_epi16(tmp1, 8));
-  __m128i tmp3 = _mm_minpos_epu16(tmp2);
+  const __m128i tmp2 = _mm_min_epu8(tmp1, _mm_srli_epi16(tmp1, 8));
+  const __m128i tmp3 = _mm_minpos_epu16(tmp2);
   return static_cast<int8_t>(static_cast<int8_t>(UINT8_MAX) -
                              static_cast<int8_t>(_mm_cvtsi128_si32(tmp3)));
 }

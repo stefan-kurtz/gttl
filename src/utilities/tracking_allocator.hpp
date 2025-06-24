@@ -16,10 +16,12 @@
 inline std::string demangle(const char* name)
 {
   int status = 0;
-  std::unique_ptr<char, void(*)(void*)> demangled(
-    abi::__cxa_demangle(name, nullptr, nullptr, &status),
-    std::free
-  );
+  const std::unique_ptr<char, void (*)(void *)> demangled(
+                               abi::__cxa_demangle(name,
+                                                   nullptr,
+                                                   nullptr,
+                                                   &status),
+                               std::free);
   return (status == 0 and demangled) ? demangled.get() : name;
 }
 

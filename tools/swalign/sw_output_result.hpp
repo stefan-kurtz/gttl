@@ -227,31 +227,34 @@ class SWOutputResultShared
         if (alignment_display.cigar())
         {
           assert(eoplist != nullptr);
-          std::string cigar_string
-            = eoplist->cigar_string_get(distinguish_mismatch_match);
+          const std::string cigar_string = eoplist->cigar_string_get(
+                                       distinguish_mismatch_match);
           fprintf(fpout,"\t%s",cigar_string.c_str());
         }
         if (alignment_display.s_substring())
         {
-          std::string usubstring_dec = sequence_decode_function(usubstring);
+          const std::string usubstring_dec =
+                                       sequence_decode_function(usubstring);
           fprintf(fpout,"\t%s",usubstring_dec.c_str());
         }
         if (alignment_display.q_substring())
         {
-          std::string vsubstring_dec = sequence_decode_function(vsubstring);
+          const std::string vsubstring_dec =
+                                       sequence_decode_function(vsubstring);
           fprintf(fpout,"\t%s",vsubstring_dec.c_str());
         }
         fputc('\n',fpout);
         if (alignment_display.subject_query_alignment())
         {
-          SWAlignmentSequenceInfo
-            alignment_sequence_info(&usubstring,
-                                    best_coords.ustart,
-                                    &vsubstring,
-                                    best_coords.vstart,
-                                    db_multiseq->sequences_maximum_length_get(),
-                                    query_multiseq
-                                      ->sequences_maximum_length_get());
+          const SWAlignmentSequenceInfo alignment_sequence_info(
+                                       &usubstring,
+                                       best_coords.ustart,
+                                       &vsubstring,
+                                       best_coords.vstart,
+                                       db_multiseq
+                                         ->sequences_maximum_length_get(),
+                                       query_multiseq
+                                         ->sequences_maximum_length_get());
           static constexpr const size_t top_seqlength = 0;
           static constexpr const size_t low_reference = 0;
           static constexpr const size_t one_off = 0;

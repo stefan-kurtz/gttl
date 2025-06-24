@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   {
     if (compile_time_local_option == local_option)
     {
-      Chain<GttlStoredMatch, compile_time_local_option> chaining(matches);
+      const Chain<GttlStoredMatch, compile_time_local_option> chaining(matches);
       std::cout << "# chain: length " << chaining.size()
                 << " score " << chaining.score() << '\n';
       if (not silent_option)

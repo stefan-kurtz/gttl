@@ -254,8 +254,8 @@ class GttlLineIterator
         {
           if (*(bufptr - 1) != '\n')
           {
-            StrFormat msg(", line %zu: missing newline character",
-                          line_number+1);
+            const StrFormat msg(", line %zu: missing newline character",
+                                line_number + 1);
             throw std::ios_base::failure(msg.str());
           }
           endofunit = true;

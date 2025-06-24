@@ -63,7 +63,7 @@ static void verify_hashvalues_for_file(const char *inputfilename,
   for (const auto *si : fasta_gen)
   {
     auto sequence = si->sequence_get();
-    NucleotideRanger nuc_ranger(sequence.data(),sequence.size());
+    const NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
     for (auto const &&range : nuc_ranger)
     {
       const size_t this_length = std::get<1>(range);
@@ -71,8 +71,8 @@ static void verify_hashvalues_for_file(const char *inputfilename,
       HashValuePairIterator qgiter(qgram_length,substring, this_length);
       for (auto const &&code_pair : qgiter)
       {
-        uint64_t hash_value = std::get<0>(code_pair);
-        uint64_t compl_hash_value = std::get<1>(code_pair);
+        const uint64_t hash_value       = std::get<0>(code_pair);
+        const uint64_t compl_hash_value = std::get<1>(code_pair);
         hash_value_sum += hash_value;
         compl_hash_value_sum += compl_hash_value;
 #ifndef NDEBUG

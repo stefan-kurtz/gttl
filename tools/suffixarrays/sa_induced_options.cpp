@@ -96,7 +96,7 @@ void SainOptions::parse(int argc, char **argv)
        {"plcp5n","use semi external implementation of algorithm involving "
                  "PLCP table with 5n bytes space peak"}};
 
-  OptionChoices lcptab_method_choices(lcptab_method_choices_map);
+  const OptionChoices lcptab_method_choices(lcptab_method_choices_map);
   DisplayOptions display_options{};
   cxxopts::Options options(
       argv[0],

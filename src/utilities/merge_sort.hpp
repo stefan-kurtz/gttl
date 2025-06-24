@@ -33,7 +33,7 @@ void merge_sort(It begin, It end, unsigned int n_threads,
                   = std::less<typename std::iterator_traits<It>::value_type>(),
                 unsigned level = 0)
 {
-  ptrdiff_t diff = end - begin;
+  const ptrdiff_t diff = end - begin;
   if (diff <= 1)
   {
     return;

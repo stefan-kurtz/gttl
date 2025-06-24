@@ -172,9 +172,9 @@ class GttlAffineDPbanded
         const ScoreType score_from_D = columnspace[i-1].Dvalue - gap_extension;
         currententry.Dvalue = score_from_R >= score_from_D ? score_from_R
                                                            : score_from_D;
-        AffineAlignEditOp dmaxedge = score_from_R >= score_from_D
-                                       ? AFFINE_DBAND_REPLACEMENT
-                                       : AFFINE_DBAND_DELETION;
+        const AffineAlignEditOp dmaxedge = score_from_R >= score_from_D ?
+                                     AFFINE_DBAND_REPLACEMENT :
+                                     AFFINE_DBAND_DELETION;
         currententry.Ivalue = min_align_score;
         AffineAlignEditOp imaxedge = AFFINE_DBAND_UNDEF;
         /* compute A_affine(i,j,I) from value in the west, if available*/
@@ -250,7 +250,7 @@ class GttlAffineDPbanded
     if constexpr (keep_columns)
     {
       assert(dpmatrix != nullptr);
-      size_t width = high_row - low_row + 1;
+      const size_t width = high_row - low_row + 1;
       colptr = dpmatrix[0];
       memcpy(colptr,columnspace,width * sizeof *columnspace);
       colptr += width;

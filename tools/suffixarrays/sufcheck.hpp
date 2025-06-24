@@ -157,7 +157,7 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
 {
   size_t count_bits_set = 0;
   size_t previouspos = 0;
-  size_t firstspecial = totallength;
+  size_t firstspecial = totallength; //NOLINT(misc-const-correctness)
   size_t rangestart = 0;
   uint8_t previouscc = 0;
   Multibitvector<false> startposoccurs(totallength + 1);

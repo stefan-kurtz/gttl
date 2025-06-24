@@ -73,7 +73,9 @@ static void fastq_split_writer(size_t split_size,
     {
       break;
     }
-    StrFormat outfilename("%s_%02d",inputfile_basename_ptr, file_number++);
+    const StrFormat outfilename("%s_%02d",
+                                inputfile_basename_ptr,
+                                file_number++);
     std::ofstream out_stream;
     out_stream.open(outfilename.str());
     for (size_t idx = 0; idx < split_size; idx++)
@@ -220,7 +222,7 @@ static void process_single_file_mapped(bool statistics,
                                        const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  Gttlmmap<char> mapped_file(inputfilename.c_str());
+  const Gttlmmap<char> mapped_file(inputfilename.c_str());
   using FastQGenerator = GttlFastQGenerator<buf_size>;
   FastQGenerator fastq_it(mapped_file.ptr(), mapped_file.size());
   process_fastq_iter<FastQGenerator>(statistics,echo,fasta_output,hash_mode,
@@ -447,10 +449,10 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
                                       size_t sequence_length)
 {
   assert(qgram_length <= sequence_length);
-  DNAQgramDecoder
-    dna_qgram_decoder(qgram_length,
-                      sequence_length + 1 - qgram_length,
-                      sub_unit_ptr);
+  const DNAQgramDecoder dna_qgram_decoder(
+                               qgram_length,
+                               sequence_length + 1 - qgram_length,
+                               sub_unit_ptr);
   std::string previous_qgram;
   for (auto const qgram_code : dna_qgram_decoder)
   {
@@ -564,9 +566,10 @@ int main(int argc,char *argv[])
           } else
           {
             const bool fasta_format = false;
-            SequencesSplit sequences_split(options.num_threads_get(),
-                                           inputfiles[0],
-                                           fasta_format);
+            const SequencesSplit sequences_split(
+                                         options.num_threads_get(),
+                                         inputfiles[0],
+                                         fasta_format);
             sequences_split.show();
             char_distribution_thd(sequences_split);
           }
@@ -583,8 +586,8 @@ int main(int argc,char *argv[])
           {
             if (options.encoding_type_get() == std::string("8"))
             {
-              DNAEncodingMultiLength<uint8_t,split_at_wildcard,false>
-                dna_encoding_multi_length(inputfiles[0]);
+              const DNAEncodingMultiLength<uint8_t, split_at_wildcard, false>
+                                   dna_encoding_multi_length(inputfiles[0]);
               if (statistics)
               {
                 dna_encoding_multi_length.statistics();
@@ -593,8 +596,8 @@ int main(int argc,char *argv[])
             {
               if (options.encoding_type_get() == std::string("16"))
               {
-                DNAEncodingMultiLength<uint16_t,split_at_wildcard,false>
-                  dna_encoding_multi_length(inputfiles[0]);
+                const DNAEncodingMultiLength<uint16_t, split_at_wildcard, false>
+                                     dna_encoding_multi_length(inputfiles[0]);
                 if (statistics)
                 {
                   dna_encoding_multi_length.statistics();
@@ -603,8 +606,10 @@ int main(int argc,char *argv[])
               {
                 if (options.encoding_type_get() == std::string("32"))
                 {
-                  DNAEncodingMultiLength<uint32_t,split_at_wildcard,false>
-                    dna_encoding_multi_length(inputfiles[0]);
+                  const DNAEncodingMultiLength<uint32_t,
+                                               split_at_wildcard,
+                                               false>
+                                       dna_encoding_multi_length(inputfiles[0]);
                   if (statistics)
                   {
                     dna_encoding_multi_length.statistics();

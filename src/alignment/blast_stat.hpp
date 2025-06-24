@@ -66,10 +66,11 @@ class BlastStatistics
                                          gap_extension_penalty);
     if (idx == -1)
     {
-      StrFormat msg(": no Gumbel parameters for computing bits scores "
-                    "available for blosum62 matrix and gap parameters %d/%d",
-                    gap_open_penalty,
-                    gap_extension_penalty);
+      const StrFormat msg(": no Gumbel parameters for computing bits scores "
+                          "available for blosum62 matrix and gap parameters"
+                          " %d/%d",
+                          gap_open_penalty,
+                          gap_extension_penalty);
       throw std::runtime_error(msg.str());
     }
     assert(idx >= 0 && idx < static_cast<int>(items));

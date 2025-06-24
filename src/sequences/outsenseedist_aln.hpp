@@ -16,7 +16,7 @@ class TrackEditoperations
   std::vector<Backreference> trace;
   size_t max_d_get(void) const noexcept
   {
-    size_t max_d_plus1 = std::sqrt(trace.size());
+    const size_t max_d_plus1 = std::sqrt(trace.size());
     assert(max_d_plus1 > 0 && max_d_plus1 * max_d_plus1 == trace.size());
     return max_d_plus1 - 1;
   }
@@ -148,7 +148,7 @@ class TrackEditoperations
               size_t front_mid, int64_t diag) const noexcept
   {
     const Backreference &br = trace[front_mid + diag];
-    uint32_t match_length = br.local_matchcount_get();
+    const uint32_t match_length = br.local_matchcount_get();
     bool has_pushed = true;
     if (br.has_mismatch())
     {
@@ -202,7 +202,7 @@ class TrackEditoperations
   {
     const size_t max_d = max_d_get();
     assert(trace.size() >= max_d + 1);
-    size_t front_mid = trace.size() - 1 - max_d;
+    const size_t front_mid = trace.size() - 1 - max_d;
     assert(front_mid + vlen >= ulen);
     const int64_t diag = static_cast<int64_t>(vlen) -
                          static_cast<int64_t>(ulen);
@@ -210,7 +210,7 @@ class TrackEditoperations
     expand(&stack,ulen,vlen,max_d,front_mid,diag);
     while (stack.size() > 0)
     {
-      StackElem se = stack[stack.size()-1];
+      const StackElem se = stack[stack.size() - 1];
       stack.pop_back();
       expand(&stack,se.u_remain,se.v_remain,
              se.current_d,se.front_mid,se.diag);

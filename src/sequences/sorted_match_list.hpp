@@ -322,9 +322,9 @@ class SortedMatchList
               throw std::runtime_error(msg.str());
             } else
             {
-              StrFormat msg(": cannot store match of length %zu in 10 bytes, "
-                            "please inform the developer",
-                            this_match_length);
+              const StrFormat msg(": cannot store match of length %zu in 10 "
+                                  "bytes, please inform the developer",
+                                  this_match_length);
               throw std::runtime_error(msg.str());
             }
           } else

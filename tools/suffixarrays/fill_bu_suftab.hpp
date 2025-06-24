@@ -60,8 +60,9 @@ static void fill_bu_suftab_MULTISEQ(const SuftabBaseType *suftab,
                                     bool verbose,
                                     const std::string &indexname)
 {
-  OrderedIntegerSequence<intset_basetype> separator_positions
-    = separator_positions_get<intset_basetype>(multiseq);
+  const OrderedIntegerSequence<intset_basetype> separator_positions =
+                               separator_positions_get<intset_basetype>(
+                                                            multiseq);
 
   const std::string bsf_filename(indexname + ".bsf");
   BinaryFileWriter<T_bu> bw(bsf_filename);
@@ -129,9 +130,8 @@ static T_bu *fill_bu_suftab_MULTISEQ_linear(GttlMemoryTracker *memory_tracker,
                                             const GttlMultiseq *multiseq,
                                             size_t totallength)
 {
-  InverseSuftabReader<SuftabBaseType> inverse_suftab_reader(memory_tracker,
-                                                            indexname,
-                                                            totallength);
+  const InverseSuftabReader<SuftabBaseType> inverse_suftab_reader(
+                               memory_tracker, indexname, totallength);
   const size_t sequences_number = multiseq->sequences_number_get();
   auto inverse_suftab_iter = inverse_suftab_reader.begin();
   T_bu *bu_suftab = new T_bu [totallength + 1];
@@ -157,8 +157,8 @@ static void check_bu_suftab_MULTISEQ(const SuftabBaseType *suftab,
                                      const std::string &filename)
 {
   const uint8_t padding_char = multiseq->padding_char_get();
-  OrderedIntegerSequence<uint32_t> separator_positions_uint
-    = separator_positions_get<uint32_t>(multiseq);
+  const OrderedIntegerSequence<uint32_t> separator_positions_uint =
+                               separator_positions_get<uint32_t>(multiseq);
   std::vector<T_bu> bu_suftab = gttl_read_vector<T_bu>(filename.c_str());
 
   for (size_t idx = 0; idx <= totallength; idx++)

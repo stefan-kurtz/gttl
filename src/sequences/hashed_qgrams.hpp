@@ -108,8 +108,9 @@ static std::pair<size_t,bool> append_minimizers(
   std::deque<BytesUnit<sizeof_unit,3>> window_deque{};
   size_t count_all_qgrams = 0;
   bool has_wildcards = false;
-  NucleotideRanger ranger(sequence,seqlen);
-  HashedQgramVector<sizeof_unit> palindromic_vector{};
+  const NucleotideRanger ranger(sequence, seqlen);
+  HashedQgramVector<sizeof_unit>  //NOLINT(misc-const-correctness)
+    palindromic_vector{};
   for (auto const &&range : ranger)
   {
     const size_t this_length = std::get<1>(range);
@@ -130,7 +131,8 @@ static std::pair<size_t,bool> append_minimizers(
     bool front_was_moved = false;
     for (auto const &&code_pair : qgiter)
     {
-      uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
+      uint64_t this_hash = // NOLINT(misc-const-correctness)
+        std::get<0>(code_pair) & hash_mask;
       size_t stored_seqnum;
       size_t stored_seqpos;
       if constexpr (HashIterator::handle_both_strands)
@@ -148,19 +150,20 @@ static std::pair<size_t,bool> append_minimizers(
           {
             /* also add the coordinates for the reverse complement
                as it would otherwise be neglected */
-            BytesUnit<sizeof_unit,3>
-              palindromic_hashed_qgram_rc(hashed_qgram_packer,
-                                       {this_hash,
-                                        static_cast<uint64_t>(seqnum+1),
-                                        static_cast<uint64_t>(seqlen -
-                                                              (seqpos +
-                                                               qgram_length))});
+            const BytesUnit<sizeof_unit, 3> palindromic_hashed_qgram_rc(
+                                         hashed_qgram_packer,
+                                         {this_hash,
+                                          static_cast<uint64_t>(seqnum + 1),
+                                          static_cast<uint64_t>(
+                                                             seqlen
+                                                             - (seqpos
+                                                             + qgram_length))});
             palindromic_vector.emplace_back(palindromic_hashed_qgram_rc);
-            BytesUnit<sizeof_unit,3>
-              palindromic_hashed_qgram_fwd(hashed_qgram_packer,
-                                           {this_hash,
-                                            static_cast<uint64_t>(seqnum),
-                                            static_cast<uint64_t>(seqpos)});
+            const BytesUnit<sizeof_unit, 3> palindromic_hashed_qgram_fwd(
+                                         hashed_qgram_packer,
+                                         {this_hash,
+                                          static_cast<uint64_t>(seqnum),
+                                          static_cast<uint64_t>(seqpos)});
             palindromic_vector.emplace_back(palindromic_hashed_qgram_fwd);
           }
           stored_seqnum = seqnum;
@@ -186,11 +189,11 @@ static std::pair<size_t,bool> append_minimizers(
         }
         window_deque.pop_back();
       }
-      BytesUnit<sizeof_unit,3>
-          current_hashed_qgram(hashed_qgram_packer,
-                               {this_hash,
-                                static_cast<uint64_t>(stored_seqnum),
-                                static_cast<uint64_t>(stored_seqpos)});
+      const BytesUnit<sizeof_unit, 3> current_hashed_qgram(
+                                   hashed_qgram_packer,
+                                   {this_hash,
+                                    static_cast<uint64_t>(stored_seqnum),
+                                    static_cast<uint64_t>(stored_seqpos)});
 #ifdef VALIDATE_MINIMIZER
       all_hashed_qgrams.emplace_back(current_hashed_qgram);
 #endif
@@ -201,8 +204,9 @@ static std::pair<size_t,bool> append_minimizers(
       // the current minimizer drops out of the window
       if (seqpos >= window_size)
       {
-        uint64_t min_pos_in_window
-          = window_deque.front().template decode_at<2>(hashed_qgram_packer);
+        uint64_t min_pos_in_window = //NOLINT(misc-const-correctness)
+          window_deque.front().template decode_at<2>
+          (hashed_qgram_packer);
         if constexpr (HashIterator::handle_both_strands)
         {
           if (window_deque.front().template decode_at<1>(hashed_qgram_packer) ==
@@ -283,7 +287,7 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
   const size_t minseqlen_to_process = window_size + qgram_length - 1;
   size_t count_all_qgrams = 0;
   bool has_wildcards = false;
-  NucleotideRanger ranger(sequence,seqlen);
+  const NucleotideRanger ranger(sequence, seqlen);
   for (auto const &&range : ranger)
   {
     const size_t this_length = std::get<1>(range);
@@ -301,7 +305,8 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
     {
       if (steps == 0)
       {
-        uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
+        uint64_t this_hash = //NOLINT(misc-const-correctness)
+          std::get<0>(code_pair) & hash_mask;
         size_t stored_seqnum;
         size_t stored_seqpos;
         if constexpr (HashIterator::handle_both_strands)
@@ -323,11 +328,11 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
           stored_seqnum = seqnum;
           stored_seqpos = seqpos;
         }
-        BytesUnit<sizeof_unit,3>
-          current_hashed_qgram(hashed_qgram_packer,
-                               {this_hash,
-                                static_cast<uint64_t>(stored_seqnum),
-                                static_cast<uint64_t>(stored_seqpos)});
+        const BytesUnit<sizeof_unit, 3> current_hashed_qgram(
+                                     hashed_qgram_packer,
+                                     {this_hash,
+                                      static_cast<uint64_t>(stored_seqnum),
+                                      static_cast<uint64_t>(stored_seqpos)});
         hashed_qgrams_vector->emplace_back(current_hashed_qgram);
         steps = window_size;
       }
@@ -600,11 +605,12 @@ class HashedQgramsGeneric
                             std::to_string(this->size()));
       const double density
         = static_cast<double>(size())/this->count_all_qgrams_get();
-      StrFormat s_density("hashed kmers density\t%.2f",density);
+      const StrFormat s_density("hashed kmers density\t%.2f", density);
       log_vector->push_back(s_density.str());
       const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
-      StrFormat s_space("SPACE\thashed kmers (MB)\t%zu",
-                        static_cast<size_t>(std::ceil(space_in_mega_bytes)));
+      const StrFormat s_space("SPACE\thashed kmers (MB)\t%zu",
+                              static_cast<size_t>(std::ceil(
+                                                        space_in_mega_bytes)));
       log_vector->push_back(s_space.str());
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }

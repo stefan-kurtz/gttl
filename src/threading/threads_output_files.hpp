@@ -57,12 +57,15 @@ class ThreadsOutputFiles
     for (size_t t_idx = 0; t_idx < num_threads; t_idx++)
     {
       constexpr const char *file_format_string = "%s%cthread_%02zu.tsv";
-      StrFormat fname(file_format_string,cc_threads_out_prefix,separator,t_idx);
+      const StrFormat fname(file_format_string,
+                            cc_threads_out_prefix,
+                            separator,
+                            t_idx);
       output_filenames.push_back(fname.str());
       FILE *out_fp = std::fopen(fname.str().c_str(),"w");
       if (out_fp == nullptr)
       {
-        StrFormat msg("cannot create file \"%s\"",fname.str().c_str());
+        const StrFormat msg("cannot create file \"%s\"", fname.str().c_str());
         throw std::ios_base::failure(msg.str());
       }
       output_filepointers.push_back(out_fp);
@@ -83,7 +86,7 @@ class ThreadsOutputFiles
         char buf[buf_size];
         while (true)
         {
-          size_t read_bytes = fread(&buf[0],1,buf_size,in_fp);
+          const size_t read_bytes = fread(&buf[0], 1, buf_size, in_fp);
           std::fwrite(&buf[0],1,read_bytes,stdout);
           if (read_bytes < buf_size)
           {

@@ -192,7 +192,7 @@ private:
       }
       // In this case there is no newline,
       // so we copy everything and continue reading
-      size_t remaining = file_buf_end - file_buf_pos;
+      const size_t remaining = file_buf_end - file_buf_pos;
       out->append(file_buf + file_buf_pos, remaining);
       len += remaining;
       file_buf_pos = file_buf_end;
@@ -208,7 +208,7 @@ private:
   bool discard_line(size_t *length = nullptr)
   {
     char ch = EOF;
-    size_t len = 0;
+    const size_t len = 0;
 
     if(length != nullptr)
     {

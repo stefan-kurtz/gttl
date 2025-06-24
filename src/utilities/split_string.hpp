@@ -20,7 +20,7 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
     if (next < str.cend())
     {
       assert(*next == sep);
-      std::string this_string = std::string(previous,next);
+      const std::string this_string = std::string(previous, next);
       result.push_back(convert(result.size(),this_string));
       if (sep == ' ')
       {
@@ -31,9 +31,9 @@ static inline std::vector<T> gttl_split_string(const std::string &str,char sep,
       }
     } else
     {
-      std::string this_string = std::string(previous, *(next-1) == '\n'
-                                                        ? (next - 1)
-                                                        : next);
+      const std::string this_string = std::string(
+                                   previous,
+                                   *(next - 1) == '\n' ? (next - 1) : next);
       result.push_back(convert(result.size(),this_string));
       break;
     }

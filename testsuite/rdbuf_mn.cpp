@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }try
   {
-    std::string x = gttl_read_file(argv[1]);
+    const std::string x = gttl_read_file(argv[1]);
     std::cout << x;
   } catch(const std::exception &err)
   {

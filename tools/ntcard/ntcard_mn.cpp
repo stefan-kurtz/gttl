@@ -27,30 +27,29 @@ static void estimate_F_values(const NtcardOptions &options)
 
   if (options.binary_option_is_set())
   {
-    BinaryNtTable table = is_protein ?
-          ntcard_enumerate<split_at_wildcard,
-                           QgramNtHashAAFwdIteratorGeneric<undefined_rank>,
-                           QgramNtHashAAFwdIteratorGenericNoTransform
-                             <undefined_rank>,
-                           BinaryNtTable,
-                           true>
-                          (options.inputfile_get(),
-                           options.qgram_length_get(),
-                           options.s_get(),
-                           options.r_get(),
-                           options.num_threads_get())
-          :
-          ntcard_enumerate<split_at_wildcard,
-                           QgramNtHashFwdIteratorGeneric<undefined_rank>,
-                           QgramNtHashFwdIteratorGenericNoTransform
-                             <undefined_rank>,
-                           BinaryNtTable,
-                           false>
-                          (options.inputfile_get(),
-                           options.qgram_length_get(),
-                           options.s_get(),
-                           options.r_get(),
-                           options.num_threads_get());
+    const BinaryNtTable table = is_protein ?
+                 ntcard_enumerate<split_at_wildcard,
+                                  QgramNtHashAAFwdIteratorGeneric<
+                                                               undefined_rank>,
+                                  QgramNtHashAAFwdIteratorGenericNoTransform<
+                                                               undefined_rank>,
+                                  BinaryNtTable,
+                                  true>(options.inputfile_get(),
+                                        options.qgram_length_get(),
+                                        options.s_get(),
+                                        options.r_get(),
+                                        options.num_threads_get()) :
+                 ntcard_enumerate<split_at_wildcard,
+                                  QgramNtHashFwdIteratorGeneric<
+                                                               undefined_rank>,
+                                  QgramNtHashFwdIteratorGenericNoTransform<
+                                                               undefined_rank>,
+                                  BinaryNtTable,
+                                  false>(options.inputfile_get(),
+                                         options.qgram_length_get(),
+                                         options.s_get(),
+                                         options.r_get(),
+                                         options.num_threads_get());
     RunTimeClass rt_estimate{};
     const double F0 = table.estimate_F0();
     printf("F0\t%.0f\n", F0);
@@ -59,31 +58,29 @@ static void estimate_F_values(const NtcardOptions &options)
     rt_estimate.show("estimate");
   } else
   {
-    NtTable table
-      = is_protein ?
-        ntcard_enumerate<split_at_wildcard,
-                         QgramNtHashAAFwdIteratorGeneric<undefined_rank>,
-                         QgramNtHashAAFwdIteratorGenericNoTransform
-                           <undefined_rank>,
-                         NtTable,
-                         true>
-                        (options.inputfile_get(),
-                         options.qgram_length_get(),
-                         options.s_get(),
-                         options.r_get(),
-                         options.num_threads_get())
-        :
-        ntcard_enumerate<split_at_wildcard,
-                         QgramNtHashFwdIteratorGeneric<undefined_rank>,
-                         QgramNtHashFwdIteratorGenericNoTransform
-                           <undefined_rank>,
-                         NtTable,
-                         false>
-                        (options.inputfile_get(),
-                         options.qgram_length_get(),
-                         options.s_get(),
-                         options.r_get(),
-                         options.num_threads_get());
+    const NtTable table = is_protein ?
+                 ntcard_enumerate<split_at_wildcard,
+                                  QgramNtHashAAFwdIteratorGeneric<
+                                                               undefined_rank>,
+                                  QgramNtHashAAFwdIteratorGenericNoTransform<
+                                                               undefined_rank>,
+                                  NtTable,
+                                  true>(options.inputfile_get(),
+                                        options.qgram_length_get(),
+                                        options.s_get(),
+                                        options.r_get(),
+                                        options.num_threads_get()) :
+                 ntcard_enumerate<split_at_wildcard,
+                                  QgramNtHashFwdIteratorGeneric<
+                                                               undefined_rank>,
+                                  QgramNtHashFwdIteratorGenericNoTransform<
+                                                               undefined_rank>,
+                                  NtTable,
+                                  false>(options.inputfile_get(),
+                                         options.qgram_length_get(),
+                                         options.s_get(),
+                                         options.r_get(),
+                                         options.num_threads_get());
     RunTimeClass rt_estimate{};
     if (options.fast_option_is_set())
     {
@@ -145,10 +142,10 @@ int main(int argc, char **argv)
     std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
-  StrFormat msg("ntcard.all\t%c\t%zu\t\t%s",
-                options.binary_option_is_set() ? 'b' : 'n',
-                options.num_threads_get(),
-                options.inputfile_get().c_str());
+  const StrFormat msg("ntcard.all\t%c\t%zu\t\t%s",
+                      options.binary_option_is_set() ? 'b' : 'n',
+                      options.num_threads_get(),
+                      options.inputfile_get().c_str());
   rt_all.show(msg.str());
   return EXIT_SUCCESS;
 }

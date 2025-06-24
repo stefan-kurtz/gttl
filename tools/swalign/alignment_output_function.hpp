@@ -37,12 +37,14 @@ static inline auto alignment_output_function_get(
                                 to_char_map<Unit_score_aa>>;
       } else
       {
-        ScoreMatrixName score_matrix_name_instance{};
-        StrFormat msg(
-            ": score matrix %s is not possible for protein "
-            "sequences; the following choices are available: %s",
-            score_matrix_id,
-            score_matrix_name_instance.string_values_joined(", ").c_str());
+        const ScoreMatrixName score_matrix_name_instance{};
+        const StrFormat msg(": score matrix %s is not possible for protein "
+                            "sequences; the following choices are available: "
+                            "%s",
+                            score_matrix_id,
+                            score_matrix_name_instance
+                              .string_values_joined(", ")
+                              .c_str());
         throw std::runtime_error(msg.str());
       }
     }
@@ -82,13 +84,14 @@ static inline auto alignment_output_function_get(
                 to_char_map<Unit_score_nuc_upper>>;
           } else
           {
-            ScoreMatrixName score_matrix_name_instance{};
-            StrFormat msg(
-                ": score matrix %s is not possible for DNA "
-                "sequences; the following choices are "
-                "available: %s",
-                score_matrix_id,
-                score_matrix_name_instance.string_values_joined(", ").c_str());
+            const ScoreMatrixName score_matrix_name_instance{};
+            const StrFormat msg(": score matrix %s is not possible for DNA "
+                                "sequences; the following choices are "
+                                "available: %s",
+                                score_matrix_id,
+                                score_matrix_name_instance
+                                  .string_values_joined(", ")
+                                  .c_str());
             throw std::runtime_error(msg.str());
           }
         }

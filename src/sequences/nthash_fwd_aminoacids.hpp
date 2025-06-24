@@ -45,7 +45,7 @@ class NtHashAminoacidsTransformer
   // swap bit 0 with bit 33 in "v"
   [[nodiscard]] static uint64_t swapbits033(const uint64_t v) noexcept
   {
-    uint64_t x = (v ^ (v >> 33)) & uint64_t{1};
+    const uint64_t x = (v ^ (v >> 33)) & uint64_t{1};
     return v ^ (x | (x << 33));
   }
 

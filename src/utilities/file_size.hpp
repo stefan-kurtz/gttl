@@ -19,7 +19,7 @@
 
 inline size_t gttl_file_size(const char *filename)
 {
-  int filedesc = open(filename,O_RDONLY);
+  const int filedesc = open(filename, O_RDONLY);
   if (filedesc == -1)       // check for error code
   {
     throw std::ios_base::failure(": cannot open file " + std::string(filename));

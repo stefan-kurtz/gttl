@@ -104,8 +104,8 @@ class GttlSeqIterator
           }
           if (current_string == &sequence_entry.sequence)
           {
-            StrFormat msg(", line %zu: corrupted sequence",
-                           gttl_li.line_number_get()+1);
+            const StrFormat msg(", line %zu: corrupted sequence",
+                                gttl_li.line_number_get() + 1);
             throw std::ios_base::failure(msg.str()); /* check_err.py checked */
           }
           if (!found_end)
@@ -117,8 +117,8 @@ class GttlSeqIterator
         if (sequence_entry.sequence.size() == 0 ||
             sequence_entry.sequence[0] == '>')
         {
-          StrFormat msg(", line %zu: corrupted sequence",
-                           gttl_li.line_number_get()+1);
+          const StrFormat msg(", line %zu: corrupted sequence",
+                              gttl_li.line_number_get() + 1);
           throw std::ios_base::failure(msg.str()); /* check_err.py checked */
         }
         return sequence_entry;

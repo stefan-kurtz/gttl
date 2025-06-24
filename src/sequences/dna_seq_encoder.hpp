@@ -578,7 +578,7 @@ class DNAEncodingMultiLength
       const std::string_view &sequence = sequence_entry->sequence_get();
       if constexpr (split_at_wildcard)
       {
-        NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
+        const NucleotideRanger nuc_ranger(sequence.data(), sequence.size());
         for (auto const &&range : nuc_ranger)
         {
           const size_t this_length = std::get<1>(range);

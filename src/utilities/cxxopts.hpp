@@ -961,7 +961,7 @@ template <typename T>
 void
 integer_parser(const std::string& text, T& value)
 {
-  parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
+  const parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
 
   using US = typename std::make_unsigned<T>::type;
   constexpr bool is_signed = std::numeric_limits<T>::is_signed;
@@ -972,7 +972,7 @@ integer_parser(const std::string& text, T& value)
 
   US result = 0;
 
-  for (char ch : value_match)
+  for(const char ch : value_match)
   {
     US digit = 0;
 
@@ -1696,7 +1696,7 @@ CXXOPTS_DIAGNOSTIC_POP
 
     Iterator operator++(int)
     {
-      Iterator retval = *this;
+      const Iterator retval = *this;
       ++(*this);
       return retval;
     }
@@ -2560,8 +2560,10 @@ OptionParser::parse(int argc, const char* const* argv)
       break;
     }
     bool matched = false;
-    values::parser_tool::ArguDesc argu_desc =
-        values::parser_tool::ParseArgument(argv[current], matched);
+    const values::parser_tool::ArguDesc argu_desc =
+                                 values::parser_tool::ParseArgument(
+                                                              argv[current],
+                                                              matched);
 
     if (!matched)
     {
@@ -2594,7 +2596,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
         for (std::size_t i = 0; i != s.size(); ++i)
         {
-          std::string name(1, s[i]);
+          const std::string name(1, s[i]);
           auto iter = m_options.find(name);
 
           if (iter == m_options.end())
@@ -2621,7 +2623,7 @@ OptionParser::parse(int argc, const char* const* argv)
           }
           else if (i + 1 < s.size())
           {
-            std::string arg_value = s.substr(i + 1);
+            const std::string arg_value = s.substr(i + 1);
             parse_option(value, name, arg_value);
             break;
           }
@@ -2708,11 +2710,11 @@ OptionParser::parse(int argc, const char* const* argv)
 
   finalise_aliases();
 
-  ParseResult parsed(std::move(m_keys),
-                     std::move(m_parsed),
-                     std::move(m_sequential),
-                     std::move(m_defaults),
-                     std::move(unmatched));
+  const ParseResult parsed(std::move(m_keys),
+                           std::move(m_parsed),
+                           std::move(m_sequential),
+                           std::move(m_defaults),
+                           std::move(unmatched));
   return parsed;
 }
 

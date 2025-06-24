@@ -164,13 +164,15 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
 #endif
 
   uint64_t sum_hash_values = 0;
-  [[maybe_unused]] uint64_t sum_rc_hash_values = 0;
   size_t seqpos = 0;
-  [[maybe_unused]] size_t bytes_unit_sum = 0;
-  [[maybe_unused]] size_t bytes_unit_sum_rc = 0;
+  //NOLINTBEGIN(misc-const-correctness)
+  [[maybe_unused]] uint64_t sum_rc_hash_values = 0;
+  [[maybe_unused]] size_t bytes_unit_sum       = 0;
+  [[maybe_unused]] size_t bytes_unit_sum_rc    = 0;
+  //NOLINTEND(misc-const-correctness)
   for (auto const &&code_pair : qgiter)
   {
-    uint64_t this_hash = std::get<0>(code_pair);
+    const uint64_t this_hash = std::get<0>(code_pair);
     sum_hash_values += this_hash;
 #ifndef NDEBUG
     for (size_t idx = 0; idx < qgram_length; idx++)
@@ -183,16 +185,16 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
 #endif
     if constexpr (create_bytes_unit)
     {
-      BytesUnit<sizeof_unit_hashed_qgrams,3>
-               current_hashed_qgram(*hashed_qgram_packer,
-                                    {this_hash & hashmask,
-                                     static_cast<uint64_t>(seqnum),
-                                     static_cast<uint64_t>(seqpos)});
+      const BytesUnit<sizeof_unit_hashed_qgrams, 3> current_hashed_qgram(
+                                   *hashed_qgram_packer,
+                                   {this_hash & hashmask,
+                                    static_cast<uint64_t>(seqnum),
+                                    static_cast<uint64_t>(seqpos)});
       bytes_unit_sum += current_hashed_qgram.sum();
     }
     if constexpr (with_rc)
     {
-      uint64_t this_rc_hash = std::get<1>(code_pair);
+      const uint64_t this_rc_hash = std::get<1>(code_pair);
 #ifndef NDEBUG
       for (size_t idx = 0; idx < qgram_length; idx++)
       {
@@ -210,11 +212,11 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
       sum_rc_hash_values += this_rc_hash;
       if constexpr (create_bytes_unit)
       {
-        BytesUnit<sizeof_unit_hashed_qgrams,3>
-                 current_rc_hashed_qgram(*hashed_qgram_packer,
-                                         {this_rc_hash & hashmask,
-                                          static_cast<uint64_t>(seqnum),
-                                          static_cast<uint64_t>(seqpos)});
+        const BytesUnit<sizeof_unit_hashed_qgrams, 3> current_rc_hashed_qgram(
+                                     *hashed_qgram_packer,
+                                     {this_rc_hash & hashmask,
+                                      static_cast<uint64_t>(seqnum),
+                                      static_cast<uint64_t>(seqpos)});
         bytes_unit_sum_rc += current_rc_hashed_qgram.sum();
       }
     } else
@@ -279,7 +281,8 @@ static void enumerate_nt_hash_template(const char *inputfilename,
     auto sequence = si->sequence_get();
     total_length += sequence.size();
     max_sequence_length = std::max(max_sequence_length,sequence.size());
-    NtCardRanger<is_aminoacid> nuc_ranger(sequence.data(),sequence.size());
+    const NtCardRanger<is_aminoacid> nuc_ranger(
+                                 sequence.data(), sequence.size());
     for (auto const &&range : nuc_ranger)
     {
       const size_t this_length = std::get<1>(range);
@@ -356,7 +359,10 @@ static void enumerate_nt_hash(const char *inputfilename,
 {
   constexpr const bool store_header = false;
   constexpr const bool store_sequence = false;
-  GttlMultiseq multiseq(inputfilename,store_header,store_sequence,UINT8_MAX);
+  const GttlMultiseq multiseq(inputfilename,
+                              store_header,
+                              store_sequence,
+                              UINT8_MAX);
   const int sequences_number_bits = multiseq.sequences_number_bits_get();
   const int sequences_length_bits = multiseq.sequences_length_bits_get();
   RunTimeClass rt_nthash{};
@@ -379,10 +385,12 @@ static void enumerate_nt_hash(const char *inputfilename,
       CALL_enumerate_nt_hash_template(9,false);
     }
   }
-  StrFormat msg("nthash\t%s\t%zu\t%d\t%d\t%d",
-                inputfilename,qgram_length,
-                hashbits,sequences_number_bits,
-                sequences_length_bits);
+  const StrFormat msg("nthash\t%s\t%zu\t%d\t%d\t%d",
+                      inputfilename,
+                      qgram_length,
+                      hashbits,
+                      sequences_number_bits,
+                      sequences_length_bits);
   rt_nthash.show(msg.str());
 }
 

@@ -26,7 +26,7 @@ class ArgvConcat
       if (concat)
       {
         assert(arg_vector.size() > 0);
-        std::string key(argv[idx]);
+        const std::string key(argv[idx]);
         if (strlen(argv[idx]) > 0 && argv[idx][0] != '-')
         {
           if (arg_vector.back().at(0) == '-')

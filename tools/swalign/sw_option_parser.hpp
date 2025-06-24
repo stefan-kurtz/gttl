@@ -126,7 +126,8 @@ struct SWOptions
             if (optind > argc - 1 ||
                 std::sscanf(argv[optind],"%d",&readint) != 1)
             {
-              StrFormat msg("missing or illegal argument to option -%c",c_opt);
+              const StrFormat msg("missing or illegal argument to option -%c",
+                                  c_opt);
               throw std::invalid_argument{msg.str()};
             }
             if (c_opt == 't')
@@ -190,7 +191,7 @@ struct SWOptions
           {
             if (optind > argc - 1)
             {
-              StrFormat msg("missing argument to option -%c",c_opt);
+              const StrFormat msg("missing argument to option -%c", c_opt);
               throw std::invalid_argument{msg.str()};
             }
             if (c_opt == 's')
@@ -251,14 +252,14 @@ struct SWOptions
           break;
         default:
           {
-            StrFormat msg("illegal option -%c",c_opt);
-            throw std::invalid_argument(msg.str());
+          const StrFormat msg("illegal option -%c", c_opt);
+          throw std::invalid_argument(msg.str());
           }
       }
     }
     if (optind < argc)
     {
-      StrFormat msg("superfluous arguments %s",argv[optind]);
+      const StrFormat msg("superfluous arguments %s", argv[optind]);
       throw std::invalid_argument(msg.str());
     }
     assert (optind == argc);

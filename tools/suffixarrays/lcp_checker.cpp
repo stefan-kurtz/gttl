@@ -54,11 +54,11 @@ int main(int argc,char *argv[])
     std::cout << "read the succinct representaton from file " << indexname
               << ".lls\n";
   }
-  std::string filename = std::string(indexname) + ".lls";
-  SuccinctBitvector succinctlcp = SuccinctBitvector(filename.c_str());
+  const std::string filename          = std::string(indexname) + ".lls";
+  const SuccinctBitvector succinctlcp = SuccinctBitvector(filename.c_str());
 
-  std::string indexstring(indexname);
-  SuccinctPlcpTable<uint32_t> succinctplcptable(indexstring);
+  const std::string indexstring(indexname);
+  const SuccinctPlcpTable<uint32_t> succinctplcptable(indexstring);
   auto succinctplcpiter = succinctplcptable.begin();
   if (!haserr)
   {
@@ -72,12 +72,12 @@ int main(int argc,char *argv[])
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
 
-      uint32_t suffix = suffixarray->get_suftab_abspos().at(idx +1 ) + 1;
-      size_t select_1 = succinctlcp.get_select(suffix, 1);
-      size_t lcp = succinctlcp.get_rank(select_1, 0) + 1 - suffix;
+      const uint32_t suffix = suffixarray->get_suftab_abspos().at(idx + 1) + 1;
+      const size_t select_1 = succinctlcp.get_select(suffix, 1);
+      const size_t lcp      = succinctlcp.get_rank(select_1, 0) + 1 - suffix;
 
 
-      uint32_t succinct_lcp = *succinctplcpiter;
+      const uint32_t succinct_lcp = *succinctplcpiter;
       if (lcp != lcpvalue || succinct_lcp != lcpvalue) {
         printf("lcpmismatch: %zu, %d, %zu, %d\n",
                idx, lcpvalue, lcp, succinct_lcp);
@@ -109,7 +109,7 @@ int main(int argc,char *argv[])
   delete suffixarray;
   if (!haserr)
   {
-    StrFormat msg("sa_reader\t%s",indexname);
+    const StrFormat msg("sa_reader\t%s", indexname);
     rt_overall.show(msg.str());
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;

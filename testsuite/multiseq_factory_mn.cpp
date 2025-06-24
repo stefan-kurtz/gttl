@@ -20,7 +20,7 @@ static void usage(const cxxopts::Options &options)
 #define CHECK_PAIRWISE_EXCLUDE(I_IDX,J_IDX)\
         if (std::get<1>(values[I_IDX]) > 0 and std::get<1>(values[J_IDX]) > 0)\
         {\
-          StrFormat msg("option %s and %s exclude each other", \
+          const StrFormat msg("option %s and %s exclude each other", \
                         std::get<0>(values[I_IDX]),std::get<0>(values[J_IDX]));\
           throw std::invalid_argument(msg.str());\
         }

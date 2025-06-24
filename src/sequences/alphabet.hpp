@@ -372,7 +372,7 @@ class GttlAlphabet
     {
       if (*s != '|')
       {
-        uint8_t r = this->char_to_rank(*s);
+        const uint8_t r = this->char_to_rank(*s);
         std::cout << *s << "\t" << static_cast<unsigned int>(r) << '\n';
       }
     }

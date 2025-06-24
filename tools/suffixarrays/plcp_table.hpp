@@ -74,7 +74,7 @@ class PlcpTable
   {
     memory_tracker->track(phi_table, __FILE__, __LINE__,
                           (totallength + 1) * sizeof *phi_table);
-    BinaryFileReader<SuftabBaseType> snd_suftab_reader(suftab_inputfile);
+    const BinaryFileReader<SuftabBaseType> snd_suftab_reader(suftab_inputfile);
     auto suftab_iter = snd_suftab_reader.begin();
     SuftabBaseType previous_suftab = *suftab_iter;
     phi_table[previous_suftab] = static_cast<SuftabBaseType>(totallength);

@@ -35,7 +35,8 @@ static void ntcard_enumerate_inner(SeqGenerator* gttl_si,
     auto sequence = si->sequence_get();
     if constexpr (split_at_wildcard)
     {
-      NtCardRanger<is_aminoacid> nuc_ranger(sequence.data(), sequence.size());
+      const NtCardRanger<is_aminoacid> nuc_ranger(
+                                   sequence.data(), sequence.size());
       for (auto const &&range : nuc_ranger)
       {
         const size_t this_length = std::get<1>(range);

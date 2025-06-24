@@ -144,7 +144,7 @@ static void display_char_ranges(const char *inputfilename)
   for (const auto *si : fasta_gen)
   {
     auto sequence = si->sequence_get();
-    ThisCharRange ranger(sequence.data(),sequence.size());
+    const ThisCharRange ranger(sequence.data(), sequence.size());
     for (auto const &&range : ranger)
     {
       std::cout << seqnum << "\t" << std::get<0>(range)
@@ -212,7 +212,7 @@ static void display_char_ranges_multiseq(const GttlMultiseq *encoded_multiseq)
       encoded_multiseq->sequences_number_get() - 1;
   using ThisCharRange
     = GttlCharRange<CharFinder,char_finder,forward,invert>;
-  ThisCharRange ranger(sequence_ptr,sequence_length_concatenation);
+  const ThisCharRange ranger(sequence_ptr, sequence_length_concatenation);
   size_t ranges_total_length = 0;
   for (auto &&range : ranger)
   {

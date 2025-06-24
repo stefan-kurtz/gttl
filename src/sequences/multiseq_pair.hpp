@@ -55,9 +55,10 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     {
       if(db_multiseq != query_multiseq) delete query_multiseq;
       delete db_multiseq;
-      StrFormat msg(": incompatible files: file \"%s\" contains protein "
-                    "sequences, but file \"%s\" does not",
-                    dbfile,queryfile);
+      const StrFormat msg(": incompatible files: file \"%s\" contains protein "
+                          "sequences, but file \"%s\" does not",
+                          dbfile,
+                          queryfile);
       throw std::runtime_error(msg.str());
     }
   } else
@@ -68,9 +69,10 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     {
       if(db_multiseq != query_multiseq) delete query_multiseq;
       delete db_multiseq;
-      StrFormat msg(": incompatible files: file \"%s\" does not contain "
-                    "protein sequences, but file \"%s\" does",
-                    dbfile,queryfile);
+      const StrFormat msg(": incompatible files: file \"%s\" does not contain "
+                          "protein sequences, but file \"%s\" does",
+                          dbfile,
+                          queryfile);
       throw std::runtime_error(msg.str());
     }
   }

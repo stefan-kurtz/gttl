@@ -50,7 +50,7 @@ static inline void swap_two_values(uint8_t *array,Counttype a,Counttype b)
   static_assert(sizeof(uint64_t) == 8);
   uint64_t *aptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * a);
   uint64_t *bptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * b);
-  uint64_t tmp = *aptr;
+  const uint64_t tmp = *aptr;
   *aptr = *bptr;
   *bptr = tmp;
   RT *aptr_rest = reinterpret_cast<RT *>(array + 8 + sizeof_unit * a);
@@ -549,7 +549,7 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass *sorter_instance,
   sorter_instance->setup(skarupke_threshold);
   while (not stack.empty())
   {
-    StackStruct current = stack.back();
+    const StackStruct current = stack.back();
     stack.pop_back();
 
     Buckets<Counttype> *buckets;

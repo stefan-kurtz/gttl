@@ -3,7 +3,7 @@
 
 int main(void)
 {
-  alphabet::GttlAlphabet_UL_4 dna_alpha{};
+  const alphabet::GttlAlphabet_UL_4 dna_alpha{};
   static_assert(dna_alpha.char_to_rank('A') == 0);
   static_assert(dna_alpha.char_to_rank('a') == 0);
   static_assert(dna_alpha.char_to_rank('C') == 1);
@@ -23,7 +23,7 @@ int main(void)
   static_assert((dna_alpha.characters_get())[2] == 'G');
   static_assert((dna_alpha.characters_get())[3] == 'T');
   dna_alpha.pretty_print();
-  alphabet::GttlAlphabet_20 protein_alpha{};
+  const alphabet::GttlAlphabet_20 protein_alpha{};
   static_assert(protein_alpha.char_to_rank('A') == 0);
   static_assert(protein_alpha.char_to_rank('W') == 18);
   static_assert(protein_alpha.char_to_rank('Y') == 19);

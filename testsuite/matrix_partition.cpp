@@ -17,11 +17,12 @@ int main(int argc,char *argv[])
     std::cerr << "Usage: " << argv[0] << " <cutlen> <rows> <cols>\n";
     return EXIT_FAILURE;
   }
-  MatrixPartition mp = cols == 0 ? MatrixPartition(static_cast<size_t>(cutlen),
-                                                   static_cast<size_t>(rows))
-                                 : MatrixPartition(static_cast<size_t>(cutlen),
-                                                   static_cast<size_t>(rows),
-                                                   static_cast<size_t>(cols));
+  const MatrixPartition mp = cols == 0 ?
+                               MatrixPartition(static_cast<size_t>(cutlen),
+                                               static_cast<size_t>(rows)) :
+                               MatrixPartition(static_cast<size_t>(cutlen),
+                                               static_cast<size_t>(rows),
+                                               static_cast<size_t>(cols));
   size_t num_pairs = 0;
   for (auto && itv : mp)
   {

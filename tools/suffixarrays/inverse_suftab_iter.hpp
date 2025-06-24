@@ -33,7 +33,7 @@ class InverseSuftabReader
     if (not isa_file_is_up_to_date(indexname))
     {
       const std::string suftab_inputfile(indexname + ".suf");
-      BinaryFileReader<SuftabBaseType> suftab_reader(suftab_inputfile);
+      const BinaryFileReader<SuftabBaseType> suftab_reader(suftab_inputfile);
       auto suftab_iter = suftab_reader.begin();
       SuftabBaseType *inverse_suftab = new SuftabBaseType [totallength + 1];
       memory_tracker->track(inverse_suftab, __FILE__, __LINE__,

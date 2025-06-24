@@ -46,7 +46,7 @@ static void show_uint64_t_bytes([[maybe_unused]] uint64_t value)
           {\
             show_uint64_t_bytes(first_value);\
             show_uint64_t_bytes(second_value);\
-            BytesUnit<sizeof_unit,2> \
+            const BytesUnit<sizeof_unit,2> \
                      bu(bp,{first_value,second_value});\
             const uint64_t first_value_dec = bu.template decode_at<0>(bp);\
             const uint64_t second_value_dec = bu.template decode_at<1>(bp);\
@@ -61,8 +61,9 @@ static void runner([[maybe_unused]] bool direct,size_t num_values)
 {
   size_t successes = 0;
   std::mt19937_64 rgen_first;
-  int bits_basetype = sizeof(basetype) * CHAR_BIT;
-  int start_bits = std::max(9,static_cast<int>(bits_basetype/size_t(4)));
+  const int bits_basetype = sizeof(basetype) * CHAR_BIT;
+  const int start_bits    = std::max(
+                               9, static_cast<int>(bits_basetype / size_t(4)));
   for (int second_bits = 1; second_bits <= start_bits; second_bits++)
   {
     const uint64_t second_max = gttl_bits2maxvalue<uint64_t>(second_bits);
@@ -82,7 +83,7 @@ static void runner([[maybe_unused]] bool direct,size_t num_values)
         {
           static_assert(overflow <= 7);
           constexpr const int sizeof_unit = sizeof(basetype) + overflow;
-          GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
+          const GttlBitPacker<sizeof_unit, 2> bp({first_bits, second_bits});
           RUN_TEST_CASES
         }
       } else
@@ -93,7 +94,7 @@ static void runner([[maybe_unused]] bool direct,size_t num_values)
           {
             if constexpr (sizeof(basetype) == sizeof(uint64_t))
             {
-              Uint64Encoding<2> bp({first_bits,second_bits});
+              const Uint64Encoding<2> bp({first_bits, second_bits});
               for (size_t idx = 0; idx < num_values; idx++)
               {
                 const uint64_t first_value = dis_first(rgen_first);
@@ -114,7 +115,7 @@ static void runner([[maybe_unused]] bool direct,size_t num_values)
           } else
           {
             constexpr const int sizeof_unit = sizeof(basetype);
-            GttlBitPacker<sizeof_unit,2> bp({first_bits,second_bits});
+            const GttlBitPacker<sizeof_unit, 2> bp({first_bits, second_bits});
             RUN_TEST_CASES
           }
         }
@@ -146,20 +147,20 @@ int main(int argc,char *argv[])
   {
     RunTimeClass rt64;
     runner<uint64_t,overflow>(false,num_values);
-    StrFormat msg64("%zu bytes",sizeof(uint64_t) + overflow);
+    const StrFormat msg64("%zu bytes", sizeof(uint64_t) + overflow);
     rt64.show(msg64.str());
     if constexpr (overflow <= 3)
     {
       RunTimeClass rt32;
       runner<uint32_t,overflow>(false,num_values);
-      StrFormat msg32("%zu bytes",sizeof(uint32_t) + overflow);
+      const StrFormat msg32("%zu bytes", sizeof(uint32_t) + overflow);
       rt32.show(msg32.str());
     }
     if constexpr (overflow <= 1)
     {
       RunTimeClass rt16;
       runner<uint16_t,overflow>(false,num_values);
-      StrFormat msg16("%zu bytes",sizeof(uint16_t) + overflow);
+      const StrFormat msg16("%zu bytes", sizeof(uint16_t) + overflow);
       rt16.show(msg16.str());
     }
   });

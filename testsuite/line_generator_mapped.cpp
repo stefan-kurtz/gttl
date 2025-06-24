@@ -27,7 +27,7 @@ static size_t out_fileinfo(const char *filename,const char *file_contents,
   {
     return 0;
   }
-  size_t lines = count_lines(file_contents + start,len);
+  const size_t lines = count_lines(file_contents + start, len);
   std::cout << "# file\t" << filename << "\t" << start << "\t"
             << (start + len - 1) << "\t" << len << "\t" << lines << '\n';
   return lines;
@@ -35,10 +35,10 @@ static size_t out_fileinfo(const char *filename,const char *file_contents,
 
 static void process_file(const char *filename)
 {
-  Gttlmmap<char> mapped_file(filename);
+  const Gttlmmap<char> mapped_file(filename);
   assert(mapped_file.size() > 0);
   const size_t parts = 2;
-  size_t mid = mapped_file.size()/parts;
+  const size_t mid   = mapped_file.size() / parts;
   assert(mid < mapped_file.size());
   const char *file_contents = mapped_file.ptr();
   const char *next_newline = static_cast<const char *>
@@ -46,23 +46,28 @@ static void process_file(const char *filename)
                                      mapped_file.size() - mid));
   if (next_newline == NULL)
   {
-    StrFormat msg(": second part of file beginning at offset %zu "
-                  " does not contain new line character",mid);
+    const StrFormat msg(": second part of file beginning at offset %zu "
+                        " does not contain new line character",
+                        mid);
     throw std::runtime_error{msg.str()};
   }
-  size_t start_part2
-    = static_cast<size_t>(next_newline + 1 - file_contents);
+  const size_t start_part2 = static_cast<size_t>(
+                               next_newline + 1 - file_contents);
   assert(start_part2 > 0);
-  size_t lines1 = out_fileinfo(filename,file_contents,0,start_part2);
-  size_t remain = mapped_file.size() - start_part2;
-  size_t lines2 = out_fileinfo(filename,file_contents,start_part2,remain);
-  size_t lines_all = count_lines(file_contents,mapped_file.size());
+  const size_t lines1 = out_fileinfo(filename, file_contents, 0, start_part2);
+  const size_t remain = mapped_file.size() - start_part2;
+  const size_t lines2 = out_fileinfo(
+                               filename, file_contents, start_part2, remain);
+  const size_t lines_all = count_lines(file_contents, mapped_file.size());
   std::cout << "# lines all\t" << lines_all << '\n';
   if (lines_all != lines1 + lines2)
   {
-    StrFormat msg(": inconsistent number of lines: lines_all = %zu != %zu = "
-                  "%zu + %zu = lines1 + lines2",lines_all,lines1+lines2,
-                                                lines1,lines2);
+    const StrFormat msg(": inconsistent number of lines: lines_all = %zu != "
+                        "%zu = %zu + %zu = lines1 + lines2",
+                        lines_all,
+                        lines1 + lines2,
+                        lines1,
+                        lines2);
     throw std::runtime_error{msg.str()};
   }
 }

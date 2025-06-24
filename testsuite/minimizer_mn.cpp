@@ -48,8 +48,9 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
       return std::make_pair(bits - sequences_bits,bytes);
     }
   }
-  StrFormat msg("cannot handle sequences_bits + hash_bits = %d + %d > 72",
-                sequences_bits,requested_hash_bits);
+  const StrFormat msg("cannot handle sequences_bits + hash_bits = %d + %d > 72",
+                      sequences_bits,
+                      requested_hash_bits);
   throw std::runtime_error{msg.str()};
 }
 
@@ -96,14 +97,14 @@ void run_nt_minimizer(const MinimizerOptions &options)
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashIterator4>;
-        HashedQgrams hqg (*multiseq,
-                          options.number_of_threads_get(),
-                          options.qgram_length_get(),
-                          options.window_size_get(),
-                          hash_bits,
-                          options.sort_by_hash_value_option_is_set(),
-                          options.at_constant_distance_option_is_set(),
-                          &log_vector);
+        const HashedQgrams hqg(*multiseq,
+                               options.number_of_threads_get(),
+                               options.qgram_length_get(),
+                               options.window_size_get(),
+                               hash_bits,
+                               options.sort_by_hash_value_option_is_set(),
+                               options.at_constant_distance_option_is_set(),
+                               &log_vector);
         RunTimeClass rt_output_hashed_qgrams{};
         hqg.show();
         log_vector.push_back(rt_output_hashed_qgrams
@@ -112,14 +113,14 @@ void run_nt_minimizer(const MinimizerOptions &options)
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashFwdIterator4>;
-        HashedQgrams hqg (*multiseq,
-                          options.number_of_threads_get(),
-                          options.qgram_length_get(),
-                          options.window_size_get(),
-                          hash_bits,
-                          options.sort_by_hash_value_option_is_set(),
-                          options.at_constant_distance_option_is_set(),
-                          &log_vector);
+        const HashedQgrams hqg(*multiseq,
+                               options.number_of_threads_get(),
+                               options.qgram_length_get(),
+                               options.window_size_get(),
+                               hash_bits,
+                               options.sort_by_hash_value_option_is_set(),
+                               options.at_constant_distance_option_is_set(),
+                               &log_vector);
         if (options.show_mode_get() != 0)
         {
           RunTimeClass rt_output_hashed_qgrams{};
