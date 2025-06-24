@@ -70,7 +70,7 @@ class GttlAffineDPbanded
 
   template<typename CharType>
   ScoreType affine_diagonalband_fillDPtab_bits(
-                                      GTTL_DEBUG_USED size_t alphasize,
+                                      [[maybe_unused]] size_t alphasize,
                                       AffineAlignTraceBits **bitmatrix,
                                       int8_t gap_opening, /* >= 0 */
                                       int8_t gap_extension, /* > 0 */
@@ -203,7 +203,7 @@ class GttlAffineDPbanded
 
   template<bool keep_columns,typename CharType>
   ScoreType affine_diagonalband_fillDPtab_scores(
-                                      GTTL_DEBUG_USED size_t alphasize,
+                                      [[maybe_unused]] size_t alphasize,
                                       [[maybe_unused]] /* if not keep_columns */
                                       AffineAlignScoreTriple **dpmatrix,
                                       int8_t gap_opening, /* >= 0 */
@@ -414,8 +414,8 @@ class GttlAffineDPbanded
                                         &usubstring,
                                       const GttlSubstring<CharType>
                                         &vsubstring,
-                                      GTTL_DEBUG_USED int64_t left_dist,
-                                      GTTL_DEBUG_USED int64_t right_dist)
+                                      [[maybe_unused]] int64_t left_dist,
+                                      [[maybe_unused]] int64_t right_dist)
   {
     const ScoreType start_penalty = gap_opening + gap_extension;
 

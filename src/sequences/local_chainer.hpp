@@ -91,7 +91,7 @@ class LocalChainElemInfo
     chain_elem_info_array[idx].predecessor = static_cast<PredecessorType>(idx);
     chain_elem_info_array[idx].is_referenced = false;
   }
-  void predecessor_set(GTTL_DEBUG_USED bool upwards_chaining,
+  void predecessor_set([[maybe_unused]] bool upwards_chaining,
                        size_t idx,PredecessorType p,
                        uint64_t ref_gap_length,uint64_t query_gap_length)
   {
