@@ -55,7 +55,7 @@ void UnwordsOptions::parse(int argc, char **argv)
   }
   catch (const cxxopts::exceptions::exception &e)
   {
-    std::cerr << options.help() << std::endl;
+    std::cerr << options.help() << '\n';
     if (!help_option)
     {
       throw std::invalid_argument(e.what());

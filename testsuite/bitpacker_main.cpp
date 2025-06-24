@@ -34,7 +34,7 @@ static void show_uint64_t_bytes(GTTL_UNUSED uint64_t value)
 #define COMPARE(V1,V2) if ((V1) != (V2))\
                        {\
                          std::cerr << #V1 << "=" << V1 << " != " \
-                                   << V2 << "=" << #V2 << std::endl;\
+                                   << V2 << "=" << #V2 << '\n';\
                          exit(EXIT_FAILURE);\
                        }
 
@@ -123,7 +123,7 @@ static void runner(GTTL_UNUSED bool direct,size_t num_values)
     }
   }
   std::cout << "# bitpacker.successes\t" << (sizeof(basetype) + overflow)
-            << successes << std::endl;
+            << successes << '\n';
 }
 
 int main(int argc,char *argv[])
@@ -131,7 +131,7 @@ int main(int argc,char *argv[])
   long read_long;
   if (argc != 2 || sscanf(argv[1],"%ld",&read_long) != 1 || read_long <= 0)
   {
-    std::cerr << "Usage: " << argv[0] << ": <num_of_value>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << ": <num_of_value>\n";
     return EXIT_FAILURE;
   }
   const size_t num_values = static_cast<size_t>(read_long);

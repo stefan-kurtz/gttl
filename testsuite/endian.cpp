@@ -17,12 +17,11 @@ static void byte_order(void)
   }
   uint64_t integer = *(reinterpret_cast<uint64_t *>(bytes));
   int shift = 56;
-  std::cout << "# byte index (left to right)\tinteger order" << std::endl;
+  std::cout << "# byte index (left to right)\tinteger order\n";
   for (int idx = 0; idx < 8; idx++)
   {
     std::cout << idx << "\t"
-              << static_cast<int>((integer >> shift) & uint64_t(255))
-              << std::endl;
+              << static_cast<int>((integer >> shift) & uint64_t(255)) << '\n';
     shift -= CHAR_BIT;
   }
 }
@@ -30,6 +29,6 @@ static void byte_order(void)
 int main(void)
 {
   std::cout << "is_big_endian\t" << (is_big_endian() ? "true" : "false")
-            << std::endl;
+            << '\n';
   byte_order();
 }

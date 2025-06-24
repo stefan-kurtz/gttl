@@ -41,7 +41,7 @@ static void process_iterator(Iterator &iterator,
     if (line_width > 0)
     {
       const std::string_view &header = si->header_get();
-      std::cout << '>' << header << std::endl;
+      std::cout << '>' << header << '\n';
       gttl_format_sequence(sequence,line_width);
     }
     seqnum++;
@@ -49,9 +49,9 @@ static void process_iterator(Iterator &iterator,
   }
   if (statistics)
   {
-    std::cout << "# number of sequences\t" << seqnum << std::endl;
-    std::cout << "# total length\t" << total_length << std::endl;
-    std::cout << "# mean length\t" << total_length/seqnum << std::endl;
+    std::cout << "# number of sequences\t" << seqnum << '\n';
+    std::cout << "# total length\t" << total_length << '\n';
+    std::cout << "# mean length\t" << total_length / seqnum << '\n';
   }
 }
 
@@ -65,7 +65,7 @@ int main(int argc,char *argv[])
   }
   catch (std::invalid_argument &e) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -99,7 +99,7 @@ int main(int argc,char *argv[])
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

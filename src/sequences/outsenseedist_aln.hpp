@@ -44,7 +44,7 @@ class TrackEditoperations
       {
         std::cout << "\t" << trace[idx].to_string();
       }
-      std::cout << std::endl;
+      std::cout << '\n';
       this_offset += 2 * d + 1;
     }
   }

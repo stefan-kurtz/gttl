@@ -43,7 +43,7 @@
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 class CharRangeOptions
@@ -153,7 +153,7 @@ static void display_char_ranges(const char *inputfilename)
     }
     seqnum++;
   }
-  std::cout << "# ranges_total_length\t" << ranges_total_length << std::endl;
+  std::cout << "# ranges_total_length\t" << ranges_total_length << '\n';
 }
 
 template<class CharFinder,const CharFinder &char_finder>
@@ -163,7 +163,7 @@ static bool display_char_ranges_cases(const char *progname,
   bool haserr = false;
   for (auto && inputfile : options.inputfiles_get())
   {
-    std::cout << inputfile << std::endl;
+    std::cout << inputfile << '\n';
     try
     {
       if (options.invert_option_is_set())
@@ -192,8 +192,8 @@ static bool display_char_ranges_cases(const char *progname,
     }
     catch (const std::exception &err)
     {
-      std::cerr << progname << ": file \"" << inputfile << "\""
-                << err.what() << std::endl;
+      std::cerr << progname << ": file \"" << inputfile << "\"" << err.what()
+                << '\n';
       haserr = true;
       break;
     }
@@ -220,8 +220,7 @@ static void display_char_ranges_multiseq(const GttlMultiseq *encoded_multiseq)
               << "\t" << std::get<1>(range) << std::endl;
     ranges_total_length += std::get<1>(range);
   }
-  std::cout << "# ranges_total_length\t" << ranges_total_length
-            << std::endl;
+  std::cout << "# ranges_total_length\t" << ranges_total_length << '\n';
 }
 
 template<class CharFinder,const CharFinder &char_finder>
@@ -270,7 +269,7 @@ int main(int argc,char *argv[])
   }
   catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -282,7 +281,7 @@ int main(int argc,char *argv[])
   {
     for (auto && inputfile : options.inputfiles_get())
     {
-      std::cout << inputfile << std::endl;
+      std::cout << inputfile << '\n';
       GttlMultiseq *multiseq = nullptr;
       try
       {
@@ -293,12 +292,9 @@ int main(int argc,char *argv[])
       }
       catch (const std::exception &err)
       {
-        std::cerr << argv[0]
-                  << ": file \""
+        std::cerr << argv[0] << ": file \""
                   << argv[optind] //NOLINT(misc-include-cleaner)
-                  << "\""
-                  << err.what()
-                  << std::endl;
+                  << "\"" << err.what() << '\n';
         haserr = true;
       }
       if (!haserr)

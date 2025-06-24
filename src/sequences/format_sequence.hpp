@@ -9,7 +9,7 @@ static inline void gttl_format_sequence(const std::string_view &sequence,
 {
   if (line_width == 0)
   {
-    std::cout << sequence << std::endl;
+    std::cout << sequence << '\n';
   } else
   {
     size_t remain = sequence.size(),
@@ -18,12 +18,12 @@ static inline void gttl_format_sequence(const std::string_view &sequence,
     {
       if (line_width < remain)
       {
-        std::cout << sequence.substr(offset,line_width) << std::endl;
+        std::cout << sequence.substr(offset, line_width) << '\n';
         remain -= line_width;
         offset += line_width;
       } else
       {
-        std::cout << sequence.substr(offset,remain) << std::endl;
+        std::cout << sequence.substr(offset, remain) << '\n';
         break;
       }
     }

@@ -66,16 +66,15 @@ static void prj_file_write(const std::string &filename,
 {
   std::ofstream out_stream;
   out_stream.open(filename);
-  out_stream << "reverse_complement\t" << (reverse_complement ? 1 : 0)
-             << std::endl;
-  out_stream << "nonspecial_suffixes\t" << nonspecial_suffixes << std::endl;
-  out_stream << "sequences_number\t" << sequences_number << std::endl;
-  out_stream << "sequences_number_bits\t" << sequences_number_bits << std::endl;
-  out_stream << "sequences_length_bits\t" << sequences_length_bits << std::endl;
-  out_stream << "sizeof_suftab_entry\t" << sizeof_suftab_entry << std::endl;
+  out_stream << "reverse_complement\t" << (reverse_complement ? 1 : 0) << '\n';
+  out_stream << "nonspecial_suffixes\t" << nonspecial_suffixes << '\n';
+  out_stream << "sequences_number\t" << sequences_number << '\n';
+  out_stream << "sequences_number_bits\t" << sequences_number_bits << '\n';
+  out_stream << "sequences_length_bits\t" << sequences_length_bits << '\n';
+  out_stream << "sizeof_suftab_entry\t" << sizeof_suftab_entry << '\n';
   for (auto &&inputfile : inputfiles)
   {
-    out_stream << "inputfile\t" << inputfile << std::endl;
+    out_stream << "inputfile\t" << inputfile << '\n';
   }
   out_stream.close();
 }
@@ -165,7 +164,7 @@ static void lcptab_output_succinct(const std::string &indexname,
 template<class Generator>
 static void lcptab_print(Generator &lcp_generator)
 {
-  std::cout << "# lcptab: " << std::endl;
+  std::cout << "# lcptab: \n";
   for(auto &&lcp_value : lcp_generator)
   {
     std::cout << lcp_value << std::endl;
@@ -238,7 +237,7 @@ static void show_suftab(const SuftabBaseType *suftab, size_t totallength)
 template <typename T_suf, typename T_bp>
 static void show_bu_suftab(const std::string &indexname, const T_bp &bp)
 {
-  std::cout << "# Suftab:" << std::endl;
+  std::cout << "# Suftab:\n";
   const std::string bu_suftab_filename{indexname + ".bsf"};
   BinaryFileReader<T_suf> bu_suftab_reader(bu_suftab_filename);
   for (auto &bu_suftab_entry : bu_suftab_reader)
@@ -257,7 +256,7 @@ static void output_tis_suf_tables(const SainOptions &sainoptions,
   const std::string &indexname = sainoptions.indexname_get();
   if (sainoptions.tistab_show_opt_is_set())
   {
-    std::cout << "# tistab: " << std::endl;
+    std::cout << "# tistab: \n";
     std::fwrite(filecontents, sizeof *filecontents, totallength, stdout);
   }
   if (sainoptions.tistab_out_opt_is_set())
@@ -364,20 +363,16 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
 
   if (sainoptions.verbose_opt_is_set())
   {
-    std::cout << "# totallength\t" << totallength << std::endl;
+    std::cout << "# totallength\t" << totallength << '\n';
     std::cout << "# number of sequences\t" << multiseq->sequences_number_get()
-              << std::endl;
-    std::cout << "# alphabet size\t"
-              << (is_protein ? 20 : 4)
-              << std::endl;
-    std::cout << "# sequences_number_bits\t" << sequences_number_bits
-              << std::endl;
-    std::cout << "# sequences_length_bits\t" << sequences_length_bits
-              << std::endl;
-    std::cout << "# required_bits\t" << required_bits << std::endl;
+              << '\n';
+    std::cout << "# alphabet size\t" << (is_protein ? 20 : 4) << '\n';
+    std::cout << "# sequences_number_bits\t" << sequences_number_bits << '\n';
+    std::cout << "# sequences_length_bits\t" << sequences_length_bits << '\n';
+    std::cout << "# required_bits\t" << required_bits << '\n';
     std::cout << "# SPACE\tsequences representation (MB):\t"
               << static_cast<size_t>(mega_bytes(multiseq->size_in_bytes()))
-              << std::endl;
+              << '\n';
   }
 
   SuftabBaseType *suftab = nullptr;
@@ -397,10 +392,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
         = multiseq->sequences_total_length_get() - numofwildcards;
       if (sainoptions.verbose_opt_is_set())
       {
-        std::cout << "# special suffixes\t" << numofwildcards
-                  << std::endl;
-        std::cout << "# nonspecial suffixes\t" << nonspecial_suffixes
-                  << std::endl;
+        std::cout << "# special suffixes\t" << numofwildcards << '\n';
+        std::cout << "# nonspecial suffixes\t" << nonspecial_suffixes << '\n';
       }
       suftab = gttl_sain_multiseq_sortsuffixes<SuftabBaseType,const_alphasize>
                                               (memory_tracker,
@@ -430,10 +423,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
           = multiseq->sequences_total_length_get() - numofwildcards;
         if (sainoptions.verbose_opt_is_set())
         {
-          std::cout << "# special suffixes\t" << numofwildcards
-                    << std::endl;
-          std::cout << "# nonspecial suffixes\t" << nonspecial_suffixes
-                    << std::endl;
+          std::cout << "# special suffixes\t" << numofwildcards << '\n';
+          std::cout << "# nonspecial suffixes\t" << nonspecial_suffixes << '\n';
         }
         suftab
           = gttl_sain_multiseq_sortsuffixes<SuftabBaseType,const_alphasize>
@@ -732,7 +723,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (sainoptions.help_opt_is_set())
@@ -844,7 +835,7 @@ int main(int argc, char *argv[])
   catch (const std::exception &err)
   {
     std::cerr << argv[0] << ": file \"" << sainoptions.inputfiles_get()[0]
-              << "\"" << err.what() << std::endl;
+              << "\"" << err.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

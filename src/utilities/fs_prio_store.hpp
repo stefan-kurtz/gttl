@@ -187,7 +187,7 @@ class FSPrioStore
       }
       std::cout << std::to_string(elements[j]);
     }
-    std::cout << "]" << std::endl;
+    std::cout << "]\n";
   }
 };
 #endif

@@ -124,7 +124,7 @@ static void process_fastq_iter(bool statistics,
       const uint64_t hash_value = wyhash(sequence.data(), sequence.size(),0);
       if (echo)
       {
-        std::cout << hash_value << "\t" << sequence << std::endl;
+        std::cout << hash_value << "\t" << sequence << '\n';
       } else
       {
         hash_value_sum += hash_value;
@@ -140,7 +140,7 @@ static void process_fastq_iter(bool statistics,
 #endif
         if (echo)
         {
-          std::cout << hash_value << "\t" << sequence << std::endl;
+          std::cout << hash_value << "\t" << sequence << '\n';
         } else
         {
           hash_value_sum += hash_value;
@@ -171,33 +171,32 @@ static void process_fastq_iter(bool statistics,
   }
   if (statistics)
   {
-    std::cout << "# number of sequences\t" << seqnum << std::endl;
-    std::cout << "# total length\t" << total_length << std::endl;
-    std::cout << "# mean sequence length\t" << total_length/seqnum << std::endl;
-    std::cout << "# minimum sequence length\t" << min_length << std::endl;
-    std::cout << "# maximum sequence length\t" << max_length << std::endl;
-    std::cout << "# length, count, count ratio" << std::endl;
+    std::cout << "# number of sequences\t" << seqnum << '\n';
+    std::cout << "# total length\t" << total_length << '\n';
+    std::cout << "# mean sequence length\t" << total_length / seqnum << '\n';
+    std::cout << "# minimum sequence length\t" << min_length << '\n';
+    std::cout << "# maximum sequence length\t" << max_length << '\n';
+    std::cout << "# length, count, count ratio\n";
     for (auto const& [len_as_key, count_as_value] : length_dist_map)
     {
       std::cout << "# " << len_as_key << "\t" << count_as_value << "\t"
                 << std::fixed << std::setprecision(4)
-                << (100.0 * static_cast<double>(count_as_value)/seqnum)
-                << std::endl;
+                << (100.0 * static_cast<double>(count_as_value) / seqnum)
+                << '\n';
     }
     std::cout << "# original size of file " << inputfilename << " (MB)\t"
               << static_cast<size_t>(mega_bytes(gttl_file_size(inputfilename)))
-              << std::endl;
+              << '\n';
     std::cout << "# expected size of sequences in RAM (MB)\t"
-              << static_cast<size_t>(mega_bytes(total_length / 4))
-              << std::endl;
+              << static_cast<size_t>(mega_bytes(total_length / 4)) << '\n';
     const size_t uint64_t_units = ((max_length * 2) + 63)/64;
     std::cout << "# expected size of DNAEncoding in RAM (MB)\t"
               << static_cast<size_t>(mega_bytes(seqnum * 8 * uint64_t_units))
-              << std::endl;
+              << '\n';
   }
   if (hash_mode != hash_mode_none)
   {
-    std::cout << inputfilename << "\t" << hash_value_sum << std::endl;
+    std::cout << inputfilename << "\t" << hash_value_sum << '\n';
   }
 }
 
@@ -289,10 +288,10 @@ static void char_distribution_seq(const std::string &inputfilename)
       dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
     }
   }
-  std::cout << "# total_count_entries\t" << count_entries << std::endl;
+  std::cout << "# total_count_entries\t" << count_entries << '\n';
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
-    std::cout << "# char\t" << char_idx << "\t" << dist[char_idx] << std::endl;
+    std::cout << "# char\t" << char_idx << "\t" << dist[char_idx] << '\n';
   }
 }
 
@@ -322,7 +321,7 @@ static void char_distribution_thd_gz(size_t num_threads,
       const std::string_view &seq_view = fastq_entry->sequence_get();
       sequence_queue.enqueue(std::string(seq_view.begin(),seq_view.end()));
     }
-    std::cout << "# total_count_entries\t" << count_entries << std::endl;
+    std::cout << "# total_count_entries\t" << count_entries << '\n';
   }));
   for (size_t thd_num = 1; thd_num < num_threads; thd_num++)
   {
@@ -367,7 +366,7 @@ static void char_distribution_thd_gz(size_t num_threads,
     }
     flushed_sequences++;
   }
-  std::cout << "# flushed_sequences\t" << flushed_sequences << std::endl;
+  std::cout << "# flushed_sequences\t" << flushed_sequences << '\n';
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
     size_t total_cc_count = 0;
@@ -375,7 +374,7 @@ static void char_distribution_thd_gz(size_t num_threads,
     {
       total_cc_count += dist[4 * (thd_num-1) + char_idx];
     }
-    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << std::endl;
+    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << '\n';
   }
   free(dist);
 }
@@ -416,7 +415,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   {
     total_count_entries += count_entries[thd_num];
   }
-  std::cout << "# total_count_entries\t" << total_count_entries << std::endl;
+  std::cout << "# total_count_entries\t" << total_count_entries << '\n';
   free(count_entries);
   for (int char_idx = 0; char_idx < 4; char_idx++)
   {
@@ -425,7 +424,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
     {
       total_cc_count += dist[4 * thd_num + char_idx];
     }
-    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << std::endl;
+    std::cout << "# char\t" << char_idx << "\t" << total_cc_count << '\n';
   }
   free(dist);
 }
@@ -465,8 +464,7 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
                      cc = qgram[idx];
         if (p_cc != cc)
         {
-          std::cerr << "p_cc = " << p_cc << " != " << cc
-                    << std::endl;
+          std::cerr << "p_cc = " << p_cc << " != " << cc << '\n';
           exit(EXIT_FAILURE);
         }
       }
@@ -495,7 +493,7 @@ static void verify_decoding_multilength(bool statistics,
     seqcount++;
   }
   std::cout << "# verified " << qgram_length << "-mers in " << seqcount
-            << " sequences" << std::endl;
+            << " sequences\n";
 }
 
 static void verify_decoding_parts_view(
@@ -525,7 +523,7 @@ int main(int argc,char *argv[])
   }
   catch (std::invalid_argument &e) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -559,7 +557,7 @@ int main(int argc,char *argv[])
             }
             catch (const std::exception &err)
             {
-              std::cerr << argv[0] << ": " << err.what() << std::endl;
+              std::cerr << argv[0] << ": " << err.what() << '\n';
               return EXIT_FAILURE;
             }
           } else
@@ -644,8 +642,7 @@ int main(int argc,char *argv[])
                     {
                       std::cerr << argv[0]
                                 << ": argument of --encoding must be one of"
-                                << " 8, 16, 32, 64,<qgram_length>"
-                                << std::endl;
+                                << " 8, 16, 32, 64,<qgram_length>\n";
                       return EXIT_FAILURE;
                     }
                     verify_decoding_multilength<split_at_wildcard>
@@ -681,8 +678,8 @@ int main(int argc,char *argv[])
     const std::vector<std::string> &inputfiles = options.inputfiles_get();
     for (auto &&inputfile : inputfiles)
     {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << err.what() << std::endl;
+      std::cerr << argv[0] << ": file \"" << inputfile << "\"" << err.what()
+                << '\n';
     }
     return EXIT_FAILURE;
   }

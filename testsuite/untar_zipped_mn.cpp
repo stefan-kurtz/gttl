@@ -9,15 +9,13 @@
 
 static void entry_show(const DecompressedFile &entry)
 {
-  std::cout << entry.filename_get() << "\t"
-            << entry.size() << "\t"
-            << (entry.is_directory() ? "d" : "f")
-            << std::endl;
+  std::cout << entry.filename_get() << "\t" << entry.size() << "\t"
+            << (entry.is_directory() ? "d" : "f") << '\n';
   if (entry.size() < 1000)
   {
-    std::cout << "'''file_contents" << std::endl;
+    std::cout << "'''file_contents\n";
     std::cout << std::string_view((const char *) entry.data(),entry.size());
-    std::cout << "'''" << std::endl;
+    std::cout << "'''\n";
   }
 }
 
@@ -30,7 +28,7 @@ int main(int argc, char* argv[])
   }
   catch (const std::invalid_argument &e)
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -60,7 +58,7 @@ int main(int argc, char* argv[])
   }
   catch (const std::exception& err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.store_option_is_set())

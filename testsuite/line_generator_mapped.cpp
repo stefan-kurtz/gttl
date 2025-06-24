@@ -28,9 +28,8 @@ static size_t out_fileinfo(const char *filename,const char *file_contents,
     return 0;
   }
   size_t lines = count_lines(file_contents + start,len);
-  std::cout << "# file\t" << filename << "\t"
-            << start << "\t" << (start + len - 1) << "\t"
-            << len << "\t" << lines << std::endl;
+  std::cout << "# file\t" << filename << "\t" << start << "\t"
+            << (start + len - 1) << "\t" << len << "\t" << lines << '\n';
   return lines;
 }
 
@@ -58,7 +57,7 @@ static void process_file(const char *filename)
   size_t remain = mapped_file.size() - start_part2;
   size_t lines2 = out_fileinfo(filename,file_contents,start_part2,remain);
   size_t lines_all = count_lines(file_contents,mapped_file.size());
-  std::cout << "# lines all\t" << lines_all << std::endl;
+  std::cout << "# lines all\t" << lines_all << '\n';
   if (lines_all != lines1 + lines2)
   {
     StrFormat msg(": inconsistent number of lines: lines_all = %zu != %zu = "
@@ -72,8 +71,7 @@ int main(int argc,char *argv[])
 {
   if (argc < 2)
   {
-    std::cerr << "Usage: " << argv[0] << " <inputfile> [inpufile ..]"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <inputfile> [inpufile ..]\n";
     return EXIT_FAILURE;
   }
   for (int file_idx = 1; file_idx < argc; file_idx++)
@@ -84,7 +82,7 @@ int main(int argc,char *argv[])
     }
     catch (const std::exception &err)
     {
-      std::cerr << argv[0] << ": " << err.what() << std::endl;
+      std::cerr << argv[0] << ": " << err.what() << '\n';
       return EXIT_FAILURE;
     }
   }

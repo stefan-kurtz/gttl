@@ -8,9 +8,8 @@ int main(int argc,char *argv[])
 {
   if (argc != 3)
   {
-    std::cout << "Usage: " << argv[0] << " file file.gz" << std::endl;
-    std::cout << "such that file.gz is the compressed version of file"
-              << std::endl;
+    std::cout << "Usage: " << argv[0] << " file file.gz\n";
+    std::cout << "such that file.gz is the compressed version of file\n";
     return EXIT_FAILURE;
   }
   try
@@ -20,22 +19,22 @@ int main(int argc,char *argv[])
     if (file_content.size() != file_content_from_zipped.size())
     {
       std::cerr << argv[0] << ": "
-                << "file " << argv[1]
-                << " (size " << file_content.size() << ") and "
-                << "file " << argv[2]
-                << " (size " << file_content_from_zipped.size()
-                << ") differ in size" << std::endl;
+                << "file " << argv[1] << " (size " << file_content.size()
+                << ") and "
+                << "file " << argv[2] << " (size "
+                << file_content_from_zipped.size() << ") differ in size"
+                << '\n';
       return EXIT_FAILURE;
     }
     if (file_content != file_content_from_zipped)
     {
-      std::cerr << argv[0] << ": " << "file content of " << argv[1]
-                << " and " << argv[2] << " differ" << std::endl;
+      std::cerr << argv[0] << ": " << "file content of " << argv[1] << " and "
+                << argv[2] << " differ\n";
       return EXIT_FAILURE;
     }
   } catch(const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

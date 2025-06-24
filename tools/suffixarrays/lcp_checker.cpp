@@ -31,8 +31,7 @@ int main(int argc,char *argv[])
 {
   if (argc != 2)
   {
-    std::cerr << "Usage: " << argv[0] << " <indexname>"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <indexname>\n";
     return EXIT_FAILURE;
   }
   const char *indexname = argv[1];
@@ -45,15 +44,15 @@ int main(int argc,char *argv[])
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": indexname \"" << indexname << "\": "
-              << err.what() << std::endl;
+    std::cerr << argv[0] << ": indexname \"" << indexname
+              << "\": " << err.what() << '\n';
     haserr = true;
   }
   if (!haserr)
   {
     /* HAL: add your code here */
     std::cout << "read the succinct representaton from file " << indexname
-              << ".lls" << std::endl;
+              << ".lls\n";
   }
   std::string filename = std::string(indexname) + ".lls";
   SuccinctBitvector succinctlcp = SuccinctBitvector(filename.c_str());
@@ -102,10 +101,10 @@ int main(int argc,char *argv[])
     // }
     std::cout << "# reverse_complement\t"
               << (suffixarray->with_reverse_complement() ? "true" : "false")
-              << std::endl;
-    std::cout << "# average lcp value\t" << (static_cast<double>(lcpvalue_sum)/
-                                             nonspecial_suffixes)
-              << std::endl;
+              << '\n';
+    std::cout << "# average lcp value\t"
+              << (static_cast<double>(lcpvalue_sum) / nonspecial_suffixes)
+              << '\n';
   }
   delete suffixarray;
   if (!haserr)

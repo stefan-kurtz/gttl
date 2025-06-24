@@ -8,7 +8,7 @@
 
 static void usage(const cxxopts::Options& options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 NtcardOptions::NtcardOptions(){};

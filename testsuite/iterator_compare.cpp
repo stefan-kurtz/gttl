@@ -21,7 +21,7 @@ inline static void assert_always(bool condition)
   if (not condition)
   {
     std::cerr <<
-      "Assertion error: Iterators do not yield the same result!" << '\n';
+      "Assertion error: Iterators do not yield the same result!\n";
     exit(EXIT_FAILURE);
   }
 }
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
   if (result.count("help"))
   {
-    std::cout << options.help() << std::endl;
+    std::cout << options.help() << '\n';
     exit(EXIT_SUCCESS);
   }
 
@@ -61,8 +61,7 @@ int main(int argc, char *argv[])
 
   if (not result.count("file"))
   {
-    std::cerr << argv[0] << ": A filename must be specified."
-        << std::endl;
+    std::cerr << argv[0] << ": A filename must be specified.\n";
     exit(EXIT_FAILURE);
   }
 

@@ -73,7 +73,7 @@ static void display_alignment(const Eoplist &eoplist)
   }
   if (i != ulen)
   {
-    std::cout << "i=" << i << "!=" << ulen << "=ulen" << std::endl;
+    std::cout << "i=" << i << "!=" << ulen << "=ulen\n";
   }
   assert(i == ulen);
   assert(j == vlen);
@@ -113,8 +113,7 @@ int main(int argc,char *argv[])
                     strcmp(argv[1],"display") != 0) ||
       sscanf(argv[2],"%ld",&trials) != 1 || trials < 1)
   {
-    std::cerr << "Usage: " << argv[0] << " silent|display <trials>"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " silent|display <trials>\n";
     return EXIT_FAILURE;
   }
   const bool display = strcmp(argv[1],"display") == 0;
@@ -161,7 +160,7 @@ int main(int argc,char *argv[])
             const size_t match_length = match_length_array[ml_idx];
             if constexpr (debug)
             {
-              std::cout << "match_add(" << match_length << ")" << std::endl;
+              std::cout << "match_add(" << match_length << ")\n";
             }
             eoplist.match_add(match_length);
             last_was_match = true;
@@ -173,7 +172,7 @@ int main(int argc,char *argv[])
           {
             if constexpr (debug)
             {
-              std::cout << "deletion_add" << std::endl;
+              std::cout << "deletion_add\n";
             }
             eoplist.deletion_add();
             last_was_match = false;
@@ -184,7 +183,7 @@ int main(int argc,char *argv[])
             {
               if constexpr (debug)
               {
-                std::cout << "insertion_add" << std::endl;
+                std::cout << "insertion_add\n";
               }
               eoplist.insertion_add();
               last_was_match = false;
@@ -195,7 +194,7 @@ int main(int argc,char *argv[])
               {
                 if constexpr (debug)
                 {
-                  std::cout << "mismatch_add" << std::endl;
+                  std::cout << "mismatch_add\n";
                 }
                 eoplist.mismatch_add();
                 last_was_match = false;
@@ -208,7 +207,7 @@ int main(int argc,char *argv[])
       if constexpr (debug)
       {
         std::cout << "# number of editoperations\t" << count_edit_operations
-                  << std::endl;
+                  << '\n';
       }
       std::string cigar_string
         = eoplist.cigar_string_get(distinguish_mismatch_match);
@@ -219,24 +218,23 @@ int main(int argc,char *argv[])
       }
       catch (const std::exception &err) /* check_err.py */
       {
-        std::cerr << argv[0] << " " << trials << " failed: "
-                  << err.what() << std::endl;
+        std::cerr << argv[0] << " " << trials << " failed: " << err.what()
+                  << '\n';
         delete eoplist_decode;
         return EXIT_FAILURE;
       }
       if (eoplist != *eoplist_decode)
       {
-        std::cerr << "distinguish_mismatch_match\t" <<
-                      (distinguish_mismatch_match ? "true" : "false")
-                  << std::endl;
-        std::cerr << eoplist.to_string() << std::endl;
-        std::cerr << cigar_string << std::endl;
-        std::cerr << eoplist_decode->to_string() << std::endl;
+        std::cerr << "distinguish_mismatch_match\t"
+                  << (distinguish_mismatch_match ? "true" : "false") << '\n';
+        std::cerr << eoplist.to_string() << '\n';
+        std::cerr << cigar_string << '\n';
+        std::cerr << eoplist_decode->to_string() << '\n';
         return EXIT_FAILURE;
       }
       if (display)
       {
-        std::cout << cigar_string << std::endl;
+        std::cout << cigar_string << '\n';
         display_alignment(eoplist);
       }
       delete eoplist_decode;

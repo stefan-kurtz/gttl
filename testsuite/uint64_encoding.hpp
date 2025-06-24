@@ -87,7 +87,7 @@ class Uint64Encoding
 
     void pretty_print(const char *tag) const noexcept
     {
-      std::cout << "# " << tag << std::endl;
+      std::cout << "# " << tag << '\n';
       for (size_t idx = 0; idx < bit_groups; idx++)
       {
         std::cout << "# bit_group\t" << idx << "\t" << bit_group_sizes[idx]

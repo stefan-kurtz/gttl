@@ -115,7 +115,7 @@ class Restrict2Pairs
       throw std::invalid_argument(
         "file specified with option -r cannot be empty");
     }
-    std::cout << "# local_pairs\t" << local_pairs.size() << std::endl;
+    std::cout << "# local_pairs\t" << local_pairs.size() << '\n';
     return local_pairs;
   }
   SetOfPairs filename2pairs_from_multiseqs(const GttlMultiseq *db_multiseq,
@@ -281,7 +281,7 @@ int main(int argc,char *argv[])
   }
   catch (const std::exception &err)
   {
-    std::cerr << program_name << ": " << err.what() << std::endl;
+    std::cerr << program_name << ": " << err.what() << '\n';
     haserr = true;
   }
   RunTimeClass timer{};
@@ -305,7 +305,7 @@ int main(int argc,char *argv[])
     catch(const std::exception &err)
     {
       std::cerr << program_name << ": file \"" << options.dbfile << "\""
-                << err.what() << std::endl;
+                << err.what() << '\n';
       haserr = true;
     }
   }
@@ -398,7 +398,7 @@ int main(int argc,char *argv[])
     }
     catch (const std::exception &err)
     {
-      std::cerr << program_name << ": " << err.what() << std::endl;
+      std::cerr << program_name << ": " << err.what() << '\n';
       haserr = true;
     }
   }

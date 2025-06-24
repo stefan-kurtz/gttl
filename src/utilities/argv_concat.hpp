@@ -80,7 +80,7 @@ class ArgvConcat
   {
     for (auto &&arg : arg_vector)
     {
-      std::cout << "arg=" << arg << std::endl;
+      std::cout << "arg=" << arg << '\n';
     }
   }
   size_t size() const noexcept

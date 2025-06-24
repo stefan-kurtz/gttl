@@ -46,13 +46,13 @@ int main(int argc, char *argv[])
 
   if (result.count("help"))
   {
-    std::cout << options.help() << std::endl;
+    std::cout << options.help() << '\n';
     exit(EXIT_SUCCESS);
   }
 
   if (!result.count("file"))
   {
-    std::cout << options.help() << std::endl;
+    std::cout << options.help() << '\n';
     exit(EXIT_FAILURE);
   }
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
       1)
   {
     std::cerr << argv[0] << ": Exactly one of -l and -n must be specified"
-              << std::endl;
+              << '\n';
     exit(EXIT_FAILURE);
   }
 
@@ -156,6 +156,6 @@ int main(int argc, char *argv[])
     }
   }
   std::cerr << argv[0] << ": file " << ifilename
-            << " does not have .fasta[.gz]|.fastq[.gz] extension!" << std::endl;
+            << " does not have .fasta[.gz]|.fastq[.gz] extension!\n";
   exit(EXIT_FAILURE);
 }

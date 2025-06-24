@@ -194,10 +194,10 @@ class OrderedIntegerSequence
       }
     }
     std::cout << "elements=" << nofelements
-              << ", numofsections=" << numofsections
-              << ", size=" << (nofelements * sizeof(Basetype) +
-                              (numofsections+1) * sizeof(size_t))
-              << " bytes)" << std::endl;
+              << ", numofsections=" << numofsections << ", size="
+              << (nofelements * sizeof(Basetype)
+                  + (numofsections + 1) * sizeof(size_t))
+              << " bytes)\n";
   }
 
   void append(size_t elem)
@@ -289,7 +289,7 @@ class OrderedIntegerSequence
     for (size_t sectionnum = 0; sectionnum < numofsections; sectionnum++)
     {
       std::cout << "# section\t" << sectionnum << "\t"
-                << sectionstart[sectionnum] << std::endl;
+                << sectionstart[sectionnum] << '\n';
     }
     size_t sectionnum = 0;
     for (size_t idx = 0; idx < nextfree; idx++)

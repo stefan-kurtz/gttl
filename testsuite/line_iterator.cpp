@@ -32,14 +32,14 @@ int main(int argc,char *argv[])
     }
     catch (const std::exception &err)
     {
-      std::cerr << argv[0] << ": file \"" << argv[2] << "\""
-                << err.what() << std::endl;
+      std::cerr << argv[0] << ": file \"" << argv[2] << "\"" << err.what()
+                << '\n';
       haserr = true;
     }
     if (!haserr && all_empty_files)
     {
       std::cerr << argv[0] << ": file \"" << argv[2]
-                << "\", line 1: corrupted sequence" << std::endl;
+                << "\", line 1: corrupted sequence\n";
       haserr = false;
     }
   } else
@@ -59,15 +59,15 @@ int main(int argc,char *argv[])
       }
       catch (const std::exception &err)
       {
-        std::cerr << argv[0] << ": file \"" << argv[1] << "\""
-                  << err.what() << std::endl;
+        std::cerr << argv[0] << ": file \"" << argv[1] << "\"" << err.what()
+                  << '\n';
         haserr = true;
         break;
       }
       if (this_file_is_empty)
       {
         std::cerr << argv[0] << ": file \"" << argv[1]
-                  << "\", line 1: corrupted sequence" << std::endl;
+                  << "\", line 1: corrupted sequence\n";
         haserr = true;
         break;
       }

@@ -47,8 +47,8 @@ class ThreadsOutputFiles
       dirname_template = strdup(dirname_path.c_str());
       cc_threads_out_prefix = mkdtemp(dirname_template);
       separator = '/';
-      std::cerr << "# store output in temporary directory " <<
-                    cc_threads_out_prefix << std::endl;
+      std::cerr << "# store output in temporary directory "
+                << cc_threads_out_prefix << '\n';
     } else
     {
       cc_threads_out_prefix = threads_out_prefix;

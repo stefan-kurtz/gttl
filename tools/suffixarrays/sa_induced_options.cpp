@@ -83,7 +83,7 @@ bool KEY##_output(void) const\
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 void SainOptions::parse(int argc, char **argv)
@@ -206,7 +206,8 @@ void SainOptions::parse(int argc, char **argv)
   if (intset_sizeof != -1 && plain_input_format_opt)
   {
     std::cout << (" option -i/--intset_sizeof has no effect if option "
-                  "--plain_input_format is set.") << std::endl;
+                  "--plain_input_format is set.")
+              << '\n';
   }
 
   if (inputfiles.size() > 1 && indexname.empty())

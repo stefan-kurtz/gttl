@@ -34,7 +34,7 @@ class SumFibThreadData
   {
     for (size_t idx = 0; idx < num_threads; idx++)
     {
-      std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << std::endl;
+      std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << '\n';
     }
   }
   ~SumFibThreadData(void) { }
@@ -53,8 +53,7 @@ int main(int argc, char *argv[])
   if (argc != 3 || sscanf(argv[1], "%ld", &readlong1) != 1 || readlong1 < 0 ||
       sscanf(argv[2], "%ld", &readlong2) != 1 || readlong2 < 0)
   {
-    std::cerr << "Usage: " << argv[0] << " <num_threads> <n>"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <num_threads> <n>\n";
     return EXIT_FAILURE;
   }
   const size_t num_threads = static_cast<size_t>(readlong1);
@@ -63,7 +62,7 @@ int main(int argc, char *argv[])
   GttlThreadPoolVar(num_threads,10,sum_fibonacci_var,n,thread_sums.data());
   for (size_t idx = 0; idx < num_threads; idx++)
   {
-    std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << std::endl;
+    std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << '\n';
   }
   SumFibThreadData thread_data(num_threads,n);
   GttlThreadPool(num_threads,10,sum_fibonacci,&thread_data);

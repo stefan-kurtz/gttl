@@ -129,8 +129,8 @@ int main(int argc,char *argv[])
     }
     catch (const std::exception &msg)
     {
-      std::cerr << progname << ": file \"" << argv[idx] << "\""
-                << msg.what() << std::endl;
+      std::cerr << progname << ": file \"" << argv[idx] << "\"" << msg.what()
+                << '\n';
       haserr = true;
       break;
     }

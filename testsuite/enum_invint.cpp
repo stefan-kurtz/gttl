@@ -83,10 +83,9 @@ static void verify_hashvalues_for_file(const char *inputfilename,
       ranges_total_length += this_length;
     }
   }
-  std::cout << "# ranges_total_length\t" << ranges_total_length << std::endl;
-  std::cout << "# hash_value_sum\t" << hash_value_sum << std::endl;
-  std::cout << "# complement hash_value_sum\t" << compl_hash_value_sum
-            << std::endl;
+  std::cout << "# ranges_total_length\t" << ranges_total_length << '\n';
+  std::cout << "# hash_value_sum\t" << hash_value_sum << '\n';
+  std::cout << "# complement hash_value_sum\t" << compl_hash_value_sum << '\n';
 }
 
 int main(int argc,char *argv[])
@@ -94,8 +93,7 @@ int main(int argc,char *argv[])
   int64_t read_long;
   if (argc != 3 || sscanf(argv[1],"%" PRIi64,&read_long) != 1 || read_long <= 0)
   {
-    std::cerr << "Usage: " << argv[0] << ": <kmer_length> <inputfile>"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << ": <kmer_length> <inputfile>\n";
     return EXIT_FAILURE;
   }
   const size_t qgram_length = static_cast<size_t>(read_long);
@@ -107,7 +105,7 @@ int main(int argc,char *argv[])
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

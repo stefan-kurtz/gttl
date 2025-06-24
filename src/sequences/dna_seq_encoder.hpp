@@ -344,9 +344,10 @@ class DNAEncodingForLength
     std::cout << "# units per sequence\t"
               << num_units_get() << std::endl;
     std::cout << "# total size (MB)\t"
-              << static_cast<size_t>(mega_bytes(total_size_get() *
-                                                sizeof(StoreUnitType)))
-              << std::endl;
+              << static_cast<size_t>(mega_bytes(
+                                              total_size_get()
+                                              * sizeof(StoreUnitType)))
+              << '\n';
   }
   std::string to_string(void) const noexcept
   {
@@ -480,9 +481,9 @@ class DNAEncodingMultiLength
     const size_t mean = (total_size + num_parts - 1)/num_parts;
     if constexpr (verbose)
     {
-      std::cout << "# size_sum\t" << total_size << std::endl;
-      std::cout << "# num_parts\t" << num_parts << std::endl;
-      std::cout << "# mean " << mean << std::endl;
+      std::cout << "# size_sum\t" << total_size << '\n';
+      std::cout << "# num_parts\t" << num_parts << '\n';
+      std::cout << "# mean " << mean << '\n';
     }
     size_t local_sum = 0, idx = 0;
     std::vector<size_t> size_vec;
@@ -524,7 +525,7 @@ class DNAEncodingMultiLength
       const size_t local_sum = size_vec[j];
       if constexpr (verbose)
       {
-        std::cout << end_idx << "\t" << local_sum << std::endl;
+        std::cout << end_idx << "\t" << local_sum << '\n';
       }
       size_t this_sum = 0;
       for (size_t idx = begin_idx; idx < end_idx; idx++)
@@ -535,7 +536,7 @@ class DNAEncodingMultiLength
       if (local_sum != this_sum)
       {
         std::cerr << "local_sum = " << local_sum << " != " << this_sum
-                  << " = this_sum" << std::endl;
+                  << " = this_sum\n";
         exit(EXIT_FAILURE);
       }
       local_sum_sum += local_sum;
@@ -544,13 +545,13 @@ class DNAEncodingMultiLength
     if (local_sum_sum != total_size)
     {
       std::cerr << "local_sum_sum = " << local_sum_sum << " != " << total_size
-                << "total_size" << std::endl;
+                << "total_size\n";
       exit(EXIT_FAILURE);
     }
     if constexpr (verbose)
     {
-      std::cout << "# stddev\t" << gttl_stddev(size_vec.begin(),
-                                               size_vec.end()) << std::endl;
+      std::cout << "# stddev\t" << gttl_stddev(size_vec.begin(), size_vec.end())
+                << '\n';
     }
   }
   void update_enc_vec(const char *sequence,size_t sequence_length)
@@ -641,7 +642,7 @@ class DNAEncodingMultiLength
     auto kv_vec = key_values_vector_get();
     if constexpr (verbose)
     {
-      std::cout << "# original key values" << std::endl;
+      std::cout << "# original key values\n";
       key_values_show(kv_vec);
     }
     expanded_vec.clear();
@@ -658,8 +659,8 @@ class DNAEncodingMultiLength
     const size_t mean = (total_size + num_parts - 1)/num_parts;
     if constexpr (verbose)
     {
-      std::cout << "# num_parts\t" << num_parts << std::endl;
-      std::cout << "# mean\t" << mean << std::endl;
+      std::cout << "# num_parts\t" << num_parts << '\n';
+      std::cout << "# mean\t" << mean << '\n';
     }
     for (auto &v : kv_vec)
     {
@@ -695,7 +696,7 @@ class DNAEncodingMultiLength
     }
     if constexpr (verbose)
     {
-      std::cout << "# expanded key values" << std::endl;
+      std::cout << "# expanded key values\n";
       key_values_show(expanded_vec);
     }
     divide_vector_evenly(num_parts);
@@ -785,7 +786,7 @@ class DNAEncodingMultiLength
   {
     if (expanded_vec.size() == 0 or end_idx_of_part_vec.size() == 0)
     {
-      std::cerr << "need to call prepare_view before" << std::endl;
+      std::cerr << "need to call prepare_view before\n";
       exit(EXIT_FAILURE);
     }
     return SplitViewIterator(enc_vec,
@@ -823,10 +824,9 @@ class DNAEncodingMultiLength
     }
     if (count_sum != total_number_of_nucleotide_ranges)
     {
-      std::cerr << "count_sum = " << count_sum << " != "
-                << total_number_of_nucleotide_ranges
-                << " = total_number_of_nucleotide_ranges"
-                << std::endl;
+      std::cerr << "count_sum = " << count_sum
+                << " != " << total_number_of_nucleotide_ranges
+                << " = total_number_of_nucleotide_ranges\n";
       exit(EXIT_FAILURE);
     }
     for (auto &&dna_encoding : enc_vec)

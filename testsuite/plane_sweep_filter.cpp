@@ -16,21 +16,20 @@ int main(void)
   matches.emplace_back(9,2,4,6,0,6.0);
   matches.emplace_back(12,1,5,7,0,15.0);
 
-  std::cout << "# query_start,query_end,ref_start,ref_end,identity"
-            << std::endl;
-  std::cout << "# before filtering" << std::endl;
+  std::cout << "# query_start,query_end,ref_start,ref_end,identity\n";
+  std::cout << "# before filtering\n";
   for (size_t idx = 0; idx < matches.size(); idx++)
   {
-    std::cout << matches[idx].to_string() << std::endl;
+    std::cout << matches[idx].to_string() << '\n';
   }
   NonRedundantMatches<GttlStoredMatch>
                      non_redundant_matches(matches);
-  std::cout << "# after filtering" << std::endl;
+  std::cout << "# after filtering\n";
   for (size_t idx = 0; idx < matches.size(); idx++)
   {
     if (non_redundant_matches[idx])
     {
-      std::cout << matches[idx].to_string() << std::endl;
+      std::cout << matches[idx].to_string() << '\n';
     }
   }
   return EXIT_SUCCESS;

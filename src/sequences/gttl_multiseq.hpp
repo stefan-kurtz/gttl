@@ -365,8 +365,7 @@ class GttlMultiseq
     if (!constant_padding_char)
     {
       std::cerr << "programming error: " << __func__
-                << " only works if the padding character is constant"
-                << std::endl;
+                << " only works if the padding character is constant\n";
       exit(EXIT_FAILURE);
     }
     return padding_char;

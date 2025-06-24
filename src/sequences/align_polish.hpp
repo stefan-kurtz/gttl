@@ -110,7 +110,7 @@ class AlignmentPolishing
       }
       if (withoutput)
       {
-        std::cout << idx << "\t" << sum_score << std::endl;
+        std::cout << idx << "\t" << sum_score << '\n';
       }
       if (sum_score < 0)
       {
@@ -132,22 +132,20 @@ class AlignmentPolishing
   }
   void show(void) const noexcept
   {
-    std::cout << "# cut_depth\t" << cut_depth << std::endl;
-    std::cout << "# entries\t" << num_entries << std::endl;
-    std::cout << "# match_score\t" << match_score << std::endl;
-    std::cout << "# difference_score\t" << difference_score << std::endl;
-    std::cout << "# lag_last_d_with_pp\t" << lag_last_d_with_pp << std::endl;
+    std::cout << "# cut_depth\t" << cut_depth << '\n';
+    std::cout << "# entries\t" << num_entries << '\n';
+    std::cout << "# match_score\t" << match_score << '\n';
+    std::cout << "# difference_score\t" << difference_score << '\n';
+    std::cout << "# lag_last_d_with_pp\t" << lag_last_d_with_pp << '\n';
     std::cout << "# history_mask\t"
-              << polish_intbits2string(cut_depth,history_mask)
-              << std::endl;
+              << polish_intbits2string(cut_depth, history_mask) << '\n';
     for (size_t idx = 0; idx < num_entries; idx++)
     {
-      std::cout << "# " << polish_intbits2string(cut_depth,idx) << "\t"
-                        << values[idx].score_sum << "\t"
-                        << values[idx].diff_from_max << "\t"
-                        << (is_polished(static_cast<uint64_t>(idx)) ? "true"
-                                                                    : "false")
-                        << std::endl;
+      std::cout << "# " << polish_intbits2string(cut_depth, idx) << "\t"
+                << values[idx].score_sum << "\t" << values[idx].diff_from_max
+                << "\t"
+                << (is_polished(static_cast<uint64_t>(idx)) ? "true" : "false")
+                << '\n';
     }
   }
 };

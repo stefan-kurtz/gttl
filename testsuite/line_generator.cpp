@@ -67,7 +67,7 @@ int main(int argc,char *argv[])
       if (this_file_is_empty)
       {
         std::cerr << argv[0] << ": file \"" << argv[1]
-                  << "\", line 1: corrupted sequence" << '\n';
+                  << "\", line 1: corrupted sequence\n";
         haserr = true;
         break;
       }

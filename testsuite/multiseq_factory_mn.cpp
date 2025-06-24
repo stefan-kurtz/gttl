@@ -14,7 +14,7 @@
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 #define CHECK_PAIRWISE_EXCLUDE(I_IDX,J_IDX)\
@@ -178,7 +178,7 @@ static void test_multiseq_factory(size_t num_parts,
                                 padding_char,
                                 short_header);
   }
-  std::cout << "# number of parts\t" << multiseq_factory->size() << std::endl;
+  std::cout << "# number of parts\t" << multiseq_factory->size() << '\n';
   if (statistics_option)
   {
     multiseq_factory->statistics();
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << err.what() << std::endl;
+    std::cerr << argv[0] << err.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

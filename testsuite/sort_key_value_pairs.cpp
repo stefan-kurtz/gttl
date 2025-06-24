@@ -25,7 +25,7 @@
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 class SortKeyValuePairsOptions
@@ -419,7 +419,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &e) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    std::cerr << argv[0] << ": " << e.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())

@@ -123,7 +123,7 @@ int main(int argc, char **argv)
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
   }
   catch (const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   StrFormat msg("ntcard.all\t%c\t%zu\t\t%s",

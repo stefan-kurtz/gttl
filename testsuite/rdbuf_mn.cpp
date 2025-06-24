@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     std::cout << x;
   } catch(const std::exception &err)
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     exit(EXIT_FAILURE);
   }
 }

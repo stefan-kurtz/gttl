@@ -75,7 +75,7 @@ struct GttlBitPacker
         if constexpr (show_bit_groups)
         {
           std::cout << "# group " << idx << ", size="  << _bit_group_sizes[idx]
-                    << ", shift=" << shift_tab[idx] << std::endl;
+                    << ", shift=" << shift_tab[idx] << '\n';
         }
         mask_tab[idx] = gttl_bits2maxvalue<uint64_t>(_bit_group_sizes[idx]);
       }
@@ -110,15 +110,15 @@ struct GttlBitPacker
 
     void pretty_print(const char *tag) const noexcept
     {
-      std::cout << "# " << tag << std::endl;
+      std::cout << "# " << tag << '\n';
       for (size_t idx = 0; idx < bit_groups; idx++)
       {
         std::cout << "# bit_group\t" << idx << "\t" << bit_group_sizes[idx]
-                  << std::endl;
+                  << '\n';
       }
       std::cout << "# overflow_left_shift\t" << overflow_left_shift
-                << std::endl;
-      std::cout << "# max_overflow\t" << max_overflow << std::endl;
+                << '\n';
+      std::cout << "# max_overflow\t" << max_overflow << '\n';
     }
 };
 #endif

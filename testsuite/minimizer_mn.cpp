@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2021 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+'\n'ht (c) 2021 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2021 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
-#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -70,7 +69,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
   rt_create_multiseq.show("reading input files and creating multiseq");
   for (auto &log : multiseq->statistics())
   {
-    std::cout << "# " << log << std::endl;
+    std::cout << "# " << log << '\n';
   }
   int hash_bits = -1,
       var_sizeof_unit_hashed_qgram;
@@ -144,7 +143,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
       }
       for (auto &msg : log_vector)
       {
-        std::cout << "# " << msg << std::endl;
+        std::cout << "# " << msg << '\n';
       }
     }
   });
@@ -162,7 +161,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": file " << err.what() << std::endl;
+    std::cerr << argv[0] << ": file " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -177,8 +176,8 @@ int main(int argc, char *argv[])
   {
     for (auto &&inputfile : options.inputfiles_get())
     {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << err.what() << std::endl;
+      std::cerr << argv[0] << ": file \"" << inputfile << "\"" << err.what()
+                << '\n';
     }
     return EXIT_FAILURE;
   }

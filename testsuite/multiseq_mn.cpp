@@ -15,7 +15,7 @@
 
 static void usage(const cxxopts::Options &options)
 {
-  std::cerr << options.help() << std::endl;
+  std::cerr << options.help() << '\n';
 }
 
 class MultiseqOptions
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
   }
   catch (std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": " << err.what() << std::endl;
+    std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -213,8 +213,8 @@ int main(int argc, char *argv[])
   {
     for (auto &&inputfile : inputfiles)
     {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\""
-                << err.what() << std::endl;
+      std::cerr << argv[0] << ": file \"" << inputfile << "\"" << err.what()
+                << '\n';
     }
     delete multiseq;
     return EXIT_FAILURE;
@@ -232,10 +232,8 @@ int main(int argc, char *argv[])
       if (options.sample_size_get() > multiseq->sequences_number_get())
       {
         std::cerr << argv[0] << " you cannot sample "
-                  << options.sample_size_get()
-                  << " sequences from a set of "
-                  << multiseq->sequences_number_get()
-                  << " elements" << std::endl;
+                  << options.sample_size_get() << " sequences from a set of "
+                  << multiseq->sequences_number_get() << " elements\n";
         has_err = true;
       } else
       {
@@ -276,11 +274,11 @@ int main(int argc, char *argv[])
   {
     for (auto &&inputfile : inputfiles)
     {
-      std::cout << "# filename\t" << inputfile << std::endl;
+      std::cout << "# filename\t" << inputfile << '\n';
     }
     for (auto &msg : multiseq->statistics())
     {
-      std::cout << "# " << msg << std::endl;
+      std::cout << "# " << msg << '\n';
     }
   }
   if (options.rankdist_option_is_set())
