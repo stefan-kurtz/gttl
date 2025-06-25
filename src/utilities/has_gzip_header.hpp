@@ -7,7 +7,7 @@
 
 static inline bool has_gzip_header(const char *file_name)
 {
-  FILE *fp = std::fopen(file_name, "rb");
+  FILE *const fp = std::fopen(file_name, "rb");
   if (fp == nullptr)
   {
     throw std::ios_base::failure(": cannot open file "

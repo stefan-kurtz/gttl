@@ -192,9 +192,10 @@ class NonWildCardRangeIterator
       do
       {
         assert(*current != wildcard);
-        const char *next_wildcard = static_cast<const char *>
-                                    (memchr(current+1,wildcard,
-                                            remaining(current+1)));
+        const char *const next_wildcard = static_cast<const char *>(
+                                     memchr(current + 1,
+                                            wildcard,
+                                            remaining(current + 1)));
         const size_t start = static_cast<size_t>(current - sequence);
         if (next_wildcard == NULL)
         {

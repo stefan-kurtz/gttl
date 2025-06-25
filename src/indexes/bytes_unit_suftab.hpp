@@ -55,7 +55,7 @@ class BytesUnitSUFtab
   {
     if (with_mmap)
     {
-      const uint8_t* suftab_bytes = suffixarray->get_mmap_suftab_bytes();
+      const uint8_t *const suftab_bytes = suffixarray->get_mmap_suftab_bytes();
       return reinterpret_cast<const BytesUnit<sizeof_unit,2> *>(suftab_bytes);
     }
     const std::vector<uint8_t> &suftab_bytes = suffixarray->get_suftab_bytes();

@@ -116,9 +116,10 @@ private:
       return false;
     }
 
-    const char* next_newline = std::find(current_ptr,
-                                         input_string + string_length,
-                                         '\n');
+    const char *const next_newline =
+                                 std::find(current_ptr,
+                                           input_string + string_length,
+                                           '\n');
     const size_t line_len = next_newline - current_ptr;
     const size_t copy_len = std::min(line_len, buf_size - 1);
 
@@ -163,11 +164,10 @@ private:
         }
       }
 
-      char* next_newline =
-        static_cast<char*>(
-          std::memchr(file_buf + file_buf_pos,
-                      '\n',
-                      file_buf_end - file_buf_pos));
+      char *const next_newline = static_cast<char *>(
+                                   std::memchr(file_buf + file_buf_pos,
+                                               '\n',
+                                               file_buf_end - file_buf_pos));
       if(next_newline != nullptr)
       {
         size_t line_len = next_newline - (file_buf + file_buf_pos);

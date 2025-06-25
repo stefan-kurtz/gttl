@@ -64,7 +64,7 @@ static void count_non_wildcard_ranges(const char *inputfilename)
     throw std::runtime_error(": can only handle DNA sequences");
     /* check_err.py checked */
   }
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename, "rb");
   if (in_fp == nullptr)
   {
     throw std::runtime_error(": cannot open file");
@@ -119,7 +119,7 @@ static void count_non_wildcard_ranges(const char *inputfilename)
 
 int main(int argc,char *argv[])
 {
-  const char *progname = argv[0];
+  const char *const progname = argv[0];
   bool haserr = false;
   for (int idx = 1; idx < argc; idx++)
   {

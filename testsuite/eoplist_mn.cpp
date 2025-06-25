@@ -31,8 +31,8 @@ static void display_alignment(const Eoplist &eoplist)
   const size_t vlen = eoplist.count_insertions_get() +
                       eoplist.count_mismatches_get() +
                       eoplist.count_matches_get();
-  char *useq = new char [ulen];
-  char *vseq = new char [vlen];
+  char *const useq        = new char[ulen];
+  char *const vseq        = new char[vlen];
   size_t i = 0;
   size_t j = 0;
   const char characters[] = "ACGT";

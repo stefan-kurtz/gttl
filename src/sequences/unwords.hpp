@@ -77,7 +77,7 @@ class Unwords
     auto unwords_vector = unwords_vector_get();
     for (const auto integer_code : unwords_vector)
     {
-      const char *qgram = qgram_decoder.decode(integer_code);
+      const char *const qgram = qgram_decoder.decode(integer_code);
       std::cout << qgram << '\n';
     }
   }
@@ -105,7 +105,7 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
       {
         const size_t this_length = std::get<1>(range);
         unwords->sequences_total_length += this_length;
-        const char *substring = sequence.data() + std::get<0>(range);
+        const char *const substring = sequence.data() + std::get<0>(range);
         InvertibleIntcodeIterator qgiter(qgram_length, substring,this_length);
         for (auto const &&code_pair : qgiter)
         {
@@ -151,13 +151,12 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
     const size_t qgram_length = (l+r)/2;
 
     RunTimeClass compute_unwords_runtime{};
-    Unwords *unwords = try_if_all_qgrams_occur<CharRanger,
-                                               InvertibleIntcodeIterator,
-                                               reverse_complement,
-                                               SeqGenerator>
-                                              (qgram_length,
-                                               alphabetsize,
-                                               seq_generator);
+    Unwords *const unwords = try_if_all_qgrams_occur<
+                                 CharRanger,
+                                 InvertibleIntcodeIterator,
+                                 reverse_complement,
+                                 SeqGenerator>(
+                                 qgram_length, alphabetsize, seq_generator);
     const StrFormat msg("count number of different %zu-grams", qgram_length);
     compute_unwords_runtime.show(msg.str());
     if (unwords->size() > 0)

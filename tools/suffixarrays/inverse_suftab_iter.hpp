@@ -35,7 +35,8 @@ class InverseSuftabReader
       const std::string suftab_inputfile(indexname + ".suf");
       const BinaryFileReader<SuftabBaseType> suftab_reader(suftab_inputfile);
       auto suftab_iter = suftab_reader.begin();
-      SuftabBaseType *inverse_suftab = new SuftabBaseType [totallength + 1];
+      SuftabBaseType *const inverse_suftab =
+                                   new SuftabBaseType[totallength + 1];
       memory_tracker->track(inverse_suftab, __FILE__, __LINE__,
                             (totallength + 1) * sizeof(SuftabBaseType));
       for (size_t idx = 0; idx <= totallength; idx++)
@@ -45,7 +46,7 @@ class InverseSuftabReader
         ++suftab_iter;
       }
       assert(suftab_iter == suftab_reader.end());
-      FILE *out_fp = std::fopen(inverse_suftab_filename.c_str(),"wb");
+      FILE *const out_fp = std::fopen(inverse_suftab_filename.c_str(), "wb");
       if (out_fp == nullptr)
       {
         throw std::ios_base::failure(std::string("cannot create file ") +

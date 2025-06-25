@@ -27,7 +27,7 @@ class LiterateMultiseq
   }
   void perform_sequence_encoding(char *char_seq,size_t len)
   {
-    uint8_t *encoding = reinterpret_cast<uint8_t *>(char_seq);
+    uint8_t *const encoding = reinterpret_cast<uint8_t *>(char_seq);
     for (size_t idx = 0; idx < len; idx++)
     {
       encoding[idx] = alpha.char_to_rank(char_seq[idx]);
@@ -83,8 +83,8 @@ class LiterateMultiseq
   }
   size_t *rank_dist_copy(void) const noexcept
   {
-    size_t *rdc = reinterpret_cast<size_t *>
-                  (std::malloc(sizeof *rdc * rank_dist.size()));
+    size_t *const rdc = reinterpret_cast<size_t *>(
+                                 std::malloc(sizeof *rdc * rank_dist.size()));
     std::memcpy(rdc, rank_dist.data(), rank_dist.size() * sizeof *rdc);
     return rdc;
   }

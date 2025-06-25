@@ -65,8 +65,8 @@ static void fastq_split_writer(size_t split_size,
   auto inputfile_basename_str{std::filesystem::path(inputfilename).filename()
                                                                   .string()};
   assert(not inputfile_basename_str.empty());
-  const char *inputfile_basename_ptr
-    = static_cast<const char *>(inputfile_basename_str.c_str());
+  const char *const inputfile_basename_ptr = static_cast<const char *>(
+                               inputfile_basename_str.c_str());
   while (!exhausted)
   {
     if (it == fastq_it.end())
@@ -272,7 +272,7 @@ static void process_paired_files(bool statistics,
 
 static void char_distribution_seq(const std::string &inputfilename)
 {
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
   if (in_fp == nullptr)
   {
     throw std::runtime_error{": cannot open file"};
@@ -302,7 +302,7 @@ static void char_distribution_thd_gz(size_t num_threads,
                                      const std::string &inputfilename)
 {
   assert(num_threads >= 2);
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
   if (in_fp == nullptr)
   {
     throw std::runtime_error(": cannot open file");
@@ -328,9 +328,8 @@ static void char_distribution_thd_gz(size_t num_threads,
   }));
   for (size_t thd_num = 1; thd_num < num_threads; thd_num++)
   {
-    threads.push_back(std::thread([&sequence_queue, &dist, thd_num]
-    {
-      size_t *local_dist = dist + 4 * (thd_num-1);
+    threads.push_back(std::thread([&sequence_queue, &dist, thd_num] {
+      size_t *const local_dist = dist + 4 * (thd_num - 1);
       using namespace std::chrono_literals;
       // The "ms" operator is defined in a header that is not to
       // be included directly.
@@ -384,10 +383,10 @@ static void char_distribution_thd_gz(size_t num_threads,
 
 static void char_distribution_thd(const SequencesSplit &sequences_split)
 {
-  size_t *count_entries = static_cast<size_t *>(calloc(sequences_split.size(),
-                                                       sizeof *count_entries));
-  size_t *dist = static_cast<size_t *>(calloc(4 * sequences_split.size(),
-                                              sizeof *dist));
+  size_t *const count_entries = static_cast<size_t *>(calloc(
+                               sequences_split.size(), sizeof *count_entries));
+  size_t *const dist          = static_cast<size_t *>(calloc(
+                               4 * sequences_split.size(), sizeof *dist));
   std::vector<std::thread> threads{};
   for (size_t thd_num = 0; thd_num < sequences_split.size(); thd_num++)
   {
@@ -396,7 +395,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
       const std::string_view &this_view = sequences_split[thd_num];
       GttlFastQGenerator<16384> fastq_it(this_view.data(), this_view.size());
       size_t local_count_entries = 0;
-      size_t *local_dist = dist + 4 * thd_num;
+      size_t *const local_dist   = dist + 4 * thd_num;
       for (auto &&fastq_entry : fastq_it)
       {
         local_count_entries++;

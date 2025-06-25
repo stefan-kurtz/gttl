@@ -81,14 +81,14 @@ class GttlMemoryTracker
   }
   void *malloc(const char *codefile_name, int codefile_line, size_t amount)
   {
-    void *ptr = std::malloc(amount);
+    void *const ptr = std::malloc(amount);
     track(ptr,codefile_name,codefile_line,amount);
     return ptr;
   }
   void *calloc(const char *codefile_name, int codefile_line, size_t num_elems,
                size_t size_elem)
   {
-    void *ptr = std::calloc(num_elems,size_elem);
+    void *const ptr = std::calloc(num_elems, size_elem);
     track(ptr,codefile_name,codefile_line,num_elems * size_elem);
     return ptr;
   }

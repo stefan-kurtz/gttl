@@ -31,10 +31,10 @@ class MatrixPartition
   }
   static int compare_itv(const void *va,const void *vb)
   {
-    const MatrixPartitionIntervalPair *a
-      = static_cast<const MatrixPartitionIntervalPair *>(va);
-    const MatrixPartitionIntervalPair *b
-      = static_cast<const MatrixPartitionIntervalPair *>(vb);
+    const MatrixPartitionIntervalPair *const a = static_cast<
+                                 const MatrixPartitionIntervalPair *>(va);
+    const MatrixPartitionIntervalPair *const b = static_cast<
+                                 const MatrixPartitionIntervalPair *>(vb);
     const size_t anti_a = matrix_partition_antidiagonal(a);
     const size_t anti_b = matrix_partition_antidiagonal(b);
     if (anti_a < anti_b) { return -1; }

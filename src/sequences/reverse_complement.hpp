@@ -9,7 +9,7 @@ template<uint8_t (&complement_function)(uint8_t)>
 static inline uint8_t *gttl_reverse_complement_encoded(const uint8_t *sequence,
                                                        size_t len)
 {
-  uint8_t *rc_seq = new uint8_t [len];
+  uint8_t *const rc_seq = new uint8_t[len];
 
   for (size_t idx = 0; idx < len; idx++)
   {

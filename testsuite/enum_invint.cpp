@@ -48,7 +48,7 @@ template<class HashValuePairIterator>
 static void verify_hashvalues_for_file(const char *inputfilename,
                                        size_t qgram_length)
 {
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename, "rb");
   using NucleotideRanger = GttlCharRange<char_finder::NucleotideFinder,
                                          nucleotide_finder,
                                          true,false>;
@@ -67,7 +67,7 @@ static void verify_hashvalues_for_file(const char *inputfilename,
     for (auto const &&range : nuc_ranger)
     {
       const size_t this_length = std::get<1>(range);
-      const char *substring = sequence.data() + std::get<0>(range);
+      const char *const substring = sequence.data() + std::get<0>(range);
       HashValuePairIterator qgiter(qgram_length,substring, this_length);
       for (auto const &&code_pair : qgiter)
       {
@@ -97,7 +97,7 @@ int main(int argc,char *argv[])
     return EXIT_FAILURE;
   }
   const size_t qgram_length = static_cast<size_t>(read_long);
-  const char *inputfilename = argv[2];
+  const char *const inputfilename = argv[2];
   try
   {
     verify_hashvalues_for_file<InvertibleIntegercode2Iterator4>

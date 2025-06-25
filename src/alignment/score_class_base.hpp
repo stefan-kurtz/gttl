@@ -10,7 +10,7 @@ template<int alphasize>
 static inline int8_t **scorematrix2D_get(const int8_t
                                            matrix[alphasize][alphasize])
 {
-  int8_t **scorematrix2D = new int8_t * [alphasize];
+  int8_t **const scorematrix2D = new int8_t *[alphasize];
   scorematrix2D[0] = new int8_t [alphasize * alphasize];
   for (size_t a = 1; a < alphasize; a++)
   {

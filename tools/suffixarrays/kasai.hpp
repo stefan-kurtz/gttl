@@ -35,7 +35,7 @@ static inline std::vector<uint32_t> gttl_lcp13_kasai(
                                       const SuftabBaseType *suftab,
                                       size_t alphasize)
 {
-  SuftabBaseType *inverse_suftab = new SuftabBaseType [totallength + 1];
+  SuftabBaseType *const inverse_suftab = new SuftabBaseType[totallength + 1];
 
   memory_tracker->track(inverse_suftab,__FILE__,__LINE__,
                         (totallength + 1) * sizeof *inverse_suftab);

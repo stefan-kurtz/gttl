@@ -53,7 +53,7 @@ static SWsimdResult sw_simd_uint16([[maybe_unused]]
   }
   simd_int *pvHStore = ssw_resources->vectors16_get();
   simd_int *pvHLoad = pvHStore + segment_len;
-  simd_int *pvE = pvHLoad + segment_len;
+  simd_int *const pvE        = pvHLoad + segment_len;
   simd_int *pvHmax = pvE + segment_len;
   simd_int *pvHStoreNext = pvHLoad;
   simd_int *pvHStoreNextNext = pvHStore;
@@ -100,8 +100,8 @@ static SWsimdResult sw_simd_uint16([[maybe_unused]]
     simd_int vF = vZero;
     simd_int vMaxColumn = vZero;
     simd_int vH = pvHStore[segment_len - 1];
-    const simd_int *vP =
-        vProfile + segment_len * static_cast<size_t>(current_char);
+    const simd_int *const vP = vProfile
+                             + segment_len * static_cast<size_t>(current_char);
 
     print_simd_int<uint16_t>("Initial vH: ", vH);
     vH = simdi8_shiftl2(vH); /* Shift the value in vH left by 2 byte. */

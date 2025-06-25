@@ -7,7 +7,7 @@
 
 static inline bool gttl_is_in_PATH(const std::string &prog)
 {
-  const char *env_p = std::getenv("PATH");
+  const char *const env_p = std::getenv("PATH");
   const auto path_list = gttl_split_string(std::string(env_p),':',1);
   for (auto &path : path_list)
   {

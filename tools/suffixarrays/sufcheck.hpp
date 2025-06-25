@@ -95,8 +95,8 @@ static void gttl_suftab_bk_suffixorder(const SequenceType *sequence,
                                        const std::vector<Rangewithchar>
                                          &rangestore)
 {
-  size_t *nexttab
-    = static_cast<size_t *>(calloc(numofchars, sizeof *nexttab));
+  size_t *const nexttab = static_cast<size_t *>(
+                               calloc(numofchars, sizeof *nexttab));
 
   for (auto && rng : rangestore)
   {

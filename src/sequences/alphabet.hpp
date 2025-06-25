@@ -388,7 +388,7 @@ class GttlAlphabet
 
   constexpr void char_to_rank_in_place(char *char_seq,size_t len) const noexcept
   {
-    uint8_t *byte_seq = reinterpret_cast<uint8_t *>(char_seq);
+    uint8_t *const byte_seq = reinterpret_cast<uint8_t *>(char_seq);
     for (size_t idx = 0; idx < len; idx++)
     {
       byte_seq[idx] = char_to_rank(char_seq[idx]);

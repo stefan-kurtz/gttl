@@ -42,7 +42,7 @@ static void ntcard_enumerate_inner(SeqGenerator* gttl_si,
         const size_t this_length = std::get<1>(range);
         if (this_length >= qgram_length)
         {
-          const char *substring = sequence.data() + std::get<0>(range);
+          const char *const substring = sequence.data() + std::get<0>(range);
           HashValueIterator qgiter(qgram_length, substring, this_length);
           for (auto const &&code_pair : qgiter)
           {
@@ -82,7 +82,7 @@ static TableClass ntcard_enumerate_seq(const std::string &inputfilename,
   TableClass table(s_value, r_value);
   if (gttl_likely_fasta_format(inputfilename))
   {
-    GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
+    const GttlFpType in_fp = gttl_fp_type_open(inputfilename.c_str(), "rb");
     if (in_fp == nullptr)
     {
       throw std::ios_base::failure(": cannot open file");

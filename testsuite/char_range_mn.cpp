@@ -131,7 +131,7 @@ static void display_char_ranges(const char *inputfilename)
     throw std::runtime_error(": can only handle DNA sequences");
     /* check_err.py checked */
   }
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename, "rb");
   if (in_fp == nullptr)
   {
     throw std::runtime_error(": cannot open file");
@@ -205,7 +205,7 @@ template<class CharFinder,const CharFinder &char_finder,
          bool forward,bool invert>
 static void display_char_ranges_multiseq(const GttlMultiseq *encoded_multiseq)
 {
-  const char *sequence_ptr = encoded_multiseq->sequence_ptr_get();
+  const char *const sequence_ptr = encoded_multiseq->sequence_ptr_get();
   assert(encoded_multiseq->sequences_number_get() > 0);
   const size_t sequence_length_concatenation
     = encoded_multiseq->sequences_total_length_get() +

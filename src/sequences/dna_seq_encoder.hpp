@@ -282,7 +282,7 @@ class DNAEncodingForLength
                          (realloc(units,allocated * sizeof *units));
       add_factor *= 1.8;
     }
-    StoreUnitType *ptr = units + nextfree;
+    StoreUnitType *const ptr = units + nextfree;
     nextfree += num_units;
     return ptr;
   }
@@ -303,7 +303,7 @@ class DNAEncodingForLength
   }
   void add(const char *sequence)
   {
-    StoreUnitType *ptr = append_ptr();
+    StoreUnitType *const ptr = append_ptr();
     dna_seq_encoder.encode(ptr,sequence);
 #ifndef NDEBUG
     dna_seq_encoder.sequence_encoding_verify(ptr,sequence);
@@ -582,7 +582,7 @@ class DNAEncodingMultiLength
         for (auto const &&range : nuc_ranger)
         {
           const size_t this_length = std::get<1>(range);
-          const char *substring = sequence.data() + std::get<0>(range);
+          const char *const substring = sequence.data() + std::get<0>(range);
           update_enc_vec(substring,this_length);
         }
       } else

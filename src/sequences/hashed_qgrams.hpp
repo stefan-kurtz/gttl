@@ -120,7 +120,7 @@ static std::pair<size_t,bool> append_minimizers(
       continue;
     }
     size_t seqpos = std::get<0>(range);
-    const char *seqptr = sequence + seqpos;
+    const char *const seqptr = sequence + seqpos;
     HashIterator qgiter(qgram_length, seqptr, this_length);
     count_all_qgrams += (this_length - qgram_length - 1);
 
@@ -297,7 +297,7 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
       continue;
     }
     size_t seqpos = std::get<0>(range);
-    const char *seqptr = sequence + seqpos;
+    const char *const seqptr = sequence + seqpos;
     HashIterator qgiter(qgram_length, seqptr, this_length);
     count_all_qgrams += (this_length - qgram_length - 1);
     size_t steps = 0;
@@ -619,11 +619,11 @@ class HashedQgramsGeneric
       RunTimeClass rt_sort{};
       if constexpr (sizeof_unit == 8)
       {
-        Buckets<size_t> *buckets
-          = ska_lsb_radix_sort<size_t>(hashbits,
-                                       reinterpret_cast<uint64_t *>
-                                         (hashed_qgram_vector.data()),
-                                       hashed_qgram_vector.size());
+        Buckets<size_t> *const buckets = ska_lsb_radix_sort<size_t>(
+                                 hashbits,
+                                 reinterpret_cast<uint64_t *>(
+                                   hashed_qgram_vector.data()),
+                                 hashed_qgram_vector.size());
         delete buckets;
       } else
       {

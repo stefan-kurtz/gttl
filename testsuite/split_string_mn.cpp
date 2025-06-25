@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
     std::cerr << "Usage: " << argv[0] << " <sep> <filename>\n";
     return EXIT_FAILURE;
   }
-  const char *inputfile = argv[2];
+  const char *const inputfile = argv[2];
   if (std::string(argv[1]).size() > 1)
   {
     std::cerr << argv[0] << ": seperator must be single character\n";

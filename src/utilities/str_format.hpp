@@ -25,7 +25,7 @@
         va_start(vl, fmt);\
         int size = vsnprintf(0, 0, fmt, vl) + sizeof('\0');\
         va_end(vl);\
-        char *buffer = new char [size];\
+        char *const buffer = new char [size];\
         va_start(vl, fmt);\
         size = vsnprintf(buffer, size, fmt, vl);\
         va_end(vl);\

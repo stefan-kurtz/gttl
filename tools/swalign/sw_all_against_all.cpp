@@ -271,7 +271,7 @@ static void multiway_merge_results(
 
 int main(int argc,char *argv[])
 {
-  const char *program_name = argv[0];
+  const char *const program_name = argv[0];
   bool haserr = false;
   SWOptions options{true};
   if (argc == 1)

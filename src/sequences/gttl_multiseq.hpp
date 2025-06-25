@@ -201,24 +201,23 @@ class GttlMultiseq
   std::pair<size_t,size_t> short_header_substring(const std::string_view header)
       const noexcept
   {
-    const char *first_delim_ptr
-      = static_cast<const char *>
-                    (std::memchr(static_cast<const void *>(header.data()),
-                                first_delim,header.size()));
+    const char *const first_delim_ptr = static_cast<const char *>(std::memchr(
+                                 static_cast<const void *>(header.data()),
+                                 first_delim,
+                                 header.size()));
     if (first_delim_ptr != NULL)
     {
-      const char *second_delim_ptr
-        = static_cast<const char *>
-                      (memchr(static_cast<const void *>
-                                        (first_delim_ptr+1),
-                                          second_delim,
-                                          static_cast<size_t>
-                                                    (header.data() +
-                                                      header.size()
-                                                      - (first_delim_ptr+1))));
-      const char *header_end
-        = second_delim_ptr != NULL ? second_delim_ptr
-                                    : (header.data() + header.size());
+      const char *const second_delim_ptr = static_cast<const char *>(memchr(
+                                   static_cast<const void *>(first_delim_ptr
+                                                             + 1),
+                                   second_delim,
+                                   static_cast<size_t>(header.data()
+                                                       + header.size()
+                                                       - (first_delim_ptr
+                                                          + 1))));
+      const char *const header_end       = second_delim_ptr != NULL ?
+                                         second_delim_ptr :
+                                         (header.data() + header.size());
       return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
                                                 header.data()),
                             static_cast<size_t>(header_end -
@@ -520,7 +519,7 @@ class GttlMultiseq
       = header_ptr_with_length(seqnum,short_header);
     std::fwrite(header_ptr,sizeof (char),header_len,stdout);
     printf("\n");
-    const char *currentseq = this->sequence_ptr_get(seqnum);
+    const char *const currentseq = this->sequence_ptr_get(seqnum);
     const size_t currentlength = this->sequence_length_get(seqnum);
     size_t line_width = 0;
     for (size_t idx = 0; idx < currentlength; idx++)
@@ -608,7 +607,7 @@ class GttlMultiseq
   /* Overload access operator[] */
   std::string_view operator [](size_t idx) const noexcept
   {
-    const char *seq_ptr = sequence_ptr_get(idx);
+    const char *const seq_ptr = sequence_ptr_get(idx);
     const size_t len = sequence_length_get(idx);
     return std::string_view(seq_ptr,len);
   }

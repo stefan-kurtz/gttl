@@ -249,7 +249,7 @@ static void enumerate_nt_hash_template(const char *inputfilename,
                                        [[maybe_unused]]
                                        int sequences_length_bits)
 {
-  GttlFpType in_fp = gttl_fp_type_open(inputfilename,"rb");
+  const GttlFpType in_fp = gttl_fp_type_open(inputfilename, "rb");
   if (in_fp == nullptr)
   {
     throw std::runtime_error(": cannot open file");
@@ -264,7 +264,8 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   size_t bytes_unit_sum = 0;
   size_t bytes_unit_sum_rc = 0;
 
-  GttlBitPacker<sizeof_unit_hashed_qgrams,3> *hashed_qgram_packer = nullptr;
+  GttlBitPacker<sizeof_unit_hashed_qgrams, 3>* //NOLINT(misc-const-correctness)
+    hashed_qgram_packer = nullptr;
   if constexpr (create_bytes_unit)
   {
     hashed_qgram_packer = new GttlBitPacker<sizeof_unit_hashed_qgrams,3>
@@ -286,7 +287,7 @@ static void enumerate_nt_hash_template(const char *inputfilename,
     for (auto const &&range : nuc_ranger)
     {
       const size_t this_length = std::get<1>(range);
-      const char *substring = sequence.data() + std::get<0>(range);
+      const char *const substring = sequence.data() + std::get<0>(range);
       auto result = apply_qgram_iterator<HashValueIterator,
                                          with_rc,
                                          show_hash_values,
@@ -411,7 +412,7 @@ int main(int argc,char *argv[])
   {
     return EXIT_SUCCESS;
   }
-  const char *progname = argv[0];
+  const char *const progname = argv[0];
   bool haserr = false;
   for (auto &&inputfile : options.inputfiles_get())
   {

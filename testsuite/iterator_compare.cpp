@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   constexpr const size_t buf_size = (1 << 14);
   size_t pseudo_hash[3] = {0,0,0};
 
-  const char* file = result["file"].as<std::string>().c_str();
+  const char *const file = result["file"].as<std::string>().c_str();
   std::cout << "# " << file << '\n';
 
   RunTimeClass runtime{};

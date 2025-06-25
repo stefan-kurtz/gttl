@@ -112,7 +112,7 @@ class GttlAffineDPbanded
       columnspace[i].Ivalue = min_align_score;
     }
     size_t low_row = 0;
-    CharType *usubstring_cache = new CharType [usubstring.size()];
+    CharType *const usubstring_cache = new CharType[usubstring.size()];
     for (size_t idx = 0; idx < usubstring.size(); idx++)
     {
       usubstring_cache[idx] = usubstring[idx];
@@ -146,7 +146,7 @@ class GttlAffineDPbanded
       {
         high_row++;
       }
-      const int8_t *score_row = scorematrix2D[static_cast<size_t>(cb)];
+      const int8_t *const score_row = scorematrix2D[static_cast<size_t>(cb)];
       /* diagonalband */
       for (size_t i = low_row+1; i <= high_row; i++)
       {
@@ -258,7 +258,7 @@ class GttlAffineDPbanded
     {
       colptr = nullptr;
     }
-    CharType *usubstring_cache = new CharType [usubstring.size()];
+    CharType *const usubstring_cache = new CharType[usubstring.size()];
     for (size_t idx = 0; idx < usubstring.size(); idx++)
     {
       usubstring_cache[idx] = usubstring[idx];
@@ -283,7 +283,7 @@ class GttlAffineDPbanded
       columnspace[low_row].Dvalue = min_align_score;
       columnspace[low_row].Ivalue = first_ivalue;
 
-      const int8_t *score_row = scorematrix2D[static_cast<size_t>(cb)];
+      const int8_t *const score_row = scorematrix2D[static_cast<size_t>(cb)];
       /* do not branch in the inner loop (except for maximum computation) */
       for (size_t i = low_row+1; i <= prev_high_row; i++)
       {
@@ -572,8 +572,8 @@ class GttlAffineDPbanded
       const size_t band_width = static_cast<size_t>(right_dist - left_dist + 1);
       if (affine_opt_memory())
       {
-        AffineAlignTraceBits **bitmatrix
-          = col_ptr_get<AffineAlignTraceBits *>(vsubstring.size());
+        AffineAlignTraceBits **const bitmatrix = col_ptr_get<
+                                     AffineAlignTraceBits *>(vsubstring.size());
 
         bitmatrix[0] = matrix_space_get<AffineAlignTraceBits>
                                        (band_width,vsubstring.size());
@@ -590,8 +590,9 @@ class GttlAffineDPbanded
                                                   right_dist);
       } else
       {
-        AffineAlignScoreTriple **dpmatrix
-          = col_ptr_get<AffineAlignScoreTriple *>(vsubstring.size());
+        AffineAlignScoreTriple **const dpmatrix = col_ptr_get<
+                                     AffineAlignScoreTriple *>(
+                                     vsubstring.size());
 
         dpmatrix[0] = matrix_space_get<AffineAlignScoreTriple>
                                       (band_width,vsubstring.size());
@@ -635,8 +636,9 @@ class GttlAffineDPbanded
     eoplist->reset();
     if (affine_opt_memory())
     {
-      const AffineAlignTraceBits *const *bitmatrix
-        = col_ptr_get<const AffineAlignTraceBits * const>(vsubstring.size());
+      const AffineAlignTraceBits *const *const bitmatrix = col_ptr_get<
+                                   const AffineAlignTraceBits *const>(
+                                   vsubstring.size());
       affine_global_alignment_traceback_bits<CharType,match_method>
                                             (eoplist,
                                              bitmatrix,
@@ -644,9 +646,9 @@ class GttlAffineDPbanded
                                              vsubstring);
     } else
     {
-      const AffineAlignScoreTriple *const * dpmatrix
-        = col_ptr_get<const AffineAlignScoreTriple * const>
-                     (vsubstring.size());
+      const AffineAlignScoreTriple *const *const dpmatrix = col_ptr_get<
+                                   const AffineAlignScoreTriple *const>(
+                                   vsubstring.size());
       affine_global_alignment_traceback_scores<CharType,match_method>
                                               (eoplist,
                                                dpmatrix,

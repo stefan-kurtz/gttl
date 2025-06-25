@@ -15,7 +15,7 @@ static inline size_t fastq_next_read_start(const char *file_contents,
                                            size_t total_size,
                                            size_t current)
 {
-  const char *end_of_string = file_contents + total_size;
+  const char *const end_of_string = file_contents + total_size;
   for (size_t idx = current; idx < total_size; idx++)
   {
     if (file_contents[idx] == '@')

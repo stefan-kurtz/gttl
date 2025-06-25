@@ -193,7 +193,7 @@ class KeyValuePair
   std::string to_string(void) const noexcept
   {
     std::string s{};
-    const uint8_t *ds = reinterpret_cast<const uint8_t *>(&key);
+    const uint8_t *const ds = reinterpret_cast<const uint8_t *>(&key);
     for (size_t idx = 0; idx < sizeof(double); idx++)
     {
       s += int2byte(static_cast<int>(ds[idx]));

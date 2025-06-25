@@ -36,7 +36,7 @@ class SuccinctBitvector
     : length(0)
   {
     //deserialize
-    FILE* in_fp = std::fopen(lls_filename.c_str(), "rb");
+    FILE *const in_fp = std::fopen(lls_filename.c_str(), "rb");
     if (in_fp == nullptr)
     {
       throw std::runtime_error(std::string("cannot open file ") + lls_filename);
@@ -332,7 +332,7 @@ class SuccinctBitvector
 
   void serialize(const std::string &lls_filename) const
   {
-    FILE* out_fp = std::fopen(lls_filename.c_str(), "wb");
+    FILE *const out_fp = std::fopen(lls_filename.c_str(), "wb");
 
     if (out_fp == nullptr)
     {

@@ -146,7 +146,7 @@ class NtTable
 
     static_assert(sizeof(double) == sizeof(size_t));
     // reuse memory for p for p_n, as the latter is just used for scaling
-    double *p_n = reinterpret_cast<double *>(p.data());
+    double *const p_n = reinterpret_cast<double *>(p.data());
     for (size_t i = 0; i < p.size(); i++)
     {
       p_n[i] = static_cast<double>(p[i]) / (size_t(1) << r_value);
@@ -155,7 +155,7 @@ class NtTable
     const double F0 = -std::log(p_n[0]) * (uint64_t(1) << (s_value + r_value));
     // allocate memory here and pass pointer to NtTableResult where it
     // is deleted once NtTableResult gets out of scope
-    double *f_n = new double [t_max + 1];
+    double *const f_n = new double[t_max + 1];
     f_n[0] = 0;
     const double denominator = static_cast<double>(1.0) /
                                (p_n[0] * std::log(p_n[0]));

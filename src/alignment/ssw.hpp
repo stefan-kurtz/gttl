@@ -169,7 +169,7 @@ static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
   const size_t segment_len = ssw_len2segment_len<Basetype>(seq_len);
   const SimdIntVector vProfile(alphasize * segment_len);
   Basetype *ptr = reinterpret_cast<Basetype *>(vProfile.get());
-  const int8_t *score_vector_end = score_vector + alphasize * alphasize;
+  const int8_t *const score_vector_end = score_vector + alphasize * alphasize;
 
   //  loop over each score row
   for (const int8_t *score_row = score_vector;

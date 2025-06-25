@@ -69,8 +69,8 @@ struct SWOptions
     assert(argc > 1);
     while (true)
     {
-      const char *flags = sw_all_against_all ? "dqsgvcthnbamfor"
-                                             : "dqsgvcthnbamp";
+      const char *const flags = sw_all_against_all ? "dqsgvcthnbamfor" :
+                                                     "dqsgvcthnbamp";
       const int opt = getopt(argc,argv,flags);
       const int lower_bound_vectorized = sw_all_against_all ? 1 : 0;
       if (opt == -1)
@@ -419,7 +419,7 @@ struct SWOptions
                    bool dna_alphabet,
                    bool with_bit_score)
   {
-    const char *tag = header_display ? "id" : "num";
+    const char *const tag = header_display ? "id" : "num";
 
     if (vectorized_alignment == 0 || vectorized_alignment == 2)
     {

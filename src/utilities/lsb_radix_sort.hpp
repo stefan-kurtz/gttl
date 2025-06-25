@@ -108,7 +108,7 @@ static inline void lsb_radix_sort(uint64_t *array,
     LSB_RADIX_SORT_SINGLE_PASS(9)
   };
   size_t num_ranges;
-  const int *bit_groups = bit_counts_get(&num_ranges,remaining_bits);
+  const int *const bit_groups  = bit_counts_get(&num_ranges, remaining_bits);
   constexpr const int max_bits = 64;
   assert(bits_already_sorted + remaining_bits <= max_bits);
   int shift = max_bits - (bits_already_sorted + remaining_bits);
@@ -117,7 +117,7 @@ static inline void lsb_radix_sort(uint64_t *array,
   for (size_t idx = 0; idx < num_ranges; idx++)
   {
     const int bits = bit_groups[idx];
-    SinglePassSorter<uint64_t> func = sorter_table_uint64[bits-1];
+    const SinglePassSorter<uint64_t> func = sorter_table_uint64[bits - 1];
     const bool was_permuted = func(shift,dest_ptr,src_ptr,array_len);
     if (was_permuted)
     {
@@ -142,9 +142,11 @@ static void lsb_radix_sort(uint8_t *array,
 {
   const int last_byte_index = remaining_bits / CHAR_BIT +
                               ((remaining_bits % CHAR_BIT) != 0 ? 1 : 0);
-  SinglePassSorter<uint8_t> func
-    = lsb_radix_sort_single_pass<uint8_t,first_pass_msb_bits,sizeof_unit,
-                                 radix_key_uint8<sizeof_unit>>;
+  const SinglePassSorter<uint8_t> func = lsb_radix_sort_single_pass<
+                               uint8_t,
+                               first_pass_msb_bits,
+                               sizeof_unit,
+                               radix_key_uint8<sizeof_unit>>;
   uint8_t *src_ptr = array;
   uint8_t *dest_ptr = buffer;
   assert(bits_already_sorted % 8 == 0);

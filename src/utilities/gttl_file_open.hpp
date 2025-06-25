@@ -74,7 +74,7 @@ static inline std::basic_string<BaseType>
     if (has_gzip_header(inputfile.c_str()))
     {
 #ifndef GTTL_WITHOUT_ZLIB
-      gzFile fp = gzopen(inputfile.c_str(), "rb");
+      gzFile const fp = gzopen(inputfile.c_str(), "rb");
       if (fp == nullptr)
       {
         throw std::runtime_error(std::string("Failed to gzopen file ")
@@ -107,7 +107,7 @@ static inline std::basic_string<BaseType>
 #endif
     } else
     {
-      FILE *infp = std::fopen(inputfile.c_str(), "rb");
+      FILE *const infp = std::fopen(inputfile.c_str(), "rb");
       if (infp == nullptr)
       {
         throw std::runtime_error(std::string("Error opening file: ")

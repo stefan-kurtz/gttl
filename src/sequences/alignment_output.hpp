@@ -227,9 +227,9 @@ static void alignment_output(const AlignmentSequenceInfo <SeqClass_u,SeqClass_v>
   size_t top_start_pos = asi.ustart;
   size_t low_start_pos = low_start_base;
 
-  char *topbuf = new char [3 * width_alignment];
-  char *midbuf = topbuf + width_alignment;
-  char *lowbuf = midbuf + width_alignment;
+  char *const topbuf = new char[3 * width_alignment];
+  char *const midbuf = topbuf + width_alignment;
+  char *const lowbuf = midbuf + width_alignment;
 
   const SeqClass_u &useq = *(asi.useq);
   const SeqClass_v &vseq = *(asi.vseq);

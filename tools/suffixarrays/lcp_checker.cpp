@@ -34,7 +34,7 @@ int main(int argc,char *argv[])
     std::cerr << "Usage: " << argv[0] << " <indexname>\n";
     return EXIT_FAILURE;
   }
-  const char *indexname = argv[1];
+  const char *const indexname  = argv[1];
   GttlSuffixArray *suffixarray = nullptr;
   RunTimeClass rt_overall{};
   bool haserr = false;

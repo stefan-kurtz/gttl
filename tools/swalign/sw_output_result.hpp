@@ -169,13 +169,14 @@ class SWOutputResultShared
         alignment_display.s_substring() or
         alignment_display.q_substring())
     {
-      const uint8_t *db_seq_ptr = db_multiseq->encoded_sequence_ptr_get(i);
+      const uint8_t *const db_seq_ptr =
+                                   db_multiseq->encoded_sequence_ptr_get(i);
       const size_t db_len = db_multiseq->sequence_length_get(i);
       const GttlSubstring<uint8_t> usubstring(db_seq_ptr,
                                               best_coords.ustart,
                                               best_coords.usubstringlength);
-      const uint8_t *query_seq_ptr
-        = query_multiseq->encoded_sequence_ptr_get(j);
+      const uint8_t *const query_seq_ptr =
+                                   query_multiseq->encoded_sequence_ptr_get(j);
       const size_t query_len = query_multiseq->sequence_length_get(j);
       const GttlSubstring<uint8_t> vsubstring(best_coords.forward_strand,
                                               query_seq_ptr,
@@ -183,9 +184,9 @@ class SWOutputResultShared
                                               best_coords.vsubstringlength,
                                               query_len);
       const bool distinguish_mismatch_match = true;
-      Eoplist *eoplist = alignment_display.need_traceback()
-                           ? new Eoplist(distinguish_mismatch_match)
-                           : nullptr;
+      Eoplist *const eoplist = alignment_display.need_traceback() ?
+                                   new Eoplist(distinguish_mismatch_match) :
+                                   nullptr;
       if (alignment_display.need_alignment())
       {
         const bool no_score_run = false;

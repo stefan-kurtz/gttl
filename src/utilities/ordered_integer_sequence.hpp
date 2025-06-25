@@ -54,8 +54,10 @@ class OrderedIntegerSequence
     const size_t *found = nullptr;
     while (secstart_begin <= secstart_end)
     {
-      const size_t *midptr
-        = secstart_begin + static_cast<size_t>(secstart_end - secstart_begin)/2;
+      const size_t *const midptr = secstart_begin
+                                   + static_cast<size_t>(secstart_end
+                                                         - secstart_begin)
+                                                                / 2;
       if (idx < *midptr)
       {
         secstart_end = midptr - 1;
@@ -120,11 +122,12 @@ class OrderedIntegerSequence
     }
     assert(pos > *leftptr && pos < *rightptr);
     const Basetype *found = nullptr;
-    const Basetype *leftorig = leftptr;
+    const Basetype *const leftorig = leftptr;
     while (leftptr <= rightptr)
     {
-      const Basetype *midptr
-        = leftptr + static_cast<size_t>(rightptr - leftptr)/2;
+      const Basetype *const midptr = leftptr
+                                   + static_cast<size_t>(rightptr - leftptr)
+                                                                / 2;
       if (pos < *midptr)
       {
         rightptr = midptr - 1;

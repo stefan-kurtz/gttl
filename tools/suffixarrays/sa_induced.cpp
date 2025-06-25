@@ -84,7 +84,7 @@ static FILE *outstream_create(const std::string &indexname,
 {
   const std::string outfilename{indexname + filenamesuffix};
 
-  FILE *out_fp = fopen(outfilename.c_str(), "wb");
+  FILE *const out_fp = fopen(outfilename.c_str(), "wb");
   if (out_fp == nullptr)
   {
     throw std::ios_base::failure(std::string(": cannot create file \"") +
@@ -99,7 +99,7 @@ static void output_suftab(const SuftabBaseType *suftab,
                           const std::string &indexname,
                           const std::string &filenamesuffix)
 {
-  FILE *out_fp = outstream_create(indexname, filenamesuffix);
+  FILE *const out_fp = outstream_create(indexname, filenamesuffix);
   std::fwrite(suftab, sizeof *suftab, totallength + 1, out_fp);
   fclose(out_fp);
 }
@@ -261,7 +261,7 @@ static void output_tis_suf_tables(const SainOptions &sainoptions,
   }
   if (sainoptions.tistab_out_opt_is_set())
   {
-    FILE *out_fp = outstream_create(indexname, ".tis");
+    FILE *const out_fp = outstream_create(indexname, ".tis");
     std::fwrite(filecontents, sizeof *filecontents, totallength, out_fp);
     fclose(out_fp);
   }
@@ -383,7 +383,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
       LiterateMultiseq<alphabet::nucleotides_upper_lower,const_alphasize>
          lit_multiseq (multiseq);
       lit_multiseq.perform_sequence_encoding();
-      size_t *charcount_arr = lit_multiseq.rank_dist_copy();
+      size_t *const charcount_arr = lit_multiseq.rank_dist_copy();
       memory_tracker->track(charcount_arr,__FILE__,__LINE__,
                             lit_multiseq.number_of_ranks() *
                             sizeof *charcount_arr);
@@ -414,7 +414,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
         LiterateMultiseq<alphabet::amino_acids, const_alphasize>
                       lit_multiseq(multiseq);
         lit_multiseq.perform_sequence_encoding();
-        size_t *charcount_arr = lit_multiseq.rank_dist_copy();
+        size_t *const charcount_arr = lit_multiseq.rank_dist_copy();
         memory_tracker->track(charcount_arr,__FILE__,__LINE__,
                               lit_multiseq.number_of_ranks() *
                               sizeof *charcount_arr);
@@ -539,8 +539,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
               try
               {
                 assert(suftab != nullptr);
-                SainBytesUnit *bu_suftab
-                  = reinterpret_cast<SainBytesUnit *>(suftab);
+                SainBytesUnit *const bu_suftab = reinterpret_cast<
+                                             SainBytesUnit *>(suftab);
                 output_suftab<SainBytesUnit>(bu_suftab, totallength, indexname,
                                              ".bsf");
               }

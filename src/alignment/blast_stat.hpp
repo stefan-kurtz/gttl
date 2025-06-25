@@ -57,8 +57,8 @@ class BlastStatistics
                    int8_t gap_extension_penalty,
                    bool scaled)
   {
-    const BlastStatisticsLine *stat = scaled ? &blosum62_scaled_stat[0]
-                                             : &blosum62_stat[0];
+    const BlastStatisticsLine *const stat = scaled ? &blosum62_scaled_stat[0] :
+                                                     &blosum62_stat[0];
     const size_t items
       = scaled ? sizeof blosum62_scaled_stat/sizeof blosum62_scaled_stat[0]
                : sizeof blosum62_stat/sizeof blosum62_stat[0];

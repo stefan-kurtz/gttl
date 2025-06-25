@@ -42,10 +42,11 @@ static void process_file(const char *filename)
   const size_t parts = 2;
   const size_t mid   = mapped_file.size() / parts;
   assert(mid < mapped_file.size());
-  const char *file_contents = mapped_file.ptr();
-  const char *next_newline = static_cast<const char *>
-                             (memchr(file_contents + mid,'\n',
-                                     mapped_file.size() - mid));
+  const char *const file_contents = mapped_file.ptr();
+  const char *const next_newline  = static_cast<const char *>(
+                               memchr(file_contents + mid,
+                                      '\n',
+                                      mapped_file.size() - mid));
   if (next_newline == nullptr)
   {
     const StrFormat msg(": second part of file beginning at offset %zu "

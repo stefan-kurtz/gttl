@@ -33,7 +33,7 @@
 
 inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 {
-  const char *protein_only_characters = "LIFEQPXZ";
+  const char *const protein_only_characters = "LIFEQPXZ";
   bool for_protein_only_lookup[UCHAR_MAX+1] = {false};
   for (size_t idx = 0; idx < strlen(protein_only_characters); idx++)
   {
@@ -55,7 +55,7 @@ inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 template<class ReaderClass>
 bool guess_if_protein_file_generic(const char *filename)
 {
-  GttlFpType in_fp = gttl_fp_type_open(filename,"rb");
+  const GttlFpType in_fp = gttl_fp_type_open(filename, "rb");
 
   if (in_fp == nullptr)
   {
@@ -107,7 +107,7 @@ bool guess_if_protein_multiseq(const MultiseqClass *multiseq)
   size_t sequences_total_length = 0;
   for (size_t seqnum = 0; seqnum < sequences_number; seqnum++)
   {
-    const char *seqptr = multiseq->sequence_ptr_get(seqnum);
+    const char *const seqptr = multiseq->sequence_ptr_get(seqnum);
     const size_t seqlen = multiseq->sequence_length_get(seqnum);
     sequences_total_length += seqlen;
     if (guess_if_protein_sequence(seqptr,seqlen))

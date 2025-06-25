@@ -62,7 +62,7 @@ class ThreadsOutputFiles
                             separator,
                             t_idx);
       output_filenames.push_back(fname.str());
-      FILE *out_fp = std::fopen(fname.str().c_str(),"w");
+      FILE *const out_fp = std::fopen(fname.str().c_str(), "w");
       if (out_fp == nullptr)
       {
         const StrFormat msg("cannot create file \"%s\"", fname.str().c_str());
@@ -81,7 +81,7 @@ class ThreadsOutputFiles
     {
       for (auto &fname : output_filenames)
       {
-        FILE *in_fp = std::fopen(fname.c_str(),"r");
+        FILE *const in_fp     = std::fopen(fname.c_str(), "r");
         const size_t buf_size = size_t(1) << 14;
         char buf[buf_size];
         while (true)

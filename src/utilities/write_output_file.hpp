@@ -24,7 +24,7 @@ static inline void write_to_output_file(const std::string &file_name,
   }
   if(compression_level == 0)
   {
-    FILE *f_out = std::fopen(file_name.c_str(), "w");
+    FILE *const f_out = std::fopen(file_name.c_str(), "w");
     if(f_out == nullptr)
     {
       throw std::ios_base::failure(": Error writing to file: " + file_name);
@@ -35,7 +35,7 @@ static inline void write_to_output_file(const std::string &file_name,
   {
     const std::string gz_file_name = file_name + ".gz";
     const std::string write_mode = "w" + std::to_string(compression_level);
-    gzFile f_out = gzopen(gz_file_name.c_str(), write_mode.c_str());
+    const gzFile f_out = gzopen(gz_file_name.c_str(), write_mode.c_str());
     if(f_out == Z_NULL)
     {
       throw std::system_error(errno,

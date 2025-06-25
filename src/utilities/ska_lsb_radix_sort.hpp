@@ -48,13 +48,13 @@ template<typename Counttype,int sizeof_unit,typename RT>
 static inline void swap_two_values(uint8_t *array,Counttype a,Counttype b)
 {
   static_assert(sizeof(uint64_t) == 8);
-  uint64_t *aptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * a);
-  uint64_t *bptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * b);
+  uint64_t *const aptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * a);
+  uint64_t *const bptr = reinterpret_cast<uint64_t *>(array + sizeof_unit * b);
   const uint64_t tmp = *aptr;
   *aptr = *bptr;
   *bptr = tmp;
-  RT *aptr_rest = reinterpret_cast<RT *>(array + 8 + sizeof_unit * a);
-  RT *bptr_rest = reinterpret_cast<RT *>(array + 8 + sizeof_unit * b);
+  RT *const aptr_rest  = reinterpret_cast<RT *>(array + 8 + sizeof_unit * a);
+  RT *const bptr_rest  = reinterpret_cast<RT *>(array + 8 + sizeof_unit * b);
   RT tmp_rest = *aptr_rest;
   *aptr_rest = *bptr_rest;
   *bptr_rest = tmp_rest;
@@ -262,10 +262,14 @@ static Buckets<Counttype> *countingsort_skarupke([[maybe_unused]] int num_bits,
 {
   assert(num_bits == first_pass_msb_bits);
   constexpr const size_t num_buckets = size_t(1) << first_pass_msb_bits;
-  Buckets<Counttype> *buckets
-    = countingsort_skarupke_it<Counttype,uint8_t,num_buckets,uint64_t,1,
-                               radix_key_uint64<first_pass_msb_bits>>
-                              (array,array_len,shift);
+  Buckets<Counttype> *const buckets  = countingsort_skarupke_it<
+                                Counttype,
+                                uint8_t,
+                                num_buckets,
+                                uint64_t,
+                                1,
+                                radix_key_uint64<first_pass_msb_bits>>(
+                               array, array_len, shift);
   return buckets;
 }
 
@@ -364,7 +368,7 @@ static Buckets<Counttype> *radixsort_ska_then_other_generic(
                                        sorter_instance
                                          ->reversed_byte_order_get());
   const int bits_already_sorted = std::get<1>(result);
-  Buckets<Counttype> *buckets = std::get<0>(result);
+  Buckets<Counttype> *const buckets = std::get<0>(result);
   if (buckets == nullptr || bits_already_sorted >= num_sort_bits)
   {
     return buckets;

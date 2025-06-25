@@ -102,7 +102,7 @@ static void fill_bu_suftab_MULTISEQ_linear(GttlMemoryTracker *memory_tracker,
                                            const GttlMultiseq *multiseq,
                                            size_t totallength)
 {
-  SuftabBaseType *inverse_suftab = new SuftabBaseType [totallength + 1];
+  SuftabBaseType *const inverse_suftab = new SuftabBaseType[totallength + 1];
   memory_tracker->track(inverse_suftab,__FILE__,__LINE__,
                         (totallength + 1) * sizeof(SuftabBaseType));
   for (size_t idx = 0; idx <= totallength; idx++)
@@ -134,7 +134,7 @@ static T_bu *fill_bu_suftab_MULTISEQ_linear(GttlMemoryTracker *memory_tracker,
                                memory_tracker, indexname, totallength);
   const size_t sequences_number = multiseq->sequences_number_get();
   auto inverse_suftab_iter = inverse_suftab_reader.begin();
-  T_bu *bu_suftab = new T_bu [totallength + 1];
+  T_bu *const bu_suftab         = new T_bu[totallength + 1];
   memory_tracker->track(bu_suftab,__FILE__,__LINE__,(totallength + 1)
                                                     * sizeof (T_bu));
   for (size_t seqnum = 0; seqnum < sequences_number; seqnum++)

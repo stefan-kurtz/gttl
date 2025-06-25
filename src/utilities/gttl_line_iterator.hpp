@@ -218,9 +218,10 @@ class GttlLineIterator
       endofunit = false;
       while (more_lines())
       {
-        char *nextnewline = reinterpret_cast<char *>
-                            (memchr(bufptr,'\n',
-                                    static_cast<size_t>(bufend - bufptr + 1)));
+        char *const nextnewline = reinterpret_cast<char *>(memchr(
+                                     bufptr,
+                                     '\n',
+                                     static_cast<size_t>(bufend - bufptr + 1)));
         if (nextnewline != nullptr)
         {
           const size_t copy_length = static_cast<size_t>(nextnewline + 1
@@ -298,8 +299,8 @@ class GttlLineIterator
       return false;
     }
     const size_t remain = static_cast<size_t>(end_input_string - suffix);
-    const char *next_separator = reinterpret_cast<const char *>
-                                 (memchr(suffix,'\n',remain));
+    const char *const next_separator = reinterpret_cast<const char *>(
+                                 memchr(suffix, '\n', remain));
     if (next_separator != nullptr)
     {
       const size_t view_len = static_cast<size_t>(next_separator - suffix + 1);

@@ -82,8 +82,8 @@ static inline size_t lcplen_fwd(const char *seq0,size_t start0,
   } else
   {
     size_t idx;
-    const char *ptr0 = seq0 + start0;
-    const char *ptr1 = seq1 + start1;
+    const char *const ptr0 = seq0 + start0;
+    const char *const ptr1 = seq1 + start1;
     for (idx = 0; match_method(ptr0[idx],ptr1[idx]); idx++)
         /* Nothing */;
     return idx;
@@ -144,8 +144,8 @@ static inline size_t block_wise_lcslen_bwd(const char *seq0, size_t start0,
                                            [[maybe_unused]] size_t seqnum1)
 {
   assert(start0 < len0 && start1 < len1);
-  const char *ptr0 = seq0 + len0 - 8 - start0;
-  const char *ptr1 = seq1 + len1 - 8 - start1;
+  const char *const ptr0     = seq0 + len0 - 8 - start0;
+  const char *const ptr1     = seq1 + len1 - 8 - start1;
   const uint64_t *block_ptr0 = reinterpret_cast<const uint64_t *>(ptr0);
   const uint64_t *block_ptr1 = reinterpret_cast<const uint64_t *>(ptr1);
 
