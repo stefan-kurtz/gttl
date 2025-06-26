@@ -15,7 +15,17 @@
 
 inline std::string demangle(const char* name)
 {
+  // Written by Ali Baharev in
+  // https://stackoverflow.com/questions/281818/
+  // Comments added by Stevan Miladinovic
   int status = 0;
+  // abi::__cva_demangle returns a char* to memory
+  // allocated with std::malloc().
+  // This means that we have to explicitly free it ourselves, using
+  // std::free().
+  // A std::unique_ptr takes care of automatically freeing memory as the
+  // last reference is lost, but it defaults to delete, not std::free().
+  // Hence why we need to pass std::free as a "custom" deallocator here.
   const std::unique_ptr<char, void (*)(void *)> demangled(
                                abi::__cxa_demangle(name,
                                                    nullptr,
@@ -55,6 +65,10 @@ struct TrackingAllocator : std::allocator<T>
 
     const size_t current = total_allocated.load();
     size_t prev_max = max_allocated.load();
+    // This loop simply updates the max-value in a thread-safe way.
+    // The variable itself is atomic, but something might change between
+    // the comparison (atomic read) and the update (atomic write).
+    // Hence we need to explicitly re-check with compare_exchange_weak.
     while (current > prev_max
            and not max_allocated.compare_exchange_weak(prev_max, current))
     {}
@@ -69,6 +83,13 @@ struct TrackingAllocator : std::allocator<T>
     std::allocator<T>::deallocate(p, n);
   }
 
+  // This struct is used when a container allocated using
+  // TrackingAllocator<T> needs to allocate memory itself.
+  // A good example of this is a std::unordered_set<T>.
+  // Here, a bucket<T> is first allocated in the set, into which Ts are then
+  // placed.
+  // This would then call TrackingAllocator<T>::rebind<bucket<T>> to allocate
+  // the bucket.
   template <typename U>
   struct rebind
   {
@@ -102,6 +123,12 @@ struct TrackingAllocator : std::allocator<T>
     register_atexit_logger();
   };
 
+  // We need this to allow rebinding via the above struct.
+  // to continue the example from above, a TrackingAllocator<bucket<T>> needs
+  // the be able to then construct as many TrackingAllocator<T> as required.
+  // It will pass itself as a reference in this process. Though we do not
+  // need this argument for our use-case, we still need to accept
+  // it in a "copy-constructor" of sorts to satisfy STL requirements.
   template <typename U>
   explicit TrackingAllocator(const TrackingAllocator<U>& /**/) noexcept
   {
@@ -113,6 +140,8 @@ struct TrackingAllocator : std::allocator<T>
   {
     static const bool registered = ([]
     {
+      // std::atexit simply runs as the program exits, including on potential
+      // SIGTERM.
       if(std::atexit(log_stats) != 0)
       {
         std::cerr << "Warning: Failed to register the"
