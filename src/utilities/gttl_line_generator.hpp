@@ -342,6 +342,11 @@ public:
       return (is_end == other.is_end) and (gen == other.gen);
     }
 
+    bool operator!=(const Iterator& other) const
+    {
+      return not(*this == other);
+    }
+
     private:
     GttlLineGenerator* gen;
     bool is_end;
