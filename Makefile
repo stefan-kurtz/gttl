@@ -12,6 +12,12 @@ build:
 	@make -C tools/ntcard
 	@make -C tools/unwords
 
+.PHONY:bear
+bear:
+	@$(MAKE) clean
+	@bear -- $(MAKE) $(MAKEGOALS) build
+	@sed -i -e '/"-Werror",/d' compile_commands.json
+
 .PHONY:debug
 debug:
 	@make -C testsuite debug=yes test
@@ -25,6 +31,13 @@ clean:
 	@make -C tools/chaining clean
 	@make -C tools/ntcard clean
 	@make -C tools/unwords clean
+
+.PHONY:tidy
+tidy:
+	@find . -name '*.hpp' -o -name '*.cpp' | \
+	 xargs -P$(shell nproc) -n1 \
+	  clang-tidy --quiet --config-file=.clang-tidy -p . \
+	  2>/dev/null
 
 .PHONY:tags
 tags:

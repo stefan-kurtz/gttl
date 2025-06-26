@@ -1,4 +1,5 @@
 ---
+QualifierAlignment: Left
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: AcrossComments

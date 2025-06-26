@@ -1,0 +1,21 @@
+Checks: >
+  -*,
+  clang-diagnostic-*,
+  -clang-diagnostic-unused-command-line-argument,
+  hicpp-exception-baseclass,
+  portability-*,
+  -portability-simd-intrinsics,
+  misc-include-cleaner,
+  performance-avoid-endl,
+  readability-isolate-declaration,
+  misc-const-correctness
+
+HeaderFilterRegex: '.*'
+SystemHeaders: false
+FormatStyle: file
+WarningsAsErrors: ''
+CheckOptions:
+  - key: misc-const-correctness.WarnPointersAsValues
+    value: true
+  - key: misc-const-correctness.TransformPointersAsValues
+    value: true
