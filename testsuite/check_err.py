@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse, sys, shutil, os
-for directory in ['../scripts','../../scripts',
-                  '{}/scripts/'.format(os.environ['GTTL'])]:
+path_to_add = None
+for directory in ['../scripts','../../scripts']:
   if os.path.isdir(directory):
-    sys.path.append(directory)
+    path_to_add = directory
     break
+if path_to_add is None and 'GTTL' in os.environ:
+  directory = '{}/scripts/'.format(os.environ['GTTL'])
+  if os.path.isdir(directory):
+    path_to_add = directory
+
+if path_to_add is not None:
+  sys.path.append(path_to_add)
+
 from mysubprocess import mysubprocess_expect
 
 def files2msg_get(fail_for_protein_sequence,p):

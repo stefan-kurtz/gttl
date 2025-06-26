@@ -5,9 +5,9 @@
 #include <exception>
 #include <iostream>
 #include <cinttypes>
-#include "utilities/gttl_file_open.hpp"
 #include <stdexcept>
 #include <string>
+#include "utilities/gttl_file_open.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
@@ -33,11 +33,13 @@ static void verify_hash_value_pair(HashValuePairIterator &qgiter,
     cc = complement_uint8(cc);
     if (cc != qgram_direct[idx])
     {
-      StrFormat msg("incorrect reverse complement "
-                    "hash_value=%" PRIu64 "\tcompl_hash_value=%" PRIu64,
-                    hash_value, compl_hash_value);
       delete[] qgram_direct;
-      throw std::runtime_error{msg.str()};
+      throw std::runtime_error(std::string("incorrect reverse complement "
+                                           "hash_value=") +
+                               std::to_string(hash_value) +
+                               std::string("\t") +
+                               std::string("compl_hash_value=") +
+                               std::to_string(compl_hash_value));
     }
   }
   delete[] qgram_direct;
