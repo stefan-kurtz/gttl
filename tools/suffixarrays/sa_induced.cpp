@@ -141,13 +141,8 @@ static void lcptab_output_succinct(const std::string &indexname,
   for (size_t pos = 0; pos < plcp_table.get_total_length(); pos++){
     const size_t cur = plcp_table.plcp_value_get(pos);
     const size_t unary = cur - last + 1;
-    /* Implement method to construct unary coding by single function call */
-    for (size_t i = 0; i < unary; i++)
-    {
-      b.push(false);
-    }
-    // printf("%zu; %zu %zu %zu %zu\n", pos, cur, cur + pos, cur - last + 1,
-    //         b.get_length());
+
+    b.push_false_n(unary);
 
     b.push(true);
     last = cur;

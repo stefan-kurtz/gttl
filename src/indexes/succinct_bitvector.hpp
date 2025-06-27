@@ -100,6 +100,12 @@ class SuccinctBitvector
     length++;
   }
 
+  void push_false_n(size_t n) {
+    clear();
+    length += n;
+    data_vector.resize((length + 63) / 64);
+  }
+
   void set(size_t index, bool value) {
     clear();
     if (value) {
@@ -205,7 +211,7 @@ class SuccinctBitvector
       fprintf(stderr, "Acceleration structure not build.\n");
       exit(1);
     }
-    // printf("count: %zu\n", count);
+
     if (not value) {
       return 0;
     }
@@ -219,9 +225,6 @@ class SuccinctBitvector
       min = 0;
     }
 
-    // printf("rank_min %zu\n", get_rank(min, true));
-
-
     size_t max;
 
     if (select_index < select_1.size()) {
@@ -232,9 +235,6 @@ class SuccinctBitvector
 
     size_t superblock_l = min / SUPERBLOCKBITS;
     size_t superblock_r = (max + SUPERBLOCKBITS - 1) / SUPERBLOCKBITS;
-
-    // printf("t: %zu %zu %zu %zu %zu\n",
-    //        select_index, min, max, superblock_l, superblock_r);
 
     while (superblock_l < superblock_r) {
       const size_t m                = (superblock_l + superblock_r) / 2;
@@ -248,14 +248,6 @@ class SuccinctBitvector
       }
     }
 
-    // min = std::max(min, superblock_l * SUPERBLOCKBITS);
-    // max = std::min(max, (superblock_l + 1) * SUPERBLOCKBITS - 1);
-
-    // size_t block_l = (min % SUPERBLOCKBITS) / BLOCKBITS;
-    // size_t block_r = (max %SUPERBLOCKBITS) / BLOCKBITS;
-
-    // printf("superblock_l: %zu\n", superblock_l);
-
     size_t block_l = 0;
     size_t block_r = 7;
 
@@ -266,7 +258,7 @@ class SuccinctBitvector
     } else {
       superblock_count = 0;
     }
-    // printf("superblock_count: %zu\n", superblock_count);
+
     while (block_l < block_r) {
       const size_t m = (block_l + block_r) / 2;
 
@@ -277,15 +269,12 @@ class SuccinctBitvector
       }
     }
 
-    // printf("superblock_l: %zu, block_l: %zu\n", superblock_l, block_l);
 
     const size_t block_count = get_block_count(superblock_l, block_l);
-    // printf("block_count: %zu\n", superblock_count + block_count);
 
     size_t local_count = 0;
     for (int i = 0; i < 8; i++) {
       const size_t index = superblock_l * 64 + block_l * 8 + i;
-      // printf("index: %zu\n", index);
       size_t pop;
       if (index >= data_vector.size()) {
         pop = 0;
@@ -293,14 +282,11 @@ class SuccinctBitvector
         pop = std::__popcount(data_vector[index]);
       }
       local_count += pop;
-      // printf("complete_count: %zu\n",
-      // superblock_count + block_count + local_count);
 
       if (superblock_count + block_count + local_count >= count) {
 
         const size_t rem = count - (superblock_count + block_count +
                                     local_count - pop);
-        // printf("rem: %zu\n", rem);
 
         return index * 64 + select_uint64_t(data_vector[index], rem, true);
       }
@@ -309,26 +295,6 @@ class SuccinctBitvector
     exit(1);
     return 0;
   };
-
-  void print() const {
-
-    // for (auto v: data_vector) {
-
-    //   printf("%064lb\n", v);
-    // }
-
-    // printf("rank:\n");
-    // for (auto v: rank) {
-
-    //   printf("%064lb %064lb\n", v.first, v.second);
-    // }
-
-    // printf("select_1: (%zu)\n", select_1.size());
-
-    // for (auto v : select_1) {
-    //   printf("%zu\n", v);
-    // }
-  }
 
   void serialize(const std::string &lls_filename) const
   {
