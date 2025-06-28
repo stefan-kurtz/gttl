@@ -164,8 +164,8 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
   HashValueIterator qgiter(qgram_length,substring,this_length);
 #ifndef NDEBUG
   using TransformerType = typename std::conditional_t<is_aminoacid,
-                                                      NtHashAminoacidsTransformer,
-                                                      NThashTransformer>;
+                                                NtHashAminoacidsTransformer,
+                                                NThashTransformer>;
   uint8_t *qgram_buffer = new uint8_t [qgram_length];
   TransformerType nt_hash_transformer(qgram_length);
   auto alphabet = HashValueIterator::alphabet;

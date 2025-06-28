@@ -145,7 +145,8 @@ struct Pow_CT
 {
   enum : uint8_t { VALUE = Pow_CT<base,numerus-1>::VALUE * base };
 };
-template <size_t base> struct Pow_CT<base,1> { enum : uint8_t { VALUE = base }; };
+template <size_t base> struct Pow_CT<base,1> 
+  { enum : uint8_t { VALUE = base }; };
 template <size_t base> struct Pow_CT<base,0> { enum : uint8_t { VALUE = 1 }; };
 
 inline double error_percentage_get(size_t distance,size_t aligned_len)
