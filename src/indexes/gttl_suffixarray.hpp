@@ -108,7 +108,7 @@ public:
   }
 };
 
-enum Suffixarrayfiles
+enum Suffixarrayfiles : uint8_t
 {
   LCPTAB_file,
   SUFTAB_file,

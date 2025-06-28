@@ -1,10 +1,11 @@
 #ifndef SEQ_READER_OPTIONS_HPP
 #define SEQ_READER_OPTIONS_HPP
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
-enum hash_mode_type
+enum hash_mode_type : uint8_t
 {
   hash_mode_none,
   hash_mode_wy,

@@ -9,7 +9,7 @@
 #include <string>
 #include <algorithm>
 
-enum EopType
+enum EopType : uint8_t
 {
   DeletionOp = 0,
   InsertionOp,

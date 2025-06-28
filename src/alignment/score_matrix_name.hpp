@@ -5,12 +5,13 @@
 #define SCORE_MATRIX_NAME_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <cassert>
 
-enum EnumScoreMatrixName
+enum EnumScoreMatrixName : uint8_t
 {
   Score_matrix_undefined,
   Score_matrix_blosum62,

@@ -131,10 +131,10 @@ static T gttl_safe_power(T a, T b)
 template <int numerus>
 struct Log2_CT
 {
-  enum { VALUE = Log2_CT<(numerus+1)/2>::VALUE + 1 };
+  enum : uint8_t { VALUE = Log2_CT<(numerus+1)/2>::VALUE + 1 };
 };
-template < > struct Log2_CT<1> { enum { VALUE = 0 }; };
-template < > struct Log2_CT<0> { enum { VALUE = 0 }; };
+template < > struct Log2_CT<1> { enum : uint8_t { VALUE = 0 }; };
+template < > struct Log2_CT<0> { enum : uint8_t { VALUE = 0 }; };
 
 
 /* compute power of base 2 at compile time
@@ -143,10 +143,10 @@ template < > struct Log2_CT<0> { enum { VALUE = 0 }; };
 template <size_t base,int numerus>
 struct Pow_CT
 {
-  enum { VALUE = Pow_CT<base,numerus-1>::VALUE * base };
+  enum : uint8_t { VALUE = Pow_CT<base,numerus-1>::VALUE * base };
 };
-template <size_t base> struct Pow_CT<base,1> { enum { VALUE = base }; };
-template <size_t base> struct Pow_CT<base,0> { enum { VALUE = 1 }; };
+template <size_t base> struct Pow_CT<base,1> { enum : uint8_t { VALUE = base }; };
+template <size_t base> struct Pow_CT<base,0> { enum : uint8_t { VALUE = 1 }; };
 
 inline double error_percentage_get(size_t distance,size_t aligned_len)
 {

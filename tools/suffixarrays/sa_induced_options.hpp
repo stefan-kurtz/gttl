@@ -18,16 +18,17 @@
 #ifndef SA_INDUCED_OPTIONS_HPP
 #define SA_INDUCED_OPTIONS_HPP
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 class SainOptions
 {
   public:
-  using LcptabMethod = enum {Lcptab_no,
-                             Lcptab_kasai13n,
-                             Lcptab_kasai9n,
-                             Lcptab_plcp5n};
+  using LcptabMethod = enum : uint8_t {Lcptab_no,
+                                       Lcptab_kasai13n,
+                                       Lcptab_kasai9n,
+                                       Lcptab_plcp5n};
  private:
   std::vector<std::string> inputfiles;
   std::string show_options_spec;

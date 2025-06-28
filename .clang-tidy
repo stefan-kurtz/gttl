@@ -8,7 +8,10 @@ Checks: >
   misc-include-cleaner,
   performance-avoid-endl,
   readability-isolate-declaration,
-  misc-const-correctness
+  misc-const-correctness,
+  performance-inefficient-vector-operation,
+  performance-for-range-copy,
+  performance-enum-size
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

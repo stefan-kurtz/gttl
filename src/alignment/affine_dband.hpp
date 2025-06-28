@@ -13,7 +13,7 @@
 template<typename ScoreType>
 class GttlAffineDPbanded
 {
-  using AffineAlignEditOp = enum
+  using AffineAlignEditOp = enum : uint8_t
   {
     AFFINE_DBAND_UNDEF = 0, /* unknown, keep it, as it' the default value 0 */
     AFFINE_DBAND_REPLACEMENT, /* 1 = 01, shift 0 = 2 * (1-1) */

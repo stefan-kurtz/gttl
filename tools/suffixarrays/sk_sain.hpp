@@ -205,7 +205,7 @@ static constexpr const char_finder::EncodedNucleotideFinder
                        encoded_nucleotide_finder;
 static constexpr const char_finder::EncodeAminoAcidFinder encoded_aa_finder;
 
-typedef enum
+typedef enum : uint8_t
 {
   GTTL_SAIN_PLAINSEQ,
   GTTL_SAIN_LONGSEQ,
