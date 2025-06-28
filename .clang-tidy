@@ -12,7 +12,8 @@ Checks: >
   performance-inefficient-vector-operation,
   performance-for-range-copy,
   performance-enum-size,
-  performance-unnecessary-value-param
+  performance-unnecessary-value-param,
+  performance-faster-string-find
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

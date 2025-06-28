@@ -166,7 +166,7 @@ class GttlSuffixArray
     /* number of keys with integer values */
     while (std::getline (in_file,line))
     {
-      if ((sep_pos = line.find("\t")) == std::string::npos)
+      if((sep_pos = line.find('\t')) == std::string::npos)
       {
         throw std::ios_base::failure(std::string("file ") + prj_filename +
                                      std::string(": missing tabulator in line ")
