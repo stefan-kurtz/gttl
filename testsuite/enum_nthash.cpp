@@ -25,9 +25,11 @@
 #include <iostream>
 #include <tuple>
 #include <cinttypes>
+#include <type_traits>
 #include <vector>
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
+#include "sequences/nthash_fwd_aminoacids.hpp"
 #include "utilities/bitpacker.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/str_format.hpp"
@@ -145,7 +147,8 @@ template<class HashValueIterator,
          bool with_rc,
          bool show_hash_values,
          int sizeof_unit_hashed_qgrams,
-         bool create_bytes_unit>
+         bool create_bytes_unit,
+         bool is_aminoacid>
 static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
                       size_t qgram_length,
                       uint64_t hashmask,
@@ -158,8 +161,11 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
 {
   HashValueIterator qgiter(qgram_length,substring,this_length);
 #ifndef NDEBUG
+  using TransformerType = typename std::conditional_t<is_aminoacid,
+                                                      NtHashAminoacidsTransformer,
+                                                      NThashTransformer>;
   uint8_t *qgram_buffer = new uint8_t [qgram_length];
-  NThashTransformer nt_hash_transformer(qgram_length);
+  TransformerType nt_hash_transformer(qgram_length);
   auto alphabet = HashValueIterator::alphabet;
 #endif
 
@@ -292,7 +298,8 @@ static void enumerate_nt_hash_template(const char *inputfilename,
                                          with_rc,
                                          show_hash_values,
                                          sizeof_unit_hashed_qgrams,
-                                         create_bytes_unit>
+                                         create_bytes_unit,
+                                         is_aminoacid>
                                         (qgram_length,
                                          hashmask,
                                          hashed_qgram_packer,

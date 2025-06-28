@@ -16,6 +16,7 @@
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
 #ifndef NDEBUG
+#include "utilities/str_format.hpp"
 template<class HashValuePairIterator>
 static void verify_hash_value_pair(HashValuePairIterator &qgiter,
                                    uint64_t hash_value,
