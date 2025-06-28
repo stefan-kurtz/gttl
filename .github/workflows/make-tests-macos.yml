@@ -29,4 +29,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: make
-      run: make -j4
+      run: make debug=yes -j4
