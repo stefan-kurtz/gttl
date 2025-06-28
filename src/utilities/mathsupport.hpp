@@ -145,7 +145,7 @@ struct Pow_CT
 {
   enum : uint8_t { VALUE = Pow_CT<base,numerus-1>::VALUE * base };
 };
-template <size_t base> struct Pow_CT<base,1> 
+template <size_t base> struct Pow_CT<base,1>
   { enum : uint8_t { VALUE = base }; };
 template <size_t base> struct Pow_CT<base,0> { enum : uint8_t { VALUE = 1 }; };
 
