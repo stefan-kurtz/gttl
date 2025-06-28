@@ -25,11 +25,9 @@
 #include <iostream>
 #include <tuple>
 #include <cinttypes>
-#include <type_traits>
 #include <vector>
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
-#include "sequences/nthash_fwd_aminoacids.hpp"
 #include "utilities/bitpacker.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/str_format.hpp"
@@ -40,6 +38,10 @@
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
+#ifndef NDEBUG
+#include "sequences/nthash_fwd_aminoacids.hpp"
+#include <type_traits>
+#endif
 
 static void usage(const cxxopts::Options &options)
 {

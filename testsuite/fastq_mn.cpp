@@ -388,6 +388,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   size_t *const dist          = static_cast<size_t *>(calloc(
                                4 * sequences_split.size(), sizeof *dist));
   std::vector<std::thread> threads{};
+  threads.reserve(sequences_split.size());
   for (size_t thd_num = 0; thd_num < sequences_split.size(); thd_num++)
   {
     threads.push_back(std::thread([&sequences_split, count_entries,dist,thd_num]

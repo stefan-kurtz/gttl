@@ -18,6 +18,7 @@ class OptionChoices
   std::string help_line(void) const
   {
     std::vector<std::string> helpline_vec;
+    helpline_vec.reserve(choices_map.size());
     for (auto const &[opt, helpline] : choices_map)
     {
       helpline_vec.push_back(std::string("\"") + opt + std::string("\": ")

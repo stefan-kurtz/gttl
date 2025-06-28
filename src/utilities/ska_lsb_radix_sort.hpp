@@ -683,6 +683,7 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
   {
     PartInfoTab part_info_tab(num_units,num_threads);
     std::vector<std::thread> threads;
+    threads.reserve(part_info_tab.size());
     for (size_t thd_num = 0; thd_num < part_info_tab.size(); thd_num++)
     {
       threads.push_back(std::thread([&part_info_tab, array,

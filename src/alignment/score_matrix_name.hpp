@@ -72,6 +72,7 @@ class ScoreMatrixName
   std::vector<std::string> string_values_get(void) const noexcept
   {
     std::vector<std::string> vec_s{};
+    vec_s.reserve(num_values);
     for (size_t idx = 0; idx < num_values; idx++)
     {
       vec_s.push_back(string_values[idx]);

@@ -27,6 +27,7 @@ class GttlThreadPoolVar
       {
         std::vector<std::shared_ptr<std::thread>> threads{};
         VirtualQueue vq(number_of_tasks);
+        threads.reserve(number_of_threads);
         for (size_t thd = 0; thd < number_of_threads; thd++)
         {
           threads.push_back(std::make_shared<std::thread>(
