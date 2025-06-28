@@ -11,7 +11,7 @@ static inline bool gttl_is_in_PATH(const std::string &prog)
   const auto path_list = gttl_split_string(std::string(env_p),':',1);
   for (auto &path : path_list)
   {
-    if (std::filesystem::exists(path + "/" + prog))
+    if (std::filesystem::exists(std::filesystem::path(path) / prog))
     {
       return true;
     }

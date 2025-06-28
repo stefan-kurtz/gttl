@@ -2,18 +2,13 @@ Checks: >
   -*,
   clang-diagnostic-*,
   -clang-diagnostic-unused-command-line-argument,
-  hicpp-exception-baseclass,
+  performance-*,
   portability-*,
   -portability-simd-intrinsics,
-  misc-include-cleaner,
-  performance-avoid-endl,
-  readability-isolate-declaration,
+  hicpp-exception-baseclass,
   misc-const-correctness,
-  performance-inefficient-vector-operation,
-  performance-for-range-copy,
-  performance-enum-size,
-  performance-unnecessary-value-param,
-  performance-faster-string-find
+  misc-include-cleaner,
+  readability-isolate-declaration
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

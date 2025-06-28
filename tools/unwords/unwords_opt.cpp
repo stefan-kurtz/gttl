@@ -42,7 +42,7 @@ void UnwordsOptions::parse(int argc, char **argv)
       help_option = true;
     }
 
-    const std::vector<std::string> unmatched_args = result.unmatched();
+    const std::vector<std::string>& unmatched_args = result.unmatched();
 
     for (size_t idx = 0; idx < unmatched_args.size(); idx++)
     {

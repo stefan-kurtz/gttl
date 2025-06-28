@@ -21,8 +21,8 @@ class OptionChoices
     helpline_vec.reserve(choices_map.size());
     for (auto const &[opt, helpline] : choices_map)
     {
-      helpline_vec.push_back(std::string("\"") + opt + std::string("\": ")
-                                               + helpline);
+      helpline_vec.push_back(std::string("\"").append(opt).append("\": ")
+                                              .append(helpline));
     }
     const char * const delim = "; ";
     std::ostringstream help_line_os;
