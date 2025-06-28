@@ -34,6 +34,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install ZLib
       run: vcpkg install zlib
+    - name: Install Clang 19
+      run: choco install llvm --version=19.1.7 -y
+    - name: Add Clang 19 to PATH
+      run: echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
     - name: make
       run: make -j4
 
