@@ -60,7 +60,7 @@ class ThreadPoolUnknownTasks
       }
     }
 
-    void enqueue(FunctionType task)
+    void enqueue(const FunctionType &task)
     {
       tsq.enqueue(task);
       tasks_changed.notify_one();

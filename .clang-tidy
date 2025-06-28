@@ -11,7 +11,8 @@ Checks: >
   misc-const-correctness,
   performance-inefficient-vector-operation,
   performance-for-range-copy,
-  performance-enum-size
+  performance-enum-size,
+  performance-unnecessary-value-param
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

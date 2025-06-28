@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include "utilities/gttl_file_open.hpp"
+#include <utility>
 #include <vector>
 #include "utilities/gttl_line_iterator.hpp"
 #include "utilities/str_format.hpp"
@@ -14,9 +15,8 @@ struct SequenceEntry
   std::string header{},
               sequence{};
   SequenceEntry(void) {}
-  SequenceEntry(std::string _header,std::string _sequence)
-    : header(_header)
-    , sequence(_sequence)
+  SequenceEntry(std::string _header, std::string _sequence)
+     : header(std::move(_header)), sequence(std::move(_sequence))
   {}
   const std::string_view header_get(void) { return header;}
   const std::string_view sequence_get(void) {return sequence;}

@@ -2052,7 +2052,12 @@ class Options
   {
     OptionNames long_names;
     long_names.emplace_back(single_long_name);
-    add_option(group, short_name, long_names, desc, value, arg_help);
+    add_option(group,
+               short_name,
+               long_names,
+               std::move(desc),
+               value,
+               std::move(arg_help));
   }
 
   //parse positional arguments into the given option
