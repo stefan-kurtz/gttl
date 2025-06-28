@@ -39,7 +39,7 @@ class GttlThreadPoolVar
              }
           }));
         }
-        for (auto th : threads)
+        for (const auto& th : threads)
         {
           th->join();
         }
