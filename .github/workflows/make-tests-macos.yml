@@ -18,7 +18,7 @@ on:
       - '**.mk'
       - '.github/workflows/make-tests-macos.yml'
 
-  workflow_dispatch: null
+  workflow_dispatch:
 
 
 jobs:

@@ -22,7 +22,7 @@ on:
       - '**.mk'
       - '.github/workflows/code-check.yml'
 
-  workflow_dispatch: null
+  workflow_dispatch:
 
 
 jobs:
