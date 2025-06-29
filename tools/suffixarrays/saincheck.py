@@ -83,4 +83,4 @@ for file_list, plain in [(file_list_plain_paths,True),
     for suffix in ['prj','lcp','ll2','ll4','suf','tis','isa','bsf']:
       this_filename = f'{indexname}.{suffix}'
       if os.path.isfile(this_filename):
-         pathlib.Path.unlink(this_filename)
+         pathlib.Path(this_filename).unlink()
