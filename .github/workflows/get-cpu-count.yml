@@ -1,0 +1,28 @@
+name: "Get CPU Count"
+run-name: "CPU Count"
+
+on: 
+  push:
+    paths:
+      - '.github/workflows/get-cpu-count.yml'
+
+  pull_request:
+    paths:
+      - '.github/workflows/get-cpu-count.yml'
+
+  workflow_dispatch:
+
+
+jobs:
+  cpu_count_windows_latest:
+    name: Get CPU Count on Windows
+    runs-on: windows-latest
+
+    env:
+      CXX: clang++
+      CPLUS_INCLUDE_PATH: "C:\\vcpkg\\packages\\zlib_x64-windows\\include"
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: nproc
+      run: nproc

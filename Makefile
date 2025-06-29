@@ -1,9 +1,9 @@
 .PHONY:all
 all:
-	@make -C tools/suffixarrays test
 	@make -C testsuite test
 	@make -C tools/chaining test
 	@make -C tools/ntcard test
+	@make -C tools/suffixarrays test
 	@make -C tools/swalign test
 	@make -C tools/unwords test
 
