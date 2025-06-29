@@ -101,10 +101,10 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     }
     //printf(\"Current_char %d\\n\", current_char);
     size_t segment_pos;
-    simd_int e,
-    simd_int* pv,
-    simd_int vF = vZero,
-    simd_int vMaxColumn = vZero,
+    simd_int e;
+    simd_int* pv;
+    simd_int vF = vZero;
+    simd_int vMaxColumn = vZero;
     simd_int vH = pvHStore[segment_len - 1];
     const simd_int *const vP = vProfile
                              + segment_len * static_cast<size_t>(current_char);
