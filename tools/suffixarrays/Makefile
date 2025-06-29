@@ -79,14 +79,14 @@ test_check_guess_and_multi:sa_induced.x
 
 .PHONY:test_saincheck
 test_saincheck:sa_induced.x
-	@./saincheck.py --absolute_suftab
-	@./saincheck.py --relative_suftab
-	@./saincheck.py --lcptab kasai13n
-	@./saincheck.py --absolute_suftab --lcptab kasai9n
-	@./saincheck.py --absolute_suftab --lcptab plcp5n
-	@./saincheck.py --reverse_complement --lcptab kasai13n
-	@./saincheck.py --absolute_suftab --reverse_complement --lcptab kasai9n
-	@./saincheck.py --absolute_suftab --reverse_complement --lcptab plcp5n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --relative_suftab
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --lcptab kasai13n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --lcptab kasai9n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --lcptab plcp5n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --reverse_complement --lcptab kasai13n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab kasai9n
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab plcp5n
 	@echo "$@ passed"
 
 test_plcp:sa_induced.x

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import re, os, sys, argparse, subprocess, shlex, pathlib
-from enum_gttl_fasta_files import enum_gttl_fasta_files
 sys.path.append('../../scripts')
 from guess_if_protein_seq import guess_if_protein_file
 
@@ -41,7 +40,7 @@ file_list_plain_paths = [filename for filename in os.listdir('.')
                                   if not is_index_file(filename)]
 
 for file_list, plain in [(file_list_plain_paths,True),
-                         (enum_gttl_fasta_files('../../testdata'),False)]:
+                         (os.environ.get("FASTA_FILES").split(" "),False)]:
   for filename in file_list:
     if filename == '':
       continue
