@@ -136,7 +136,7 @@ class SuccinctBitvector
           if (i + inner * 8 + outer * 64 >= data_vector.size()) {
             pop = 0;
           } else {
-            pop = std::__popcount(data_vector[i + inner * 8 + outer * 64]);
+            pop = std::popcount(data_vector[i + inner * 8 + outer * 64]);
             index_1 += pop;
 
             if (index_1 >= INDEXINTERVAL) {
@@ -193,13 +193,13 @@ class SuccinctBitvector
       if (i >= data_vector.size()) {
         pop = 0;
       } else {
-        pop = std::__popcount(data_vector[i]);
+        pop = std::popcount(data_vector[i]);
       }
       r += pop;
     }
 
     if (index % 64 != 0) {
-       r += std::__popcount((data_vector[index / 64] << (64 - (index % 64))));
+       r += std::popcount((data_vector[index / 64] << (64 - (index % 64))));
     }
     return r;
   };
@@ -279,7 +279,7 @@ class SuccinctBitvector
       if (index >= data_vector.size()) {
         pop = 0;
       } else {
-        pop = std::__popcount(data_vector[index]);
+        pop = std::popcount(data_vector[index]);
       }
       local_count += pop;
 
@@ -367,9 +367,9 @@ private:
 
       size_t pop;
       if (value) {
-        pop = std::__popcount(shifted);
+        pop = std::popcount(shifted);
       } else {
-        pop = std::__popcount(shifted) - shift;
+        pop = std::popcount(shifted) - shift;
       }
 
       if (pop < count) {
