@@ -1,11 +1,10 @@
 #ifndef SW_OPTION_PARSER_HPP
 #define SW_OPTION_PARSER_HPP
 #ifndef _WIN32
-  // we only include getopt_core.h after it has already
-  // been included in unistd. This saves us having to repeatedly
-  // disable include-linting when using optind/getopt
+  // We disable the include-cleaner check here, since
+  // optind is defind in <bits/getopt_core.h>, which should *NOT* be
+  // included directly.
   #include <unistd.h> // NOLINT(misc-include-cleaner)
-  #include <bits/getopt_core.h>
 #else
   #define NOMINMAX
   #include <io.h>

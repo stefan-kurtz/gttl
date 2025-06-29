@@ -35,7 +35,7 @@
 #ifdef _WIN32
   #include "utilities/windows_getopt.hpp"
 #else
-  // We disable the include-cleaner check here and when using optind, since
+  // We disable the include-cleaner check here, since
   // optind is defind in <bits/getopt_core.h>, which should *NOT* be
   // included directly.
   #include <unistd.h> // NOLINT(misc-include-cleaner)
@@ -293,7 +293,7 @@ int main(int argc,char *argv[])
       catch (const std::exception &err)
       {
         std::cerr << argv[0] << ": file \""
-                  << argv[optind] //NOLINT(misc-include-cleaner)
+                  << argv[optind]
                   << "\"" << err.what() << '\n';
         haserr = true;
       }

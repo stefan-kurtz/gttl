@@ -19,3 +19,5 @@ CheckOptions:
     value: true
   - key: misc-const-correctness.TransformPointersAsValues
     value: true
+  - key: misc-include-cleaner.IgnoreHeaders
+    value: 'bits/getopt_core.h'
