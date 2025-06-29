@@ -33,13 +33,19 @@ sw_all_against_all.x:${SWAGAOBJ}
 	$(LD) ${LDFLAGS} ${SWAGAOBJ} -o $@ ${LDLIBS}
 
 ../../src/alignment/sw_simd_uint8.hpp:ssw_gen.py
-	./ssw_gen.py 8 | clang-format --assume-filename=$@ > $@
+	./ssw_gen.py 8 | clang-format --assume-filename=$@ | \
+		fold -s -w 80 | \
+		sed 's/[ \t]*$$//' > $@
 
 ../../src/alignment/sw_simd_uint16.hpp:ssw_gen.py
-	./ssw_gen.py 16 | clang-format --assume-filename=$@ > $@
+	./ssw_gen.py 16 | clang-format --assume-filename=$@ | \
+		fold -s -w 80 | \
+		sed 's/[ \t]*$$//' > $@
 
 ../../src/alignment/sw_simd_uint32.hpp:ssw_gen.py
-	./ssw_gen.py 32 | clang-format --assume-filename=$@ > $@
+	./ssw_gen.py 32 | clang-format --assume-filename=$@ | \
+		fold -s -w 80 | \
+		sed 's/[ \t]*$$//' > $@
 
 ../../src/alignment/blosum62.hpp:blosum62.txt scorematrix.py
 	@./scorematrix.py --constexpr blosum62 $< | clang-format --assume-filename=$@ > $@

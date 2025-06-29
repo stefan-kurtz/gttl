@@ -103,7 +103,8 @@ sw_simd_uint8([[maybe_unused]] const uint8_t *original_dbseq,
     simd_int vMaxColumn      = vZero;
     simd_int vH              = pvHStore[segment_len - 1];
     const simd_int *const vP = vProfile
-                                 + segment_len * static_cast<size_t>(current_char);
+                                 + segment_len *
+static_cast<size_t>(current_char);
 
     print_simd_int<uint8_t>("Initial vH: ", vH);
     vH = simdi8_shiftl1(vH); /* Shift the value in vH left by 2 byte. */
@@ -232,7 +233,8 @@ sw_simd_uint8([[maybe_unused]] const uint8_t *original_dbseq,
       {
         max_align_score = local_max_score;
         if(static_cast<uint32_t>(max_align_score)
-                                        + static_cast<uint32_t>(abs_smallest_score)
+                                        +
+static_cast<uint32_t>(abs_smallest_score)
            >= UINT8_MAX)
         {
           break; /*overflow */
