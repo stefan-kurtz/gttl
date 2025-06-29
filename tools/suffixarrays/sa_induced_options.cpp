@@ -218,7 +218,7 @@ void SainOptions::parse(int argc, char **argv)
   {
     if (inputfiles.size() == 1 && indexname.empty())
     {
-      indexname = std::filesystem::path(inputfiles[0]).filename();
+      indexname = std::filesystem::path(inputfiles[0]).filename().string();
       assert(not indexname.empty());
     }
   }
