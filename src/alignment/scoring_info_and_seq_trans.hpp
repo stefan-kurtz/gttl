@@ -40,7 +40,7 @@ static inline std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
       {
         const ScoreMatrixName score_matrix_name_instance{};
         const StrFormat msg(": score matrix %s is not possible for protein "
-                            "sequences; the following choices are available:"
+                            "sequences; the following choices are available: "
                             "%s",
                             score_matrix_id,
                             score_matrix_name_instance
