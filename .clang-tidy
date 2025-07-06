@@ -8,7 +8,8 @@ Checks: >
   hicpp-exception-baseclass,
   misc-const-correctness,
   misc-include-cleaner,
-  readability-isolate-declaration
+  readability-isolate-declaration,
+  modernize-type-traits
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

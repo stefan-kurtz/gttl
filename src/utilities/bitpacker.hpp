@@ -49,13 +49,12 @@ struct GttlBitPacker
       overflow_left_shift(0),
       max_overflow(0)
     {
-      using basetype
-        = typename std::conditional<sizeof_unit >= 8,
-                                    uint64_t,
-                                    typename std::conditional<sizeof_unit >= 4,
-                                                              uint32_t,
-                                                              uint16_t>::type>
-                                    ::type;
+      using basetype = std::conditional_t<
+                                   sizeof_unit >= 8,
+                                   uint64_t,
+                                   std::conditional_t<sizeof_unit >= 4,
+                                                      uint32_t,
+                                                      uint16_t>>;
       static_assert(bit_groups >= 2 &&
                     sizeof_unit >= sizeof(basetype) &&
                     sizeof_unit <= sizeof(basetype) + 7);

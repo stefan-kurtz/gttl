@@ -281,16 +281,14 @@ template <typename SuftabBaseType,
 class GttlSainseq
 {
   static_assert(sizeof(SuftabBaseType) == 4 || sizeof(SuftabBaseType) == 8);
-  using Sint = typename std::conditional<sizeof(SuftabBaseType) == 4,
-                                         int32_t,
-                                         int64_t>::type;
-  using T_seq = typename std::conditional
-                         <T_seqtype == GTTL_SAIN_PLAINSEQ,
-                          uint8_t,
-                          typename std::conditional
-                                   <T_seqtype == GTTL_SAIN_MULTISEQ,
-                                    GttlMultiseq,
-                                    SuftabBaseType>::type>::type;
+  using Sint =
+                               std::conditional_t<sizeof(SuftabBaseType) == 4,
+                                                  int32_t, int64_t>;
+  using T_seq = std::conditional_t<
+                               T_seqtype == GTTL_SAIN_PLAINSEQ, uint8_t,
+                               std::conditional_t<T_seqtype == GTTL_SAIN_MULTISEQ,
+                                                  GttlMultiseq,
+                                                  SuftabBaseType>>;
   size_t pos2unique_int(size_t pos) const noexcept
   {
     return pos + UCHAR_MAX + 1;

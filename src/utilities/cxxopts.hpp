@@ -578,7 +578,7 @@ class incorrect_argument_type : public parsing
 template <typename T>
 void throw_or_mimic(const std::string& text)
 {
-  static_assert(std::is_base_of<std::exception, T>::value,
+  static_assert(std::is_base_of_v<std::exception, T>,
                 "throw_or_mimic only works on std::exception and "
                 "deriving classes");
 
@@ -962,7 +962,7 @@ integer_parser(const std::string& text, T& value)
 {
   const parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
 
-  using US = typename std::make_unsigned<T>::type;
+  using US                 = std::make_unsigned_t<T>;
   constexpr bool is_signed = std::numeric_limits<T>::is_signed;
 
   const bool          negative    = int_desc.negative.length() > 0;
@@ -1038,10 +1038,8 @@ void stringstream_parser(const std::string& text, T& value)
   }
 }
 
-template <typename T,
-         typename std::enable_if<std::is_integral<T>::value>::type* = nullptr
-         >
-void parse_value(const std::string& text, T& value)
+template <typename T, std::enable_if_t<std::is_integral_v<T>> * = nullptr>
+void parse_value(const std::string &text, T &value)
 {
     integer_parser(text, value);
 }
@@ -1075,11 +1073,9 @@ parse_value(const std::string& text, std::string& value)
 // The fallback parser. It uses the stringstream parser to parse all types
 // that have not been overloaded explicitly.  It has to be placed in the
 // source code before all other more specialized templates.
-template <typename T,
-         typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr
-         >
-void
-parse_value(const std::string& text, T& value) {
+template <typename T, std::enable_if_t<!std::is_integral_v<T>> * = nullptr>
+void parse_value(const std::string &text, T &value)
+{
   stringstream_parser(text, value);
 }
 
@@ -1271,11 +1267,7 @@ class abstract_value : public Value
     return m_implicit_value;
   }
 
-  bool
-  is_boolean() const override
-  {
-    return std::is_same<T, bool>::value;
-  }
+  bool is_boolean() const override { return std::is_same_v<T, bool>; }
 
   const T&
   get() const

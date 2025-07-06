@@ -13,13 +13,13 @@
 template<int sizeof_unit,int bit_groups>
 class BytesUnit
 {
-  using basetype
-    = typename std::conditional<sizeof_unit >= 8,
-                                uint64_t,
-                                typename std::conditional<sizeof_unit >= 4,
-                                                          uint32_t,
-                                                          uint16_t>::type>
-                                ::type;
+  using basetype = std::conditional_t<
+                               sizeof_unit >= 8,
+                               uint64_t,
+                               std::conditional_t<sizeof_unit >= 4,
+                                                  uint32_t,
+                                                  uint16_t>>;
+
   private:
     uint8_t bytes[sizeof_unit];
   public:
