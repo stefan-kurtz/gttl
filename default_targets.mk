@@ -19,7 +19,7 @@ code_check:
 
 .PHONY:clean
 clean:
-	@${RM} *.[oxd] */*.[oxd] tmp.* TMP* *.fast[aq] *.fast[aq].gz
+	@${RM} -r *.[oxd] */*.[oxd] tmp.* TMP* *.fast[aq] *.fast[aq].gz
 	@${RM} -r sfx.* *.x.dSYM/ __pycache__ simd32_seqs
 # The following are testing-files generated in tools/ntcard
 	@${RM} eco29.fasta soil_unique.fasta 70x_161nt_phread64.fastq.gz SRR19536726_1_1000.fastq

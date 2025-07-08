@@ -229,11 +229,13 @@ class BestFromThread
   }
   bool operator < (const BestFromThread &other) const
   {
+    if (it == result->end()) return false;
+    if (other.it == other.result->end()) return true;
     return *it > *other.it;
   }
   bool at_end(void) const
   {
-    return it + 1 == result->end();
+    return it == result->end() - 1;
   }
 };
 

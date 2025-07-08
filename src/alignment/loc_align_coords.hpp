@@ -1,6 +1,7 @@
 #ifndef LOC_ALIGN_COORDS_HPP
 #define LOC_ALIGN_COORDS_HPP
 
+#include <sys/types.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -8,14 +9,15 @@
 
 struct LocalAlignmentCoordinates
 {
-  size_t ustart, /* start position of local opt. alignment in <useq> */
-         usubstringlength, /* length of substring of local opt. align.
+  ssize_t ustart = -1; /* start position of local opt. alignment in <useq> */
+  ssize_t vstart = -1; /* start position of local opt. alignment in <vseq> */
+
+  size_t usubstringlength = 0, /* length of substring of local opt. align.
                               in <useq> */
-         vstart, /* start position of local opt. alignment in <vseq> */
-         vsubstringlength; /* length of substring of local opt. align.
+         vsubstringlength = 0; /* length of substring of local opt. align.
                               in <vseq> */
-  uint32_t raw_score; /* score of local alignment */
-  bool forward_strand;
+  uint32_t raw_score = 0; /* score of local alignment */
+  bool forward_strand = true;
   LocalAlignmentCoordinates(void) {};
   void show(FILE *fpout,bool dna_alphabet,const GttlMultiseq *multiseq,
             size_t seqnum) const noexcept
