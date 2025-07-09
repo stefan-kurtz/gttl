@@ -1443,11 +1443,7 @@ class OptionDetails
     return m_long;
   }
 
-  std::size_t
-  hash() const
-  {
-    return m_hash;
-  }
+  [[nodiscard]] std::size_t hash() const { return m_hash; }
 
   private:
   std::string m_short{};
@@ -1549,8 +1545,7 @@ CXXOPTS_DIAGNOSTIC_POP
   }
 
   template <typename T>
-  const T&
-  as() const
+  [[nodiscard]] const T &as() const
   {
     if (m_value == nullptr) {
         throw_or_mimic<exceptions::option_has_no_value>(

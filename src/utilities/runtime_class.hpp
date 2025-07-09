@@ -15,7 +15,7 @@ class RunTimeClass
   {
     start_time = std::chrono::high_resolution_clock::now();
   }
-  size_t to_ms(size_t time_microseconds) const
+  [[nodiscard]] size_t to_ms(size_t time_microseconds) const
   {
     return time_microseconds/size_t(1000);
   }

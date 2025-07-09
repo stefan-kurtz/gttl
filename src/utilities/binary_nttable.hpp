@@ -49,7 +49,7 @@ class BinaryNtTable
     table.set(static_cast<size_t>(hash & r_mask));
   }
 
-  double estimate_F0(void) const
+  [[nodiscard]] double estimate_F0(void) const
   {
     const size_t p0 = (size_t(1) << r_value) - table.count();
 
@@ -61,10 +61,7 @@ class BinaryNtTable
            (uint64_t(1) << (s_value + r_value));
   }
 
-  size_t F1_count_get(void) const noexcept
-  {
-    return qgram_count;
-  }
+  [[nodiscard]] size_t F1_count_get(void) const noexcept { return qgram_count; }
 
   void sequences_number_set(size_t _sequences_number)
   {
@@ -72,7 +69,7 @@ class BinaryNtTable
     sequences_number = _sequences_number;
   }
 
-  size_t sequences_number_get(void) const noexcept
+  [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
     return sequences_number;
   }

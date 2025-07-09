@@ -33,16 +33,17 @@ class SeqReaderOptions
   SeqReaderOptions(size_t,bool);
 
   void parse(int argc, char **argv);
-  bool help_option_is_set(void) const noexcept;
-  bool statistics_option_is_set(void) const noexcept;
-  bool echo_option_is_set(void) const noexcept;
-  bool fasta_output_option_is_set(void) const noexcept;
-  bool mapped_option_is_set(void) const noexcept;
-  std::string encoding_type_get(void) const noexcept;
-  size_t split_size_get(void) const noexcept;
-  size_t num_threads_get(void) const noexcept;
-  size_t line_width_get(void) const noexcept;
-  const std::vector<std::string> &inputfiles_get(void) const noexcept;
-  hash_mode_type hash_mode_get(void) const;
+  [[nodiscard]] bool help_option_is_set(void) const noexcept;
+  [[nodiscard]] bool statistics_option_is_set(void) const noexcept;
+  [[nodiscard]] bool echo_option_is_set(void) const noexcept;
+  [[nodiscard]] bool fasta_output_option_is_set(void) const noexcept;
+  [[nodiscard]] bool mapped_option_is_set(void) const noexcept;
+  [[nodiscard]] std::string encoding_type_get(void) const noexcept;
+  [[nodiscard]] size_t split_size_get(void) const noexcept;
+  [[nodiscard]] size_t num_threads_get(void) const noexcept;
+  [[nodiscard]] size_t line_width_get(void) const noexcept;
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept;
+  [[nodiscard]] hash_mode_type hash_mode_get(void) const;
 };
 #endif

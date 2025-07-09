@@ -409,7 +409,7 @@ class LSBuint64Sorter
     buffer_width = _bucket_width;
     uint64_buffer = new uint64_t [_bucket_width];
   }
-  bool reversed_byte_order_get(void) const noexcept
+  [[nodiscard]] bool reversed_byte_order_get(void) const noexcept
   {
     return false; /* Not used */
   }
@@ -447,7 +447,7 @@ class LSBbytesSorter
   {
     uint8_buffer = new uint8_t [sizeof_unit * maximum_bucket_width];
   }
-  bool reversed_byte_order_get(void) const noexcept
+  [[nodiscard]] bool reversed_byte_order_get(void) const noexcept
   {
     return reversed_byte_order;
   }
@@ -637,10 +637,7 @@ class PartInfoTab
       }
     }
   }
-  size_t size(void) const noexcept
-  {
-    return end_indexes.size();
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return end_indexes.size(); }
   std::pair<size_t,size_t> operator [](size_t idx) const noexcept
   {
     return std::make_pair(idx == 0 ? 0 : end_indexes[idx-1],

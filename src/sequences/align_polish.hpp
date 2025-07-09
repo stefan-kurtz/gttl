@@ -43,7 +43,8 @@ class AlignmentPolishing
                           score + match_score,maxscore);
     }
   }
-  std::string polish_intbits2string(size_t bits,size_t bs) const noexcept
+  [[nodiscard]] std::string
+  polish_intbits2string(size_t bits, size_t bs) const noexcept
   {
     std::string cs{};
 
@@ -92,8 +93,8 @@ class AlignmentPolishing
     delete[] values;
   }
 
-  bool is_polished_brute_force(uint64_t matchhistory,bool withoutput)
-             const noexcept
+  [[nodiscard]] bool
+  is_polished_brute_force(uint64_t matchhistory, bool withoutput) const noexcept
   {
     size_t idx;
     uint64_t mask;
@@ -119,14 +120,14 @@ class AlignmentPolishing
     }
     return true;
   }
-  bool is_polished(uint64_t match_history) const noexcept
+  [[nodiscard]] bool is_polished(uint64_t match_history) const noexcept
   {
     auto value0 = values[match_history & history_mask];
     auto value1 = values[(match_history >> cut_depth) & history_mask];
     return value0.diff_from_max >= 0 &&
            (value0.score_sum + value1.diff_from_max) >= 0;
   }
-  size_t lag_last_d_with_pp_get(void) const noexcept
+  [[nodiscard]] size_t lag_last_d_with_pp_get(void) const noexcept
   {
     return lag_last_d_with_pp;
   }

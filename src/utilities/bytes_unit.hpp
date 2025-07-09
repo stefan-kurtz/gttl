@@ -89,9 +89,10 @@ class BytesUnit
       memcpy(&bytes[0],reinterpret_cast<uint8_t *>(&integer),sizeof integer);
     }
 
-    template<int idx>
-    uint64_t decode_at(const GttlBitPacker<sizeof_unit,bit_groups>
-                             &bitpacker) const noexcept
+    template <int idx>
+    [[nodiscard]] uint64_t
+    decode_at(const GttlBitPacker<sizeof_unit, bit_groups> &bitpacker)
+                                 const noexcept
     {
       static_assert(idx >= 0 && idx < bit_groups);
       static_assert(std::is_trivially_copyable_v<basetype>);
@@ -178,7 +179,7 @@ class BytesUnit
       return memcmp(&bytes[0],&other.bytes[0],sizeof_unit) < 0;
     }
 
-    size_t sum(void) const noexcept
+    [[nodiscard]] size_t sum(void) const noexcept
     {
       const basetype integer = *(reinterpret_cast<const basetype *>(bytes));
 

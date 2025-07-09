@@ -20,15 +20,15 @@ class NtcardOptions
   public:
     NtcardOptions(void);
     void parse(int argc, char **argv);
-    const std::string &inputfile_get(void) const noexcept;
-    size_t qgram_length_get(void) const noexcept;
-    size_t s_get(void) const noexcept;
-    size_t r_get(void) const noexcept;
-    bool show_f_option_is_set(void) const noexcept;
-    bool fast_option_is_set(void) const noexcept;
-    bool binary_option_is_set(void) const noexcept;
-    bool handle_wildcard_like_A_is_set(void) const noexcept;
-    bool help_option_is_set(void) const noexcept;
-    size_t num_threads_get(void) const noexcept;
+    [[nodiscard]] const std::string &inputfile_get(void) const noexcept;
+    [[nodiscard]] size_t qgram_length_get(void) const noexcept;
+    [[nodiscard]] size_t s_get(void) const noexcept;
+    [[nodiscard]] size_t r_get(void) const noexcept;
+    [[nodiscard]] bool show_f_option_is_set(void) const noexcept;
+    [[nodiscard]] bool fast_option_is_set(void) const noexcept;
+    [[nodiscard]] bool binary_option_is_set(void) const noexcept;
+    [[nodiscard]] bool handle_wildcard_like_A_is_set(void) const noexcept;
+    [[nodiscard]] bool help_option_is_set(void) const noexcept;
+    [[nodiscard]] size_t num_threads_get(void) const noexcept;
 };
 #endif

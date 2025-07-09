@@ -9,7 +9,8 @@ Checks: >
   misc-const-correctness,
   misc-include-cleaner,
   readability-isolate-declaration,
-  modernize-type-traits
+  modernize-type-traits,
+  modernize-use-nodiscard
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false

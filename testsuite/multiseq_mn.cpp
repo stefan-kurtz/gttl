@@ -123,50 +123,45 @@ class MultiseqOptions
       throw std::invalid_argument(e.what());
     }
   }
-  bool help_option_is_set(void) const noexcept
+  [[nodiscard]] bool help_option_is_set(void) const noexcept
   {
     return help_option;
   }
-  bool protein_option_is_set(void) const noexcept
+  [[nodiscard]] bool protein_option_is_set(void) const noexcept
   {
     return protein_option;
   }
-  bool zipped_option_is_set(void) const noexcept
+  [[nodiscard]] bool zipped_option_is_set(void) const noexcept
   {
     return zipped_option;
   }
-  bool rankdist_option_is_set(void) const noexcept
+  [[nodiscard]] bool rankdist_option_is_set(void) const noexcept
   {
     return rankdist_option;
   }
-  bool short_header_option_is_set(void) const noexcept
+  [[nodiscard]] bool short_header_option_is_set(void) const noexcept
   {
     return short_header_option;
   }
-  bool sorted_by_header_option_is_set(void) const noexcept
+  [[nodiscard]] bool sorted_by_header_option_is_set(void) const noexcept
   {
     return sorted_by_header_option;
   }
-  bool statistics_option_is_set(void) const noexcept
+  [[nodiscard]] bool statistics_option_is_set(void) const noexcept
   {
     return statistics_option;
   }
-  int width_option_get(void) const noexcept
-  {
-    return width_arg;
-  }
-  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  [[nodiscard]] int width_option_get(void) const noexcept { return width_arg; }
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept
   {
     return inputfiles;
   }
-  size_t sample_size_get(void) const noexcept
+  [[nodiscard]] size_t sample_size_get(void) const noexcept
   {
     return sample_size;
   }
-  unsigned int seed_get(void) const noexcept
-  {
-    return seed;
-  }
+  [[nodiscard]] unsigned int seed_get(void) const noexcept { return seed; }
 };
 
 int main(int argc, char *argv[])

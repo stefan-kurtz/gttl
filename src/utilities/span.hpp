@@ -27,10 +27,7 @@ public:
       return *this;
     }
 
-    size_t size(void) const noexcept
-    {
-      return num_elements;
-    }
+    [[nodiscard]] size_t size(void) const noexcept { return num_elements; }
 
     T* begin(void) noexcept
     {

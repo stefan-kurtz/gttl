@@ -34,16 +34,16 @@ class NtTableResult
   {
     delete[] f_n_ptr;
   }
-  double f_n_at(size_t idx) const
+  [[nodiscard]] double f_n_at(size_t idx) const
   {
     assert(idx <= t_max);
     return f_n_ptr[idx];
   }
-  double F0_get(void) const { return F0; }
-  double F1_get(void) const { return F1; }
-  size_t F1_count_get(void) const { return F1_count; }
-  size_t t_max_get(void) const { return t_max; }
-  double count_estimate_get(void) const
+  [[nodiscard]] double F0_get(void) const { return F0; }
+  [[nodiscard]] double F1_get(void) const { return F1; }
+  [[nodiscard]] size_t F1_count_get(void) const { return F1_count; }
+  [[nodiscard]] size_t t_max_get(void) const { return t_max; }
+  [[nodiscard]] double count_estimate_get(void) const
   {
     return F0_get() + (F0_get() - f_n_at(1)) * 2.0;
   }
@@ -102,7 +102,7 @@ class NtTable
     qgram_count += other.qgram_count;
     sequences_number += other.sequences_number;
   }
-  double estimate_F0(void) const
+  [[nodiscard]] double estimate_F0(void) const
   {
     size_t p0 = 0;
     for (auto t : table)
@@ -121,7 +121,7 @@ class NtTable
            (uint64_t(1) << (s_value + r_value));
   }
 
-  NtTableResult estimate_all(void) const
+  [[nodiscard]] NtTableResult estimate_all(void) const
   {
     size_t t_max = 0;
     for (auto t : table)
@@ -181,10 +181,7 @@ class NtTable
     return NtTableResult(f_n, t_max, F0, F1, qgram_count);
   }
 
-  size_t F1_count_get(void) const noexcept
-  {
-    return qgram_count;
-  }
+  [[nodiscard]] size_t F1_count_get(void) const noexcept { return qgram_count; }
 
   void sequences_number_set(size_t _sequences_number)
   {
@@ -192,7 +189,7 @@ class NtTable
     sequences_number = _sequences_number;
   }
 
-  size_t sequences_number_get(void) const noexcept
+  [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
     return sequences_number;
   }

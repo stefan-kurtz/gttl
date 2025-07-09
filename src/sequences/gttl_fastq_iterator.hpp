@@ -20,7 +20,7 @@ class GttlFastQIterator
       std::array<StringStoreType,4> seqbufs{};
       private:
       template<int state>
-      auto access(void) const noexcept
+      [[nodiscard]] auto access(void) const noexcept
       {
         if constexpr (std::is_same_v<StringStoreType, std::string>)
         {
@@ -118,7 +118,7 @@ class GttlFastQIterator
     {
       line_iterator.reset();
     }
-    size_t line_number(void) const noexcept
+    [[nodiscard]] size_t line_number(void) const noexcept
     {
       return line_iterator->line_number_get();
     }

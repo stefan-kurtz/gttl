@@ -32,6 +32,7 @@ class OrderedIntegerSequence
   }
 #endif
   public:
+  [[nodiscard]]
   size_t backward_sec_idx_largest_leq(size_t idx,size_t section_upperbound)
     const noexcept
   {
@@ -47,6 +48,7 @@ class OrderedIntegerSequence
   }
 
   private:
+  [[nodiscard]]
   size_t binarysearch_sec_idx_largest_leq(size_t idx) const noexcept
   {
     const size_t *secstart_begin = sectionstart;
@@ -147,11 +149,11 @@ class OrderedIntegerSequence
     return size_t(1) + static_cast<size_t> (found - leftorig);
   }
  public:
-  size_t section_number_get(size_t elem) const noexcept
+  [[nodiscard]] size_t section_number_get(size_t elem) const noexcept
   {
     return elem >> logsectionsize;
   }
-  size_t section_min_elem(size_t idx) const noexcept
+  [[nodiscard]] size_t section_min_elem(size_t idx) const noexcept
   {
     return idx << logsectionsize;
   }
@@ -222,7 +224,7 @@ class OrderedIntegerSequence
     previouselem = elem;
   }
 
-  bool is_member(size_t elem) const noexcept
+  [[nodiscard]] bool is_member(size_t elem) const noexcept
   {
     if (elem <= maxelement)
     {
@@ -239,7 +241,7 @@ class OrderedIntegerSequence
     return false;
   }
 
-  size_t pos2seqnum(size_t pos) const noexcept
+  [[nodiscard]] size_t pos2seqnum(size_t pos) const noexcept
   {
     const size_t sectionnum = section_number_get(pos);
     assert(pos <= maxelement);
@@ -310,13 +312,14 @@ class OrderedIntegerSequence
     }
   }
 
-  size_t get_element_at(size_t sectionnum,size_t idx) const noexcept
+  [[nodiscard]] size_t
+  get_element_at(size_t sectionnum, size_t idx) const noexcept
   {
     assert(idx < nextfree);
     return section_min_elem(sectionnum) + elements[idx];
   }
 
-  size_t get_element_at(size_t idx) const noexcept
+  [[nodiscard]] size_t get_element_at(size_t idx) const noexcept
   {
     assert(idx < nextfree);
     const size_t sectionnum = binarysearch_sec_idx_largest_leq(idx);

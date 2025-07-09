@@ -62,19 +62,13 @@ class Buckets
   {
     return bucket_ends;
   }
-  size_t size(void) const noexcept
-  {
-    return num_buckets;
-  }
-  Iterator begin() const noexcept
+  [[nodiscard]] size_t size(void) const noexcept { return num_buckets; }
+  [[nodiscard]] Iterator begin() const noexcept
   {
     return Iterator(bucket_ends,num_buckets);
   }
-  Iterator end() const
-  {
-    return Iterator(nullptr,num_buckets);
-  }
-  basetype maximum_width_get(void) const noexcept
+  [[nodiscard]] Iterator end() const { return Iterator(nullptr, num_buckets); }
+  [[nodiscard]] basetype maximum_width_get(void) const noexcept
   {
     basetype bucket_start = 0;
     basetype maximum_bucket_width = 0;

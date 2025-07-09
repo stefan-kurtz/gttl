@@ -42,7 +42,7 @@ class DisplayOptions
   DisplayOptions(void)
   { }
 
-  std::string allowed_help(void) const
+  [[nodiscard]] std::string allowed_help(void) const
   {
     return string_values_join(", ", allowed_options.begin(),
                                     allowed_options.end());

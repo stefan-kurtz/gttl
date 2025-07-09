@@ -40,16 +40,13 @@ class LineIteratorSubstring
     view = _view;
     view_len = _view_len;
   }
-  size_t size(void) const noexcept {return view_len;}
+  [[nodiscard]] size_t size(void) const noexcept { return view_len; }
   void clear(void)
   {
     view = nullptr;
     view_len = 0;
   }
-  const char *data(void) const noexcept
-  {
-    return view;
-  }
+  [[nodiscard]] const char *data(void) const noexcept { return view; }
   void pop_back(void)
   {
     assert(view_len > 0);
@@ -178,7 +175,7 @@ class GttlLineIterator
     {
       separator = _separator;
     }
-    size_t line_number_get(void) const noexcept
+    [[nodiscard]] size_t line_number_get(void) const noexcept
     {
       return line_number;
     }
@@ -266,11 +263,8 @@ class GttlLineIterator
       }
       return false;
     }
-    bool endofunit_get(void) const noexcept
-    {
-      return endofunit;
-    }
-    size_t file_index_get(void) const noexcept
+    [[nodiscard]] bool endofunit_get(void) const noexcept { return endofunit; }
+    [[nodiscard]] size_t file_index_get(void) const noexcept
     {
       return file_index;
     }

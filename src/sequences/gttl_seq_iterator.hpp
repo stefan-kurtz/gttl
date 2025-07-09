@@ -166,7 +166,7 @@ class GttlSeqIterator
       static_assert(buf_size == 0);
       gttl_li.separator_set('>');
     }
-    size_t line_number(void) const noexcept
+    [[nodiscard]] size_t line_number(void) const noexcept
     {
       return gttl_li.line_number_get();
     }

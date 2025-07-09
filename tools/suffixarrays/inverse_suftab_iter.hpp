@@ -15,7 +15,7 @@ class InverseSuftabReader
 {
   const std::string inverse_suftab_outputfile;
   const BinaryFileReader<SuftabBaseType> inverse_suftab_reader;
-  bool isa_file_is_up_to_date(const std::string &indexname) const
+  [[nodiscard]] bool isa_file_is_up_to_date(const std::string &indexname) const
   {
     const std::string suftab_inputfile(indexname + ".suf");
     const std::string inverse_suftab_inputfile(indexname + ".isa");
@@ -68,14 +68,8 @@ class InverseSuftabReader
                                                            totallength))
     , inverse_suftab_reader(inverse_suftab_outputfile)
   { }
-  auto begin(void) const
-  {
-    return inverse_suftab_reader.begin();
-  }
-  auto end(void) const
-  {
-    return inverse_suftab_reader.end();
-  }
+  [[nodiscard]] auto begin(void) const { return inverse_suftab_reader.begin(); }
+  [[nodiscard]] auto end(void) const { return inverse_suftab_reader.end(); }
   ~InverseSuftabReader(void)
   { }
 };

@@ -24,7 +24,8 @@ class MatrixPartition
 {
   using MatrixPartitionVector = std::vector<MatrixPartitionIntervalPair>;
   MatrixPartitionVector itv_list;
-  MatrixPartitionIntervalPair split_interval(size_t a,size_t b) const noexcept
+  [[nodiscard]] MatrixPartitionIntervalPair
+  split_interval(size_t a, size_t b) const noexcept
   {
     const size_t h = b/2 + (b % 2);
     return MatrixPartitionIntervalPair{a,h,a+h,b-h};
@@ -119,18 +120,9 @@ class MatrixPartition
     return itv_list[idx];
   }
   using ConstIterator = MatrixPartitionVector::const_iterator;
-  ConstIterator begin(void) const
-  {
-    return itv_list.cbegin();
-  }
+  [[nodiscard]] ConstIterator begin(void) const { return itv_list.cbegin(); }
 
-  ConstIterator end(void) const
-  {
-    return itv_list.cend();
-  }
-  size_t size(void) const noexcept
-  {
-    return itv_list.size();
-  }
+  [[nodiscard]] ConstIterator end(void) const { return itv_list.cend(); }
+  [[nodiscard]] size_t size(void) const noexcept { return itv_list.size(); }
 };
 #endif

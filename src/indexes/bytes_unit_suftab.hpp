@@ -86,9 +86,6 @@ class BytesUnitSUFtab
   {
     return decode_seqnum_relpos(bu_suftab[interval_bound]);
   }
-  size_t size(void) const noexcept
-  {
-    return nonspecial_suffixes;
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return nonspecial_suffixes; }
 };
 #endif

@@ -60,12 +60,9 @@ class Multibitvector
     assert(idx < num_bits);
     return multibitvector[idx >> bitvector_log][idx & bitvector_mask];
   }
-  size_t size(void) const noexcept
-  {
-    return num_bits;
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return num_bits; }
 
-  size_t size_in_bytes(void) const
+  [[nodiscard]] size_t size_in_bytes(void) const
   {
     return num_bitvectors * sizeof(Bitvector);
   }
@@ -103,7 +100,7 @@ class Multibitvector
   {
     return !(*this == rhs);
   }
-  size_t count(void) const noexcept
+  [[nodiscard]] size_t count(void) const noexcept
   {
     if constexpr (track_count)
     {

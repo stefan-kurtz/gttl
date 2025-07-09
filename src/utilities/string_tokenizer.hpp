@@ -43,7 +43,8 @@ class StringTokenizer
       token_list.push_back(std::string(buffer));
     }
   }
-  const std::vector<std::string> &token_list_get(void) const noexcept
+  [[nodiscard]] const std::vector<std::string> &
+  token_list_get(void) const noexcept
   {
     return token_list;
   }

@@ -77,15 +77,12 @@ class CyclicBuffer
     }
     return space + static_cast<size_t>(first);
   }
-  const Basetype *pointer_to_array(void) const noexcept
+  [[nodiscard]] const Basetype *pointer_to_array(void) const noexcept
   {
     assert(num_elems == max_num_elems);
     return &space[0];
   }
-  size_t size(void) const noexcept
-  {
-    return num_elems;
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return num_elems; }
   void reset(void) noexcept
   {
     num_elems = 0;

@@ -16,10 +16,12 @@ class UnwordsOptions
   public:
   UnwordsOptions(void);
   void parse(int argc, char **argv);
-  bool help_option_is_set(void) const noexcept;
-  bool ignore_reverse_complement_option_is_set(void) const noexcept;
-  bool store_sequences_option_is_set(void) const noexcept;
-  size_t qgram_length_max_get(void) const noexcept;
-  const std::vector<std::string> &inputfiles_get(void) const noexcept;
+  [[nodiscard]] bool help_option_is_set(void) const noexcept;
+  [[nodiscard]] bool
+  ignore_reverse_complement_option_is_set(void) const noexcept;
+  [[nodiscard]] bool store_sequences_option_is_set(void) const noexcept;
+  [[nodiscard]] size_t qgram_length_max_get(void) const noexcept;
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept;
 };
 #endif

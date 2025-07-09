@@ -55,24 +55,25 @@ class SainOptions
   SainOptions(void) { }
   void parse(int argc, char **argv);
 
-  bool help_opt_is_set(void) const noexcept;
-  bool verbose_opt_is_set(void) const noexcept;
-  bool plain_input_format_opt_is_set(void) const noexcept;
-  bool check_suftab_opt_is_set(void) const noexcept;
-  bool abs_suftab_out_opt_is_set(void) const noexcept;
-  bool abs_suftab_show_opt_is_set(void) const noexcept;
-  bool rel_suftab_out_opt_is_set(void) const noexcept;
-  bool rel_suftab_show_opt_is_set(void) const noexcept;
-  bool tistab_out_opt_is_set(void) const noexcept;
-  bool tistab_show_opt_is_set(void) const noexcept;
-  bool reverse_complement_option_is_set(void) const noexcept;
-  bool buffered_option_is_set(void) const noexcept;
-  bool lcptab_show_opt_is_set(void) const noexcept;
-  bool succinct_option_is_set(void) const noexcept;
-  LcptabMethod lcptab_method_get(void) const noexcept;
-  std::string indexname_get(void) const noexcept;
-  const std::vector<std::string> &inputfiles_get(void) const noexcept;
-  int intset_sizeof_get(void) const noexcept;
+  [[nodiscard]] bool help_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool verbose_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool plain_input_format_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool check_suftab_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool abs_suftab_out_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool abs_suftab_show_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool rel_suftab_out_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool rel_suftab_show_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool tistab_out_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool tistab_show_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool reverse_complement_option_is_set(void) const noexcept;
+  [[nodiscard]] bool buffered_option_is_set(void) const noexcept;
+  [[nodiscard]] bool lcptab_show_opt_is_set(void) const noexcept;
+  [[nodiscard]] bool succinct_option_is_set(void) const noexcept;
+  [[nodiscard]] LcptabMethod lcptab_method_get(void) const noexcept;
+  [[nodiscard]] std::string indexname_get(void) const noexcept;
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept;
+  [[nodiscard]] int intset_sizeof_get(void) const noexcept;
 };
 
 #endif

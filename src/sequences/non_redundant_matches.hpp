@@ -117,9 +117,6 @@ class NonRedundantMatches
     assert(idx < good.size());
     return good[idx];
   }
-  size_t count(void) const noexcept
-  {
-    return good.count();
-  }
+  [[nodiscard]] size_t count(void) const noexcept { return good.count(); }
 };
 #endif

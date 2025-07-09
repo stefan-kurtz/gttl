@@ -213,7 +213,7 @@ class QgramRecHashValueIterator
       }
       return code;
     }
-    size_t qgram_length_get(void) const noexcept
+    [[nodiscard]] size_t qgram_length_get(void) const noexcept
     {
       return qgram_length;
     }

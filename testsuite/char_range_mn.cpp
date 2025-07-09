@@ -94,27 +94,28 @@ class CharRangeOptions
       throw std::invalid_argument(e.what());
     }
   }
-  bool help_option_is_set(void) const noexcept
+  [[nodiscard]] bool help_option_is_set(void) const noexcept
   {
     return help_option;
   }
-  bool invert_option_is_set(void) const noexcept
+  [[nodiscard]] bool invert_option_is_set(void) const noexcept
   {
     return invert_option;
   }
-  bool reverse_option_is_set(void) const noexcept
+  [[nodiscard]] bool reverse_option_is_set(void) const noexcept
   {
     return reverse_option;
   }
-  bool singlechar_option_is_set(void) const noexcept
+  [[nodiscard]] bool singlechar_option_is_set(void) const noexcept
   {
     return singlechar_option;
   }
-  bool multiseq_option_is_set(void) const noexcept
+  [[nodiscard]] bool multiseq_option_is_set(void) const noexcept
   {
     return multiseq_option;
   }
-  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept
   {
     return this->inputfiles;
   }

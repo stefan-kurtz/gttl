@@ -60,11 +60,8 @@ class BottomUpTraversalStack
     assert(nextfree > 0);
     nextfree--;
   }
-  size_t size(void) const noexcept
-  {
-    return nextfree;
-  }
-  size_t max_stack_size_get(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept { return nextfree; }
+  [[nodiscard]] size_t max_stack_size_get(void) const noexcept
   {
     return max_stack_size;
   }

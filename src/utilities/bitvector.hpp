@@ -12,7 +12,7 @@ class Bitvector
   static constexpr const size_t bits = sizeof(uint64_t) * CHAR_BIT;
   static constexpr const uint64_t first_bit = uint64_t(1) << (bits - 1);
   uint64_t value;
-  uint64_t the_bit(size_t idx) const noexcept
+  [[nodiscard]] uint64_t the_bit(size_t idx) const noexcept
   {
     assert(idx < bits);
     return first_bit >> idx;
@@ -48,11 +48,11 @@ class Bitvector
   {
     return value != rhs.value;
   }
-  size_t count(void) const noexcept
+  [[nodiscard]] size_t count(void) const noexcept
   {
     return popcount_uint64_t(value);
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     s.reserve(bits);

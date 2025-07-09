@@ -73,18 +73,20 @@ class InvertibleIntegercodeTransformer4
     }
     return std::make_pair(fwd_code,rev_compl_code);
   }
-  uint64_t next_hash_value_get(uint8_t old_t_char,
-                               uint64_t integer_code,
-                               uint8_t new_t_char) const noexcept
+  [[nodiscard]] uint64_t
+  next_hash_value_get(uint8_t old_t_char,
+                      uint64_t integer_code,
+                      uint8_t new_t_char) const noexcept
   {
     integer_code -= (static_cast<uint64_t>(old_t_char) << shift);
     integer_code *= uint64_t(4);
     integer_code += static_cast<uint64_t>(new_t_char);
     return integer_code;
   }
-  uint64_t next_compl_hash_value_get(uint8_t compl_old_t_char,
-                                     uint64_t integer_code,
-                                     uint8_t compl_new_t_char) const noexcept
+  [[nodiscard]] uint64_t
+  next_compl_hash_value_get(uint8_t compl_old_t_char,
+                            uint64_t integer_code,
+                            uint8_t compl_new_t_char) const noexcept
   {
     assert(integer_code >= static_cast<uint64_t>(compl_old_t_char));
     integer_code -= compl_old_t_char;
@@ -127,9 +129,10 @@ class InvertibleIntegercodeTransformer20
   {
     return first_fwd_qgram_integer_code<20>(sequence,qgram_length);
   }
-  uint64_t next_hash_value_get(uint8_t old_t_char,
-                               uint64_t integer_code,
-                               uint8_t new_t_char) const noexcept
+  [[nodiscard]] uint64_t
+  next_hash_value_get(uint8_t old_t_char,
+                      uint64_t integer_code,
+                      uint8_t new_t_char) const noexcept
   {
     integer_code -= static_cast<uint64_t>(old_t_char) * msb_weight;
     integer_code *= static_cast<uint64_t>(20);

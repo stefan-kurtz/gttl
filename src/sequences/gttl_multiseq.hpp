@@ -70,7 +70,7 @@ class GttlMultiseq
            concatenated_sequences.size() * sizeof(char));
   }
 
-  size_t size_in_bytes_extra(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes_extra(void) const noexcept
   {
     return sizeof(GttlMultiseq) +
            sizeof(std::string) * header_vector.size() +
@@ -78,13 +78,13 @@ class GttlMultiseq
            length_dist_map.size() * 2 * sizeof(size_t);
   }
 
-  size_t size_in_bytes_sequence(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes_sequence(void) const noexcept
   {
     return sequence_offsets.size() * sizeof(size_t) +
            concatenated_sequences.size() * sizeof(char);
   }
 
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return size_in_bytes_sequence() + size_in_bytes_extra();
   }
@@ -188,8 +188,8 @@ class GttlMultiseq
   /* Returns start position and length of header substring,
    * short version from start to first space(excluded). */
 
-  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
-     const noexcept
+  [[nodiscard]] std::pair<size_t, size_t>
+  short_header_substring(const std::string_view header) const noexcept
   {
     size_t idx;
     for (idx = 0; idx < header.size() && !isspace(header[idx]); idx++)
@@ -197,9 +197,9 @@ class GttlMultiseq
     return std::make_pair(0,idx);
   }
 
-  template<char first_delim,char second_delim>
-  std::pair<size_t,size_t> short_header_substring(const std::string_view header)
-      const noexcept
+  template <char first_delim, char second_delim>
+  [[nodiscard]] std::pair<size_t, size_t>
+  short_header_substring(const std::string_view header) const noexcept
   {
     const char *const first_delim_ptr = static_cast<const char *>(std::memchr(
                                  static_cast<const void *>(header.data()),
@@ -324,43 +324,43 @@ class GttlMultiseq
   ~GttlMultiseq(void)
   { }
 
-  size_t sequences_number_get(void) const noexcept
+  [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
     return sequences_number;
   }
 
-  size_t sequences_total_length_get(void) const noexcept
+  [[nodiscard]] size_t sequences_total_length_get(void) const noexcept
   {
     return sequences_total_length;
   }
 
-  size_t sequences_minimum_length_get(void) const noexcept
+  [[nodiscard]] size_t sequences_minimum_length_get(void) const noexcept
   {
     return sequences_minimum_length;
   }
 
-  size_t sequences_maximum_length_get(void) const noexcept
+  [[nodiscard]] size_t sequences_maximum_length_get(void) const noexcept
   {
     return sequences_maximum_length;
   }
 
-  int sequences_length_bits_get(void) const noexcept
+  [[nodiscard]] int sequences_length_bits_get(void) const noexcept
   {
     return gttl_required_bits<size_t>(sequences_maximum_length);
   }
 
-  int sequences_number_bits_get(void) const noexcept
+  [[nodiscard]] int sequences_number_bits_get(void) const noexcept
   {
     assert(sequences_number_get() > 0);
     return gttl_required_bits<size_t>(sequences_number_get() - 1);
   }
 
-  int sequences_bits_get(void) const noexcept
+  [[nodiscard]] int sequences_bits_get(void) const noexcept
   {
     return sequences_number_bits_get() + sequences_length_bits_get();
   }
 
-  char padding_char_get(void) const
+  [[nodiscard]] char padding_char_get(void) const
   {
     if (!constant_padding_char)
     {
@@ -376,18 +376,18 @@ class GttlMultiseq
     has_reverse_complement = true;
   }
 
-  bool has_reverse_complement_is_set(void) const noexcept
+  [[nodiscard]] bool has_reverse_complement_is_set(void) const noexcept
   {
     return has_reverse_complement;
   }
 
-  bool has_read_pairs_is_set(void) const noexcept
+  [[nodiscard]] bool has_read_pairs_is_set(void) const noexcept
   {
     return has_read_pairs;
   }
 
   /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */
-  size_t sequence_length_get(size_t seqnum) const noexcept
+  [[nodiscard]] size_t sequence_length_get(size_t seqnum) const noexcept
   {
     /* To Check whether there are any problems considering the pointer at
     sequences_number goes out of bound and is used for the length of the last
@@ -398,7 +398,7 @@ class GttlMultiseq
   }
 
   /* Returns a pointer to the sequence with number seqnum */
-  const char *sequence_ptr_get(size_t seqnum) const noexcept
+  [[nodiscard]] const char *sequence_ptr_get(size_t seqnum) const noexcept
   {
     assert(seqnum < sequences_number_get() &&
             sequence_offsets[seqnum] < concatenated_sequences.size());
@@ -408,7 +408,8 @@ class GttlMultiseq
   /* Returns a pointer to the sequence with number seqnum */
   /* This function shall only be called after transforming the sequences
       using a LiterateMultiseq */
-  const uint8_t *encoded_sequence_ptr_get(size_t seqnum) const noexcept
+  [[nodiscard]] const uint8_t *
+  encoded_sequence_ptr_get(size_t seqnum) const noexcept
   {
     assert(seqnum < sequences_number_get() &&
             sequence_offsets[seqnum] < concatenated_sequences.size());
@@ -417,12 +418,12 @@ class GttlMultiseq
                             sequence_offsets[seqnum]);
   }
 
-  const char *sequence_ptr_get(void) const noexcept
+  [[nodiscard]] const char *sequence_ptr_get(void) const noexcept
   {
     return sequence_ptr_get(0);
   }
 
-  uint8_t sequence_char_get(size_t position) const noexcept
+  [[nodiscard]] uint8_t sequence_char_get(size_t position) const noexcept
   {
     return static_cast<uint8_t>(concatenated_sequences[position+1]);
   }
@@ -434,13 +435,14 @@ class GttlMultiseq
     return concatenated_sequences.data() + sequence_offsets[seqnum];
   }
 
-  const std::string_view header_get(size_t seqnum) const noexcept
+  [[nodiscard]] const std::string_view header_get(size_t seqnum) const noexcept
   {
     assert(seqnum < header_vector.size());
     return header_vector[seqnum];
   }
 
-  std::pair<size_t,size_t> short_header_get(size_t seqnum) const noexcept
+  [[nodiscard]] std::pair<size_t, size_t>
+  short_header_get(size_t seqnum) const noexcept
   {
     assert(seqnum < short_header_cache.size());
     uint16_t sh_offset;
@@ -450,7 +452,7 @@ class GttlMultiseq
                           static_cast<size_t>(sh_len));
   }
 
-  std::vector<std::string> statistics() const noexcept
+  [[nodiscard]] std::vector<std::string> statistics() const noexcept
   {
     std::vector<std::string> log_vector;
     log_vector.push_back(std::string("sequences_number\t") +
@@ -468,8 +470,8 @@ class GttlMultiseq
     return log_vector;
   }
 
-  std::vector<std::pair<size_t,size_t>> length_distribution(void)
-      const noexcept
+  [[nodiscard]] std::vector<std::pair<size_t, size_t>>
+  length_distribution(void) const noexcept
   {
     std::vector<std::pair<size_t,size_t>> length_dist_table;
     length_dist_table.reserve(length_dist_map.size());
@@ -480,7 +482,8 @@ class GttlMultiseq
     std::sort(length_dist_table.begin(),length_dist_table.end());
     return length_dist_table;
   }
-  size_t total_number_of_suffixes(size_t prefix_length) const noexcept
+  [[nodiscard]] size_t
+  total_number_of_suffixes(size_t prefix_length) const noexcept
   {
     size_t total = 0;
     for (auto &&element : length_dist_map)
@@ -493,8 +496,8 @@ class GttlMultiseq
     }
     return total;
   }
-  std::pair<const char *,size_t> header_ptr_with_length(size_t seqnum,
-                                                        bool short_header) const
+  [[nodiscard]] std::pair<const char *, size_t>
+  header_ptr_with_length(size_t seqnum, bool short_header) const
   {
     const std::string_view header = header_get(seqnum);
     size_t header_offset;

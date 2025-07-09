@@ -37,7 +37,7 @@ class FSPrioStore
     }
   }
 
-  size_t size(void) const
+  [[nodiscard]] size_t size(void) const
   {
     if constexpr (heap_based)
     {
@@ -48,12 +48,12 @@ class FSPrioStore
     }
   }
 
-  bool is_empty(void) const
+  [[nodiscard]] bool is_empty(void) const
   {
     return static_cast<bool>(size() == 0);
   }
 
-  bool is_full(void) const
+  [[nodiscard]] bool is_full(void) const
   {
     return static_cast<bool>(size() == capacity);
   }
@@ -136,7 +136,7 @@ class FSPrioStore
       return elements.begin() + num_elements;
     }
   }
-  ConstIterator begin() const
+  [[nodiscard]] ConstIterator begin() const
   {
     if constexpr (heap_based)
     {
@@ -144,7 +144,7 @@ class FSPrioStore
     }
     return elements.begin();
   }
-  ConstIterator end() const
+  [[nodiscard]] ConstIterator end() const
   {
     if constexpr (heap_based)
     {
@@ -154,7 +154,7 @@ class FSPrioStore
       return elements.begin() + num_elements;
     }
   }
-  ConstIterator cbegin() const
+  [[nodiscard]] ConstIterator cbegin() const
   {
     if constexpr (heap_based)
     {
@@ -162,7 +162,7 @@ class FSPrioStore
     }
     return elements.cbegin();
   }
-  ConstIterator cend() const
+  [[nodiscard]] ConstIterator cend() const
   {
     if constexpr (heap_based)
     {

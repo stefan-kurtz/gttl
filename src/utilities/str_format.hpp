@@ -41,10 +41,7 @@ class StrFormat
     {
       STR_FORMAT_VARIABLE(=);
     }
-    std::string str(void) const
-    {
-      return this_string;
-    }
+    [[nodiscard]] std::string str(void) const { return this_string; }
     void append(std::string &more)
     {
       this_string += more;

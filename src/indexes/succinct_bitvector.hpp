@@ -115,7 +115,8 @@ class SuccinctBitvector
     }
   };
 
-  bool get(size_t index) const {
+  [[nodiscard]] bool get(size_t index) const
+  {
     return (data_vector[index / 64] >> (index % 64)) & 1;
   };
 
@@ -168,7 +169,8 @@ class SuccinctBitvector
     select_1.push_back(length);
   };
 
-  size_t get_rank(size_t index, bool value) const {
+  [[nodiscard]] size_t get_rank(size_t index, bool value) const
+  {
     if (rank.empty()) {
       fprintf(stderr, "Acceleration structure not build.\n");
       exit(1);
@@ -205,8 +207,8 @@ class SuccinctBitvector
   };
 
 
-  size_t get_select(size_t count, bool value) const {
-
+  [[nodiscard]] size_t get_select(size_t count, bool value) const
+  {
     if (select_1.empty()) {
       fprintf(stderr, "Acceleration structure not build.\n");
       exit(1);
@@ -326,21 +328,23 @@ class SuccinctBitvector
     std::fclose(out_fp);
   }
 
-  size_t get_length() const noexcept {
-    return length;
-  }
-private:
+  [[nodiscard]] size_t get_length() const noexcept { return length; }
+
+  private:
 
   void clear() {
     rank.clear();
     select_1.clear();
   }
 
-  size_t get_superblock_count(size_t superblock_index) const {
+  [[nodiscard]] size_t get_superblock_count(size_t superblock_index) const
+  {
     return rank[superblock_index].second >> 20;
   }
 
-  size_t get_block_count(size_t superblock_index, size_t block_index) const {
+  [[nodiscard]] size_t
+  get_block_count(size_t superblock_index, size_t block_index) const
+  {
     if (block_index == 7) {
       return (rank[superblock_index].second >> 8) & 0xFFF;
     } else if (block_index == 6) {

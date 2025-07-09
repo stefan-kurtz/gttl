@@ -94,7 +94,7 @@ class SequencesSplit
                                            mapped_file.size() - current_start));
     }
   }
-  double variance(void) const
+  [[nodiscard]] double variance(void) const
   {
     double v = 0.0;
     const double mean = static_cast<double>(total_size())/intervals.size();
@@ -117,26 +117,14 @@ class SequencesSplit
   }
   using ConstIterator = std::vector<std::string_view>::const_iterator;
 
-  ConstIterator begin(void) const
-  {
-    return intervals.cbegin();
-  }
+  [[nodiscard]] ConstIterator begin(void) const { return intervals.cbegin(); }
 
-  ConstIterator end(void) const
-  {
-    return intervals.cend();
-  }
+  [[nodiscard]] ConstIterator end(void) const { return intervals.cend(); }
   const std::string_view operator [](size_t idx) const
   {
     return intervals[idx];
   }
-  size_t size(void) const
-  {
-    return intervals.size();
-  }
-  size_t total_size(void) const
-  {
-    return mapped_file.size();
-  }
+  [[nodiscard]] size_t size(void) const { return intervals.size(); }
+  [[nodiscard]] size_t total_size(void) const { return mapped_file.size(); }
 };
 #endif

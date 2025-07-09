@@ -79,11 +79,11 @@ class SuccinctPlcpTable
   { }
   ~SuccinctPlcpTable(void)
   { }
-  Iterator begin(void) const
+  [[nodiscard]] Iterator begin(void) const
   {
     return Iterator(totallength, 0, suftab_inputfile, &succinct_plcp_table);
   }
-  Iterator end(void) const
+  [[nodiscard]] Iterator end(void) const
   {
     return Iterator(0, totallength, suftab_inputfile, nullptr);
   }

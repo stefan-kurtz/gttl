@@ -83,13 +83,7 @@ class ArgvConcat
       std::cout << "arg=" << arg << '\n';
     }
   }
-  size_t size() const noexcept
-  {
-    return arg_vector.size();
-  }
-  char** concat_get() const noexcept
-  {
-    return my_argv;
-  }
+  [[nodiscard]] size_t size() const noexcept { return arg_vector.size(); }
+  [[nodiscard]] char **concat_get() const noexcept { return my_argv; }
 };
 #endif

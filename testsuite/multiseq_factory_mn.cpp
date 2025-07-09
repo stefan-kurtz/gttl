@@ -117,31 +117,26 @@ class MultiseqFactoryOptions
                                   "arguments must be an even number");
     }
   }
-  size_t num_parts_get(void) const noexcept
-  {
-    return num_parts;
-  }
-  size_t len_parts_get(void) const noexcept
-  {
-    return len_parts;
-  }
-  size_t num_sequences_get(void) const noexcept
+  [[nodiscard]] size_t num_parts_get(void) const noexcept { return num_parts; }
+  [[nodiscard]] size_t len_parts_get(void) const noexcept { return len_parts; }
+  [[nodiscard]] size_t num_sequences_get(void) const noexcept
   {
     return num_sequences;
   }
-  size_t sequence_output_width_get(void) const noexcept
+  [[nodiscard]] size_t sequence_output_width_get(void) const noexcept
   {
     return sequence_output_width;
   }
-  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept
   {
     return inputfiles;
   }
-  bool help_option_is_set(void) const noexcept
+  [[nodiscard]] bool help_option_is_set(void) const noexcept
   {
     return help_option;
   }
-  bool statistics_option_is_set(void) const noexcept
+  [[nodiscard]] bool statistics_option_is_set(void) const noexcept
   {
     return statistics_option;
   }

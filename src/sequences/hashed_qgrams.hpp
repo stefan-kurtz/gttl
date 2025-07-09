@@ -390,7 +390,7 @@ struct HashedQgramVectorTable
     }
     *hashed_qgrams_vector = std::move(table[max_size_idx]);
   }
-  size_t count_all_qgrams_get(void) const noexcept
+  [[nodiscard]] size_t count_all_qgrams_get(void) const noexcept
   {
     size_t total_count_all_qgrams = 0;
     for (auto count : count_all_qgrams)
@@ -399,7 +399,7 @@ struct HashedQgramVectorTable
     }
     return total_count_all_qgrams;
   }
-  bool has_wildcards_get(void) const noexcept
+  [[nodiscard]] bool has_wildcards_get(void) const noexcept
   {
     size_t total_has_wildcards = false;
     for (const auto &hw : has_wildcards)
@@ -517,7 +517,7 @@ class HashedQgramsGeneric
   public:
   static constexpr const bool possible_false_positive_matches
     = HashIterator::possible_false_positive_matches;
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     return hashed_qgram_vector.size();
   }
@@ -642,37 +642,37 @@ class HashedQgramsGeneric
       }
     }
   }
-  size_t count_all_qgrams_get(void) const noexcept
+  [[nodiscard]] size_t count_all_qgrams_get(void) const noexcept
   {
     return count_all_qgrams;
   }
-  bool sequence_has_wildcards(void) const noexcept
+  [[nodiscard]] bool sequence_has_wildcards(void) const noexcept
   {
     return has_wildcards;
   }
-  uint64_t hash_value_get(size_t idx) const noexcept
+  [[nodiscard]] uint64_t hash_value_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return hashed_qgram_vector[idx].template decode_at<0>(hashed_qgram_packer);
   }
-  size_t sequence_number_get(size_t idx) const noexcept
+  [[nodiscard]] size_t sequence_number_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(hashed_qgram_vector[idx]
                                .template decode_at<1>(hashed_qgram_packer));
   }
-  size_t startpos_get(size_t idx) const noexcept
+  [[nodiscard]] size_t startpos_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(hashed_qgram_vector[idx]
                                .template decode_at<2>(hashed_qgram_packer));
   }
-  int packer_bit_group_size_get(int idx) const noexcept
+  [[nodiscard]] int packer_bit_group_size_get(int idx) const noexcept
   {
     return hashed_qgram_packer.bit_group_size_get(idx);
   }
 
-  size_t qgram_length_get(void) const noexcept
+  [[nodiscard]] size_t qgram_length_get(void) const noexcept
   {
     return qgram_length;
   }
@@ -689,11 +689,11 @@ class HashedQgramsGeneric
              sequence_number + offset,startpos);
     }
   }
-  Iterator begin(void) const noexcept
+  [[nodiscard]] Iterator begin(void) const noexcept
   {
     return Iterator (hashed_qgram_vector,hashed_qgram_packer,0);
   }
-  Iterator end(void) const noexcept
+  [[nodiscard]] Iterator end(void) const noexcept
   {
     return Iterator (hashed_qgram_vector,hashed_qgram_packer,
                      hashed_qgram_vector.size());

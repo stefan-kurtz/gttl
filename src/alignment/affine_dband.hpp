@@ -36,7 +36,7 @@ class GttlAffineDPbanded
     uint8_t trace;
     public:
     template<int edge_type>
-    AffineAlignEditOp edge_get(void) const noexcept
+    [[nodiscard]] AffineAlignEditOp edge_get(void) const noexcept
     {
       constexpr const int shift = 2 * (edge_type-1);
       return static_cast<AffineAlignEditOp>((trace >> shift) & uint8_t(3));
@@ -490,7 +490,7 @@ class GttlAffineDPbanded
     }
   }
 
-  size_t next_band_width(size_t band_width) const noexcept
+  [[nodiscard]] size_t next_band_width(size_t band_width) const noexcept
   {
     if (band_width < 4)
     {
@@ -503,7 +503,7 @@ class GttlAffineDPbanded
     return (band_width * 5)/4;
   }
 
-  bool affine_opt_memory(void) const noexcept
+  [[nodiscard]] bool affine_opt_memory(void) const noexcept
   {
     return base_type_size == sizeof(AffineAlignTraceBits);
   }

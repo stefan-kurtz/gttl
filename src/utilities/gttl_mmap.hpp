@@ -64,7 +64,7 @@ class Gttlmmap
     assert(filedesc >= 0);
     close(filedesc);
   }
-  const T *ptr(void) const noexcept
+  [[nodiscard]] const T *ptr(void) const noexcept
   {
     assert(memorymap != nullptr);
     return reinterpret_cast<const T *>(memorymap);

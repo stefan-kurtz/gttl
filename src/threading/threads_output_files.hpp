@@ -107,12 +107,13 @@ class ThreadsOutputFiles
       }
     }
   }
-  FILE *filepointer(size_t t) const noexcept
+  [[nodiscard]] FILE *filepointer(size_t t) const noexcept
   {
     assert(t < output_filepointers.size());
     return output_filepointers[t];
   }
-  const std::vector<FILE *> &filepointers_vector_get(void) const noexcept
+  [[nodiscard]] const std::vector<FILE *> &
+  filepointers_vector_get(void) const noexcept
   {
     return output_filepointers;
   }

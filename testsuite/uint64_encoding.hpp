@@ -59,7 +59,8 @@ class Uint64Encoding
     * checks if numbers fitting given bitranges
     */
 
-    uint64_t encode(const std::array<uint64_t, bit_groups> &arr) const noexcept
+    [[nodiscard]] uint64_t
+    encode(const std::array<uint64_t, bit_groups> &arr) const noexcept
     {
       uint64_t code = 0;
 
@@ -71,15 +72,15 @@ class Uint64Encoding
       return code;
     }
 
-    template<int idx>
-    uint64_t decode_at(uint64_t code) const noexcept
+    template <int idx>
+    [[nodiscard]] uint64_t decode_at(uint64_t code) const noexcept
     {
       static_assert(idx < bit_groups);
       return (code >> shift_tab[idx]) & mask_tab[idx];
     }
 
-    template<int idx>
-    int bit_group_size(void) const noexcept
+    template <int idx>
+    [[nodiscard]] int bit_group_size(void) const noexcept
     {
       static_assert(idx < bit_groups);
       return bit_group_sizes[idx];

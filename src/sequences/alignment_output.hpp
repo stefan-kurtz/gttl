@@ -49,7 +49,7 @@ struct AlignmentSequenceInfo
     vstart = _vstart;
     max_length = std::max(ulen,vlen);
   }
-  int width_of_numbers_get(void) const
+  [[nodiscard]] int width_of_numbers_get(void) const
   {
     assert(max_length > 0);
     const size_t maximum_position = max_length-1;

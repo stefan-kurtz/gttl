@@ -20,9 +20,6 @@ class VirtualQueue {
     {
       return current++;
     }
-    size_t last_element(void) const noexcept
-    {
-      return last;
-   }
+    [[nodiscard]] size_t last_element(void) const noexcept { return last; }
 };
 #endif

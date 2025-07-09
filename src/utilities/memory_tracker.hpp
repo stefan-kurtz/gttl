@@ -110,11 +110,11 @@ class GttlMemoryTracker
              codefile_name,codefile_line,current,max_so_far);
     }
   }
-  size_t peak_get(void) const noexcept
+  [[nodiscard]] size_t peak_get(void) const noexcept
   {
     return static_cast<size_t>(mega_bytes(max_so_far));
   }
-  size_t peak_in_bytes_get(void) const noexcept
+  [[nodiscard]] size_t peak_in_bytes_get(void) const noexcept
   {
     return max_so_far;
   }

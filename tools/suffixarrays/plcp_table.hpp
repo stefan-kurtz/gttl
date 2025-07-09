@@ -107,24 +107,21 @@ class PlcpTable
       lcpvalue -= (lcpvalue > 0);
     }
   }
-  uint32_t plcp_value_get(size_t index) const
+  [[nodiscard]] uint32_t plcp_value_get(size_t index) const
   {
     return plcp_table[index];
   }
-  size_t get_total_length() const
-  {
-    return totallength;
-  }
+  [[nodiscard]] size_t get_total_length() const { return totallength; }
   ~PlcpTable(void)
   {
     memory_tracker->untrack(phi_table, __FILE__, __LINE__);
     delete[] phi_table;
   }
-  Iterator begin(void) const
+  [[nodiscard]] Iterator begin(void) const
   {
     return Iterator(totallength, 0, suftab_inputfile, plcp_table);
   }
-  Iterator end(void) const
+  [[nodiscard]] Iterator end(void) const
   {
     return Iterator(0, totallength + 1, suftab_inputfile, nullptr);
   }

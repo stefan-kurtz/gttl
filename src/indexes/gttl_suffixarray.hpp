@@ -98,11 +98,11 @@ public:
     , ll4tab(gttl_read_vector<uint32_t>(infile_base + ".ll4"))
   { }
 
-  Iterator begin(void) const noexcept
+  [[nodiscard]] Iterator begin(void) const noexcept
   {
     return Iterator(small_lcptab, ll2tab, ll4tab);
   }
-  Iterator end(void) const noexcept
+  [[nodiscard]] Iterator end(void) const noexcept
   {
     return Iterator(small_lcptab, ll2tab, ll4tab);
   }
@@ -140,7 +140,7 @@ class GttlSuffixArray
   bool int_values_set[num_integer_keys] = {false};
   std::vector<std::string> inputfiles;
 
-  int key2index(const std::string &key) const noexcept
+  [[nodiscard]] int key2index(const std::string &key) const noexcept
   {
     auto found = std::find(keys.begin(), keys.end(), key);
     if (found == keys.end())
@@ -264,64 +264,67 @@ class GttlSuffixArray
       delete gttl_mmap_suftab_bytes;
     }
   }
-  const std::vector<SuftabBaseType> &get_suftab_abspos() const noexcept
+  [[nodiscard]] const std::vector<SuftabBaseType> &
+  get_suftab_abspos() const noexcept
   {
     assert(not suftab_abspos.empty());
     return suftab_abspos;
   }
-  const std::vector<uint8_t> &get_suftab_bytes() const noexcept
+  [[nodiscard]] const std::vector<uint8_t> &get_suftab_bytes() const noexcept
   {
     assert(not suftab_bytes.empty());
     return suftab_bytes;
   }
-  const uint8_t *get_mmap_suftab_bytes(void) const noexcept
+  [[nodiscard]] const uint8_t *get_mmap_suftab_bytes(void) const noexcept
   {
     assert(gttl_mmap_suftab_bytes);
     return gttl_mmap_suftab_bytes->ptr();
   }
-  const std::vector<uint8_t> &get_tistab(void) const noexcept
+  [[nodiscard]] const std::vector<uint8_t> &get_tistab(void) const noexcept
   {
     assert(not tistab.empty());
     return tistab;
   }
-  const LCPtable &lcptable_get(void) const noexcept
+  [[nodiscard]] const LCPtable &lcptable_get(void) const noexcept
   {
     assert(lcptable != nullptr);
     return *lcptable;
   }
-  bool with_reverse_complement(void) const noexcept
+  [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
     return int_values[key2index("reverse_complement")] == 1 ? true : false;
   }
-  size_t nonspecial_suffixes_get(void) const noexcept
+  [[nodiscard]] size_t nonspecial_suffixes_get(void) const noexcept
   {
     return int_values[key2index("nonspecial_suffixes")];
   }
-  size_t sequences_number_get(void) const noexcept
+  [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
     return int_values[key2index("sequences_number")];
   }
-  int sequences_number_bits_get(void) const noexcept
+  [[nodiscard]] int sequences_number_bits_get(void) const noexcept
   {
     return static_cast<int>(int_values[key2index("sequences_number_bits")]);
   }
-  int sequences_length_bits_get(void) const noexcept
+  [[nodiscard]] int sequences_length_bits_get(void) const noexcept
   {
     return static_cast<int>(int_values[key2index("sequences_length_bits")]);
   }
-  int sizeof_suftab_entry(void) const noexcept
+  [[nodiscard]] int sizeof_suftab_entry(void) const noexcept
   {
     return static_cast<int>(int_values[key2index("sizeof_suftab_entry")]);
   }
-  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept
   {
     return inputfiles;
   }
   private:
-  SuftabBaseType lcp_interval_find_rightbound(uint8_t cc,
-                                              size_t offset,
-                                              SuftabBaseType left,
-                                              SuftabBaseType right) const
+  [[nodiscard]] SuftabBaseType lcp_interval_find_rightbound(uint8_t cc,
+                                                          size_t offset,
+                                                          SuftabBaseType left,
+                                                          SuftabBaseType right)
+                                                           const
   {
     while (left + 1 < right)
     {
@@ -338,11 +341,11 @@ class GttlSuffixArray
     }
     return left;
   }
-  uint8_t sequence_access(size_t idx) const
+  [[nodiscard]] uint8_t sequence_access(size_t idx) const
   {
     return idx == tistab.size() ? UINT8_MAX : tistab[idx];
   }
-  std::tuple<bool,SuftabBaseType,SuftabBaseType>
+  [[nodiscard]] std::tuple<bool,SuftabBaseType,SuftabBaseType>
     lcp_interval_find_child_intv(uint8_t cc,
                                  size_t offset,
                                  SuftabBaseType left,

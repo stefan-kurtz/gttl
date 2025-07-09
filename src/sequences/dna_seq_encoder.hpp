@@ -62,7 +62,7 @@ class DNASeqEncoder
   const size_t num_units;
   const int additional_shift;
   const StoreUnitType end_mask;
-  StoreUnitType end_mask_get(void) const noexcept
+  [[nodiscard]] StoreUnitType end_mask_get(void) const noexcept
   {
     const size_t endbits = bits_in_store_unit -
                            2 * (prefix_length % characters_per_unit);
@@ -73,7 +73,7 @@ class DNASeqEncoder
     }
     return (static_cast<StoreUnitType>(1) << endbits) - 1;
   }
-  int additional_shift_get(void) const noexcept
+  [[nodiscard]] int additional_shift_get(void) const noexcept
   {
     const int remainder = prefix_length % characters_per_unit;
     if (remainder > 0)
@@ -251,15 +251,9 @@ class DNASeqEncoder
     }
     return additional_value;
   }
-  size_t num_bits_get(void) const noexcept
-  {
-    return num_bits;
-  }
-  size_t num_units_get(void) const noexcept
-  {
-    return num_units;
-  }
-  size_t num_sequence_bytes_get(void) const noexcept
+  [[nodiscard]] size_t num_bits_get(void) const noexcept { return num_bits; }
+  [[nodiscard]] size_t num_units_get(void) const noexcept { return num_units; }
+  [[nodiscard]] size_t num_sequence_bytes_get(void) const noexcept
   {
     const size_t num_sequence_bits(std::max(size_t(64),2 * prefix_length));
     return (num_sequence_bits + bits_in_store_unit - 1)/bits_in_store_unit;
@@ -315,24 +309,21 @@ class DNAEncodingForLength
                        (realloc(units,nextfree * sizeof *units));
     allocated = nextfree;
   }
-  size_t num_units_get(void) const noexcept
-  {
-    return num_units;
-  }
-  size_t number_of_sequences_get(void) const noexcept
+  [[nodiscard]] size_t num_units_get(void) const noexcept { return num_units; }
+  [[nodiscard]] size_t number_of_sequences_get(void) const noexcept
   {
     assert(nextfree % num_units == 0);
     return nextfree / num_units;
   }
-  size_t sequence_length_get(void) const noexcept
+  [[nodiscard]] size_t sequence_length_get(void) const noexcept
   {
     return constant_sequence_length;
   }
-  const StoreUnitType *units_get(void) const noexcept
+  [[nodiscard]] const StoreUnitType *units_get(void) const noexcept
   {
     return units;
   }
-  size_t total_size_get(void) const noexcept
+  [[nodiscard]] size_t total_size_get(void) const noexcept
   {
     return number_of_sequences_get() * num_units_get();
   }
@@ -350,7 +341,7 @@ class DNAEncodingForLength
                                               * sizeof(StoreUnitType)))
               << '\n';
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     static const std::array<char,4> dna_letters{'A','C','G','T'};
     static constexpr const int bits_in_store_unit
@@ -446,7 +437,7 @@ class DNAEncodingMultiLength
   using KeyValuesType = std::vector<std::tuple<size_t,size_t,size_t,size_t>>;
   KeyValuesType expanded_vec;
   std::vector<size_t> end_idx_of_part_vec;
-  auto key_values_vector_get(void) const
+  [[nodiscard]] auto key_values_vector_get(void) const
   {
     KeyValuesType key_values;
     size_t enc_vec_idx = 0;
@@ -785,7 +776,7 @@ class DNAEncodingMultiLength
     }
   };
 
-  auto begin(size_t part_idx = 0) const
+  [[nodiscard]] auto begin(size_t part_idx = 0) const
   {
     if (expanded_vec.size() == 0 or end_idx_of_part_vec.size() == 0)
     {
@@ -798,7 +789,7 @@ class DNAEncodingMultiLength
                              part_idx,
                              false);
   }
-  auto end(void) const
+  [[nodiscard]] auto end(void) const
   {
     return SplitViewIterator(enc_vec,
                              expanded_vec,
@@ -806,15 +797,15 @@ class DNAEncodingMultiLength
                              0,
                              true);
   }
-  size_t num_parts_get(void) const
+  [[nodiscard]] size_t num_parts_get(void) const
   {
     return end_idx_of_part_vec.size();
   }
-  size_t total_number_of_sequences_get(void) const
+  [[nodiscard]] size_t total_number_of_sequences_get(void) const
   {
     return total_number_of_sequences;
   }
-  size_t total_number_of_nucleotide_ranges_get(void) const
+  [[nodiscard]] size_t total_number_of_nucleotide_ranges_get(void) const
   {
     return total_number_of_nucleotide_ranges;
   }

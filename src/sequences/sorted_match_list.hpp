@@ -373,68 +373,68 @@ class SortedMatchList
     }
     number_of_all_matches = encoded_match_list.size();
   }
-  size_t number_of_all_matches_get(void) const noexcept
+  [[nodiscard]] size_t number_of_all_matches_get(void) const noexcept
   {
     return number_of_all_matches;
   }
-  size_t number_of_seeds_get(void) const noexcept
+  [[nodiscard]] size_t number_of_seeds_get(void) const noexcept
   {
     return number_of_seeds;
   }
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     return encoded_match_list.size();
   }
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return sizeof(SortedMatchList) +
            encoded_match_list.size() * sizeof(BytesUnitMatch);
   }
-  size_t ref_seqnum_get(size_t idx) const noexcept
+  [[nodiscard]] size_t ref_seqnum_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(encoded_match_list[idx]
                                .template decode_at<ref_idx>(match_packer));
   }
-  size_t query_seqnum_get(size_t idx) const noexcept
+  [[nodiscard]] size_t query_seqnum_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(encoded_match_list[idx]
                                .template decode_at<query_idx>(match_packer));
   }
-  size_t ref_endpos_get(size_t idx) const noexcept
+  [[nodiscard]] size_t ref_endpos_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(encoded_match_list[idx]
                                .template decode_at<ref_pos_idx>(match_packer));
   }
-  size_t query_endpos_get(size_t idx) const noexcept
+  [[nodiscard]] size_t query_endpos_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>
                       (encoded_match_list[idx]
                        .template decode_at<query_pos_idx>(match_packer));
   }
-  size_t length_get(size_t idx) const noexcept
+  [[nodiscard]] size_t length_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return minimum_mem_length +
            static_cast<size_t>(encoded_match_list[idx]
                                .template decode_at<4>(match_packer));
   }
-  size_t order_endpos_get(size_t idx) const noexcept
+  [[nodiscard]] size_t order_endpos_get(size_t idx) const noexcept
   {
     assert(idx < size());
     return static_cast<size_t>(encoded_match_list[idx]
                                .template decode_at<2>(match_packer));
   }
-  bool same_segment(size_t i, size_t j) const noexcept
+  [[nodiscard]] bool same_segment(size_t i, size_t j) const noexcept
   {
     return (this->ref_seqnum_get(i) == this->ref_seqnum_get(j) &&
             this->query_seqnum_get(i) == this->query_seqnum_get(j));
   }
-  std::pair<uint64_t,uint64_t> colinear_match_pair(size_t i,size_t j)
-    const noexcept
+  [[nodiscard]] std::pair<uint64_t, uint64_t>
+  colinear_match_pair(size_t i, size_t j) const noexcept
   {
     const uint64_t ref_endpos_j = this->ref_endpos_get(j);
     const uint64_t query_endpos_j = this->query_endpos_get(j);
@@ -466,7 +466,7 @@ class SortedMatchList
             number_of_all_matches_get());
     fprintf(out_fp,"# number of unique matches\t%zu\n",size());
   }
-  bool all_same_segment(void) const noexcept
+  [[nodiscard]] bool all_same_segment(void) const noexcept
   {
     return ref_multiseq.sequences_number_get() == size_t(1) &&
            query_multiseq.sequences_number_get() == size_t(1);

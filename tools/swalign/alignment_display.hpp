@@ -60,52 +60,28 @@ class AlignmentDisplay
     : flag(Nothing)
     , width_value(0)
   {}
-  bool need_alignment(void) const
+  [[nodiscard]] bool need_alignment(void) const
   {
     return (flag & Verify) or (flag & Identity) or
            (flag & Cigar) or (flag & Alignment);
   }
-  bool need_traceback(void) const
+  [[nodiscard]] bool need_traceback(void) const
   {
     return (flag & Identity) or (flag & Cigar) or (flag & Alignment);
   }
-  bool only_verify_score(void) const
-  {
-    return flag == Verify;
-  }
-  bool identity(void) const
-  {
-    return flag & Identity;
-  }
-  bool s_coverage(void) const
-  {
-    return flag & Scoverage;
-  }
-  bool q_coverage(void) const
-  {
-    return flag & Qcoverage;
-  }
-  bool cigar(void) const
-  {
-    return flag & Cigar;
-  }
-  bool s_substring(void) const
-  {
-    return flag & Ssubstring;
-  }
-  bool q_substring(void) const
-  {
-    return flag & Qsubstring;
-  }
-  bool subject_query_alignment(void) const
+  [[nodiscard]] bool only_verify_score(void) const { return flag == Verify; }
+  [[nodiscard]] bool identity(void) const { return flag & Identity; }
+  [[nodiscard]] bool s_coverage(void) const { return flag & Scoverage; }
+  [[nodiscard]] bool q_coverage(void) const { return flag & Qcoverage; }
+  [[nodiscard]] bool cigar(void) const { return flag & Cigar; }
+  [[nodiscard]] bool s_substring(void) const { return flag & Ssubstring; }
+  [[nodiscard]] bool q_substring(void) const { return flag & Qsubstring; }
+  [[nodiscard]] bool subject_query_alignment(void) const
   {
     return flag & Alignment;
   }
-  size_t width(void) const
-  {
-    return width_value;
-  }
-  std::string to_string(void) const
+  [[nodiscard]] size_t width(void) const { return width_value; }
+  [[nodiscard]] std::string to_string(void) const
   {
     if (flag & Alignment)
     {

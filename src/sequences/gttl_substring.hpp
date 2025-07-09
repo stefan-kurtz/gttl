@@ -76,7 +76,7 @@ class GttlSubstring
     assert(idx <= transformed_end);
     return complement_uint8_wc_remains(original_seq[transformed_end - idx]);
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     if (forward_strand)
     {
@@ -86,9 +86,6 @@ class GttlSubstring
                 + std::to_string(substringlen) + ","
                 + std::to_string(original_seqlen);
   }
-  size_t size(void) const noexcept
-  {
-    return substringlen;
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return substringlen; }
 };
 #endif

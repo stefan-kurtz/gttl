@@ -21,7 +21,10 @@ class FrontValueMatchHistory
     : row(_row)
     , mismatch_history(uint64_t(0))
   {}
-  uint64_t match_history_get(void) const noexcept { return ~mismatch_history; }
+  [[nodiscard]] uint64_t match_history_get(void) const noexcept
+  {
+    return ~mismatch_history;
+  }
   bool operator>=(size_t scalar) const noexcept { return row >= scalar; }
   bool operator<=(const FrontValueMatchHistory &fh) const noexcept
   {
@@ -57,7 +60,7 @@ class FrontValueMatchHistory
 #endif
   }
   size_t operator+(size_t ell) const noexcept { return row + ell; }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string cs{};
     cs += std::to_string(row);
@@ -66,9 +69,13 @@ class FrontValueMatchHistory
     cs += "\t" + std::to_string(popcount_uint64_t(match_history));
     return cs;
   }
-  size_t row_get(size_t ulen) const noexcept { return std::min(row, ulen); }
-  size_t aligned_len_get(int32_t diag_idx,size_t ulen,
-                         [[maybe_unused]] size_t vlen) const noexcept
+  [[nodiscard]] size_t row_get(size_t ulen) const noexcept
+  {
+    return std::min(row, ulen);
+  }
+  [[nodiscard]] size_t
+  aligned_len_get(int32_t diag_idx, size_t ulen,
+                  [[maybe_unused]] size_t vlen) const noexcept
   {
     const size_t dest_row = row_get(ulen);
     assert(diag_idx >= 0 || static_cast<size_t>(-diag_idx) <= 2 * dest_row);

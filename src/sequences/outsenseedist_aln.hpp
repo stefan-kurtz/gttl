@@ -14,7 +14,7 @@ class TrackEditoperations
 {
   private:
   std::vector<Backreference> trace;
-  size_t max_d_get(void) const noexcept
+  [[nodiscard]] size_t max_d_get(void) const noexcept
   {
     const size_t max_d_plus1 = std::sqrt(trace.size());
     assert(max_d_plus1 > 0 && max_d_plus1 * max_d_plus1 == trace.size());
@@ -47,7 +47,7 @@ class TrackEditoperations
       this_offset += 2 * d + 1;
     }
   }
-  Eoplist traceback_one(size_t ulen, size_t vlen) const noexcept
+  [[nodiscard]] Eoplist traceback_one(size_t ulen, size_t vlen) const noexcept
   {
     const size_t max_d = max_d_get();
     assert(trace.size() >= max_d + 1);

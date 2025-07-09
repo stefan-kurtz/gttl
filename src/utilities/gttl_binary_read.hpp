@@ -158,13 +158,7 @@ class BinaryFileReader
   explicit BinaryFileReader(const std::string &_inputfile)
     : inputfile(_inputfile)
   { }
-  Iterator begin(void) const
-  {
-    return Iterator(inputfile);
-  }
-  Iterator end(void) const
-  {
-    return Iterator();
-  }
+  [[nodiscard]] Iterator begin(void) const { return Iterator(inputfile); }
+  [[nodiscard]] Iterator end(void) const { return Iterator(); }
 };
 #endif  // GTTL_BINARY_READ_HPP

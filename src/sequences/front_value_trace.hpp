@@ -35,7 +35,7 @@ class FrontValueTrace
   }
   void operator+=(int value) { row += value; }
   size_t operator+(size_t ell) const noexcept { return row + ell; }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string cs{};
     cs += std::to_string(row);
@@ -48,7 +48,7 @@ class FrontValueTrace
   void mismatch_set(void) { backreference.mismatch_set(); }
   void mismatch_add(void) { backreference.mismatch_add(); }
 
-  Backreference backreference_get(void) const noexcept
+  [[nodiscard]] Backreference backreference_get(void) const noexcept
   {
     return backreference;
   }

@@ -216,13 +216,13 @@ class Chain
   {
     return *std::ranges::max_element(scores);
   }
-  Iterator begin(void) const noexcept
+  [[nodiscard]] Iterator begin(void) const noexcept
   {
     auto first_elem = std::distance(scores.begin(),
                                     std::ranges::max_element(scores));
     return Iterator(precursors, first_elem);
   }
-  Iterator end(void) const noexcept
+  [[nodiscard]] Iterator end(void) const noexcept
   {
     return Iterator(precursors, undef);
   }

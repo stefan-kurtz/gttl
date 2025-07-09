@@ -152,14 +152,11 @@ class GttlCharRange
     GttlCharRange(const char *_sequence,size_t _seqlen) :
           sequence(_sequence),
           seqlen(_seqlen) {}
-  Iterator begin() const
-  {
-    return Iterator(sequence,seqlen,false);
-  }
-  Iterator end() const
-  {
-    return Iterator(nullptr,0,true);
-  }
+    [[nodiscard]] Iterator begin() const
+    {
+      return Iterator(sequence, seqlen, false);
+    }
+    [[nodiscard]] Iterator end() const { return Iterator(nullptr, 0, true); }
 };
 
 namespace char_range

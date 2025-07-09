@@ -82,7 +82,7 @@ class BlastStatistics
     printf("lambda_d_log2=%.6e\n",blast_stat->lambda_d_log2);
 #endif
   }
-  uint32_t raw_score2bit_score(uint32_t raw_score) const noexcept
+  [[nodiscard]] uint32_t raw_score2bit_score(uint32_t raw_score) const noexcept
   {
     return static_cast<uint32_t>(floor(lambda_d_log2 *
                                        static_cast<double>(raw_score) -

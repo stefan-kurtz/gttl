@@ -59,7 +59,7 @@ class QgramDecoder
   {
     delete[] qgram_buffer;
   }
-  const char *decode(uint64_t integer_code) const noexcept
+  [[nodiscard]] const char *decode(uint64_t integer_code) const noexcept
   {
     assert(integer_code <= max_integer_code);
     qgram_buffer[qgram_length] = '\0';
@@ -121,7 +121,7 @@ class ConstQgramDecoder
   {
     delete[] qgram_buffer;
   }
-  const char *decode(uint64_t integer_code) const noexcept
+  [[nodiscard]] const char *decode(uint64_t integer_code) const noexcept
   {
     assert(integer_code <= max_integer_code);
     qgram_buffer[qgram_length] = '\0';

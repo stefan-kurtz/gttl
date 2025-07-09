@@ -148,23 +148,20 @@ class SortKeyValuePairsOptions
       throw std::invalid_argument(e.what());
     }
   }
-  size_t number_of_values_get(void) const noexcept
+  [[nodiscard]] size_t number_of_values_get(void) const noexcept
   {
     return number_of_values;
   }
-  size_t num_threads_get(void) const noexcept
+  [[nodiscard]] size_t num_threads_get(void) const noexcept
   {
     return num_threads;
   }
-  char data_type_option_get(void) const noexcept
+  [[nodiscard]] char data_type_option_get(void) const noexcept
   {
     return data_type_option;
   }
-  int sort_mode_get(void) const noexcept
-  {
-    return sort_mode;
-  }
-  bool help_option_is_set(void) const noexcept
+  [[nodiscard]] int sort_mode_get(void) const noexcept { return sort_mode; }
+  [[nodiscard]] bool help_option_is_set(void) const noexcept
   {
     return help_option;
   }
@@ -190,7 +187,7 @@ class KeyValuePair
     : key(_key)
     , value(_value)
   {}
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     const uint8_t *const ds = reinterpret_cast<const uint8_t *>(&key);
@@ -236,7 +233,7 @@ class Key2ValuePair
       keys_as_bytes[sizeof(double) + idx] = ds[idx];
     }
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     for (size_t idx = 0; idx < sizeof_key; idx++)

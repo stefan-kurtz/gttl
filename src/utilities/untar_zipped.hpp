@@ -25,7 +25,7 @@ class DecompressedFile
     : current_file_size(0)
     , data_ptr(nullptr)
   {}
-  bool is_directory(void) const
+  [[nodiscard]] bool is_directory(void) const
   {
     assert(current_filename.size() > 0);
     return current_filename.back() == '/';
@@ -39,18 +39,12 @@ class DecompressedFile
     current_file_size = _current_file_size;
     data_ptr = _data_ptr;
   }
-  const std::string &filename_get(void) const
+  [[nodiscard]] const std::string &filename_get(void) const
   {
     return current_filename;
   }
-  size_t size(void) const
-  {
-    return current_file_size;
-  }
-  const uint8_t *data(void) const
-  {
-    return data_ptr;
-  }
+  [[nodiscard]] size_t size(void) const { return current_file_size; }
+  [[nodiscard]] const uint8_t *data(void) const { return data_ptr; }
   void clear(void)
   {
     data_ptr = nullptr;
@@ -142,7 +136,7 @@ class TarReader
     }
     return nullptr;
   }
-  const char *option_string(const std::string &filename) const
+  [[nodiscard]] const char *option_string(const std::string &filename) const
   {
     if (gttl_has_suffix(filename,".tar.bz2"))
     {
@@ -190,7 +184,7 @@ class TarReader
     free(data_ptr);
     delete popen_reader;
   }
-  size_t current_file_size_get(void) const
+  [[nodiscard]] size_t current_file_size_get(void) const
   {
     return current_file_size;
   }

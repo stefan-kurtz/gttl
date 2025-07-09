@@ -115,31 +115,29 @@ class NtHashOptions
       throw std::invalid_argument(err.what());
     }
   }
-  bool help_option_is_set(void) const noexcept
+  [[nodiscard]] bool help_option_is_set(void) const noexcept
   {
     return help_option;
   }
-  int hashbits_get(void) const noexcept
-  {
-    return hashbits;
-  }
-  size_t kmer_length_get(void) const noexcept
+  [[nodiscard]] int hashbits_get(void) const noexcept { return hashbits; }
+  [[nodiscard]] size_t kmer_length_get(void) const noexcept
   {
     return kmer_length;
   }
-  bool bytes_unit_option_is_set(void) const noexcept
+  [[nodiscard]] bool bytes_unit_option_is_set(void) const noexcept
   {
     return bytes_unit_option;
   }
-  bool with_rc_option_is_set(void) const noexcept
+  [[nodiscard]] bool with_rc_option_is_set(void) const noexcept
   {
     return with_rc_option;
   }
-  bool show_hash_values_is_set(void) const noexcept
+  [[nodiscard]] bool show_hash_values_is_set(void) const noexcept
   {
     return show_hash_values;
   }
-  const std::vector<std::string> &inputfiles_get(void) const noexcept
+  [[nodiscard]] const std::vector<std::string> &
+  inputfiles_get(void) const noexcept
   {
     return inputfiles;
   }

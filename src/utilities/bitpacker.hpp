@@ -102,7 +102,7 @@ struct GttlBitPacker
       }
     }
 
-    int bit_group_size_get(int idx) const noexcept
+    [[nodiscard]] int bit_group_size_get(int idx) const noexcept
     {
       assert(idx < bit_groups);
       return bit_group_sizes[idx];

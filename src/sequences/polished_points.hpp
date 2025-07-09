@@ -44,7 +44,7 @@ class PolishedPoint
     return !(*this == other);
   }
 
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     const std::string error_percentage_string
       = aligned_len == 0 ? "undef"
@@ -60,27 +60,18 @@ class PolishedPoint
            + ")";
   }
 
-  size_t distance_get(void) const noexcept
-  {
-    return distance;
-  }
+  [[nodiscard]] size_t distance_get(void) const noexcept { return distance; }
 
-  size_t aligned_len_get(void) const noexcept
+  [[nodiscard]] size_t aligned_len_get(void) const noexcept
   {
     return aligned_len;
   }
 
-  size_t row_get(void) const noexcept
-  {
-    return row;
-  }
+  [[nodiscard]] size_t row_get(void) const noexcept { return row; }
 
-  size_t unit_cost_get(void) const noexcept
-  {
-    return unit_cost;
-  }
+  [[nodiscard]] size_t unit_cost_get(void) const noexcept { return unit_cost; }
 
-  size_t column_get(void) const noexcept
+  [[nodiscard]] size_t column_get(void) const noexcept
   {
     assert(aligned_len >= row);
     return aligned_len - row;
@@ -149,7 +140,7 @@ class PolishedPoints
     longest_aligned_len = 0;
     best.clear();
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     s += '(' + std::to_string(smallest_error_percentage) + "," +
@@ -272,26 +263,23 @@ class PolishedPoints
   {
     return !(*this == other);
   }
-  size_t longest_aligned_len_get(void) const noexcept
+  [[nodiscard]] size_t longest_aligned_len_get(void) const noexcept
   {
     return longest_aligned_len;
   }
-  double smallest_error_percentage_get(void) const noexcept
+  [[nodiscard]] double smallest_error_percentage_get(void) const noexcept
   {
     return smallest_error_percentage;
   }
-  size_t smallest_unit_cost_get(void) const noexcept
+  [[nodiscard]] size_t smallest_unit_cost_get(void) const noexcept
   {
     return (longest_aligned_len/2) * (smallest_error_percentage/100.0);
   }
-  Iterator begin(void) const noexcept
+  [[nodiscard]] Iterator begin(void) const noexcept
   {
     return Iterator(best,best.size());
   }
-  Iterator end(void) const
-  {
-    return Iterator(best,-1);
-  }
+  [[nodiscard]] Iterator end(void) const { return Iterator(best, -1); }
 };
 
 /* FrontValueClass need to implement the following functions:

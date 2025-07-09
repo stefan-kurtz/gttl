@@ -55,7 +55,7 @@ class LocalChainElemInfo
     }
     return score_sum;
   }
-  bool is_referenced_get(size_t idx) const noexcept
+  [[nodiscard]] bool is_referenced_get(size_t idx) const noexcept
   {
     assert(idx < nextfree);
     return chain_elem_info_array[idx].is_referenced;
@@ -116,7 +116,7 @@ class LocalChainElemInfo
     assert(idx < nextfree);
     chain_elem_info_array[idx].predecessor &= ~first_bit;
   }
-  bool is_marked(size_t idx) const noexcept
+  [[nodiscard]] bool is_marked(size_t idx) const noexcept
   {
     assert(idx < nextfree);
     return static_cast<bool>(chain_elem_info_array[idx].predecessor
@@ -176,31 +176,28 @@ class LocalChainAttributes
   {
     return score;
   }
-  bool self_overlap(void) const noexcept
+  [[nodiscard]] bool self_overlap(void) const noexcept
   {
     return ref_endpos >= query_endpos - query_match_length + 1;
   }
-  size_t from_element_get(void) const noexcept
+  [[nodiscard]] size_t from_element_get(void) const noexcept
   {
     return from_element;
   }
-  size_t size(void) const noexcept
-  {
-    return chain_len;
-  }
-  size_t ref_endpos_get(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept { return chain_len; }
+  [[nodiscard]] size_t ref_endpos_get(void) const noexcept
   {
     return ref_endpos;
   }
-  size_t ref_match_length_get(void) const noexcept
+  [[nodiscard]] size_t ref_match_length_get(void) const noexcept
   {
     return ref_match_length;
   }
-  size_t query_endpos_get(void) const noexcept
+  [[nodiscard]] size_t query_endpos_get(void) const noexcept
   {
     return query_endpos;
   }
-  size_t query_match_length_get(void) const noexcept
+  [[nodiscard]] size_t query_match_length_get(void) const noexcept
   {
     return query_match_length;
   }
@@ -613,8 +610,8 @@ class LocalChainer
     ScoreType previous_score;
 #endif
 
-    size_t first_in_chain_idx_get(size_t from_element,
-                                  size_t chain_len) const noexcept
+    [[nodiscard]] size_t
+    first_in_chain_idx_get(size_t from_element, size_t chain_len) const noexcept
     {
       assert(chain_len >= 2);
       size_t j = from_element;

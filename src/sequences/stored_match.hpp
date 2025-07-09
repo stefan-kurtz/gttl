@@ -29,10 +29,7 @@ class GttlStoredMatch
                  distance;
   const double weight;
 
-  double weight_get(void) const noexcept
-  {
-    return weight;
-  }
+  [[nodiscard]] double weight_get(void) const noexcept { return weight; }
 
   public:
   GttlStoredMatch(size_t _primary_startpos, size_t _primary_len,
@@ -52,26 +49,23 @@ class GttlStoredMatch
            _secondary_len <= max_value &&
            _distance <= max_value);
   }
-  uint32_t primary_startpos_get(void) const noexcept
+  [[nodiscard]] uint32_t primary_startpos_get(void) const noexcept
   {
     return primary_startpos;
   }
-  uint32_t primary_len_get(void) const noexcept
+  [[nodiscard]] uint32_t primary_len_get(void) const noexcept
   {
     return primary_len;
   }
-  uint32_t secondary_startpos_get(void) const noexcept
+  [[nodiscard]] uint32_t secondary_startpos_get(void) const noexcept
   {
     return secondary_startpos;
   }
-  uint32_t secondary_len_get(void) const noexcept
+  [[nodiscard]] uint32_t secondary_len_get(void) const noexcept
   {
     return secondary_len;
   }
-  uint32_t distance_get(void) const noexcept
-  {
-    return distance;
-  }
+  [[nodiscard]] uint32_t distance_get(void) const noexcept { return distance; }
   /* the == and != operators are needed to check the consistency of the filter
      results in verify_filer */
   bool operator==(const GttlStoredMatch& other) const noexcept
@@ -88,21 +82,22 @@ class GttlStoredMatch
   }
 
   /* compare by weight only */
-  bool superior_weight (const GttlStoredMatch& other) const noexcept
+  [[nodiscard]] bool
+  superior_weight(const GttlStoredMatch &other) const noexcept
   {
     return this->weight_get() > other.weight_get();
   }
 
   /* compare weights and if a tie, compare by primary startpos */
-  bool superior_weight_tie_primary_startpos(const GttlStoredMatch& other)
-    const noexcept
+  [[nodiscard]] bool superior_weight_tie_primary_startpos(
+                               const GttlStoredMatch &other) const noexcept
   {
       return this->superior_weight(other) or
              (this->weight_get() == other.weight_get() and
               this->primary_startpos_get() > other.primary_startpos_get());
   }
 
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     return std::to_string(primary_startpos) + "," +
            std::to_string(primary_len) + "," +

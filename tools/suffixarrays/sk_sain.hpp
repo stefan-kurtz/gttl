@@ -65,11 +65,8 @@ class SainbufferKeyValues
   {
     assert(buf_size <= UINT32_MAX);
   }
-  bool has_own_memory(void) const noexcept { return own_memory; }
-  size_t size_in_bytes(void) const noexcept
-  {
-    return size;
-  }
+  [[nodiscard]] bool has_own_memory(void) const noexcept { return own_memory; }
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept { return size; }
 };
 
 template<typename SuftabBaseType>
@@ -100,7 +97,7 @@ class Sainbuffer
                                sizeof *values))
     , nextidx(GTTL_TRACK_CALLOC(uint32_t,numofchars, sizeof *nextidx))
   { }
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return sain_buffer_key_values.size_in_bytes();
   }
@@ -223,7 +220,7 @@ class SuftabResources
   const size_t suftabentries;
   SuftabBaseType *suftab;
   public:
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return suftabentries * sizeof *suftab;
   }
@@ -245,12 +242,10 @@ class SuftabResources
   {
     suftab[suftabentries - 1] = suftabentries - 1;
   }
-  SuftabBaseType *suftab_ptr_get(void) const
-  {
-    return suftab;
-  }
-  auto subtable_assigner(bool do_use_fast_method,size_t number_of_names)
-    const noexcept
+  [[nodiscard]] SuftabBaseType *suftab_ptr_get(void) const { return suftab; }
+  [[nodiscard]] auto
+  subtable_assigner(bool do_use_fast_method,
+                    size_t number_of_names) const noexcept
   {
     std::vector<std::pair<SuftabBaseType *,size_t>> vec_subtable;
     size_t factor = 1;
@@ -290,7 +285,7 @@ class GttlSainseq
                                  <T_seqtype == GTTL_SAIN_MULTISEQ,
                                                   GttlMultiseq,
                                                   SuftabBaseType>>;
-  size_t pos2unique_int(size_t pos) const noexcept
+  [[nodiscard]] size_t pos2unique_int(size_t pos) const noexcept
   {
     return pos + UCHAR_MAX + 1;
   }
@@ -363,10 +358,9 @@ class GttlSainseq
   const char *multiseq_seq_ptr;
   size_t this_size;
 
-  template <bool special_as_pos,bool sequential = false>
-  size_t sainseq_getchar(size_t position,[[maybe_unused]] int line)
-    WITH_BRANCHINGconst
-    noexcept
+  template <bool special_as_pos, bool sequential = false>
+  [[nodiscard]] size_t sainseq_getchar(size_t position,
+                  [[maybe_unused]] int line) WITH_BRANCHINGconst noexcept
   {
     assert(position < totallength);
 #ifdef ACCESS_STATISTICS
@@ -402,7 +396,7 @@ class GttlSainseq
     return 0;
   }
 
-  bool use_fast_method(void) const noexcept
+  [[nodiscard]] bool use_fast_method(void) const noexcept
   {
     constexpr const int word_size = sizeof(SuftabBaseType) * CHAR_BIT;
     constexpr const SuftabBaseType first2bits
@@ -1248,8 +1242,8 @@ class GttlSainseq
     }
   }
 
-  int sain_compare_suffixes(size_t start1, size_t start2)
-    WITH_BRANCHINGconst noexcept
+  [[nodiscard]] int sain_compare_suffixes(size_t start1, size_t start2)
+                               WITH_BRANCHINGconst noexcept
   {
     assert(start1 <= totallength && start2 <= totallength && start1 != start2);
     constexpr const bool special_as_pos = T_seqtype == GTTL_SAIN_MULTISEQ;
@@ -1986,10 +1980,7 @@ class GttlSainseq
     }
   }
 
-  size_t size_in_bytes(void) const noexcept
-  {
-    return this_size;
-  }
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept { return this_size; }
 
   void sain_rec_sortsuffixes(GttlMemoryTracker *memory_tracker,
                              FILE *out_fp,
@@ -2189,7 +2180,7 @@ class GttlSainseq
       run_time_at_level->show(out_fp, 0);
     }
   }
-  size_t nonspecialentries_get(void) const noexcept
+  [[nodiscard]] size_t nonspecialentries_get(void) const noexcept
   {
     return nonspecialentries;
   }

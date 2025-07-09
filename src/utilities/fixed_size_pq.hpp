@@ -25,12 +25,15 @@ class FixedSizePriorityQueue
   }
 
   void reset(void) { numofelements = 0; }
-  bool is_empty(void) const { return static_cast<bool>(numofelements == 0); }
-  bool is_full(void) const
+  [[nodiscard]] bool is_empty(void) const
+  {
+    return static_cast<bool>(numofelements == 0);
+  }
+  [[nodiscard]] bool is_full(void) const
   {
     return static_cast<bool>(numofelements == capacity);
   }
-  size_t size(void) const { return numofelements; }
+  [[nodiscard]] size_t size(void) const { return numofelements; }
 
   void add(const BaseType *value)
   {

@@ -15,7 +15,7 @@ class OptionChoices
   OptionChoices(const std::map<std::string, std::string> &_choices_map)
     : choices_map(_choices_map)
   { }
-  std::string help_line(void) const
+  [[nodiscard]] std::string help_line(void) const
   {
     std::vector<std::string> helpline_vec;
     helpline_vec.reserve(choices_map.size());
@@ -30,7 +30,7 @@ class OptionChoices
               std::ostream_iterator<std::string>(help_line_os, delim));
     return help_line_os.str();
   }
-  int choose(const std::string &choice) const
+  [[nodiscard]] int choose(const std::string &choice) const
   {
     int idx = 0;
     for (auto const &[opt, helpline] : choices_map)

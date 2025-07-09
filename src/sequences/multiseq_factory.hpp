@@ -21,7 +21,8 @@ class GttlMultiseqFactory
   std::vector<size_t> seqnum_offset_vector;
   size_t num_sequences;
   bool fastq_paired_input;
-  size_t fastq_file_total_length_get(const std::string &inputfile) const
+  [[nodiscard]] size_t
+  fastq_file_total_length_get(const std::string &inputfile) const
   {
     GttlFastQGenerator<buf_size> fastq_it(inputfile.c_str());
     size_t sequences_total_length = 0;
@@ -223,7 +224,7 @@ class GttlMultiseqFactory
       delete ms;
     }
   }
-  std::pair<GttlMultiseq *,size_t> at(size_t idx) const noexcept
+  [[nodiscard]] std::pair<GttlMultiseq *, size_t> at(size_t idx) const noexcept
   {
     assert(idx < multiseq_vector.size());
     size_t sequence_number_offset;
@@ -237,11 +238,11 @@ class GttlMultiseqFactory
     }
     return std::make_pair(multiseq_vector[idx],sequence_number_offset);
   }
-  size_t size(void) const noexcept
+  [[nodiscard]] size_t size(void) const noexcept
   {
     return multiseq_vector.size();
   }
-  bool is_fastq_paired_input(void) const noexcept
+  [[nodiscard]] bool is_fastq_paired_input(void) const noexcept
   {
     return fastq_paired_input;
   }

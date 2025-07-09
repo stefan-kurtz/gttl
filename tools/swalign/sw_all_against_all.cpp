@@ -233,10 +233,7 @@ class BestFromThread
     if (other.it == other.result->end()) return true;
     return *it > *other.it;
   }
-  bool at_end(void) const
-  {
-    return it == result->end() - 1;
-  }
+  [[nodiscard]] bool at_end(void) const { return it == result->end() - 1; }
 };
 
 template<typename ScoreType>

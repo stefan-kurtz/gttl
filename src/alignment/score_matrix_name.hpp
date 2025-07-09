@@ -64,13 +64,16 @@ class ScoreMatrixName
         string_values_joined(", ", start_index));
     }
   }
-  bool is(EnumScoreMatrixName param) const noexcept { return value == param; }
-  std::string str(void) const noexcept
+  [[nodiscard]] bool is(EnumScoreMatrixName param) const noexcept
+  {
+    return value == param;
+  }
+  [[nodiscard]] std::string str(void) const noexcept
   {
     assert(static_cast<size_t>(value) < num_values);
     return string_values[static_cast<size_t>(value)];
   }
-  std::vector<std::string> string_values_get(void) const noexcept
+  [[nodiscard]] std::vector<std::string> string_values_get(void) const noexcept
   {
     std::vector<std::string> vec_s{};
     vec_s.reserve(num_values);

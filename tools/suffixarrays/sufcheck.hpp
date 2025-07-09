@@ -41,20 +41,14 @@ class Rangewithchar
 #endif
     , firstchar(_firstchar)
   { }
-  size_t start_get(void) const
-  {
-    return start;
-  }
+  [[nodiscard]] size_t start_get(void) const { return start; }
 #ifndef NDEBUG
   size_t width_get(void) const
   {
     return end - start + 1;
   }
 #endif
-  uint8_t firstchar_get(void) const
-  {
-    return firstchar;
-  }
+  [[nodiscard]] uint8_t firstchar_get(void) const { return firstchar; }
 };
 
 template <bool is_multiseq>

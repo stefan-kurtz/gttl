@@ -30,7 +30,10 @@ class Backreference
     assert(_local_matchcount <= UINT32_MAX);
     local_matchcount = static_cast<uint32_t>(_local_matchcount);
   }
-  uint32_t local_matchcount_get(void) const noexcept { return local_matchcount;}
+  [[nodiscard]] uint32_t local_matchcount_get(void) const noexcept
+  {
+    return local_matchcount;
+  }
 
   void deletion_set(void) { backbits = ft_eop_deletion; }
   void deletion_add(void) { backbits |= ft_eop_deletion; }
@@ -39,10 +42,19 @@ class Backreference
   void mismatch_set(void) { backbits = ft_eop_mismatch; }
   void mismatch_add(void) { backbits |= ft_eop_mismatch; }
 
-  bool has_deletion(void) const noexcept { return backbits & ft_eop_deletion;}
-  bool has_insertion(void) const noexcept { return backbits & ft_eop_insertion;}
-  bool has_mismatch(void) const noexcept { return backbits & ft_eop_mismatch;}
-  std::string to_string(void) const noexcept
+  [[nodiscard]] bool has_deletion(void) const noexcept
+  {
+    return backbits & ft_eop_deletion;
+  }
+  [[nodiscard]] bool has_insertion(void) const noexcept
+  {
+    return backbits & ft_eop_insertion;
+  }
+  [[nodiscard]] bool has_mismatch(void) const noexcept
+  {
+    return backbits & ft_eop_mismatch;
+  }
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     if (has_deletion())

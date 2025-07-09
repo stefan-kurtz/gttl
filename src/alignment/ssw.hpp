@@ -48,16 +48,13 @@ class SimdIntVector
     delete[] ptr;
   }
 
-  simd_int *get(void) const noexcept
-  {
-    return ptr;
-  }
+  [[nodiscard]] simd_int *get(void) const noexcept { return ptr; }
   void reset(size_t segment_len)
   {
     assert(ptr != nullptr);
     std::memset(ptr, 0, 4 * segment_len * sizeof *ptr);
   }
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return sizeof(*ptr) * num_elements + sizeof(num_elements);
   }
@@ -114,9 +111,18 @@ class SSWresources
 #ifndef NDEBUG
   size_t maximum_seq_len_get(void) const noexcept { return maximum_seq_len; }
 #endif
-  simd_int *vectors8_get(void) const noexcept { return vectors8.get(); }
-  simd_int *vectors16_get(void) const noexcept { return vectors16.get(); }
-  simd_int *vectors32_get(void) const noexcept { return vectors32.get(); }
+  [[nodiscard]] simd_int *vectors8_get(void) const noexcept
+  {
+    return vectors8.get();
+  }
+  [[nodiscard]] simd_int *vectors16_get(void) const noexcept
+  {
+    return vectors16.get();
+  }
+  [[nodiscard]] simd_int *vectors32_get(void) const noexcept
+  {
+    return vectors32.get();
+  }
   void reset8(size_t segment_len) { vectors8.reset(segment_len); }
   void reset16(size_t segment_len) { vectors16.reset(segment_len); }
   void reset32(size_t segment_len) { vectors32.reset(segment_len); }
@@ -139,7 +145,7 @@ struct SWsimdResult
     , opt_loc_alignment_score(max_value)
   {}
 
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     return "on_db_seq=" + std::to_string(on_dbseq) +
            ", on_query_seq=" + std::to_string(on_query) +
@@ -292,7 +298,7 @@ class SSWprofile
     PRINT_ALL_SSW_PROFILES;
   }
   ~SSWprofile(void) {}
-  size_t size_in_bytes(void) const noexcept
+  [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return profile_uint8.size_in_bytes() +
            profile_uint16.size_in_bytes() +

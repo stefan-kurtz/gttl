@@ -43,13 +43,14 @@ class CigarOperator
     : edit_operation(UndefinedOp)
     , iteration(0)
   {}
-  char to_char(bool distinguish_mismatch_match) const noexcept
+  [[nodiscard]] char to_char(bool distinguish_mismatch_match) const noexcept
   {
     return distinguish_mismatch_match
              ? eoplist_pretty_print_dm[static_cast<int>(edit_operation)]
              : eoplist_pretty_print[static_cast<int>(edit_operation)];
   }
-  std::string to_string(bool distinguish_mismatch_match) const noexcept
+  [[nodiscard]] std::string
+  to_string(bool distinguish_mismatch_match) const noexcept
   {
     std::string s{};
     assert(edit_operation < UndefinedOp);
@@ -66,19 +67,19 @@ class Eoplist
   static constexpr const uint8_t ft_eopcode_deletion = uint8_t(254);
   static constexpr const uint8_t ft_eopcode_insertion = uint8_t(255);
 
-  bool eopcode_is_match(uint8_t eopcode) const noexcept
+  [[nodiscard]] bool eopcode_is_match(uint8_t eopcode) const noexcept
   {
     return eopcode < ft_eopcode_mismatch;
   }
-  bool eopcode_is_mismatch(uint8_t eopcode) const noexcept
+  [[nodiscard]] bool eopcode_is_mismatch(uint8_t eopcode) const noexcept
   {
     return eopcode == ft_eopcode_mismatch;
   }
-  bool eopcode_is_deletion(uint8_t eopcode) const noexcept
+  [[nodiscard]] bool eopcode_is_deletion(uint8_t eopcode) const noexcept
   {
     return eopcode == ft_eopcode_deletion;
   }
-  bool eopcode_is_insertion(uint8_t eopcode) const noexcept
+  [[nodiscard]] bool eopcode_is_insertion(uint8_t eopcode) const noexcept
   {
     return eopcode == ft_eopcode_insertion;
   }
@@ -292,10 +293,7 @@ class Eoplist
     indel_add(ft_eopcode_insertion);
     counter_for_insertions++;
   }
-  size_t size(void) const noexcept
-  {
-    return eoplist.size();
-  }
+  [[nodiscard]] size_t size(void) const noexcept { return eoplist.size(); }
   void reverse_end(size_t firstindex)
   {
     if (firstindex + 1 >= eoplist.size())
@@ -304,58 +302,58 @@ class Eoplist
     }
     std::reverse(eoplist.begin() + firstindex,eoplist.end());
   }
-  size_t count_matches_get(void) const noexcept
+  [[nodiscard]] size_t count_matches_get(void) const noexcept
   {
     return counter_for_matches;
   }
-  size_t count_mismatches_get(void) const noexcept
+  [[nodiscard]] size_t count_mismatches_get(void) const noexcept
   {
     return counter_for_mismatches;
   }
-  size_t count_deletions_get(void) const noexcept
+  [[nodiscard]] size_t count_deletions_get(void) const noexcept
   {
     return counter_for_deletions;
   }
-  size_t count_insertions_get(void) const noexcept
+  [[nodiscard]] size_t count_insertions_get(void) const noexcept
   {
     return counter_for_insertions;
   }
-  size_t count_gap_opens_get(void) const noexcept
+  [[nodiscard]] size_t count_gap_opens_get(void) const noexcept
   {
     return counter_for_gap_opens;
   }
-  size_t aligned_len_get(void) const noexcept
+  [[nodiscard]] size_t aligned_len_get(void) const noexcept
   {
     return count_deletions_get() + count_insertions_get() +
            2 * (count_mismatches_get() + count_matches_get());
   }
-  size_t aligned_len_u_get(void) const noexcept
+  [[nodiscard]] size_t aligned_len_u_get(void) const noexcept
   {
     return count_deletions_get() + count_mismatches_get() + count_matches_get();
   }
-  size_t aligned_len_v_get(void) const noexcept
+  [[nodiscard]] size_t aligned_len_v_get(void) const noexcept
   {
     return count_insertions_get() + count_mismatches_get()
                                   + count_matches_get();
   }
-  size_t errors_get(void) const noexcept
+  [[nodiscard]] size_t errors_get(void) const noexcept
   {
     return count_deletions_get() + count_insertions_get() +
            count_mismatches_get();
   }
-  double error_percentage_get(void) const noexcept
+  [[nodiscard]] double error_percentage_get(void) const noexcept
   {
     return 200.0 * static_cast<double>(errors_get())/aligned_len_get();
   }
-  Iterator begin(void) const
+  [[nodiscard]] Iterator begin(void) const
   {
     return Iterator(eoplist,distinguish_mismatch_match,false);
   }
-  Iterator end(void) const
+  [[nodiscard]] Iterator end(void) const
   {
     return Iterator(eoplist,distinguish_mismatch_match,true);
   }
-  std::string to_string(void) const noexcept
+  [[nodiscard]] std::string to_string(void) const noexcept
   {
     std::string s{};
     for (auto &&co : *this)
@@ -545,7 +543,8 @@ class Eoplist
     return sum_score;
   }
 
-  std::string cigar_string_get(bool distinguish_mismatch_match) const noexcept
+  [[nodiscard]] std::string
+  cigar_string_get(bool distinguish_mismatch_match) const noexcept
   {
     std::string cigar_string{};
     for (auto &&cigar_operator : *this)
