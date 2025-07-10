@@ -19,7 +19,7 @@ test:test_alphabet \
      test_char_range \
      test_matrix_partition \
      test_non_wc_ranges \
-     test_line_iterator \
+     test_line_generator \
      test_fastq_iterator \
      test_fasta_iterator \
      test_multiseq \
@@ -38,7 +38,6 @@ test:test_alphabet \
      test_split_files \
      test_multiseq_factory \
      test_read_vector \
-     test_iterator_compare \
      test_string_of_digits \
      test_binary_iterator
 	@echo "Congratulations. $@ passed."

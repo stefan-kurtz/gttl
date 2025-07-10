@@ -34,7 +34,7 @@
 #include "utilities/matrix_partition.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/all_vs_all2.hpp"
-#include "utilities/gttl_line_iterator.hpp"
+#include "utilities/gttl_line_generator.hpp"
 #include "utilities/split_string.hpp"
 #include "utilities/string_of_digits.hpp"
 #include "threading/thread_pool_var.hpp"
@@ -97,19 +97,17 @@ class Restrict2Pairs
   {
     SetOfPairs local_pairs{};
     constexpr const int buf_size = 1 << 14;
-    GttlLineIterator<buf_size> gttl_li(inputfile);
-    std::string buffer;
-    while (gttl_li.next(&buffer))
+    GttlLineGenerator<buf_size> gttl_li(inputfile);
+    for (const auto& line : gttl_li)
     {
-      if (buffer.size() > 0 and buffer[0] != '#')
+      if (line.size() > 0 and line[0] != '#')
       {
-        std::vector<std::string> vec = gttl_split_string(buffer, '\t');
+        std::vector<std::string> vec = gttl_split_string(line, '\t');
         assert(vec.size() >= 2);
         const uint32_t i = convert_header(db_header_id2idx,vec[0]);
         const uint32_t j = convert_header(query_header_id2idx,vec[1]);
         local_pairs.insert(std::make_pair(i,j));
       }
-      buffer.clear();
     }
     if (local_pairs.size() == 0)
     {
