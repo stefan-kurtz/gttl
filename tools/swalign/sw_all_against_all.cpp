@@ -227,6 +227,7 @@ class BestFromThread
   }
   bool operator < (const BestFromThread &other) const
   {
+    // SK: Check why this is necessary
     if (it == result->end()) return false;
     if (other.it == other.result->end()) return true;
     return *it > *other.it;
