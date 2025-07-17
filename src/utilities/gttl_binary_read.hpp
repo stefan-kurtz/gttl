@@ -153,7 +153,7 @@ class BinaryFileReader
   };
 
   private:
-  const std::string &inputfile;
+  const std::string inputfile;
   public:
   explicit BinaryFileReader(const std::string &_inputfile)
     : inputfile(_inputfile)

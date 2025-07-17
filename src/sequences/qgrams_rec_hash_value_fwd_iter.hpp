@@ -20,6 +20,9 @@
 #include <cstdint>
 #include <iterator>
 #include <utility>
+#ifndef NDEBUG
+#include <cmath>
+#endif
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"

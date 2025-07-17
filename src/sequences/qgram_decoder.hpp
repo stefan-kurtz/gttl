@@ -3,6 +3,11 @@
 #include <cstddef>
 #include <cassert>
 #include <cstdint>
+#ifndef NDEBUG
+#include <numeric>
+#include <cmath>
+#include "utilities/mathsupport.hpp"
+#endif
 #include "sequences/complement_plain.hpp"
 
 #ifndef NDEBUG

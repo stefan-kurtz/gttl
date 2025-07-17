@@ -13,7 +13,7 @@
 template <typename SuftabBaseType>
 class InverseSuftabReader
 {
-  const std::string inverse_suftab_outputfile;
+  std::string inverse_suftab_outputfile;
   const BinaryFileReader<SuftabBaseType> inverse_suftab_reader;
   [[nodiscard]] bool isa_file_is_up_to_date(const std::string &indexname) const
   {
@@ -66,8 +66,10 @@ class InverseSuftabReader
     : inverse_suftab_outputfile(create_inverse_suftab_file(memory_tracker,
                                                            indexname,
                                                            totallength))
-    , inverse_suftab_reader(inverse_suftab_outputfile)
-  { }
+    , inverse_suftab_reader(BinaryFileReader<SuftabBaseType>
+                               (inverse_suftab_outputfile))
+  {
+  }
   [[nodiscard]] auto begin(void) const { return inverse_suftab_reader.begin(); }
   [[nodiscard]] auto end(void) const { return inverse_suftab_reader.end(); }
   ~InverseSuftabReader(void)
