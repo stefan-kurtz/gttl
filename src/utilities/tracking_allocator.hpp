@@ -4,9 +4,9 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdlib>
-#include <iostream>
 #include <memory>
 #include <type_traits>
+#include "utilities/mathsupport.hpp"
 
 #if defined(__clang__) || defined(__GNUC__)
 
@@ -48,6 +48,7 @@ inline std::string demangle(const char* name)
 template <typename T>
 struct TrackingAllocator : std::allocator<T>
 {
+  using value_type = T;
   static_assert(not std::is_void_v<T>,
                 "TrackingAllocator does not support void-types!\n");
 
@@ -105,16 +106,17 @@ struct TrackingAllocator : std::allocator<T>
 
   static void log_stats()
   {
-    std::cerr << "TrackingAllocator<" << demangle(typeid(T).name())
-              << "> stats:\n"
-              << "  max_allocated:\t" << max_allocated.load() << " bytes\n"
-              << "  allocations:\t"   << allocations.load() << "\n"
-              << "  deallocations:\t" << deallocations.load() << "\n";
-
+    printf("# TrackingAllocator<%s> "
+           "max_allocated\t%.1f\t"
+           "allocations\t%zu\t"
+           "deallocations\t%zu\n",demangle(typeid(T).name()).c_str(),
+                                  mega_bytes(max_allocated.load()),
+                                  allocations.load(),
+                                  deallocations.load());
     if(allocations != deallocations)
     {
-      std::cerr << "WARNING: allocations != deallocations!\n"
-                << "This indicates a memory leak!\n";
+      fprintf(stderr,"WARNING: #allocations != #deallocations "
+                     "=> memory leak\n");
     }
   }
 
@@ -144,8 +146,8 @@ struct TrackingAllocator : std::allocator<T>
       // SIGTERM.
       if(std::atexit(log_stats) != 0)
       {
-        std::cerr << "Warning: Failed to register the"
-                  << "TrackingAllocator logger with atexit()!\n";
+        fprintf(stderr,"WARNING: #allocations != #deallocations "
+                       "=> memory leak\n");
         // We don't throw, because this is not critical
       }
       return true;
