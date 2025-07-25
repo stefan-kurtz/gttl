@@ -39,7 +39,8 @@ test:test_alphabet \
      test_multiseq_factory \
      test_read_vector \
      test_string_of_digits \
-     test_binary_iterator
+     test_binary_iterator \
+     test_multiple_options
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -440,6 +441,11 @@ test_binary_iterator:binary_iterator.x
        ${VALGRIND} ./binary_iterator.x "../testdata/$$file" | diff --strip-trailing-cr - "../testdata/$$file"; \
      done < ../testdata/corrupt_files.txt
 	@echo "Congratulations. $@ passed"
+
+.PHONY:test_multiple_options
+test_multiple_options:multiple_options_mn.x
+	@./multiple_options_mn.x 'p_value+k_mer' | diff - ../testdata/p_value_and_k_mer.txt
+	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
