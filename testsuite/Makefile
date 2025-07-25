@@ -20,8 +20,8 @@ test:test_alphabet \
      test_matrix_partition \
      test_non_wc_ranges \
      test_line_generator \
-     test_fastq_iterator \
-     test_fasta_iterator \
+     test_fastq_generator \
+     test_fasta_generator \
      test_multiseq \
      test_thread_pool \
      test_sort_kvt \
@@ -138,21 +138,6 @@ test_sorted_by_header_multiseq:./multiseq_mn.x
 	@./cmp_sorted_by_header.sh ${AT1MB}
 	@echo "Congratulations. $@ passed."
 
-.PHONY:test_line_iterator
-test_line_iterator:line_iterator.x
-	@./line_iterator.py `find .. -name '*.[ch]pp'` | sh -s
-	@${VALGRIND} ./line_iterator.x ${AT1MB} | diff --strip-trailing-cr - ${AT1MB}
-	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
-	@cat ${AT1MB} | tr -d '\n' > ${TMPFILE}
-	@echo "" >> ${TMPFILE}
-	@${VALGRIND} ./line_iterator.x ${TMPFILE} | diff --strip-trailing-cr - ${TMPFILE}
-	@cat ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
-	@cat ${AT1MB} ${AT1MB} ${AT1MB} > ${TMPFILE}
-	@${VALGRIND} ./line_iterator.x ${AT1MB} ${AT1MB} ${AT1MB} | diff --strip-trailing-cr - ${TMPFILE}
-	@${RM} ${TMPFILE}
-	@echo "Congratulations. $@ passed."
-
 .PHONY:test_line_generator
 test_line_generator:line_generator.x
 	@./line_generator.py `find .. -name '*.[ch]pp'` | sh -s
@@ -180,17 +165,17 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 	./matrix_partition_cmp.sh 500 13000 0
 	@echo "Congratulations. $@ passed."
 
-.PHONY:test_fastq_iterator
-test_fastq_iterator:./fastq_mn.x
+.PHONY:test_fastq_generator
+test_fastq_generator:./fastq_mn.x
 	@for num_threads in 1 2 3 4 5; do \
 	  ${VALGRIND} ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep -E '# char|# total_count_entries' | diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_dist.tsv;\
 	done
-	@sh ./test_fastq_iterator.sh
+	@sh ./test_fastq_generator.sh
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
 	@echo "Congratulations. $@ passed."
 
-.PHONY:test_fasta_iterator
-test_fasta_iterator:./fasta_mn.x
+.PHONY:test_fasta_generator
+test_fasta_generator:./fasta_mn.x
 	@for input_mode in "" --mapped; do \
 	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff --strip-trailing-cr - ${AT1MB};\
 	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff --strip-trailing-cr - ${SW175};\
@@ -244,12 +229,6 @@ test_invint:enum_invint.x
 	@${VALGRIND} ./enum_invint.x 15 ../testdata/vaccg.fna | diff --strip-trailing-cr - ../testdata/vaccg_invint15.tsv
 	@${VALGRIND} ./enum_invint.x 15 ../testdata/ychrIII.fna | diff --strip-trailing-cr - ../testdata/ychrIII_invint15.tsv
 	@${VALGRIND} ./enum_invint.x 14 ../testdata/at1MB.fna | diff --strip-trailing-cr - ../testdata/at1MB_invint14.tsv
-	@echo "Congratulations. $@ passed."
-
-.PHONY:test_line_iterator_mapped
-test_line_iterator_mapped:line_iterator_mapped.x
-	@${VALGRIND} ./line_iterator_mapped.x `ls ../testdata/*.fna | grep -E -v 'empty.fna|\.gz'`
-	@${VALGRIND} ./line_iterator_mapped.x *.[hc]pp
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_generator_mapped
@@ -418,15 +397,6 @@ test_read_vector:read_vector_mn.x
 	@${RM} ${TMPFILE} ${TMPFILE}.gz
 	@echo "$@ passed"
 
-.PHONY:test_iterator_compare
-test_iterator_compare:iterator_compare.x
-	@${VALGRIND} ./iterator_compare.x -q ../testdata/SRR19536726_1_1000.fastq.gz
-	@${VALGRIND} ./iterator_compare.x -a ../testdata/varlen_paired_both.fasta.gz
-	@${VALGRIND} ./iterator_compare.x -a ${AT1MB}
-	@${VALGRIND} ./iterator_compare.x -a ${SW175}
-	@${VALGRIND} ./iterator_compare.x -q ../testdata/70x_161nt_phred64.fastq
-	@echo "Congratulations. $@ passed"
-
 .PHONY:test_string_of_digits
 test_string_of_digits:string_of_digits.x
 	@${VALGRIND} ./string_of_digits.x
@@ -444,7 +414,7 @@ test_binary_iterator:binary_iterator.x
 
 .PHONY:test_multiple_options
 test_multiple_options:multiple_options_mn.x
-	@./multiple_options_mn.x 'p_value+k_mer' | diff - ../testdata/p_value_and_k_mer.txt
+	@./multiple_options_mn.x 'p_value+k_mer' | diff --strip-trailing-cr - ../testdata/p_value_and_k_mer.txt
 	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
