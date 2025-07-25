@@ -1,4 +1,4 @@
-GTTL ?= ..
+GTTL := ..
 include ${GTTL}/config.mk
 
 MAIN_SRC=${shell grep -wl main *.cpp}
@@ -168,7 +168,7 @@ test_matrix_partition:matrix_partition.py matrix_partition.x
 .PHONY:test_fastq_generator
 test_fastq_generator:./fastq_mn.x
 	@for num_threads in 1 2 3 4 5; do \
-	  ${VALGRIND} ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep -E '# char|# total_count_entries' | diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_dist.tsv;\
+	  ${VALGRIND} ./fastq_mn.x --threads $${num_threads} ../testdata/70x_161nt_phred64.fastq | grep -E '# char|# total_count_entries' | diff --strip-trailing-cr - ../testdata/70x_161nt_phred64_dist.tsv || exit 1;\
 	done
 	@sh ./test_fastq_generator.sh
 	@./check_split.sh ../testdata/70x_161nt_phred64.fastq
@@ -177,10 +177,10 @@ test_fastq_generator:./fastq_mn.x
 .PHONY:test_fasta_generator
 test_fasta_generator:./fasta_mn.x
 	@for input_mode in "" --mapped; do \
-	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff --strip-trailing-cr - ${AT1MB};\
-	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff --strip-trailing-cr - ${SW175};\
-	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${Y3} | diff --strip-trailing-cr - ${Y3};\
-	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${VAC} | diff --strip-trailing-cr - ${VAC};\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 70 ${AT1MB} | diff --strip-trailing-cr - ${AT1MB} || exit 1;\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 60 ${SW175} | diff --strip-trailing-cr - ${SW175} || exit 1;\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${Y3} | diff --strip-trailing-cr - ${Y3} || exit 1;\
+	  ${VALGRIND} ./fasta_mn.x $${input_mode} --width 61 ${VAC} | diff --strip-trailing-cr - ${VAC} || exit 1;\
 	done
 	@echo "Congratulations. $@ passed."
 
@@ -192,29 +192,29 @@ test_thread_pool:thread_pool_mn.x
 .PHONY:test_sort_kvt
 test_sort_kvt:sort_key_value_pairs.x
 	@for num in 66 666 66666 666666 6666666; do \
-	   ./sort_key_value_pairs.x -d t -m lsb-radix $$num;\
-	   ./sort_key_value_pairs.x -d t -m mergesort $$num;\
-	   ./sort_key_value_pairs.x -d t -m stdsort $$num;\
+	   ./sort_key_value_pairs.x -d t -m lsb-radix $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d t -m mergesort $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d t -m stdsort $$num || exit 1;\
 	done
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_sort_kvp
 test_sort_kvp:sort_key_value_pairs.x
 	@for num in 100 1000 10000 100000 1000000 10000000; do \
-	   ./sort_key_value_pairs.x -d p -m lsb-radix $$num;\
-	   ./sort_key_value_pairs.x -d p -m mergesort $$num;\
-	   ./sort_key_value_pairs.x -d p -m stdsort $$num;\
+	   ./sort_key_value_pairs.x -d p -m lsb-radix $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d p -m mergesort $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d p -m stdsort $$num || exit 1;\
 	done
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_sort_i
 test_sort_i:sort_key_value_pairs.x
 	@for num in 200 2000 20000 200000 2000000 20000000; do \
-	   ./sort_key_value_pairs.x -t 1 -d i -m lsb-radix $$num;\
-	   ./sort_key_value_pairs.x -t 2 -d i -m lsb-radix $$num;\
-	   ./sort_key_value_pairs.x -t 3 -d i -m lsb-radix $$num;\
-	   ./sort_key_value_pairs.x -d i -m mergesort $$num;\
-	   ./sort_key_value_pairs.x -d i -m stdsort $$num;\
+	   ./sort_key_value_pairs.x -t 1 -d i -m lsb-radix $$num || exit 1;\
+	   ./sort_key_value_pairs.x -t 2 -d i -m lsb-radix $$num || exit 1;\
+	   ./sort_key_value_pairs.x -t 3 -d i -m lsb-radix $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d i -m mergesort $$num || exit 1;\
+	   ./sort_key_value_pairs.x -d i -m stdsort $$num || exit 1;\
 	done
 	@echo "Congratulations. $@ passed."
 
@@ -381,7 +381,7 @@ test_untar:untar_zipped_mn.x
 	@for suffix in gz bz2; do \
 	  for norapidgzip in "" "--no_rapidgzip"; do \
 	    for store_in_memory  in "" "--store_in_memory"; do \
-	      ${VALGRIND} ./untar_zipped_mn.x $${norapidgzip} $${store_in_memory} ../testdata/pubmed_small.tar.$${suffix} | diff --strip-trailing-cr - ../testdata/pubmed_small.txt;\
+	      ${VALGRIND} ./untar_zipped_mn.x $${norapidgzip} $${store_in_memory} ../testdata/pubmed_small.tar.$${suffix} | diff --strip-trailing-cr - ../testdata/pubmed_small.txt || exit 1;\
 	    done \
 	  done \
 	done
@@ -391,8 +391,8 @@ test_untar:untar_zipped_mn.x
 test_read_vector:read_vector_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@for filename in ${AT1MB} ${SW175} ${Y3} ${VAC}; do \
-	  gzip -9 -c $${filename} > ${TMPFILE}.gz; \
-	  ${VALGRIND} ./read_vector_mn.x $${filename} ${TMPFILE}.gz; \
+	  gzip -9 -c $${filename} > ${TMPFILE}.gz || exit 1; \
+	  ${VALGRIND} ./read_vector_mn.x $${filename} ${TMPFILE}.gz || exit 1; \
 	done
 	@${RM} ${TMPFILE} ${TMPFILE}.gz
 	@echo "$@ passed"

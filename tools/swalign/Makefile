@@ -97,11 +97,11 @@ test-agc: test-agc-proteins test-agc-DNA test-best-threads test-against-0
 .PHONY:test-agc-proteins
 test-agc-proteins:sw_all_against_all.x
 	@for prog in ./sw_all_against_all.x; do \
-	  ${VALGRIND} $${prog} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/ref-query-protein-v1.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -t 2 -a 1 | ./largerscore.py - testdata/ref-query-protein.tsv; \
+	  ${VALGRIND} $${prog} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/ref-query-protein-v1.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -t 2 -a 1 | ./largerscore.py - testdata/ref-query-protein.tsv || exit 1; \
 	  for moption in "" "-m"; do \
-	    ${VALGRIND} $${prog} -d testdata/Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 5 $${moption} | diff --strip-trailing-cr -I '^#' - testdata/Q6GZS4-query-cigar.tsv; \
-	    ${VALGRIND} $${prog} -d testdata/Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 60 $${moption} | diff --strip-trailing-cr -I '^#' - testdata/Q6GZS4-query-align.txt; \
+	    ${VALGRIND} $${prog} -d testdata/Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 5 $${moption} | diff --strip-trailing-cr -I '^#' - testdata/Q6GZS4-query-cigar.tsv || exit 1; \
+	    ${VALGRIND} $${prog} -d testdata/Q6GZS4.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -a 60 $${moption} | diff --strip-trailing-cr -I '^#' - testdata/Q6GZS4-query-align.txt || exit 1; \
 	  done; \
 	done
 	@echo "tests for protein alignments with affine gap costs (vectorized) passed"
@@ -111,18 +111,18 @@ test-agc-DNA:sw_all_against_all.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@for prog in ./sw_all_against_all.x; do \
-	  ${VALGRIND} $${prog} -v 1 -d testdata/simple_fwd.fna | cut -f 1-5 | diff --strip-trailing-cr -I '^#' - testdata/simple_v1_output.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc -g 4 1 -v 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v1.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -t 2 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 5 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.a2.tsv; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 60 > ${TMPFILE1}; \
-	  ./alignment_parse.py ${TMPFILE1}; \
-	  bzip2 -d -c testdata/smrt100-2000.a60_new.tsv.bz2 > ${TMPFILE2}; \
-	  ./cmp_with_alignment.py -s ${TMPFILE1} ${TMPFILE2}; \
-	  ${VALGRIND} $${prog} -d testdata/smrt100-2000-first.fna -q testdata/smrt100-2000-last.fna -s unit_score_nuc_lower -g 4 1 -v 2 | grep -v '^#' | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000-d_vs_q.tsv; \
-	  $${prog} -d testdata/humhdabcd.fna -q testdata/humdystrop.fna -g 4 1 -v 2 -a 5 | diff --strip-trailing-cr -I '^#' - testdata/humhdabcd_humdystrop.tsv; \
+	  ${VALGRIND} $${prog} -v 1 -d testdata/simple_fwd.fna | cut -f 1-5 | diff --strip-trailing-cr -I '^#' - testdata/simple_v1_output.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc -g 4 1 -v 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v1.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 1 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -t 2 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.v2.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 5 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000.a2.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -a 60 > ${TMPFILE1} || exit 1; \
+	  ./alignment_parse.py ${TMPFILE1} || exit 1; \
+	  bzip2 -d -c testdata/smrt100-2000.a60_new.tsv.bz2 > ${TMPFILE2} || exit 1; \
+	  ./cmp_with_alignment.py -s ${TMPFILE1} ${TMPFILE2} || exit 1; \
+	  ${VALGRIND} $${prog} -d testdata/smrt100-2000-first.fna -q testdata/smrt100-2000-last.fna -s unit_score_nuc_lower -g 4 1 -v 2 | grep -v '^#' | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/smrt100-2000-d_vs_q.tsv || exit 1; \
+	  $${prog} -d testdata/humhdabcd.fna -q testdata/humdystrop.fna -g 4 1 -v 2 -a 5 | diff --strip-trailing-cr -I '^#' - testdata/humhdabcd_humdystrop.tsv || exit 1; \
 	done
 	@${RM} ${TMPFILE1} ${TMPFILE2}
 	@echo "tests for DNA alignments with affine gap costs (vectorized) passed"
@@ -134,8 +134,8 @@ test-best-threads:sw_all_against_all.x
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@./select-best.py -a 2 testdata/smrt100-2000.v2.best2.tsv | sort -k 1 -n -k 7 -n > ${TMPFILE2}
 	@for num_threads in 1 2 4; do \
-	  ${VALGRIND} ./sw_all_against_all.x -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -b 11 -a 1 -t $${num_threads} | sort -k 1 -n -k 7 -n  | diff --strip-trailing-cr -I '^#' - ${TMPFILE1}; \
-	  ${VALGRIND} ./sw_all_against_all.x -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -b 2 -t $${num_threads} | sort -k 1 -n -k 7 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE2}; \
+	  ${VALGRIND} ./sw_all_against_all.x -d testdata/ref-protein.fsa -q testdata/query-protein.fasta -s blosum62 -g 11 1 -v 2 -b 11 -a 1 -t $${num_threads} | sort -k 1 -n -k 7 -n  | diff --strip-trailing-cr -I '^#' - ${TMPFILE1} || exit 1; \
+	  ${VALGRIND} ./sw_all_against_all.x -d testdata/smrt100-2000.fna -s unit_score_nuc_lower -g 4 1 -v 2 -b 2 -t $${num_threads} | sort -k 1 -n -k 7 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE2} || exit 1; \
 	done
 	@${RM} ${TMPFILE1} ${TMPFILE2}
 	@echo "$@ passed"
@@ -145,9 +145,9 @@ test-against-0:sw_all_against_all.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@./alignment_parse.py testdata/smrt100-2000-a60-v0.txt
 	@for prog in ./sw_all_against_all.x; do \
-	  ${VALGRIND} $${prog} -a 60 -v 2 -d testdata/smrt100-2000.fna > ${TMPFILE}; \
-	  ./alignment_parse.py ${TMPFILE}; \
-	  ./cmp_with_alignment.py -s testdata/smrt100-2000-a60-v0.txt ${TMPFILE}; \
+	  ${VALGRIND} $${prog} -a 60 -v 2 -d testdata/smrt100-2000.fna > ${TMPFILE} || exit 1; \
+	  ./alignment_parse.py ${TMPFILE} || exit 1; \
+	  ./cmp_with_alignment.py -s testdata/smrt100-2000-a60-v0.txt ${TMPFILE} || exit 1; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -161,12 +161,12 @@ test-lgc:sw_all_against_all.x testdata/gsa-seqpair.fasta testdata/gsa-align.tsv 
 	@$(eval TMPFILE2 := $(shell mktemp --tmpdir=.))
 	@gzip -d -c testdata/local-cigar98.tsv.gz > ${TMPFILE2}
 	@for prog in ./sw_all_against_all.x; do \
-	  ${VALGRIND} $${prog} -g 0 1 -v 2 -s unit_score_aa -d testdata/gsa-seqpair.fasta | diff --strip-trailing-cr -I '^#' - testdata/gsa-align.tsv; \
-	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq18.fasta | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/local-coords18.tsv; \
-	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq18.fasta -t 2 | sort -k1,1n -k2,2n | diff --strip-trailing-cr -I '^#' - testdata/local-coords18.tsv; \
-	  ${VALGRIND} $${prog} -g 0 4 -a 5 -v 2 -d testdata/seq18.fasta | sort -k1,1n -k2,2n | diff --strip-trailing-cr -I '^#' - ${TMPFILE1}; \
-	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq98.fasta | cut -f 1,2,7 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/seq98-a1-v0.tsv; \
-	  ${VALGRIND} $${prog} -g 0 4 -a 5 -v 2 -d testdata/seq98.fasta | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE2}; \
+	  ${VALGRIND} $${prog} -g 0 1 -v 2 -s unit_score_aa -d testdata/gsa-seqpair.fasta | diff --strip-trailing-cr -I '^#' - testdata/gsa-align.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq18.fasta | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/local-coords18.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq18.fasta -t 2 | sort -k1,1n -k2,2n | diff --strip-trailing-cr -I '^#' - testdata/local-coords18.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -g 0 4 -a 5 -v 2 -d testdata/seq18.fasta | sort -k1,1n -k2,2n | diff --strip-trailing-cr -I '^#' - ${TMPFILE1} || exit 1; \
+	  ${VALGRIND} $${prog} -g 0 4 -a 1 -v 2 -d testdata/seq98.fasta | cut -f 1,2,7 | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - testdata/seq98-a1-v0.tsv || exit 1; \
+	  ${VALGRIND} $${prog} -g 0 4 -a 5 -v 2 -d testdata/seq98.fasta | sort -k 1 -n -k 2 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE2} || exit 1; \
 	done
 	@${RM} ${TMPFILE1} ${TMPFILE2}
 	@echo "tests for linear gap costs (vectorized) passed"
@@ -200,9 +200,9 @@ test-swaga:test-swaga-proteins-self test-swaga-proteins-query test-swaga-protein
 .PHONY:test-swaga-proteins-self
 test-swaga-proteins-self:sw_all_against_all.x
 	@for fileid in seq18 seq50 query-protein; do \
-	  ./sw_all_against_all.x -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv; \
-	  ./sw_all_against_all.x -t 2 -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv; \
-	  ./sw_all_against_all.x -t 4 -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv; \
+	  ./sw_all_against_all.x -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv || exit 1; \
+	  ./sw_all_against_all.x -t 2 -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv || exit 1; \
+	  ./sw_all_against_all.x -t 4 -d testdata/$${fileid}.fasta | sort -k1 -n -k2 -n  | diff --strip-trailing-cr -I '^#' - testdata/$${fileid}-d.tsv || exit; \
 	done
 	@echo "$@ passed"
 
@@ -210,11 +210,11 @@ test-swaga-proteins-self:sw_all_against_all.x
 test-swaga-proteins-query:sw_all_against_all.x
 	@$(eval TMPFILE1 := $(shell mktemp --tmpdir=.))
 	@for num_threads in 1 2 4; do \
-	  ./sw_all_against_all.x -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | grep -v '^#' | sort -k1 -n -k2 -n | diff --strip-trailing-cr -I '^#' - testdata/ref-query-protein.tsv; \
+	  ./sw_all_against_all.x -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | grep -v '^#' | sort -k1 -n -k2 -n | diff --strip-trailing-cr -I '^#' - testdata/ref-query-protein.tsv || exit 1; \
 	done
 	@./select-best.py -a 29 testdata/ref-query-protein.tsv | sort -k1 -n -k2 -n > ${TMPFILE1}
 	@for num_threads in 1 2 4; do \
-	  ./sw_all_against_all.x -c 50 -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | sort -k1 -n -k2 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE1}; \
+	  ./sw_all_against_all.x -c 50 -t $${num_threads} -d testdata/ref-protein.fsa -q testdata/query-protein.fasta | sort -k1 -n -k2 -n | diff --strip-trailing-cr -I '^#' - ${TMPFILE1} || exit 1; \
 	done
 	@${RM} ${TMPFILE1}
 	@echo "$@ passed"
@@ -243,8 +243,8 @@ test-swaga-b:sw_all_against_all.x
 	@../../scripts/select-seq.py -f 100 ${AT1MB} > ${TMPFILE2}
 	@./sw_all_against_all.x -d ${TMPFILE2} | ./select-best.py -a 37 - > ${TMPFILE3}
 	@for num_threads in 1 2 3 4; do \
-	  ./sw_all_against_all.x -t $${num_threads} -b 50 -d testdata/seq50.fasta | diff --strip-trailing-cr -I '^#' - ${TMPFILE1}; \
-	  ./sw_all_against_all.x -t $${num_threads} -b 37 -d ${TMPFILE2} | diff --strip-trailing-cr -I '^#' - ${TMPFILE3}; \
+	  ./sw_all_against_all.x -t $${num_threads} -b 50 -d testdata/seq50.fasta | diff --strip-trailing-cr -I '^#' - ${TMPFILE1} || exit 1; \
+	  ./sw_all_against_all.x -t $${num_threads} -b 37 -d ${TMPFILE2} | diff --strip-trailing-cr -I '^#' - ${TMPFILE3} || exit 1; \
 	done
 	@${RM} ${TMPFILE1} ${TMPFILE2} ${TMPFILE3}
 	@echo "$@ passed"
@@ -296,8 +296,8 @@ test_overflow:sw_all_against_all.x simd32_seqs
 	@touch ${TMPFILE}
 	@for filename in `ls simd32_seqs`; do \
 	   echo $${filename}; \
-           ./sw_all_against_all.x -v 1 -d simd32_seqs/$$filename >> ${TMPFILE}; \
-           ./sw_all_against_all.x -v 2 -d simd32_seqs/$$filename >> ${TMPFILE}; \
+           ./sw_all_against_all.x -v 1 -d simd32_seqs/$$filename >> ${TMPFILE} || exit 1; \
+           ./sw_all_against_all.x -v 2 -d simd32_seqs/$$filename >> ${TMPFILE} || exit 1; \
         done
 	@grep '^# TIME' ${TMPFILE}
 	@diff --strip-trailing-cr -I '^# ' ${TMPFILE} testdata/simd32_seqs_results.tsv

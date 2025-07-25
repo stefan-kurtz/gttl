@@ -92,11 +92,11 @@ test_saincheck:sa_induced.x
 test_plcp:sa_induced.x
 	@for filename in ${GTTL_FASTA_FILES} ; do \
 	   echo "test_plcp.sh $${filename}"; \
-	   ./test_plcp.sh $${filename}; \
+	   ./test_plcp.sh $${filename} || exit 1; \
 	done
 	@for filename in `enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
 	  echo "test_plcp.sh $${filename}"; \
-	  ./test_plcp.sh $${filename}; \
+	  ./test_plcp.sh $${filename} || exit 1; \
 	done
 	@echo "$@ passed"
 
@@ -105,14 +105,14 @@ test_sfx_compare:sa_induced.x
 	@for filename in ${GTTL_FASTA_FILES}; do \
 	   cp $$filename ${TMPFILE}; \
 	   echo "sfx-compare.sh $$filename"; \
-	   ./sfx-compare.sh ${TMPFILE}; \
+	   ./sfx-compare.sh ${TMPFILE} || exit 1; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
 
 test_big:sa_induced.x
 	@for filename in `enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
-	  ./sa_induced.x --relative_suftab --verbose --check_suftab $${filename}; \
+	  ./sa_induced.x --relative_suftab --verbose --check_suftab $${filename} || exit 1; \
 	  ${RM} `basename $${filename}`.bsf `basename $${filename}`.prj; \
 	done
 	@echo "$@ passed"

@@ -37,7 +37,7 @@ ifdef HIQ
 	@./ntcard_mn.x ${HIQ} | diff --strip-trailing-cr -I "^#" - references/hiq_base.txt
 	@for mode in binary fast long ; do \
 	   for num_threads in 1 2 3; do \
-	     ./ntcard_mn.x --$${mode} --threads $${num_threads} ${HIQ} | diff --strip-trailing-cr -I '^#' - references/hiq_$${mode}.txt; \
+	     ./ntcard_mn.x --$${mode} --threads $${num_threads} ${HIQ} | diff --strip-trailing-cr -I '^#' - references/hiq_$${mode}.txt || exit 1; \
 	   done \
 	done
 	@echo "$@ passed"
@@ -54,7 +54,7 @@ ifdef ECO29_SINGLE_FILE
 	@./ntcard_mn.x eco29.fasta | diff --strip-trailing-cr -I "^#" - references/eco_base.txt
 	@for mode in binary fast long; do \
 	   for num_threads in 1 2 3; do \
-	     ./ntcard_mn.x --$${mode} --threads $${num_threads} eco29.fasta | diff --strip-trailing-cr -I '^#' - references/eco_$${mode}.txt; \
+	     ./ntcard_mn.x --$${mode} --threads $${num_threads} eco29.fasta | diff --strip-trailing-cr -I '^#' - references/eco_$${mode}.txt || exit 1; \
 	   done \
 	done
 	@echo "$@ passed"
@@ -71,7 +71,7 @@ ifdef SOIL_UNIQUE
 	@./ntcard_mn.x soil_unique.fasta | diff --strip-trailing-cr -I "^#" - references/soil_unique_base.txt
 	@for mode in binary fast long; do \
 	   for num_threads in 1 2 3; do \
-	     ./ntcard_mn.x --$${mode} --threads $${num_threads} soil_unique.fasta | diff --strip-trailing-cr -I '^#' - references/soil_unique_$${mode}.txt; \
+	     ./ntcard_mn.x --$${mode} --threads $${num_threads} soil_unique.fasta | diff --strip-trailing-cr -I '^#' - references/soil_unique_$${mode}.txt || exit 1; \
 	   done \
 	done
 	@echo "$@ passed"
@@ -82,7 +82,7 @@ test_hg38chr1:ntcard_mn.x soil_unique.fasta
 ifdef HG38CHR1
 	@./ntcard_mn.x ${HG38CHR1} | diff --strip-trailing-cr -I "^#" - references/hg38chr1_base.txt
 	@for mode in binary fast long; do \
-	   ./ntcard_mn.x --$${mode} ${HG38CHR1} | diff --strip-trailing-cr -I '^#' - references/hg38chr1_$${mode}.txt; \
+	   ./ntcard_mn.x --$${mode} ${HG38CHR1} | diff --strip-trailing-cr -I '^#' - references/hg38chr1_$${mode}.txt || exit 1; \
 	done
 	@echo "$@ passed"
 endif
@@ -98,10 +98,10 @@ test_fastq:ntcard_mn.x SRR19536726_1_1000.fastq 70x_161nt_phred64.fastq.gz
 	@for filename in ../../testdata/70x_161nt_phred64.fastq 70x_161nt_phred64.fastq.gz SRR19536726_1_1000.fastq ../../testdata/SRR19536726_1_1000.fastq.gz; do \
 	  bfilename=`basename $${filename}`;\
 	  bfilename=`echo $${bfilename} | cut -d '.' -f 1`;\
-	  ./ntcard_mn.x $${filename} | diff --strip-trailing-cr -I "^#" - references/$${bfilename}_base.txt; \
+	  ./ntcard_mn.x $${filename} | diff --strip-trailing-cr -I "^#" - references/$${bfilename}_base.txt || exit 1; \
 	  for mode in binary fast long; do \
 	    for num_threads in 1 2 3; do \
-	      ./ntcard_mn.x --$${mode} --threads $${num_threads} $${filename} | diff --strip-trailing-cr -I '^#' - references/$${bfilename}_$${mode}.txt; \
+	      ./ntcard_mn.x --$${mode} --threads $${num_threads} $${filename} | diff --strip-trailing-cr -I '^#' - references/$${bfilename}_$${mode}.txt || exit 1; \
 	     done \
 	   done \
 	done

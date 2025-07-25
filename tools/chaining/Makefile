@@ -22,8 +22,8 @@ test_small:chaining.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@for lines in 1 2 4 20 50 283 298 304 665 753 800 900 1500; do \
 		gzip -d -c ecolicmp250.of.gz | head -n $$lines | sed -r 's/\t/ /g' > ${TMPFILE}; \
-		./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-global.txt; \
-    ./chaining.x --local ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt; \
+		./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-global.txt || exit 1; \
+    ./chaining.x --local ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt || exit 1; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "Congratulations, $@ passed."
@@ -34,9 +34,9 @@ test_large:chaining.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@for lines in 8000 10766 58655 62935 64833 733000 733536 733537 800000 900000; do \
 		echo '# select first '$$lines' lines of ecoli_vs_ecoli.of'; \
-		head -n $$lines testdata/ecoli_vs_ecoli.of > ${TMPFILE}; \
-    ./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-global.txt; \
-    ./chaining.x --local ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt; \
+		head -n $$lines testdata/ecoli_vs_ecoli.of > ${TMPFILE} || exit 1; \
+    ./chaining.x ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-global.txt || exit 1; \
+    ./chaining.x --local ${TMPFILE} | diff --strip-trailing-cr - testdata/chain-$$lines-local.txt || exit 1; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "Congratulations, $@ passed."
@@ -47,8 +47,8 @@ test_repfind:chaining.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@for file in ${REPFINDDATA}; do \
 		echo '# compute matches for '$$file; \
-    ./chaining.x testdata/$$(basename $$file)-repdata.txt --silent | diff --strip-trailing-cr - testdata/chain-$$(basename $$file)-global.txt; \
-    ./chaining.x testdata/$$(basename $$file)-repdata.txt --silent --local | diff --strip-trailing-cr - testdata/chain-$$(basename $$file)-local.txt; \
+    ./chaining.x testdata/$$(basename $$file)-repdata.txt --silent | diff --strip-trailing-cr - testdata/chain-$$(basename $$file)-global.txt || exit 1; \
+    ./chaining.x testdata/$$(basename $$file)-repdata.txt --silent --local | diff --strip-trailing-cr - testdata/chain-$$(basename $$file)-local.txt || exit 1; \
 	done
 	@${RM} ${TMPFILE}
 	@echo "Congratulations, $@ passed."
