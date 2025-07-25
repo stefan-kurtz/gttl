@@ -24,7 +24,7 @@ class MultipleOptions
      https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
     */
     char value[length_of_literal];
-    constexpr explicit StringLiteral(const char (&str)[length_of_literal])
+    constexpr StringLiteral(const char (&str)[length_of_literal])
     {
       std::copy_n(str, length_of_literal, value);
     }
