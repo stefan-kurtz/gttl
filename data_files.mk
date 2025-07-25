@@ -16,7 +16,10 @@ REPFINDDATA = ${GTTL}/testdata/Duplicate.fna \
               ${GTTL}/testdata/vaccg.fna
 
 # All FastA files (Extensions according to Wikipedia)
-GTTL_FASTA_FILES = $(shell find ${GTTL}/testdata -type f -name "*.fna" \
+CORRUPT_FILES = $(shell cat ${GTTL}/testdata/corrupt_files.txt)
+EXCLUDE_PATTERNS = $(foreach f,$(CORRUPT_FILES),! -name $(f))
+GTTL_FASTA_FILES = $(shell find ${GTTL}/testdata -type f \
+                                                     \( -name "*.fna" \
                                                      -o -name "*.fsa" \
                                                      -o -name "*.fasta" \
                                                      -o -name "*.fas" \
@@ -24,7 +27,8 @@ GTTL_FASTA_FILES = $(shell find ${GTTL}/testdata -type f -name "*.fna" \
                                                      -o -name "*.ffn" \
                                                      -o -name "*.faa" \
                                                      -o -name "*.mpfa" \
-                                                     -o -name "*.frn")
+                                                     -o -name "*.frn" \) \
+                                                     $(EXCLUDE_PATTERNS))
 
 # Same, but for FastQ
 GTTL_FASTQ_FILES = $(shell find ${GTTL}/testdata -type f -name "*.fastq" \
