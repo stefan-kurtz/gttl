@@ -69,6 +69,8 @@ void SeqReaderOptions::parse(int argc, char **argv)
                           "are from the first file and sequences at odd "
                           "indexes are from the second file",
         cxxopts::value<bool>(fasta_output_option)->default_value("false"))
+       ("p,paired", "process two files as paired read files",
+         cxxopts::value<bool>(paired_option)->default_value("false"))
        ("hash", "compute hash values of all sequences using the method "
                 "provided as parameter; possible values wy (for wyhash)"
 #ifdef WITH_XXHASH
@@ -103,6 +105,11 @@ void SeqReaderOptions::parse(int argc, char **argv)
     if (max_input_files > 0 and inputfiles.size() > max_input_files)
     {
       throw cxxopts::exceptions::exception("superfluous input files");
+    }
+    if (paired_option and inputfiles.size() != 2)
+    {
+      throw cxxopts::exceptions::exception("option -p/--paired expects exactly "
+                                           "two file arguments");
     }
     if (split_size != 0 && inputfiles.size() != 1)
     {
@@ -161,6 +168,11 @@ bool SeqReaderOptions::fasta_output_option_is_set(void) const noexcept
 bool SeqReaderOptions::mapped_option_is_set(void) const noexcept
 {
   return mapped_option;
+}
+
+bool SeqReaderOptions::paired_option_is_set(void) const noexcept
+{
+  return paired_option;
 }
 
 std::string SeqReaderOptions::encoding_type_get(void) const noexcept

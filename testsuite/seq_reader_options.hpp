@@ -20,7 +20,8 @@ class SeqReaderOptions
        statistics_option = false,
        echo_option = false,
        fasta_output_option = false,
-       mapped_option = false;
+       mapped_option = false,
+       paired_option = false;
   std::string encoding_type;
   size_t num_threads = 0,
          split_size = 0,
@@ -38,6 +39,7 @@ class SeqReaderOptions
   [[nodiscard]] bool echo_option_is_set(void) const noexcept;
   [[nodiscard]] bool fasta_output_option_is_set(void) const noexcept;
   [[nodiscard]] bool mapped_option_is_set(void) const noexcept;
+  [[nodiscard]] bool paired_option_is_set(void) const noexcept;
   [[nodiscard]] std::string encoding_type_get(void) const noexcept;
   [[nodiscard]] size_t split_size_get(void) const noexcept;
   [[nodiscard]] size_t num_threads_get(void) const noexcept;

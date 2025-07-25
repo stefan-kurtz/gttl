@@ -518,7 +518,7 @@ static void verify_decoding_parts_view(
 
 int main(int argc,char *argv[])
 {
-  SeqReaderOptions options{2,true};
+  SeqReaderOptions options{0,true};
 
   try
   {
@@ -566,10 +566,9 @@ int main(int argc,char *argv[])
           } else
           {
             const bool fasta_format = false;
-            const SequencesSplit sequences_split(
-                                         options.num_threads_get(),
-                                         inputfiles[0],
-                                         fasta_format);
+            const SequencesSplit sequences_split(options.num_threads_get(),
+                                                 inputfiles[0],
+                                                 fasta_format);
             sequences_split.show();
             char_distribution_thd(sequences_split);
           }
@@ -677,7 +676,18 @@ int main(int argc,char *argv[])
       }
     } else
     {
-      process_paired_files(statistics,fasta_output,inputfiles[0],inputfiles[1]);
+      if (options.paired_option_is_set())
+      {
+        process_paired_files(statistics,fasta_output,inputfiles[0],
+                                                     inputfiles[1]);
+      } else
+      {
+        for (const auto &inputfile : inputfiles)
+        {
+          process_single_file_streamed(statistics,echo,fasta_output,
+                                       hash_mode,inputfile);
+        }
+      }
     }
   }
   catch (const std::exception &err)

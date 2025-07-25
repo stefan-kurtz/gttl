@@ -41,4 +41,4 @@ do
   ./fastq_mn.x ${mapped_opt} --fasta_output --width 150 ../testdata/varlen_paired_1.fastq |\
       diff --strip-trailing-cr - ../testdata/varlen_paired_1.fasta
 done
-./fastq_mn.x --fasta_output --width 150 ../testdata/varlen_paired_[12].fastq | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta
+./fastq_mn.x --fasta_output --paired --width 150 ../testdata/varlen_paired_[12].fastq | diff --strip-trailing-cr - ../testdata/varlen_paired_both.fasta

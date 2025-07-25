@@ -114,7 +114,7 @@ test_nthash_wc_palindrome:enum_nthash.x
 
 .PHONY:test_multiseq
 test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq
-#	@./check_err.py ./multiseq_mn.x
+	@./check_err.py ./multiseq_mn.x
 	@${VALGRIND} ./multiseq_mn.x --width 0 ../testdata/small.fna | diff --strip-trailing-cr -I '^#' - ../testdata/small.fna
 	@${VALGRIND} ./multiseq_mn.x --width 60 ${SW175} | diff --strip-trailing-cr -I '^#' - ${SW175}
 	@${VALGRIND} ./multiseq_mn.x --statistics --rankdist --protein ${SW175} | grep -v '^# TIME' | diff --strip-trailing-cr - ../testdata/sw175_stat.tsv
@@ -366,9 +366,9 @@ test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 	@echo "# number of parts	10" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 200 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x --width 70 -n 2 ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq > ${TMPFILE}
-	@${VALGRIND} ./fastq_mn.x --width 70 -f ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./fastq_mn.x --width 70 --paired --fasta_output ../testdata/varlen_paired_1.fastq ../testdata/varlen_paired_2.fastq | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x --width 70 -n 100 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz > ${TMPFILE}
-	@${VALGRIND} ./fastq_mn.x --width 70 -f ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./fastq_mn.x --width 70 --paired --fasta_output ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff -I '^#' --strip-trailing-cr - ${TMPFILE}
 	@echo "# number of parts	25" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -l 8080 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./multiseq_factory_mn.x -n 80 ../testdata/SRR19536726_1_1000.fastq.gz ../testdata/SRR19536726_1_1000.fastq.gz | diff --strip-trailing-cr - ${TMPFILE}
