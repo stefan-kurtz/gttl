@@ -414,7 +414,7 @@ test_binary_iterator:binary_iterator.x
 
 .PHONY:test_multiple_options
 test_multiple_options:multiple_options_mn.x
-	@./multiple_options_mn.x 'p_value+k_mer' | diff --strip-trailing-cr - ../testdata/p_value_and_k_mer.txt
+	@./multiple_options_mn.x 'p_value+k_mer' | sed -E '/^[A-Z]:\\\\/ s/^([^:]*:){2}/.\/multiple_options_mn.x:/' | diff --strip-trailing-cr - ../testdata/p_value_and_k_mer.txt
 	@echo "$@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
