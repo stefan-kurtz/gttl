@@ -30,7 +30,7 @@ class ThreadsOutputFiles
   public:
   ThreadsOutputFiles(const char *program_prefix,
                      const char *threads_out_prefix,size_t num_threads)
-    : has_threads_out_prefix(threads_out_prefix != NULL)
+    : has_threads_out_prefix(threads_out_prefix != nullptr)
     , dirname_template(nullptr)
     , output_filenames({})
     , output_filepointers({})
@@ -38,7 +38,7 @@ class ThreadsOutputFiles
     assert(num_threads > 1);
     const char *cc_threads_out_prefix;
     char separator;
-    if (threads_out_prefix == NULL)
+    if (threads_out_prefix == nullptr)
     {
       const std::string dirname_path = std::string("./") +
                                        std::string(program_prefix) +

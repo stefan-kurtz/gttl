@@ -7,7 +7,6 @@
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "sequences/split_files.hpp"
-#include "utilities/has_suffix_or_prefix.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -96,9 +95,9 @@ int main(int argc, char *argv[])
     output_basename = ifilename.substr(
                                  ifilename.find_last_of('/') + 1,
                                  ifilename.find_last_of('.'));
-    if (gttl_has_suffix(ifilename,
-                        ".gz"))  // We need to remove two file extensions here
+    if (ifilename.ends_with(".gz"))
     {
+      // We need to remove two file extensions here
       output_basename = output_basename.substr(
                                    0, output_basename.find_last_of('.'));
     }

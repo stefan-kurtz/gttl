@@ -44,10 +44,36 @@ class GttlLineGenerator
     }
   }
 
+  explicit GttlLineGenerator(const std::string& file_name, bool _is_end = false)
+    : file(gttl_fp_type_open(file_name.c_str(), "rb"))
+    , out(&default_buffer)
+    , is_end(_is_end)
+    , line_number(1)
+  {
+    if(file == nullptr)
+    {
+      throw std::ios_base::failure(": cannot open file");
+    }
+  }
+
   explicit GttlLineGenerator(const char* file_name,
                     std::string* _out,
                     bool _is_end = false)
     : file(gttl_fp_type_open(file_name, "rb"))
+    , out(_out)
+    , is_end(_is_end)
+    , line_number(1)
+  {
+    if (file == nullptr)
+    {
+      throw std::ios_base::failure(": cannot open file");
+    }
+  }
+
+  explicit GttlLineGenerator(const std::string& file_name,
+                    std::string* _out,
+                    bool _is_end = false)
+    : file(gttl_fp_type_open(file_name.c_str(), "rb"))
     , out(_out)
     , is_end(_is_end)
     , line_number(1)

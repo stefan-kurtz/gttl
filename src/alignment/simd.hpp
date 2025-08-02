@@ -73,7 +73,7 @@
 
 #ifdef NEON
 #include <arm_neon.h>
-typedef poly128_t simd_int;
+using simd_int = poly128_t;
 
 #define SIMD_VECSIZE_INT NEON_VECSIZE_INT
 #define SIMD_ALIGN_INT NEON_ALIGN_INT
@@ -166,7 +166,7 @@ static int inline simdi8_movemask_neon_i8(poly128_t x)
 #define SIMD_DOUBLE
 #define ALIGN_DOUBLE AVX512_ALIGN_DOUBLE
 #define VECSIZE_DOUBLE AVX512_VECSIZE_DOUBLE
-typedef __m512d simd_double;
+using simd_double = __m512d;
 #define simdf64_add(x, y) _mm512_add_pd(x, y)
 #define simdf64_sub(x, y) _mm512_sub_pd(x, y)
 #define simdf64_mul(x, y) _mm512_mul_pd(x, y)
@@ -189,7 +189,7 @@ typedef __m512d simd_double;
 #define SIMD_FLOAT
 #define ALIGN_FLOAT AVX512_ALIGN_FLOAT
 #define VECSIZE_FLOAT AVX512_VECSIZE_FLOAT
-typedef __m512 simd_float;
+using simd_float = __m512;
 #define simdf32_add(x, y) _mm512_add_ps(x, y)
 #define simdf32_sub(x, y) _mm512_sub_ps(x, y)
 #define simdf32_mul(x, y) _mm512_mul_ps(x, y)
@@ -217,7 +217,7 @@ typedef __m512 simd_float;
 #define SIMD_INT
 #define SIMD_ALIGN_INT AVX512_ALIGN_INT
 #define SIMD_VECSIZE_INT AVX512_VECSIZE_INT
-typedef __m512i simd_int;
+using simd_int = __m512i;
 #define simdi32_add(x, y) _mm512_add_epi32(x, y)
 #define simdi16_add(x, y) _mm512_add_epi16(x, y)
 #define simdi16_adds(x, y) _mm512_adds_epi16(x, y)
@@ -290,7 +290,7 @@ inline __m256i _mm256_shift_left4(__m256i a)
 inline uint16_t simd_hmax16_avx(const __m256i buffer);
 inline uint8_t simd_hmax8_avx(const __m256i buffer);
 
-typedef __m256i simd_int;
+using simd_int = __m256i;
 #define simdi32_add(x, y) _mm256_add_epi32(x, y)
 #define simdi32_adds(x, y) simd_i32_adds(x, y)
 #define simdi16_add(x, y) _mm256_add_epi16(x, y)
@@ -352,7 +352,7 @@ typedef __m256i simd_int;
 #define SIMD_DOUBLE
 #define ALIGN_DOUBLE AVX_ALIGN_DOUBLE
 #define VECSIZE_DOUBLE AVX_VECSIZE_DOUBLE
-typedef __m256d simd_double;
+using simd_double = __m256d;
 #define simdf64_add(x, y) _mm256_add_pd(x, y)
 #define simdf64_sub(x, y) _mm256_sub_pd(x, y)
 #define simdf64_mul(x, y) _mm256_mul_pd(x, y)
@@ -375,7 +375,7 @@ typedef __m256d simd_double;
 #define SIMD_FLOAT
 #define ALIGN_FLOAT AVX_ALIGN_FLOAT
 #define VECSIZE_FLOAT AVX_VECSIZE_FLOAT
-typedef __m256 simd_float;
+using simd_float = __m256;
 #define simdf32_add(x, y) _mm256_add_ps(x, y)
 #define simdf32_sub(x, y) _mm256_sub_ps(x, y)
 #define simdf32_mul(x, y) _mm256_mul_ps(x, y)
@@ -406,7 +406,7 @@ typedef __m256 simd_float;
 #define SIMD_DOUBLE
 #define ALIGN_DOUBLE SSE_ALIGN_DOUBLE
 #define VECSIZE_DOUBLE SSE_VECSIZE_DOUBLE
-typedef __m128d simd_double;
+using simd_double = __m128d;
 #define simdf64_add(x, y) _mm_add_pd(x, y)
 #define simdf64_sub(x, y) _mm_sub_pd(x, y)
 #define simdf64_mul(x, y) _mm_mul_pd(x, y)
@@ -429,7 +429,7 @@ typedef __m128d simd_double;
 #define SIMD_FLOAT
 #define ALIGN_FLOAT SSE_ALIGN_FLOAT
 #define VECSIZE_FLOAT SSE_VECSIZE_FLOAT
-typedef __m128 simd_float;
+using simd_float = __m128;
 #define simdf32_add(x, y) _mm_add_ps(x, y)
 #define simdf32_sub(x, y) _mm_sub_ps(x, y)
 #define simdf32_mul(x, y) _mm_mul_ps(x, y)
@@ -457,7 +457,7 @@ typedef __m128 simd_float;
 #define SIMD_INT
 #define SIMD_ALIGN_INT SSE_ALIGN_INT
 #define SIMD_VECSIZE_INT SSE_VECSIZE_INT
-typedef __m128i simd_int;
+using simd_int = __m128i;
 uint16_t simd_hmax16(const __m128i buffer);
 uint8_t simd_hmax8(const __m128i buffer);
 #define simdi32_add(x, y) _mm_add_epi32(x, y)

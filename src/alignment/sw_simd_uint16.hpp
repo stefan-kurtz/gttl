@@ -42,7 +42,7 @@ sw_simd_uint16([[maybe_unused]] const uint8_t *original_dbseq,
   simd_int vTemp;
   uint32_t cmp;
 
-  if(ssw_resources == NULL)
+  if(ssw_resources == nullptr)
   {
     ssw_resources = new SSWresources(16, query_len);
     own_resources = true;

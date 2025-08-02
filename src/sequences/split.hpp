@@ -8,7 +8,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/gttl_mmap.hpp"
 
 static inline size_t fastq_next_read_start(const char *file_contents,
@@ -56,7 +55,7 @@ class SequencesSplit
     , file_contents(mapped_file.ptr())
     , intervals({})
   {
-    if (gttl_has_suffix(inputfilename,std::string(".gz")))
+    if (inputfilename.ends_with(".gz"))
     {
       throw std::ios_base::failure("cannot process .gz");
     }

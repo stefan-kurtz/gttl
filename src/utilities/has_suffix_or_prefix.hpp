@@ -2,25 +2,12 @@
 #define HAS_SUFFIX_OR_PREFIX_HPP
 #include <string>
 #include <vector>
-static inline bool gttl_has_prefix(const std::string &s,
-                                   const std::string &prefix)
-{
-  return s.size() >= prefix.size() and s.substr(0,prefix.size()) == prefix;
-}
-
-static inline bool gttl_has_suffix(const std::string &s,
-                                   const std::string &suffix)
-{
-  return s.size() >= suffix.size() and
-         s.substr(s.size() - suffix.size()) == suffix;
-}
-
 static inline bool gttl_has_suffix_with_extension(const std::string &to_check,
                                                   const std::string &suffix,
                                                   const std::string &extension)
 {
-  return gttl_has_suffix(to_check, suffix) or
-         gttl_has_suffix(to_check, suffix + extension);
+  return to_check.ends_with(suffix) or
+         to_check.ends_with(suffix + extension);
 }
 
 static inline bool gttl_has_any_suffix_with_extension(

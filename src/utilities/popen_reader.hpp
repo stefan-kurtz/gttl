@@ -69,7 +69,7 @@ class PopenReader
 
       for (auto const &prog : progs)
       {
-        execlp(prog.c_str(), args..., (char *) NULL);
+        execlp(prog.c_str(), args..., (char *) nullptr);
       }
       exit(1);
     } else

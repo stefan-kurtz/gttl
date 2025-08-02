@@ -1,8 +1,6 @@
 #ifndef MULTISEQ_PAIR_HPP
 #define MULTISEQ_PAIR_HPP
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <exception>
@@ -15,12 +13,12 @@
 static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   create_multiseq_pair(const char *dbfile,const char*queryfile)
 {
-  GttlMultiseq *db_multiseq = NULL;
-  GttlMultiseq *query_multiseq = NULL;
+  GttlMultiseq *db_multiseq                  = nullptr;
+  GttlMultiseq *query_multiseq               = nullptr;
   bool is_dna_alphabet = false;
   static constexpr const bool store_header = true;
   static constexpr const bool store_sequence = true;
-  assert(dbfile != NULL);
+  assert(dbfile != nullptr);
   try
   {
     db_multiseq = new GttlMultiseq(dbfile,store_header,store_sequence,
@@ -30,7 +28,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   {
     throw;
   }
-  assert(queryfile != NULL);
+  assert(queryfile != nullptr);
   if (dbfile == queryfile || strcmp(dbfile,queryfile) == 0)
   {
     query_multiseq = db_multiseq;

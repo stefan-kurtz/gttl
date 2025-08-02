@@ -102,6 +102,6 @@ static inline std::tuple<int8_t **, int8_t, size_t> scoring_info_and_seq_trans(
       }
     }
   }
-  return std::tuple<int8_t **, int8_t, size_t>(NULL, INT8_MAX, 0);
+  return std::tuple<int8_t **, int8_t, size_t>(nullptr, INT8_MAX, 0);
 }
 #endif /* SCORING_INFO_AND_SEQ_TRANS_HPP */

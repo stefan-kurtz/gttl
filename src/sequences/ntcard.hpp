@@ -14,7 +14,6 @@
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/has_fasta_or_fastq_extension.hpp"
-#include "utilities/has_suffix_or_prefix.hpp"
 #include "sequences/split.hpp"
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/dna_seq_decoder.hpp"
@@ -300,7 +299,7 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
     rt_enumerate.show("ntcard.enumerate");
     return table;
   }
-  if (gttl_has_suffix(inputfilename,std::string(".gz")))
+  if (inputfilename.ends_with(".gz"))
   {
     RunTimeClass rt_encode{};
     DNAEncodingMultiLength<uint64_t,split_at_wildcard,false>

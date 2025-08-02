@@ -122,7 +122,7 @@ if args.scoring:
           additional_arguments=(',GttlMultiseq *db_multiseq,'
                                 'GttlMultiseq *query_multiseq'),
           final_return=('return std::tuple<int8_t **,int8_t,size_t>'
-                        '(NULL,INT8_MAX,0);')))
+                        '(nullptr,INT8_MAX,0);')))
 elif args.alignment_output:
   def do_replacement(x):
     return ('''return alignment_output<GttlSubstring<uint8_t>,

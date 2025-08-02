@@ -86,12 +86,12 @@ pid_t fork(void)
   if (!mod) return -ENOSYS;
 
   clone_p = (RtlCloneUserProcess_f) GetProcAddress(mod, "RtlCloneUserProcess");
-  if (clone_p == NULL) return -ENOSYS;
+  if (clone_p == nullptr) return -ENOSYS;
 
   /* lets do this */
   result = clone_p(RTL_CLONE_PROCESS_FLAGS_CREATE_SUSPENDED |
                        RTL_CLONE_PROCESS_FLAGS_INHERIT_HANDLES,
-                   NULL, NULL, NULL, &process_info);
+                   nullptr, nullptr, nullptr, &process_info);
 
   if (result == RTL_CLONE_PARENT)
   {

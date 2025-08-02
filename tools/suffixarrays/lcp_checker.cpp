@@ -73,8 +73,9 @@ int main(int argc,char *argv[])
          from the succinct representation equals lcpvalue */
 
       const uint32_t suffix = suffixarray->get_suftab_abspos().at(idx + 1) + 1;
-      const size_t select_1 = succinctlcp.get_select(suffix, 1);
-      const size_t lcp      = succinctlcp.get_rank(select_1, 0) + 1 - suffix;
+      const size_t select_1 = succinctlcp.get_select(suffix, true);
+      const size_t lcp      = succinctlcp.get_rank(select_1, false)
+                              + 1 - suffix;
 
 
       const uint32_t succinct_lcp = *succinctplcpiter;

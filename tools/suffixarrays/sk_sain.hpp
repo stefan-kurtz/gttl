@@ -202,12 +202,12 @@ static constexpr const char_finder::EncodedNucleotideFinder
                        encoded_nucleotide_finder;
 static constexpr const char_finder::EncodeAminoAcidFinder encoded_aa_finder;
 
-typedef enum : uint8_t
+enum GttlSainseqtype : uint8_t
 {
   GTTL_SAIN_PLAINSEQ,
   GTTL_SAIN_LONGSEQ,
   GTTL_SAIN_MULTISEQ
-} GttlSainseqtype;
+};
 
 /* For LONGSEQ, the alphabet is not constant and so we use numofchars, but
    not T_alphasize and so set the latter to 0 */

@@ -22,7 +22,7 @@ static inline std::vector<std::string> gttl_read_tagged_lines(
     for (auto &&tag : tags)
     {
       if (line_buffer.size() >= tag.size() &&
-          line_buffer.substr(0,tag.size()) == tag)
+          line_buffer.starts_with(tag))
       {
         tagged_lines.push_back(line_buffer.substr(tag.size(),
                                line_buffer.size() - tag.size()));

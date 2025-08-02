@@ -45,7 +45,7 @@ static void process_file(const char *filename)
                                memchr(file_contents + mid,
                                       '\n',
                                       mapped_file.size() - mid));
-  if (next_newline == NULL)
+  if(next_newline == nullptr)
   {
     const StrFormat msg(": second part of file beginning at offset %zu "
                         " does not contain new line character",

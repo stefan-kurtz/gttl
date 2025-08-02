@@ -205,7 +205,7 @@ class GttlMultiseq
                                  static_cast<const void *>(header.data()),
                                  first_delim,
                                  header.size()));
-    if (first_delim_ptr != NULL)
+    if(first_delim_ptr != nullptr)
     {
       const char *const second_delim_ptr = static_cast<const char *>(memchr(
                                    static_cast<const void *>(first_delim_ptr
@@ -215,7 +215,7 @@ class GttlMultiseq
                                                        + header.size()
                                                        - (first_delim_ptr
                                                           + 1))));
-      const char *const header_end       = second_delim_ptr != NULL ?
+      const char *const header_end       = second_delim_ptr != nullptr ?
                                          second_delim_ptr :
                                          (header.data() + header.size());
       return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -

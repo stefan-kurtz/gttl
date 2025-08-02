@@ -47,7 +47,7 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
   simd_int vTemp;
   uint32_t cmp;
 
-  if (ssw_resources == NULL)
+  if (ssw_resources == nullptr)
   {
     ssw_resources = new SSWresources({{ width }}, query_len);
     own_resources = true;

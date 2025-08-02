@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <vector>
 #include "utilities/split_string.hpp"
-#include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/popen_reader.hpp"
 
 class DecompressedFile
@@ -138,15 +137,15 @@ class TarReader
   }
   [[nodiscard]] const char *option_string(const std::string &filename) const
   {
-    if (gttl_has_suffix(filename,".tar.bz2"))
+    if (filename.ends_with(".tar.bz2"))
     {
       return "-Oxvvjf";
     }
-    if (gttl_has_suffix(filename,".tar.gz"))
+    if (filename.ends_with(".tar.gz"))
     {
       return "-Oxvvzf";
     }
-    if (gttl_has_suffix(filename,".tar"))
+    if (filename.ends_with(".tar"))
     {
       return "-Oxvvf";
     }
@@ -166,7 +165,7 @@ class TarReader
     , popen_reader(nullptr)
     , append_0_byte(_append_0_byte)
   {
-    if (with_rapidgzip and not gttl_has_suffix(filename,".tar"))
+    if (with_rapidgzip and not filename.ends_with(".tar"))
     {
       popen_reader = new PopenReader({"gtar","tar"},
                                      "tar","-I","rapidgzip","-Oxvvf",

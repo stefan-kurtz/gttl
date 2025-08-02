@@ -35,7 +35,6 @@
 #include <filesystem>
 #include "utilities/gttl_file_open.hpp"
 #include <vector>
-#include "utilities/has_suffix_or_prefix.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
@@ -551,7 +550,7 @@ int main(int argc,char *argv[])
           char_distribution_seq(inputfiles[0]);
         } else
         {
-          if (gttl_has_suffix(inputfiles[0],std::string(".gz")))
+          if (std::string(inputfiles[0]).ends_with(".gz"))
           {
             try
             {

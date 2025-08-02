@@ -50,9 +50,9 @@ class SuccinctPlcpTable
       {
         const SuftabBaseType current_suftab = *suftab_iter;
         const uint32_t suffix               = current_suftab + 1;
-        const size_t select_1 = succinct_plcp_table->get_select(suffix, 1);
-        const size_t lcp      = succinct_plcp_table->get_rank(select_1, 0) + 1
-                                     - suffix;
+        const size_t select_1 = succinct_plcp_table->get_select(suffix, true);
+        const size_t lcp      = succinct_plcp_table->get_rank(select_1, false)
+                                + 1 - suffix;
         current_lcpvalue = lcp;
       } else
       {
@@ -75,7 +75,7 @@ class SuccinctPlcpTable
    , lcp_inputfile(indexname + ".lls")
    , succinct_plcp_table(lcp_inputfile.c_str())
    , totallength(succinct_plcp_table.get_rank(succinct_plcp_table.get_length(),
-                                              1))
+                                              true))
   { }
   ~SuccinctPlcpTable(void)
   { }

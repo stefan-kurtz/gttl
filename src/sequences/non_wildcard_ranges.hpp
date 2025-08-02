@@ -171,7 +171,7 @@ class NonWildCardRangeIterator
         seqlen(_seqlen),
         minimum_length(_minimum_length)
     {
-      assert(_seqlen > 0 && _sequence != NULL);
+      assert(_seqlen > 0 && _sequence != nullptr);
     }
     std::vector<std::pair<size_t,size_t>> enumerate(void)
     {
@@ -180,7 +180,7 @@ class NonWildCardRangeIterator
       {
         current = static_cast<const char *>(gttl_memcchr<wildcard>(sequence+1,
                                                                    seqlen - 1));
-        if (current == NULL)
+        if(current == nullptr)
         {
           return non_wildcard_ranges;
         }
@@ -188,7 +188,7 @@ class NonWildCardRangeIterator
       {
         current = sequence;
       }
-      assert(current != NULL);
+      assert(current != nullptr);
       do
       {
         assert(*current != wildcard);
@@ -197,7 +197,7 @@ class NonWildCardRangeIterator
                                             wildcard,
                                             remaining(current + 1)));
         const size_t start = static_cast<size_t>(current - sequence);
-        if (next_wildcard == NULL)
+        if(next_wildcard == nullptr)
         {
           assert(start <= seqlen - 1);
           if (seqlen - start >= minimum_length)
@@ -215,7 +215,7 @@ class NonWildCardRangeIterator
         current = static_cast<const char *>(gttl_memcchr<wildcard>
                                              (next_wildcard+1,
                                               remaining(next_wildcard+1)));
-      } while (current != NULL);
+      } while(current != nullptr);
       return non_wildcard_ranges;
     }
 };

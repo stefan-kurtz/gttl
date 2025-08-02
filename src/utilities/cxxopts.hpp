@@ -1038,9 +1038,9 @@ void stringstream_parser(const std::string& text, T& value)
   }
 }
 
-template <typename T, std::enable_if_t<std::is_integral_v<T>> * = nullptr>
+template <typename T>
 void parse_value(const std::string &text, T &value)
-{
+requires (std::is_integral_v<T>) {
     integer_parser(text, value);
 }
 
@@ -1073,9 +1073,9 @@ parse_value(const std::string& text, std::string& value)
 // The fallback parser. It uses the stringstream parser to parse all types
 // that have not been overloaded explicitly.  It has to be placed in the
 // source code before all other more specialized templates.
-template <typename T, std::enable_if_t<!std::is_integral_v<T>> * = nullptr>
+template <typename T>
 void parse_value(const std::string &text, T &value)
-{
+requires (!std::is_integral_v<T>) {
   stringstream_parser(text, value);
 }
 

@@ -10,7 +10,7 @@ static inline bool gttl_likely_fasta_format(const std::string &inputfilename)
                                              ".fq.gz",".fastq.gz"};
   for (auto &suffix : fq_suffixes)
   {
-    if (gttl_has_suffix(inputfilename,suffix))
+    if (inputfilename.ends_with(suffix))
     {
       return false;
     }

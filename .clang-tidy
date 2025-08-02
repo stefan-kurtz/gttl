@@ -10,7 +10,12 @@ Checks: >
   misc-include-cleaner,
   readability-isolate-declaration,
   modernize-type-traits,
-  modernize-use-nodiscard
+  modernize-use-nodiscard,
+  modernize-use-bool-literals,
+  modernize-use-using,
+  modernize-use-starts-ends-with,
+  modernize-use-constraints,
+  modernize-use-nullptr
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false
