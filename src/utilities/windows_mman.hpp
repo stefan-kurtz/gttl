@@ -165,7 +165,8 @@ void* mmap([[maybe_unused]] void *addr, size_t len, int prot, int flags,
         return MAP_FAILED;
     }
 
-    fm = CreateFileMapping(h, nullptr, protect, dwMaxSizeHigh, dwMaxSizeLow, nullptr);
+    fm = CreateFileMapping(h, nullptr, protect, dwMaxSizeHigh, dwMaxSizeLow,
+                           nullptr);
 
     if (fm == nullptr)
     {
