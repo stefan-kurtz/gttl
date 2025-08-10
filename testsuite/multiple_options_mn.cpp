@@ -33,12 +33,10 @@ int main(int argc, char *argv[])
     display_options.set_flags(argstring);
     std::cout << argv[0] << ": the following values are set: "
                          <<  display_options.to_string() << '\n';
-#ifdef NEWCODE
     if (display_options.is_set<"p_value">())
     {
       std::cout << "p_value is set" << '\n';
     }
-#endif
   }
   catch (const std::invalid_argument &err)
   {
