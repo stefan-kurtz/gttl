@@ -1075,7 +1075,7 @@ parse_value(const std::string& text, std::string& value)
 // source code before all other more specialized templates.
 template <typename T>
 void parse_value(const std::string &text, T &value)
-requires (!std::is_integral_v<T>) {
+requires (not std::is_integral_v<T>) {
   stringstream_parser(text, value);
 }
 

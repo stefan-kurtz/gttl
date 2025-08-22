@@ -12,25 +12,26 @@
 #include <string>
 #include <vector>
 
-template<const GttlLitStringInitializerList &option_args>
-class MultipleOptions
+template<size_t length_of_literal>
+struct GttlStringLiteral
 {
-  template<size_t length_of_literal>
-  struct StringLiteral
+  /*
+   Literal class type that wraps a constant expression string.
+   Uses implicit conversion to allow templates to *seemingly* accept
+   constant strings. Adapted from
+   https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
+  */
+  char value[length_of_literal];
+  constexpr GttlStringLiteral(const char (&str)[length_of_literal])
   {
-    /*
-     Literal class type that wraps a constant expression string.
-     Uses implicit conversion to allow templates to *seemingly* accept
-     constant strings. Adapted from
-     https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
-    */
-    char value[length_of_literal];
-    constexpr StringLiteral(const char (&str)[length_of_literal])
-    {
-      std::copy_n(str, length_of_literal, value);
-    }
-  };
+    std::copy_n(str, length_of_literal, value);
+  }
+};
 
+
+template<const GttlLitStringInitializerList &option_args>
+class GttlMultipleOptions
+{
   [[nodiscard]] uint64_t the_bit(int shift) const noexcept
   {
     return uint64_t{1} << shift;
@@ -40,7 +41,7 @@ class MultipleOptions
   const std::string option_name;
 
   public:
-  explicit MultipleOptions(const char* _option_name)
+  explicit GttlMultipleOptions(const char* _option_name)
     : flags(0)
     , option_name(_option_name)
   { }
@@ -74,7 +75,7 @@ class MultipleOptions
     }
   }
 
-  template<StringLiteral key>
+  template<GttlStringLiteral key>
   [[nodiscard]] bool is_set() const noexcept
   {
     constexpr const int shift

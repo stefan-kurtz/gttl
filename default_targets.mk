@@ -9,8 +9,7 @@
 
 .PHONY:tags
 tags:
-	@ctags -w --c++-kinds=+p --fields=+iaSKlm --extra=+q `ls *.[hc]pp` \
-        `find ${GTTL}/src -name '*.hpp'` > $@
+	@scripts/ctags.sh
 
 .PHONY:code_check
 code_check:

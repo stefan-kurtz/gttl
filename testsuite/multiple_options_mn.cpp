@@ -14,7 +14,7 @@ static constexpr const GttlLitStringInitializerList display_option_args
   "p_value_histogram"
 };
 
-using DisplayOptions = MultipleOptions<display_option_args>;
+using DisplayOptions = GttlMultipleOptions<display_option_args>;
 
 int main(int argc, char *argv[])
 {
