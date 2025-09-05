@@ -4,6 +4,7 @@
 #include <exception>
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 #include <string>
 #include <vector>
 #include "sequences/gttl_multiseq.hpp"
@@ -31,6 +32,8 @@ class MultiseqOptions
   bool statistics_option;
   size_t sample_size;
   size_t length_dist_bin_size;
+  size_t min_length;
+  size_t max_length;
   unsigned int seed;
   int width_arg = -1;
  public:
@@ -44,6 +47,8 @@ class MultiseqOptions
    , statistics_option(false)
    , sample_size(0)
    , length_dist_bin_size(0)
+   , min_length(0)
+   , max_length(0)
    , seed(0)
  { }
 
@@ -64,6 +69,12 @@ class MultiseqOptions
        ("l,length_dist", "output distribution of lengths of sequences; "
                          "argument specifies the size of the bins",
         cxxopts::value<size_t>(length_dist_bin_size)->default_value("0"))
+       ("min_length", "specify minimum length of sequences to select when "
+                      "sampling or formatting sequences",
+        cxxopts::value<size_t>(min_length)->default_value("0"))
+       ("max_length", "specify maximum length of sequences to select when "
+                      "sampling or formatting sequences",
+        cxxopts::value<size_t>(max_length)->default_value("0"))
        ("z,zipped", "expect two fastq  files with the same "
                     "number of sequences; show them "
                     "in zipped order, i.e. the "
@@ -141,6 +152,16 @@ class MultiseqOptions
           throw std::invalid_argument("options --width and --length_dist "
                                       "are not compatible");
         }
+        if (min_length > 0)
+        {
+          throw std::invalid_argument("options --min_length and --length_dist "
+                                      "are not compatible");
+        }
+        if (max_length > 0)
+        {
+          throw std::invalid_argument("options --max_length and --length_dist "
+                                      "are not compatible");
+        }
         if (short_header_option)
         {
           throw std::invalid_argument("options --short_header and "
@@ -195,6 +216,14 @@ class MultiseqOptions
   {
     return sample_size;
   }
+  [[nodiscard]] size_t min_length_get(void) const noexcept
+  {
+    return min_length;
+  }
+  [[nodiscard]] size_t max_length_get(void) const noexcept
+  {
+    return max_length;
+  }
   [[nodiscard]] unsigned int seed_get(void) const noexcept
   {
     return seed;
@@ -204,6 +233,39 @@ class MultiseqOptions
     return length_dist_bin_size;
   }
 };
+
+static std::vector<size_t> min_max_length_random_sample(
+                                                   const GttlMultiseq *multiseq,
+                                                   size_t min_length,
+                                                   size_t max_length,
+                                                   size_t sample_size,
+                                                   unsigned int seed)
+{
+  if (max_length == 0)
+  {
+    max_length = std::numeric_limits<size_t>::max();
+  }
+  std::vector<size_t> selected_seqnums;
+  for (size_t seqnum = 0; seqnum < multiseq->sequences_number_get(); seqnum++)
+  {
+    const size_t current_length = multiseq->sequence_length_get(seqnum);
+    if (current_length >= min_length and current_length <= max_length)
+    {
+      selected_seqnums.push_back(seqnum);
+    }
+  }
+  const std::vector<size_t> index_sample
+    = gttl_random_sample<size_t>(selected_seqnums.size(),
+                                 sample_size,
+                                 seed);
+  std::vector<size_t> sample;
+  sample.reserve(sample_size);
+  for (const auto &idx : index_sample)
+  {
+    sample.push_back(selected_seqnums[idx]);
+  }
+  return sample;
+}
 
 int main(int argc, char *argv[])
 {
@@ -266,19 +328,19 @@ int main(int argc, char *argv[])
   {
     if (options.sample_size_get() > 0)
     {
-      if (options.sample_size_get() > multiseq->sequences_number_get())
-      {
-        std::cerr << argv[0] << " you cannot sample "
-                  << options.sample_size_get() << " sequences from a set of "
-                  << multiseq->sequences_number_get() << " elements\n";
-        has_err = true;
-      } else
+      try
       {
         RunTimeClass rt_sample{};
-        const std::vector<size_t> sample = gttl_random_sample<size_t>(
-                                     multiseq->sequences_number_get(),
-                                     options.sample_size_get(),
-                                     options.seed_get());
+        const std::vector<size_t> sample
+          = (options.min_length_get() > 0 or options.max_length_get() > 0)
+              ? min_max_length_random_sample(multiseq,
+                                             options.min_length_get(),
+                                             options.max_length_get(),
+                                             options.sample_size_get(),
+                                             options.seed_get())
+              : gttl_random_sample<size_t>(multiseq->sequences_number_get(),
+                                           options.sample_size_get(),
+                                           options.seed_get());
         for (auto &seqnum : sample)
         {
           multiseq->show_single_sequence(
@@ -294,17 +356,43 @@ int main(int argc, char *argv[])
                             multiseq->sequences_number_get());
         rt_sample.show(msg.str());
       }
+      catch (const std::runtime_error &msg)
+      {
+        std::cerr << argv[0] << ": " << msg.what() << '\n';
+        return EXIT_FAILURE;
+      }
     } else
     {
-      if (options.sorted_by_header_option_is_set())
+      if (options.min_length_get() > 0 or options.max_length_get() > 0)
       {
-        multiseq->show_sorted_by_header(
-                    static_cast<size_t>(options.width_option_get()),
-                    options.short_header_option_is_set());
+        const size_t min_length = options.min_length_get();
+        const size_t max_length = options.max_length_get() == 0
+                                    ? std::numeric_limits<size_t>::max()
+                                    : options.max_length_get();
+        for (size_t seqnum = 0; seqnum < multiseq->sequences_number_get();
+             seqnum++)
+        {
+          const size_t current_length = multiseq->sequence_length_get(seqnum);
+          if (current_length >= min_length and current_length <= max_length)
+          {
+            multiseq->show_single_sequence(
+                        static_cast<size_t>(options.width_option_get()),
+                        options.short_header_option_is_set(),
+                        seqnum);
+          }
+        }
       } else
       {
-        multiseq->show(static_cast<size_t>(options.width_option_get()),
-                       options.short_header_option_is_set());
+        if (options.sorted_by_header_option_is_set())
+        {
+          multiseq->show_sorted_by_header(
+                      static_cast<size_t>(options.width_option_get()),
+                      options.short_header_option_is_set());
+        } else
+        {
+          multiseq->show(static_cast<size_t>(options.width_option_get()),
+                         options.short_header_option_is_set());
+        }
       }
     }
   }

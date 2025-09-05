@@ -75,7 +75,8 @@ static auto alignment_output_function_get(
           return alignment_output<GttlSubstring<uint8_t>,
                                   GttlSubstring<uint8_t>,
                                   uint8_t,
-                                  encoded_matching_characters<Unit_score_nuc_lower>,
+                                  encoded_matching_characters
+                                    <Unit_score_nuc_lower>,
                                   to_char_map<Unit_score_nuc_lower>>;
         } else
         {
@@ -84,7 +85,8 @@ static auto alignment_output_function_get(
             return alignment_output<GttlSubstring<uint8_t>,
                                     GttlSubstring<uint8_t>,
                                     uint8_t,
-                                    encoded_matching_characters<Unit_score_nuc_upper>,
+                                    encoded_matching_characters
+                                      <Unit_score_nuc_upper>,
                                     to_char_map<Unit_score_nuc_upper>>;
           } else
           {
