@@ -471,13 +471,28 @@ class GttlMultiseq
   }
 
   [[nodiscard]] std::vector<std::pair<size_t, size_t>>
-  length_distribution(void) const noexcept
+  length_distribution(size_t length_dist_bin_size = 1) const noexcept
   {
     std::vector<std::pair<size_t,size_t>> length_dist_table;
-    length_dist_table.reserve(length_dist_map.size());
-    for (auto const& [key, value] : length_dist_map)
+    if (length_dist_bin_size == 1)
     {
-      length_dist_table.push_back(std::make_pair(key,value));
+      length_dist_table.reserve(length_dist_map.size());
+      for (auto const& [length,  count] : length_dist_map)
+      {
+        length_dist_table.push_back(std::make_pair(length,count));
+      }
+    } else
+    {
+      std::map<size_t,size_t> length_dist_bins;
+      for (auto const& [length,  count] : length_dist_map)
+      {
+        length_dist_bins[length/length_dist_bin_size] += count;
+      }
+      length_dist_table.reserve(length_dist_bins.size());
+      for (auto const& [length,  count] : length_dist_bins)
+      {
+        length_dist_table.push_back(std::make_pair(length,count));
+      }
     }
     std::sort(length_dist_table.begin(),length_dist_table.end());
     return length_dist_table;
@@ -486,12 +501,11 @@ class GttlMultiseq
   total_number_of_suffixes(size_t prefix_length) const noexcept
   {
     size_t total = 0;
-    for (auto &&element : length_dist_map)
+    for (auto const& [length, count] : length_dist_map)
     {
-      if (std::get<0>(element) >= prefix_length)
+      if (length >= prefix_length)
       {
-        total += (std::get<0>(element) - prefix_length + 1) *
-                  std::get<1>(element);
+        total += (length - prefix_length + 1) * count;
       }
     }
     return total;

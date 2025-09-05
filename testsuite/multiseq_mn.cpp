@@ -22,21 +22,20 @@ class MultiseqOptions
 {
  private:
   std::vector<std::string> inputfiles;
-  bool help_option,
-       protein_option,
-       zipped_option,
-       rankdist_option,
-       short_header_option,
-       sorted_by_header_option,
-       statistics_option;
+  bool help_option;
+  bool protein_option;
+  bool zipped_option;
+  bool rankdist_option;
+  bool short_header_option;
+  bool sorted_by_header_option;
+  bool statistics_option;
   size_t sample_size;
+  size_t length_dist_bin_size;
   unsigned int seed;
   int width_arg = -1;
-
  public:
   MultiseqOptions(void)
-   : inputfiles({})
-   , help_option(false)
+   : help_option(false)
    , protein_option(false)
    , zipped_option(false)
    , rankdist_option(false)
@@ -44,8 +43,9 @@ class MultiseqOptions
    , sorted_by_header_option(false)
    , statistics_option(false)
    , sample_size(0)
+   , length_dist_bin_size(0)
    , seed(0)
- {}
+ { }
 
   void parse(int argc, char **argv)
   {
@@ -61,6 +61,9 @@ class MultiseqOptions
        ("seed", "specify seed for generating random sample (default is 0, so "
                 "that each call uses a differnt seed)",
         cxxopts::value<unsigned int>(seed)->default_value("0"))
+       ("l,length_dist", "output distribution of lengths of sequences; "
+                         "argument specifies the size of the bins",
+        cxxopts::value<size_t>(length_dist_bin_size)->default_value("0"))
        ("z,zipped", "expect two fastq  files with the same "
                     "number of sequences; show them "
                     "in zipped order, i.e. the "
@@ -116,6 +119,34 @@ class MultiseqOptions
         throw std::invalid_argument("option --sorted_by_header requires to "
                                     "use option -w/--width");
       }
+      if (length_dist_bin_size > 0)
+      {
+        if (sample_size > 0)
+        {
+          throw std::invalid_argument("options --sample and --length_dist "
+                                      "are not compatible");
+        }
+        if (seed > 0)
+        {
+          throw std::invalid_argument("options --seed and --length_dist "
+                                      "are not compatible");
+        }
+        if (zipped_option)
+        {
+          throw std::invalid_argument("options --zipped and --length_dist "
+                                      "are not compatible");
+        }
+        if (width_arg > 0)
+        {
+          throw std::invalid_argument("options --width and --length_dist "
+                                      "are not compatible");
+        }
+        if (short_header_option)
+        {
+          throw std::invalid_argument("options --short_header and "
+                                      "--length_dist are not compatible");
+        }
+      }
     }
     catch (const cxxopts::exceptions::exception &e)
     {
@@ -151,9 +182,12 @@ class MultiseqOptions
   {
     return statistics_option;
   }
-  [[nodiscard]] int width_option_get(void) const noexcept { return width_arg; }
-  [[nodiscard]] const std::vector<std::string> &
-  inputfiles_get(void) const noexcept
+  [[nodiscard]] int width_option_get(void) const noexcept
+  {
+    return width_arg;
+  }
+  [[nodiscard]] const std::vector<std::string> &inputfiles_get(void) const
+    noexcept
   {
     return inputfiles;
   }
@@ -161,7 +195,14 @@ class MultiseqOptions
   {
     return sample_size;
   }
-  [[nodiscard]] unsigned int seed_get(void) const noexcept { return seed; }
+  [[nodiscard]] unsigned int seed_get(void) const noexcept
+  {
+    return seed;
+  }
+  [[nodiscard]] size_t length_dist_bin_size_get(void) const noexcept
+  {
+    return length_dist_bin_size;
+  }
 };
 
 int main(int argc, char *argv[])
@@ -289,9 +330,19 @@ int main(int argc, char *argv[])
     } else
     {
       static constexpr const char nucleotides_upper_lower[] = "Aa|Cc|Gg|TtUu";
-      const LiterateMultiseq<nucleotides_upper_lower, 4> literate_multiseq(
-                                   multiseq);
+      const LiterateMultiseq<nucleotides_upper_lower, 4>
+           literate_multiseq(multiseq);
       literate_multiseq.show_rank_dist(nullptr); /* no mutex necessary */
+    }
+  }
+  if (options.length_dist_bin_size_get() > 0)
+  {
+    const size_t bin_size = options.length_dist_bin_size_get();
+    const auto length_dist = multiseq->length_distribution(bin_size);
+    for (const auto &[length, count] : length_dist)
+    {
+      std::cout << (bin_size * length) << "--" << (bin_size * (length + 1) - 1)
+                << "\t" << count << '\n';
     }
   }
   delete multiseq;

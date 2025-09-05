@@ -125,6 +125,8 @@ test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "42" > ${TMPFILE}
 	@${VALGRIND} ./multiseq_mn.x --sample 42 --seed 34824347 --short_header --width 0 ${AT1MB} | grep -c '^>' | diff --strip-trailing-cr - ${TMPFILE}
+	@${VALGRIND} ./multiseq_mn.x --length_dist 1 ../testdata/at1MB.fna | diff -I '^#' - ../testdata/at1MB_length_dist_1.tsv
+	@${VALGRIND} ./multiseq_mn.x --length_dist 10 ../testdata/at1MB.fna | diff -I '^#' - ../testdata/at1MB_length_dist_10.tsv
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed."
 
