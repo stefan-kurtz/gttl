@@ -55,7 +55,7 @@ static void estimate_F_values(const NtcardOptions &options)
     printf("F0\t%.0f\n", F0);
     printf("F1 (count)\t%zu\n",table.F1_count_get());
     printf("sequences_number\t%zu\n",table.sequences_number_get());
-    rt_estimate.show("estimate");
+    rt_estimate.show("binary.estimate");
   } else
   {
     const NtTable table = is_protein ?
@@ -106,7 +106,8 @@ static void estimate_F_values(const NtcardOptions &options)
       printf("F1 (count)\t%zu\n",nt_table_result.F1_count_get());
     }
     printf("sequences_number\t%zu\n",table.sequences_number_get());
-    rt_estimate.show("estimate");
+    rt_estimate.show(options.fast_option_is_set() ? "fast.estimate"
+                                                  : "estimate");
   }
 }
 

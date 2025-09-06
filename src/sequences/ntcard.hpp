@@ -10,6 +10,7 @@
 #include <thread>
 #include <tuple>
 #include <vector>
+#include <format>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
@@ -296,7 +297,10 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
                                       qgram_length,
                                       s_value,
                                       r_value);
-    rt_enumerate.show("ntcard.enumerate");
+    const std::string msg = std::format("ntcard.enumerate, {}, {}, 1 thread",
+                                        inputfilename,
+                                        is_aminoacid ? "protein" : "DNA");
+    rt_enumerate.show(msg.c_str());
     return table;
   }
   if (inputfilename.ends_with(".gz"))
@@ -317,7 +321,11 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
                                          r_value);
     table.sequences_number_set(dna_encoding_multi_length
                                   .total_number_of_sequences_get());
-    rt_enumerate.show("ntcard.enumerate");
+    const std::string msg = std::format("ntcard.enumerate {}, {}, {} threads",
+                                        inputfilename,
+                                        is_aminoacid ? "protein" : "DNA",
+                                        num_threads);
+    rt_enumerate.show(msg.c_str());
     return table;
   }
   RunTimeClass rt_enumerate{};
@@ -330,7 +338,11 @@ static TableClass ntcard_enumerate(const std::string &inputfilename,
                                     s_value,
                                     r_value,
                                     num_threads);
-  rt_enumerate.show("ntcard.enumerate");
+  const std::string msg = std::format("ntcard.enumerate, {}, {}, {} threads",
+                                      inputfilename,
+                                      is_aminoacid ? "protein" : "DNA",
+                                      num_threads);
+  rt_enumerate.show(msg.c_str());
   return table;
 }
 #endif
