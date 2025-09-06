@@ -89,18 +89,17 @@ class SWcomparator
              la_coords.usubstringlength,
              la_coords.vstart,
              la_coords.vsubstringlength)
-      = ssw_align<forward_strand>
-                 (*ssw_profile,
-                  &ssw_resources,
-                  reinterpret_cast<const uint8_t *>(query_seq.data()),
-                  query_seq.size(),
-                  /* as ssw does not count gap_extension for
-                  first symbol in gap, we add it to the
-                  gap_open_penalty here */
-                  static_cast<uint8_t>(gap_open_penalty +
-                                       gap_extension_penalty),
-                  static_cast<uint8_t>(gap_extension_penalty),
-                  compute_only_end);
+      = ssw_profile->align<forward_strand>
+                          (&ssw_resources,
+                           reinterpret_cast<const uint8_t *>(query_seq.data()),
+                           query_seq.size(),
+                           /* as ssw does not count gap_extension for
+                           first symbol in gap, we add it to the
+                           gap_open_penalty here */
+                           static_cast<uint8_t>(gap_open_penalty +
+                                                gap_extension_penalty),
+                           static_cast<uint8_t>(gap_extension_penalty),
+                           compute_only_end);
     la_coords.forward_strand = true;
 
     if (try_reverse_strand)
@@ -111,18 +110,18 @@ class SWcomparator
                la_coords_rc.usubstringlength,
                la_coords_rc.vstart,
                la_coords_rc.vsubstringlength)
-        = ssw_align<not forward_strand>
-                   (*ssw_profile,
-                    &ssw_resources,
-                    reinterpret_cast<const uint8_t *>(query_seq.data()),
-                    query_seq.size(),
-                    /* as ssw does not count gap_extension for
-                    first symbol in gap, we add it to the
-                    gap_open_penalty here */
-                    static_cast<uint8_t>(gap_open_penalty +
-                                         gap_extension_penalty),
-                    static_cast<uint8_t>(gap_extension_penalty),
-                    compute_only_end);
+        = ssw_profile->align<not forward_strand>
+                            (&ssw_resources,
+                             reinterpret_cast<const uint8_t *>
+                                             (query_seq.data()),
+                             query_seq.size(),
+                             /* as ssw does not count gap_extension for
+                             first symbol in gap, we add it to the
+                             gap_open_penalty here */
+                             static_cast<uint8_t>(gap_open_penalty +
+                                                  gap_extension_penalty),
+                             static_cast<uint8_t>(gap_extension_penalty),
+                             compute_only_end);
       la_coords_rc.forward_strand = false;
       if (la_coords_rc > la_coords)
       {
