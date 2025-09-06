@@ -6,24 +6,25 @@
 #include <cassert>
 #include <string_view>
 #include <tuple>
+#include <limits>
 #include "alignment/loc_align_coords.hpp"
 #include "alignment/ssw.hpp"
 
-template<class SWProcessPair,class SWProcessResultShared,
+template<class SWProcessPair, class SWProcessResultShared,
          class SWProcessResultThreadRelated>
 class SWcomparator
 {
   SWProcessResultThreadRelated *sw_process_result_thread_related;
-  size_t alphasize;
-  bool try_reverse_strand;
+  const size_t alphasize;
+  const bool try_reverse_strand;
   const int8_t *const *scorematrix2D;
-  int8_t smallest_score;
-  int8_t gap_open_penalty;
-  int8_t gap_extension_penalty;
+  const int8_t smallest_score;
+  const int8_t gap_open_penalty;
+  const int8_t gap_extension_penalty;
   SSWprofile *ssw_profile;
   SSWresources ssw_resources;
   size_t current_i;
-  bool compute_only_end;
+  const bool compute_only_end;
   const SWProcessPair &process_this_pair;
   const SWProcessResultShared &sw_process_result_shared;
 
@@ -47,8 +48,8 @@ class SWcomparator
     , gap_open_penalty(_gap_open_penalty)
     , gap_extension_penalty(_gap_extension_penalty)
     , ssw_profile(nullptr)
-    , ssw_resources(8 + 16,max_seq_len)
-    , current_i(~size_t(0))
+    , ssw_resources(8 + 16, max_seq_len)
+    , current_i(std::numeric_limits<size_t>::max())
     , compute_only_end(_compute_only_end)
     , process_this_pair(_process_this_pair)
     , sw_process_result_shared(_sw_process_result_shared)
@@ -57,7 +58,7 @@ class SWcomparator
   {
     delete ssw_profile;
   }
-  void preprocess(size_t i,const std::string_view &db_seq)
+  void preprocess(size_t i, const std::string_view &db_seq)
   {
     if (ssw_profile != nullptr)
     {
@@ -71,9 +72,9 @@ class SWcomparator
                                     (db_seq.data()),
                                   db_seq.size());
   }
-  bool compare(size_t i,size_t j,const std::string_view &query_seq)
+  bool compare(size_t i, size_t j, const std::string_view &query_seq)
   {
-    if (not process_this_pair.check(i,j))
+    if (not process_this_pair.check(i, j))
     {
       return false;
     }
@@ -102,9 +103,9 @@ class SWcomparator
                   compute_only_end);
     la_coords.forward_strand = true;
 
-    LocalAlignmentCoordinates la_coords_rc;
     if (try_reverse_strand)
     {
+      LocalAlignmentCoordinates la_coords_rc;
       std::tie(la_coords_rc.raw_score,
                la_coords_rc.ustart,
                la_coords_rc.usubstringlength,
@@ -125,13 +126,13 @@ class SWcomparator
       la_coords_rc.forward_strand = false;
       if (la_coords_rc > la_coords)
       {
-        return sw_process_result_shared.process(
-                                              sw_process_result_thread_related,
-                                              la_coords_rc,i,j);
+        return sw_process_result_shared
+                 .process(sw_process_result_thread_related,
+                          la_coords_rc, i, j);
       }
     }
     return sw_process_result_shared.process(sw_process_result_thread_related,
-                                            la_coords,i,j);
+                                            la_coords, i, j);
   }
 };
 #endif
