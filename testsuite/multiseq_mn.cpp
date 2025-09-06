@@ -7,12 +7,12 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <format>
 #include "sequences/gttl_multiseq.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "sequences/literate_multiseq.hpp"
 #include "utilities/random_sample.hpp"
-#include "utilities/str_format.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -235,6 +235,7 @@ class MultiseqOptions
 };
 
 static std::vector<size_t> min_max_length_random_sample(
+                                                   size_t *min_max_satisfy,
                                                    const GttlMultiseq *multiseq,
                                                    size_t min_length,
                                                    size_t max_length,
@@ -254,13 +255,14 @@ static std::vector<size_t> min_max_length_random_sample(
       selected_seqnums.push_back(seqnum);
     }
   }
+  *min_max_satisfy = selected_seqnums.size();
   const std::vector<size_t> index_sample
     = gttl_random_sample<size_t>(selected_seqnums.size(),
                                  sample_size,
                                  seed);
   std::vector<size_t> sample;
   sample.reserve(sample_size);
-  for (const auto &idx : index_sample)
+  for (const auto idx : index_sample)
   {
     sample.push_back(selected_seqnums[idx]);
   }
@@ -330,10 +332,12 @@ int main(int argc, char *argv[])
     {
       try
       {
+        size_t min_max_satisfy = 0;
         RunTimeClass rt_sample{};
         const std::vector<size_t> sample
           = (options.min_length_get() > 0 or options.max_length_get() > 0)
-              ? min_max_length_random_sample(multiseq,
+              ? min_max_length_random_sample(&min_max_satisfy,
+                                             multiseq,
                                              options.min_length_get(),
                                              options.max_length_get(),
                                              options.sample_size_get(),
@@ -341,20 +345,29 @@ int main(int argc, char *argv[])
               : gttl_random_sample<size_t>(multiseq->sequences_number_get(),
                                            options.sample_size_get(),
                                            options.seed_get());
-        for (auto &seqnum : sample)
+        for (const auto seqnum : sample)
         {
           multiseq->show_single_sequence(
                       static_cast<size_t>(options.width_option_get()),
                       options.short_header_option_is_set(),
                       seqnum);
         }
-        const StrFormat msg("create a sample of %zu (%.2f%%)"
-                            "from %zu sequences",
-                            options.sample_size_get(),
-                            100.0 * options.sample_size_get()
+        const std::string msg
+          = (options.min_length_get() > 0 or options.max_length_get() > 0)
+            ? std::format("create a sample of {} ({:.2f}%) "
+                          "from {} sequences satisfying the min_length/"
+                          "max_length constraints from a total number of "
+                          "{} sequences",
+                          options.sample_size_get(),
+                          100.0 * options.sample_size_get()/min_max_satisfy,
+                          min_max_satisfy,
+                          multiseq->sequences_number_get())
+            : std::format("create a sample of {} ({:.2f}%%) from {} sequences",
+                          options.sample_size_get(),
+                          100.0 * options.sample_size_get()
                                   / multiseq->sequences_number_get(),
-                            multiseq->sequences_number_get());
-        rt_sample.show(msg.str());
+                          multiseq->sequences_number_get());
+        rt_sample.show(msg);
       }
       catch (const std::runtime_error &msg)
       {
