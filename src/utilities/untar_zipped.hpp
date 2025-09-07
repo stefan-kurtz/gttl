@@ -95,7 +95,8 @@ class TarReader
     {
       throw std::ios_base::failure(
               std::string("cannot extract byte number from \"") +
-              line_vector[2] + std::string("\""));
+              line_vector[2] + std::string("\", line=\"") +
+              line + std::string("\""));
     }
     line.clear();
     current_filename = std::string(line_vector[5]);

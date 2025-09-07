@@ -72,10 +72,10 @@ sw_all_against_all.x:${SWAGAOBJ}
         clang-format --assume-filename=$@ > $@
 
 ../../src/alignment/scoring_info_and_seq_trans.hpp:score_class_choices.py
-	@./score_class_choices.py --scoring | clang-format --assume-filename=$@ > $@
+	@./score_class_choices.py --scoring | clang-format -style="{ColumnLimit: 80}" --assume-filename=$@ > $@
 
 alignment_output_function.hpp:score_class_choices.py
-	@./score_class_choices.py --alignment_output | clang-format --assume-filename=$@ > $@
+	@./score_class_choices.py --alignment_output | clang-format --style="{ColumnLimit: 80}" -assume-filename=$@ > $@
 
 sequence_decode_function.hpp:score_class_choices.py
 	@./score_class_choices.py --sequence_decode | clang-format --assume-filename=$@ > $@

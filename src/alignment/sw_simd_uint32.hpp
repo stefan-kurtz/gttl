@@ -42,7 +42,7 @@ sw_simd_uint32([[maybe_unused]] const uint8_t *original_dbseq,
   simd_int vTemp;
   uint32_t cmp;
 
-  if(ssw_resources == nullptr)
+  if (ssw_resources == nullptr)
   {
     ssw_resources = new SSWresources(32, query_len);
     own_resources = true;
@@ -62,7 +62,7 @@ sw_simd_uint32([[maybe_unused]] const uint8_t *original_dbseq,
   int64_t dbseq_pos;
   int64_t dbseq_pos_end;
   assert(dbseq_len > 0);
-  if constexpr(forward_reading)
+  if constexpr (forward_reading)
   {
     dbseq_pos     = 0;
     dbseq_pos_end = static_cast<int64_t>(dbseq_len);
@@ -75,19 +75,19 @@ sw_simd_uint32([[maybe_unused]] const uint8_t *original_dbseq,
   }
 
   /* outer loop to process the database sequence */
-  while(dbseq_pos != dbseq_pos_end)
+  while (dbseq_pos != dbseq_pos_end)
   {
 #if SSW_SIMD_DEBUG > 0
     column_count++;
 #endif
     assert(dbseq_pos >= 0);
     uint8_t current_char;
-    if constexpr(forward_strand)
+    if constexpr (forward_strand)
     {
       current_char = original_dbseq[dbseq_pos];
     } else
     {
-      if constexpr(forward_reading)
+      if constexpr (forward_reading)
       {
         assert(dbseq_len == original_dbseq_len);
       }
@@ -118,8 +118,8 @@ static_cast<size_t>(current_char);
     pvHStoreNextNext = pv;
 
     /* inner loop to process the query sequence */
-    for(segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
-        ++segment_pos)
+    for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
+         ++segment_pos)
     {
       vH = simdi32_adds(vH, simdi_load(vP + segment_pos));
       print_simd_int<uint32_t>("for loop 1 vH: ", vH);
@@ -171,15 +171,16 @@ static_cast<size_t>(current_char);
     vTemp = simdui8_subs(vF, vTemp);
     vTemp = simdi8_eq(vTemp, vZero);
 
-    for(cmp = simdi8_movemask(vTemp), segment_pos = 0; cmp != SSW_MAX_CMP_VALUE;
-        cmp = simdi8_movemask(vTemp))
+    for (cmp = simdi8_movemask(vTemp), segment_pos = 0;
+         cmp != SSW_MAX_CMP_VALUE;
+         cmp = simdi8_movemask(vTemp))
     {
       vH         = simdui8_max(vH, vF);
       vMaxColumn = simdui8_max(vMaxColumn, vH);
       simdi_store(pvHStore + segment_pos, vH);
       vF = simdui8_subs(vF, vGapE);
       segment_pos++;
-      if(segment_pos >= segment_len)
+      if (segment_pos >= segment_len)
       {
         segment_pos = 0;
         vF          = simdi8_shiftl1(vF);
@@ -190,11 +191,11 @@ static_cast<size_t>(current_char);
       vTemp = simdi8_eq(vTemp, vZero);
     }
 #else
-    for(size_t k = 0; GTTL_IS_LIKELY(k < simd_size); ++k)
+    for (size_t k = 0; GTTL_IS_LIKELY(k < simd_size); ++k)
     {
       vF = simdi8_shiftl4(vF);
-      for(segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
-          ++segment_pos)
+      for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
+           ++segment_pos)
       {
         vH         = simdi_load(pvHStore + segment_pos);
         vH         = simdi32_max(vH, vF);
@@ -203,12 +204,12 @@ static_cast<size_t>(current_char);
         /* Update vF value. */
         vH = simdui32_subs(vH, vGapO);
         vF = simdui32_subs(vF, vGapE);
-        if(GTTL_IS_UNLIKELY(!simdi8_movemask(simdi32_gt(vF, vH))))
+        if (GTTL_IS_UNLIKELY(!simdi8_movemask(simdi32_gt(vF, vH))))
         {
           break;
         }
       }
-      if(segment_pos < segment_len)
+      if (segment_pos < segment_len)
       {
         break;
       }
@@ -223,18 +224,18 @@ static_cast<size_t>(current_char);
     simd_int vMaxMark = vZero; /* highest score until previous column. */
     vTemp             = simdi32_eq(vMaxMark, vMaxScore);
     cmp               = simdi8_movemask(vTemp);
-    if(cmp != SSW_MAX_CMP_VALUE)
+    if (cmp != SSW_MAX_CMP_VALUE)
     {
       const uint32_t local_max_score = simdi32_hmax(vMaxScore);
 
       vMaxMark = vMaxScore;
-      if(GTTL_IS_LIKELY(local_max_score > max_align_score))
+      if (GTTL_IS_LIKELY(local_max_score > max_align_score))
       {
         max_align_score = local_max_score;
-        if(static_cast<uint32_t>(max_align_score)
-                                        +
+        if (static_cast<uint32_t>(max_align_score)
+                                         +
 static_cast<uint32_t>(abs_smallest_score)
-           >= UINT32_MAX)
+            >= UINT32_MAX)
         {
           break; /*overflow */
         }
@@ -252,14 +253,14 @@ static_cast<uint32_t>(abs_smallest_score)
     }
 
     /* Record the max score of current column. */
-    if(expected_score > 0 && simdi32_hmax(vMaxColumn) == expected_score)
+    if (expected_score > 0 && simdi32_hmax(vMaxColumn) == expected_score)
     {
       break;
     }
     dbseq_pos += step;
 #if SSW_SIMD_DEBUG > 1
     uint32_t *ptr = reinterpret_cast<uint32_t *>(pvHStore);
-    for(size_t i = 0; i < segment_len * simd_size; i++)
+    for (size_t i = 0; i < segment_len * simd_size; i++)
     {
       printf("%4d", ptr[(i % segment_len) * simd_size + i / segment_len]);
     }
@@ -267,21 +268,21 @@ static_cast<uint32_t>(abs_smallest_score)
 #endif
   }
 
-  if(static_cast<uint32_t>(max_align_score)
-                                  + static_cast<uint32_t>(abs_smallest_score)
-     < UINT32_MAX)
+  if (static_cast<uint32_t>(max_align_score)
+                                   + static_cast<uint32_t>(abs_smallest_score)
+      < UINT32_MAX)
   {
     /* Trace the column with the max alignment score for the ending
        position on query. */
     uint32_t *ptr           = reinterpret_cast<uint32_t *>(pvHmax);
     const size_t column_len = segment_len * simd_size;
-    for(size_t i = 0; GTTL_IS_LIKELY(i < column_len); ++i, ++ptr)
+    for (size_t i = 0; GTTL_IS_LIKELY(i < column_len); ++i, ++ptr)
     {
-      if(*ptr == max_align_score)
+      if (*ptr == max_align_score)
       {
         const size_t current_end = i / simd_size
                                      + (i % simd_size) * segment_len;
-        if(current_end < sw_simd_result.on_query)
+        if (current_end < sw_simd_result.on_query)
         {
           sw_simd_result.on_query = current_end;
         }
@@ -289,7 +290,7 @@ static_cast<uint32_t>(abs_smallest_score)
     }
     sw_simd_result.opt_loc_alignment_score = max_align_score;
   }
-  if(own_resources)
+  if (own_resources)
   {
     delete ssw_resources;
   }
