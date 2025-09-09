@@ -125,6 +125,18 @@ class QgramRecHashValueFwdIterator
   };
 
   private:
+    static constexpr inline uint64_t pow_minus_one(uint64_t base, uint64_t exp)
+    {
+      if (exp == 0) return 0;
+      uint64_t acc = 1;
+      for (uint64_t i = 0; i < exp; ++i)
+      {
+        if (acc > UINT64_MAX / base) return UINT64_MAX;
+        acc *= base;
+      }
+      return acc - 1;
+    }
+
     QgramTransformer qgram_transformer;
     size_t qgram_length;
     const SequenceBaseType *sequence;
@@ -143,9 +155,7 @@ class QgramRecHashValueFwdIterator
       , sequence(_sequence)
       , seqlen(_seqlen)
 #ifndef NDEBUG
-      , max_integer_code(qgram_length == 32 ? UINT64_MAX
-                                            : (std::pow(alpha_size,
-                                                        _qgram_length) - 1))
+      , max_integer_code(pow_minus_one(alpha_size, _qgram_length))
 #endif
     {
       current_window.initialize(_qgram_length);
