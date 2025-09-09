@@ -21,34 +21,41 @@ def mysubprocess(cmd_line):
   return rc, stdout_str, remove_suppression(stderr_err)
 
 def normalize_err_msg(s):
-  return re.sub(r'^[^:]+: ','',s)
+  if isinstance(s, str):
+    return re.sub(r'^[^:]+: ','',s)
+  return s
 
 def mysubprocess_expect(cmd_line,expected_err_code,expected_err_msg = None):
   rc, stdout_str, stderr_str = mysubprocess(cmd_line)
   if rc != expected_err_code:
-    sys.stderr.write(\
-      '{}: cmd_line="{}", err_code = {} != {} = expected_err_code\n'
-       .format(sys.argv[0],cmd_line,rc,expected_err_code))
+    sys.stderr.write((f'{sys.argv[0]}: cmd_line="{cmd_line}", err_code = {rc} '
+                      f'!= {expected_err_code} = expected_err_code\n'))
     exit(1)
   if expected_err_msg:
     n_stderr_str = normalize_err_msg(stderr_str)
     n_expected_err_msg = normalize_err_msg(expected_err_msg)
-    if not n_stderr_str.startswith(n_expected_err_msg):
-      sys.stderr.write(\
-        '{}: cmd_line="{}",\nstderr_str = "{}" !=\n       \
-        "{}" = expected_err_msg\n'
-         .format(sys.argv[0],cmd_line,n_stderr_str,n_expected_err_msg))
+    if isinstance(expected_err_msg,set):
+      for word in expected_err_msg:
+        if word not in n_stderr_str:
+          sys.stderr.write((f'err_code={rc}: cmd_line="{cmd_line}",\n'
+                            f'stderr_str = "{n_stderr_str}" '
+                            f'does not contain the keyword {word}\n'))
+          exit(1)
+    elif not n_stderr_str.startswith(n_expected_err_msg):
+      sys.stderr.write((f'{sys.argv[0]}: cmd_line="{cmd_line}",\n'
+                        f'stderr_str =\n"{n_stderr_str}" !=\n'
+                        f'"{n_expected_err_msg}"\n= expected_err_msg\n'))
       if len(n_stderr_str) != len(n_expected_err_msg):
-        sys.stderr.write(('diagnosis: len(n_stderr_str) = {} != {} = '
-                          'len(n_expected_err_msg)\n')
-                          .format(len(n_stderr_str),len(n_expected_err_msg)))
+        sys.stderr.write((f'diagnosis: len(n_stderr_str) = {len(n_stderr_str)} '
+                          f'!= {len(n_expected_err_msg)} = '
+                          'len(n_expected_err_msg)\n'))
       else:
         diff_pos = [i for i in range(len(n_stderr_str))
                       if n_stderr_str[i] != n_expected_err_msg[i]]
         assert len(diff_pos) > 0
         first_diff_pos = diff_pos[0]
-        sys.stderr.write(('diagnosis: n_stderr_str[{}] = {} != {} = '
-                          ' n_expected_err_msg[{}]\n')
-                          .format(first_diff_pos,n_stderr_str[first_diff_pos],
-                                  n_expected_err_msg[first_diff_pos],first_diff_pos))
+        sys.stderr.write((f'diagnosis: n_stderr_str[{first_diff_pos}] = '
+                          f'{n_stderr_str[first_diff_pos]} != '
+                          f'{n_expected_err_msg[first_diff_pos]} = '
+                          f'n_expected_err_msg[{first_diff_pos}]\n'))
       exit(1)
