@@ -11,6 +11,7 @@ test: test_untar
 endif
 
 test:test_alphabet \
+     test_multibitvector \
      test_cycle_of_numbers \
      test_endian \
      test_nthash \
@@ -418,6 +419,11 @@ test_binary_iterator:binary_iterator.x
 test_multiple_options:multiple_options_mn.x
 	@./multiple_options_mn.x 'p_value+k_mer' | sed -E '/^[A-Z]:\\\\/ s/^([^:]*:){2}/.\/multiple_options_mn.x:/' | diff --strip-trailing-cr - ../testdata/p_value_and_k_mer.txt
 	@echo "$@ passed"
+
+.PHONY:test_multibitvector
+test_multibitvector:multibitvector.x
+	@./multibitvector.x
+	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
 	$(CXX) ${LDFLAGS} fastq_mn.o seq_reader_options.o -o $@ ${LDLIBS}
