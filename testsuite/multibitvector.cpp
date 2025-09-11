@@ -26,13 +26,13 @@ int main(int argc, char* argv[])
       if (not bv[i])
       {
         std::cerr << argv[0] << ": set(" << i << ") did not set bit!\n";
-	return EXIT_FAILURE;
+        return EXIT_FAILURE;
       }
       bv.reset(i);
       if (bv[i])
       {
         std::cerr << argv[0] << ": reset(" << i << ") did not reset bit!\n";
-	return EXIT_FAILURE;
+        return EXIT_FAILURE;
       }
     }
 
@@ -47,7 +47,8 @@ int main(int argc, char* argv[])
     const size_t c = bv2.count();
     if (c != manual_count)
     {
-      std::cerr << argv[0] << ": count() mismatch. Expected " << manual_count << " got " << c << '\n';
+      std::cerr << argv[0] << ": count() mismatch. Expected "
+                << manual_count << " got " << c << '\n';
       return EXIT_FAILURE;
     }
 
@@ -66,15 +67,16 @@ int main(int argc, char* argv[])
       if (i % 3 == 0)
       {
         bv4.set(i);
-	golden.set(i);
+        golden.set(i);
       }
     }
     for (size_t i = 0; i < n_bits; ++i)
     {
       if (bv4[i] != golden.test(i))
       {
-        std::cerr << argv[0] << ": mismatch against std::bitset at bit " << i << '\n';
-	return EXIT_FAILURE;
+        std::cerr << argv[0] << ": mismatch against std::bitset at bit "
+                  << i << '\n';
+        return EXIT_FAILURE;
       }
     }
     if (bv4.count() != static_cast<size_t>(golden.count()))
@@ -92,7 +94,8 @@ int main(int argc, char* argv[])
     }
     if (bv5.count() != expected)
     {
-      std::cerr << argv[0] << ": stray bits counted for size " << n_bits << '\n';
+      std::cerr << argv[0] << ": stray bits counted for size "
+                << n_bits << '\n';
       return EXIT_FAILURE;
     }
   }

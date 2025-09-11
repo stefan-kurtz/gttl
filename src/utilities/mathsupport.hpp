@@ -87,7 +87,7 @@ inline int gttl_required_bits(Numtype value)
 inline size_t popcount_uint64_t(uint64_t value)
 {
 #if __has_builtin(__builtin_popcountl)
-  return __builtin_popcountl(static_cast<long>(value));
+  return __builtin_popcountll(value);
 #else
   size_t pc = 0;
   for (; value != 0; value &= value - 1)
