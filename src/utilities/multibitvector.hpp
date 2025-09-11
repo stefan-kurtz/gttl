@@ -46,9 +46,7 @@ class Multibitvector
   }
   void reset(size_t idx) noexcept
   {
-    assert(idx < num_bits and
-           (not multibitvector[idx >> bitvector_log][idx & bitvector_mask] or
-            set_bits > 0));
+    assert(idx < num_bits);
     if constexpr (track_count)
     {
       set_bits -= multibitvector[idx >> bitvector_log][idx & bitvector_mask];
