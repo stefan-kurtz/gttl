@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
     multiseq->short_header_cache_create();
   }
   rt_multiseq.show("create GttlMultiseq");
-  bool has_err = false;
+
   if (options.width_option_get() >= 0)
   {
     if (options.sample_size_get() > 0)
@@ -448,5 +448,5 @@ int main(int argc, char *argv[])
   }
   delete multiseq;
   rt_total.show("total");
-  return has_err ? EXIT_FAILURE : EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

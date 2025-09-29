@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include "utilities/uniform_random_int.hpp"
 #include "utilities/multibitvector.hpp"

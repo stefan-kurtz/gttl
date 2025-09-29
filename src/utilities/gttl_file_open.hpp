@@ -15,27 +15,44 @@
 #include <zlib.h>
 
 using GttlFpType = gzFile;
-#define gttl_fp_type_open(FILENAME, MODE)   gzopen(FILENAME, MODE)
-#define gttl_fp_type_close(FP)              gzclose(FP)
-#define gttl_fp_type_reset(FP)              gzseek(FP, 0, SEEK_SET)
-#define gttl_fp_type_gets(FP, BUFFER, SIZE) gzgets(FP, BUFFER, SIZE)
-#define gttl_fp_type_getc(FP)               gzgetc(FP)
-#define gttl_fp_type_is_eof(FP)             gzeof(FP)
-#define gttl_fp_type_rewind(FP)             gzrewind(FP)
-#define gttl_fp_type_read(BUF, SIZE, COUNT, FP) gzread(FP, BUF, (COUNT)*(SIZE))
+constexpr auto gttl_fp_type_open = &gzopen;
+constexpr auto gttl_fp_type_close = &gzclose;
+constexpr auto gttl_fp_type_gets = &gzgets;
+constexpr auto gttl_fp_type_getc = &gzgetc;
+constexpr auto gttl_fp_type_is_eof = &gzeof;
+constexpr auto gttl_fp_type_rewind = &gzrewind;
+
+inline int gttl_fp_type_reset(gzFile fp)
+{
+  return gzseek(fp, 0, SEEK_SET);
+}
+
+inline size_t gttl_fp_type_read(void* buf, size_t size, size_t count, gzFile fp)
+{
+  return gzread(fp, buf, count * size);
+}
 
 #else
 #include <ios>
 using GttlFpType = FILE *;
-#define gttl_fp_type_open(FILENAME, MODE)   std::fopen(FILENAME, MODE)
-#define gttl_fp_type_close(FP)              fclose(FP)
-#define gttl_fp_type_reset(FP)              fseek(FP, 0, SEEK_SET)
+constexpr auto gttl_fp_type_open = &std::fopen;
+constexpr auto gttl_fp_type_close = &std::fclose;
+constexpr auto gttl_fp_type_gets = &std::fgetc;
+constexpr auto gttl_fp_type_is_eof = &std::feof;
+constexpr auto gttl_fp_type_rewind = &std::rewind;
+
+inline int gtl_fp_type_reset(FILE* fp)
+{
+  return std::fseek(fp, 0, SEEK_SET);
+}
+
+inline size_t gttl_fp_type_read(void* buf, size_t size, size_t count, FILE* fp)
+{
+  return std::fread(buf, size, count, fp);
+}
+
 #define gttl_fp_type_gets(FP, BUFFER, SIZE) (fgets(BUFFER, SIZE, FP) != nullptr\
                                              ? BUFFER : nullptr)
-#define gttl_fp_type_getc(FP)               getc(FP)
-#define gttl_fp_type_is_eof(FP)             feof(FP)
-#define gttl_fp_type_rewind(FP)             rewind(FP)
-#define gttl_fp_type_read(BUF, SIZE, COUNT, FP) fread(BUF, SIZE, COUNT, FP)
 #endif
 
 template<typename BaseType>

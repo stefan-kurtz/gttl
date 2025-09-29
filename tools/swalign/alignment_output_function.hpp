@@ -1,6 +1,8 @@
 /* created by ./score_class_choices.py --alignment_output DO NOT EDIT */
 #ifndef ALIGNMENT_OUTPUT_FUNCTION_HPP
 #define ALIGNMENT_OUTPUT_FUNCTION_HPP
+#include <cstdint>
+#include <stdexcept>
 #include "alignment/blosum62.hpp"
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
@@ -11,9 +13,9 @@
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "sequences/alignment_output.hpp"
 #include "sequences/gttl_substring.hpp"
-#include <cstddef>
+#include "utilities/str_format.hpp"
 
-static auto
+inline static auto
 alignment_output_function_get(const char *score_matrix_id,
                               const ScoreMatrixName &score_matrix_name,
                               bool dna_alphabet) {
@@ -30,8 +32,8 @@ alignment_output_function_get(const char *score_matrix_id,
                                 encoded_matching_characters<Unit_score_aa>,
                                 to_char_map<Unit_score_aa>>;
       } else {
-        ScoreMatrixName score_matrix_name_instance{};
-        StrFormat msg(
+        const ScoreMatrixName score_matrix_name_instance{};
+        const StrFormat msg(
             ": score matrix %s is not possible for protein "
             "sequences; the following choices are available: %s",
             score_matrix_id,
@@ -66,8 +68,8 @@ alignment_output_function_get(const char *score_matrix_id,
                 encoded_matching_characters<Unit_score_nuc_upper>,
                 to_char_map<Unit_score_nuc_upper>>;
           } else {
-            ScoreMatrixName score_matrix_name_instance{};
-            StrFormat msg(
+            const ScoreMatrixName score_matrix_name_instance{};
+            const StrFormat msg(
                 ": score matrix %s is not possible for DNA "
                 "sequences; the following choices are "
                 "available: %s",

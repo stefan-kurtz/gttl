@@ -9,6 +9,10 @@ template = environment.from_string('''/* created by {{ program_call }} DO NOT ED
 #ifndef {{ unique_file_key }}
 #define {{ unique_file_key }}
 #include <cstddef>
+#include <cstdint>
+#include <stdexcept>
+#include <string>
+#include <tuple>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -17,6 +21,8 @@ template = environment.from_string('''/* created by {{ program_call }} DO NOT ED
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
+#include "sequences/gttl_multiseq.hpp"
+#include "utilities/str_format.hpp"
 {{ include_extra }}
 
 static {{ return_type }} {{ function_name }}
@@ -37,8 +43,8 @@ static {{ return_type }} {{ function_name }}
         {{ do_replacement('Unit_score_aa') }}
       } else
       {
-        ScoreMatrixName score_matrix_name_instance{};
-        StrFormat msg(": score matrix %s is not possible for protein "
+        const ScoreMatrixName score_matrix_name_instance{};
+        const StrFormat msg(": score matrix %s is not possible for protein "
                       "sequences; the following choices are available: %s",
                       score_matrix_id,
                       score_matrix_name_instance.string_values_joined(", ")
@@ -70,8 +76,8 @@ static {{ return_type }} {{ function_name }}
             {{ do_replacement('Unit_score_nuc_upper') }}
           } else
           {
-            ScoreMatrixName score_matrix_name_instance{};
-            StrFormat msg(": score matrix %s is not possible for DNA "
+            const ScoreMatrixName score_matrix_name_instance{};
+            const StrFormat msg(": score matrix %s is not possible for DNA "
                           "sequences; the following choices are "
                           "available: %s",
                           score_matrix_id,

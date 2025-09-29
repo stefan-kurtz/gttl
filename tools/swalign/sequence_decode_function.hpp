@@ -2,6 +2,9 @@
 #ifndef SEQUENCE_DECODE_FUNCTION_HPP
 #define SEQUENCE_DECODE_FUNCTION_HPP
 #include <cstddef>
+#include <cstdint>
+#include <stdexcept>
+#include <string>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -11,6 +14,7 @@
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
 #include "sequences/gttl_substring.hpp"
+#include "utilities/str_format.hpp"
 
 template <class SeqClass, typename CharType, char (&to_char)(CharType)>
 static std::string sequence_decode(const SeqClass &seq)
@@ -23,7 +27,7 @@ static std::string sequence_decode(const SeqClass &seq)
   return s;
 }
 
-static auto
+inline static auto
 sequence_decode_function_get(const char *score_matrix_id,
                              const ScoreMatrixName &score_matrix_name,
                              bool dna_alphabet)
@@ -45,8 +49,8 @@ sequence_decode_function_get(const char *score_matrix_id,
                                to_char_map<Unit_score_aa>>;
       } else
       {
-        ScoreMatrixName score_matrix_name_instance{};
-        StrFormat msg(": score matrix %s is not possible for protein "
+        const ScoreMatrixName score_matrix_name_instance{};
+        const StrFormat msg(": score matrix %s is not possible for protein "
                       "sequences; the following choices are available: %s",
                       score_matrix_id,
                       score_matrix_name_instance.string_values_joined(", ")
@@ -86,8 +90,8 @@ sequence_decode_function_get(const char *score_matrix_id,
                                    to_char_map<Unit_score_nuc_upper>>;
           } else
           {
-            ScoreMatrixName score_matrix_name_instance{};
-            StrFormat msg(": score matrix %s is not possible for DNA "
+            const ScoreMatrixName score_matrix_name_instance{};
+            const StrFormat msg(": score matrix %s is not possible for DNA "
                           "sequences; the following choices are "
                           "available: %s",
                           score_matrix_id,
