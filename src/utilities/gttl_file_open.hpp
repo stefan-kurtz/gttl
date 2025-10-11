@@ -15,12 +15,12 @@
 #include <zlib.h>
 
 using GttlFpType = gzFile;
-constexpr auto gttl_fp_type_open = &gzopen;
-constexpr auto gttl_fp_type_close = &gzclose;
-constexpr auto gttl_fp_type_gets = &gzgets;
-constexpr auto gttl_fp_type_getc = &gzgetc;
-constexpr auto gttl_fp_type_is_eof = &gzeof;
-constexpr auto gttl_fp_type_rewind = &gzrewind;
+inline const auto gttl_fp_type_open = &gzopen;
+inline const auto gttl_fp_type_close = &gzclose;
+inline const auto gttl_fp_type_gets = &gzgets;
+inline const auto gttl_fp_type_getc = &gzgetc;
+inline const auto gttl_fp_type_is_eof = &gzeof;
+inline const auto gttl_fp_type_rewind = &gzrewind;
 
 inline int gttl_fp_type_reset(gzFile fp)
 {
@@ -35,11 +35,11 @@ inline size_t gttl_fp_type_read(void* buf, size_t size, size_t count, gzFile fp)
 #else
 #include <ios>
 using GttlFpType = FILE *;
-constexpr auto gttl_fp_type_open = &std::fopen;
-constexpr auto gttl_fp_type_close = &std::fclose;
-constexpr auto gttl_fp_type_gets = &std::fgetc;
-constexpr auto gttl_fp_type_is_eof = &std::feof;
-constexpr auto gttl_fp_type_rewind = &std::rewind;
+inline const auto gttl_fp_type_open = &std::fopen;
+inline const auto gttl_fp_type_close = &std::fclose;
+inline const auto gttl_fp_type_gets = &std::fgetc;
+inline const auto gttl_fp_type_is_eof = &std::feof;
+inline const auto gttl_fp_type_rewind = &std::rewind;
 
 inline int gtl_fp_type_reset(FILE* fp)
 {
