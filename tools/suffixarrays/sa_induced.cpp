@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <bit>
 #include <cassert>
 #include <climits>
 #include <cstdio>
@@ -280,7 +281,7 @@ static void enhanced_suffixarray_plain_input_format(GttlMemoryTracker
 {
   const std::string &indexname = sainoptions.indexname_get();
   constexpr const bool intermediatecheck = false;
-  const int required_bits = gttl_required_bits(totallength);
+  const int required_bits = std::bit_width(totallength);
   static constexpr const size_t const_alphasize = UINT8_MAX + 1;
   SuftabBaseType *suftab
     = gttl_sain_plain_sortsuffixes<SuftabBaseType,const_alphasize>

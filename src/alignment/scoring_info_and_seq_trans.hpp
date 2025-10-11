@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 
 inline static std::tuple<int8_t **, int8_t, size_t>

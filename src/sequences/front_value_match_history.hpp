@@ -1,12 +1,12 @@
 #ifndef FRONT_VALUE_MATCH_HISTORY_HPP
 #define FRONT_VALUE_MATCH_HISTORY_HPP
 #include <algorithm>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
 #include <string>
 #include "utilities/bit_sequence.hpp"
-#include "utilities/mathsupport.hpp"
 
 class FrontValueMatchHistory
 {
@@ -66,7 +66,7 @@ class FrontValueMatchHistory
     cs += std::to_string(row);
     const uint64_t match_history = match_history_get();
     cs += "\t" + bit_sequence2string<uint64_t>(match_history);
-    cs += "\t" + std::to_string(popcount_uint64_t(match_history));
+    cs += "\t" + std::to_string(std::popcount(match_history));
     return cs;
   }
   [[nodiscard]] size_t row_get(size_t ulen) const noexcept

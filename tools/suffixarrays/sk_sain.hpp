@@ -19,6 +19,7 @@
 #define SK_SAIN_HPP
 
 #include <algorithm>
+#include <bit>
 #include <cassert>
 #include <cstdlib>
 #include <cstdio>
@@ -56,7 +57,7 @@ class SainbufferKeyValues
                       size_t numofchars,
                       size_t totallength)
     : log_bufsize(std::max(0,21 - (sizeof_SuftabBaseType == size_t(4) ? 1 : 2)
-                                - gttl_required_bits(numofchars)))
+                                - std::bit_width(numofchars)))
     , buf_size(size_t(1) << log_bufsize)
     , cache_size(numofchars << log_bufsize)
     , size(sizeof_SuftabBaseType * cache_size +

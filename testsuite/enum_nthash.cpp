@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <bit>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -318,9 +319,9 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   printf("# num_of_sequences\t%zu\n",seqnum);
   printf("# total_length\t%zu\n",total_length);
   printf("# max_sequence_length\t%zu\n",max_sequence_length);
-  printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(seqnum));
+  printf("# num_of_sequences.bits\t%d\n",std::bit_width(seqnum));
   printf("# max_sequence_length.bits\t%d\n",
-          gttl_required_bits<size_t>(max_sequence_length));
+          std::bit_width(max_sequence_length));
   printf("# count_all_qgrams\t%zu\n",count_all_qgrams);
   printf("# sum_hash_values\t%" PRIu64 "\n",sum_hash_values);
   printf("# bytes_unit_sum\t%zu\n", bytes_unit_sum);
@@ -497,9 +498,9 @@ int main(int argc,char *argv[])
         printf("# num_of_sequences\t%zu\n",seqnum);
         printf("# total_length\t%zu\n",total_length);
         printf("# max_sequence_length\t%zu\n",max_sequence_length);
-        printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(seqnum));
+        printf("# num_of_sequences.bits\t%d\n",std::bit_width(seqnum));
         printf("# max_sequence_length.bits\t%d\n",
-               gttl_required_bits<size_t>(max_sequence_length));
+               std::bit_width(max_sequence_length));
         printf("# count_all_qgrams\t%zu\n",count_all_qgrams);
         printf("# sum_hash_values\t%" PRIu64 "\n",sum_hash_values);
         rt.show("Runtime wyhash: ");

@@ -16,15 +16,14 @@
 */
 #ifndef MATHSUPPORT_HPP
 #define MATHSUPPORT_HPP
-#include <cstdint>
 #include <cstddef>
 #include <climits>
 #include <cassert>
 #include <cmath>
 #include <limits>
-#include <numeric>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 #ifndef __has_builtin         // Optional of course.
 #define __has_builtin(X) 0  // Compatibility with non-clang compilers.
@@ -62,92 +61,50 @@ inline T gttl_bits2maxvalue_not_full(int bits)
   return (static_cast<T>(1) << bits) - 1;
 }
 
-template<typename Numtype>
-inline int gttl_required_bits(Numtype value)
+inline constexpr const double bytesPerMegaByte = size_t{1024} * size_t{1024};
+
+inline constexpr double mega_bytes(size_t bytes) noexcept
 {
-  if (value == 0)
-  {
-    return 0;
-  }
-#if __has_builtin(__builtin_clz)
-#include <climits>
-  static_assert(sizeof(value) <= sizeof(unsigned long long));
-  return sizeof(unsigned long) * CHAR_BIT -
-         __builtin_clzl(static_cast<unsigned long>(value));
-#else
-  int count;
-  for(count = 0; value > 0; count++)
-  {
-    value >>= 1;
-  }
-  return count;
-#endif
+  return static_cast<double>(bytes)/bytesPerMegaByte;
 }
 
-inline size_t popcount_uint64_t(uint64_t value)
-{
-#if __has_builtin(__builtin_popcountl)
-  return __builtin_popcountll(value);
-#else
-  size_t pc = 0;
-  for (; value != 0; value &= value - 1)
-  {
-    pc++;
-  }
-  return pc;
-#endif
-}
-
-inline double mega_bytes(size_t bytes)
-{
-  return static_cast<double>(bytes)/(size_t(1024) * size_t(1024));
-}
-
-/* compute a**b and throw exception on overflow */
 template<typename T>
-static T gttl_safe_power(T a, T b)
+static constexpr T gttl_safe_power(T a, T b)
 {
-  T prod = static_cast<T>(1);
-  for (T idx = 0; idx < b; idx++)
+  static_assert(std::is_integral_v<T> and std::is_unsigned_v<T>);
+
+  T prod = 1;
+  constexpr const T max_value = std::numeric_limits<T>::max();
+
+  while (b > 0)
   {
-    static constexpr const T max_value = std::numeric_limits<T>::max();
-    if (a > max_value/prod)
+    if ((b & 1) == 1)
     {
-      throw std::overflow_error(
+      if (a != 0 and prod > max_value / a)
+      {
+        throw std::overflow_error(
+              std::string("overflow when evaluating ")
+            + std::to_string(prod) + " * " + std::to_string(a)
+            + std::string(" to compute pow(")
+            + std::to_string(a) + std::string(", ")
+            + std::to_string(b) + std::string(")"));
+      }
+      prod *= a;
+    }
+    b >>= 1;
+    if (b > 0 and a != 0 and a > max_value / a)
+    {
+        throw std::overflow_error(
               std::string("overflow when evaluating ")
             + std::to_string(prod) + " * " + std::to_string(a)
             + std::string(" to compute pow(")
             + std::to_string(a) + std::string(", ")
             + std::to_string(b) + std::string(")"));
     }
-    prod *= a;
+    a *= a;
   }
   return prod;
 }
-
-/* compute base 2 logarithm at compile time:
-   use as Log2_CT<64>::VALUE; */
-
-template <int numerus>
-struct Log2_CT
-{
-  enum : uint8_t { VALUE = Log2_CT<(numerus+1)/2>::VALUE + 1 };
-};
-template < > struct Log2_CT<1> { enum : uint8_t { VALUE = 0 }; };
-template < > struct Log2_CT<0> { enum : uint8_t { VALUE = 0 }; };
-
-
-/* compute power of base 2 at compile time
-   use as Pow_CT<16>::VALUE; */
-
-template <size_t base,int numerus>
-struct Pow_CT
-{
-  enum : uint8_t { VALUE = Pow_CT<base,numerus-1>::VALUE * base };
-};
-template <size_t base> struct Pow_CT<base,1>
-  { enum : uint8_t { VALUE = base }; };
-template <size_t base> struct Pow_CT<base,0> { enum : uint8_t { VALUE = 1 }; };
 
 inline double error_percentage_get(size_t distance,size_t aligned_len)
 {
@@ -159,19 +116,22 @@ inline double error_percentage_get(size_t distance,size_t aligned_len)
   return 100.0 * static_cast<double>(distance)/(aligned_len/2.0);
 }
 
+// Welford's Algorithm for numerically determining the variance of a population
 template<class InputIt>
-double gttl_variance(InputIt first,InputIt last)
+double gttl_variance(InputIt first, InputIt last)
 {
-  const auto sum = std::accumulate(first,last,0);
-  const auto num_elements = last - first;
-  const double mean = static_cast<double>(sum)/num_elements;
-  double squared_difference = 0;
-  for (auto it = first; it != last; ++it)
+  size_t n = 0;
+  double mean = 0.0;
+  double M2 = 0.0;
+  for(; first != last; ++first)
   {
-    const double diff = static_cast<double>(*it) - mean;
-    squared_difference += (diff * diff);
+    ++n;
+    double x = static_cast<double>(*first);
+    double delta = x - mean;
+    mean += delta / n;
+    M2 += delta * (x - mean);
   }
-  return squared_difference / num_elements;
+  return (n > 0) ? M2 / n : 0.0;
 }
 
 template<class InputIt>

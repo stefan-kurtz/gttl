@@ -1,6 +1,7 @@
 #ifndef GTTL_MULTISEQ_HPP
 #define GTTL_MULTISEQ_HPP
 
+#include <bit>
 #include <cstdint>
 #include <cassert>
 #include <stdexcept>
@@ -22,7 +23,6 @@
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
 #include "utilities/str_format.hpp"
-#include "utilities/mathsupport.hpp"
 #include "utilities/cycle_of_numbers.hpp"
 
 /* A class to store various sequences and their header information.
@@ -346,13 +346,13 @@ class GttlMultiseq
 
   [[nodiscard]] int sequences_length_bits_get(void) const noexcept
   {
-    return gttl_required_bits<size_t>(sequences_maximum_length);
+    return std::bit_width(sequences_maximum_length);
   }
 
   [[nodiscard]] int sequences_number_bits_get(void) const noexcept
   {
     assert(sequences_number_get() > 0);
-    return gttl_required_bits<size_t>(sequences_number_get() - 1);
+    return std::bit_width(sequences_number_get() - 1);
   }
 
   [[nodiscard]] int sequences_bits_get(void) const noexcept

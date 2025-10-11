@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <bit>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -25,7 +26,6 @@
 #include <utility>
 #include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/gttl_file_open.hpp"
-#include "utilities/mathsupport.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/non_wildcard_ranges.hpp"
 
@@ -108,13 +108,13 @@ static void count_non_wildcard_ranges(const char *inputfilename)
             non_wildcard_ranges_total_length);
   printf("# non_wildcard_ranges_max_length\t%zu\n",
             non_wildcard_ranges_max_length);
-  printf("# num_of_sequences.bits\t%d\n",gttl_required_bits(num_of_sequences));
+  printf("# num_of_sequences.bits\t%d\n",std::bit_width(num_of_sequences));
   printf("# max_sequence_length.bits\t%d\n",
-          gttl_required_bits<size_t>(max_sequence_length));
+          std::bit_width(max_sequence_length));
   printf("# non_wildcard_ranges_number.bits\t%d\n",
-            gttl_required_bits<size_t>(non_wildcard_ranges_number));
+            std::bit_width(non_wildcard_ranges_number));
   printf("# non_wildcard_ranges_max_length.bits\t%d\n",
-            gttl_required_bits<size_t>(non_wildcard_ranges_max_length));
+            std::bit_width(non_wildcard_ranges_max_length));
 }
 
 int main(int argc,char *argv[])

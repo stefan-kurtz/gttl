@@ -1,11 +1,11 @@
 #ifndef BITVECTOR_HPP
 #define BITVECTOR_HPP
+#include <bit>
 #include <cassert>
 #include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include "utilities/mathsupport.hpp"
 
 class Bitvector
 {
@@ -50,7 +50,7 @@ class Bitvector
   }
   [[nodiscard]] size_t count(void) const noexcept
   {
-    return popcount_uint64_t(value);
+    return std::popcount(value);
   }
   [[nodiscard]] std::string to_string(void) const noexcept
   {
