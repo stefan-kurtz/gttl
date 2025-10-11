@@ -111,7 +111,7 @@ static void process_fastq_iter(bool statistics,
   size_t max_length = 0;;
   uint64_t hash_value_sum = 0;
   std::map<size_t,size_t> length_dist_map;
-  for (auto &&fastq_entry : fastq_it)
+  for (const auto *fastq_entry : fastq_it)
   {
     const std::string_view &sequence = fastq_entry->sequence_get();
     if (statistics)
@@ -281,7 +281,7 @@ static void char_distribution_seq(const std::string &inputfilename)
   GttlFastQGenerator<buf_size> fastq_it(in_fp);
   size_t dist[4] = {0};
   size_t count_entries = 0;
-  for (auto fastq_entry : fastq_it)
+  for (const auto *fastq_entry : fastq_it)
   {
     count_entries++;
     const std::string_view &sequence = fastq_entry->sequence_get();
@@ -317,7 +317,7 @@ static void char_distribution_thd_gz(size_t num_threads,
   threads.push_back(std::thread([&sequence_queue, &fastq_it]
   {
     size_t count_entries = 0;
-    for (auto &&fastq_entry : fastq_it)
+    for (const auto *fastq_entry : fastq_it)
     {
       count_entries++;
       const std::string_view &seq_view = fastq_entry->sequence_get();
@@ -341,7 +341,7 @@ static void char_distribution_thd_gz(size_t num_threads,
           break;
         }
         auto sequence = opt_sequence.value();
-        for (auto cc : sequence)
+        for (const auto cc : sequence)
         {
           local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
         }
@@ -361,7 +361,7 @@ static void char_distribution_thd_gz(size_t num_threads,
       break;
     }
     auto sequence = opt_sequence.value();
-    for (auto cc : sequence)
+    for (const auto cc : sequence)
     {
       dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
     }
@@ -396,7 +396,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
       GttlFastQGenerator<16384> fastq_it(this_view.data(), this_view.size());
       size_t local_count_entries = 0;
       size_t *const local_dist   = dist + 4 * thd_num;
-      for (auto &&fastq_entry : fastq_it)
+      for (const auto *fastq_entry : fastq_it)
       {
         local_count_entries++;
         const std::string_view &sequence = fastq_entry->sequence_get();

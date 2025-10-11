@@ -148,7 +148,7 @@ class GttlMultiseqFactory
     {
       GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());
       size_t sequences_total_length = 0;
-      for (auto &&si : fasta_it)
+      for (const auto *si : fasta_it)
       {
         sequences_total_length += si->sequence_get().size();
       }
@@ -165,7 +165,7 @@ class GttlMultiseqFactory
     }
     size_t seqnum = 0;
     size_t current_part_number_of_units = 0;
-    for (auto &&si : fasta_it)
+    for (const auto *si : fasta_it)
     {
       if (current_part_number_of_units < number_of_units_in_split)
       {

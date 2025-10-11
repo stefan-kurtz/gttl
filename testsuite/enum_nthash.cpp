@@ -283,7 +283,7 @@ static void enumerate_nt_hash_template(const char *inputfilename,
   GttlFastAGenerator<buf_size> fasta_gen(in_fp);
 
 
-  for (auto &&si : fasta_gen)
+  for (const auto *si : fasta_gen)
   {
     auto sequence = si->sequence_get();
     total_length += sequence.size();
@@ -465,7 +465,7 @@ int main(int argc,char *argv[])
         uint64_t sum_hash_values = 0;
         size_t count_all_qgrams = 0;
 
-        for (auto &&si : fasta_gen)
+        for (const auto *si : fasta_gen)
         {
           auto sequence = si->sequence_get();
           total_length += sequence.size();
