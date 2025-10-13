@@ -126,8 +126,8 @@ double gttl_variance(InputIt first, InputIt last)
   for(; first != last; ++first)
   {
     ++n;
-    double x = static_cast<double>(*first);
-    double delta = x - mean;
+    const double x = static_cast<double>(*first);
+    const double delta = x - mean;
     mean += delta / n;
     M2 += delta * (x - mean);
   }
