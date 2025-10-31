@@ -14,7 +14,8 @@ CXX_VERSION := $(shell basename ${CXX_PURE})
 CPPFLAGS = -I ${GTTL}/src -DLARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DCXXOPTS_NO_REGEX -DCXX_VERSION=\"${CXX_VERSION}\"
 
 # Compiler flags
-CFLAGS = -Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -g -m64 -march=native
+MARCH ?= native
+CFLAGS = -Wall -Werror -Wextra -pedantic -Wno-ignored-attributes -Wunused-parameter -Wpointer-arith -funroll-loops -g -m64 -march=${MARCH}
 CXXFLAGS = -std=c++20
 
 # Linker flags
