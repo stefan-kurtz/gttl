@@ -1,0 +1,1 @@
+gttl_required_bits	#include <bit>	 std::bit_width

@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <array>
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -66,6 +67,13 @@ class Uint64Encoding
 
       for (int idx = 0; idx < bit_groups; idx++)
       {
+        if (arr[idx] > mask_tab[idx])
+        {
+          printf("bit_group_sizes[%d]=%d\n",idx,bit_group_sizes[idx]);
+          printf("shift_tab[%d]=%d\n",idx,shift_tab[idx]);
+          printf("arr[%d]=%" PRIu64 " > %" PRIu64 " = mask_tab[%d]\n",
+                 idx,arr[idx],mask_tab[idx],idx);
+        }
         assert(arr[idx] <= mask_tab[idx]);
         code |= (arr[idx] << shift_tab[idx]);
       }
