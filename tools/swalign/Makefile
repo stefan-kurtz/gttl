@@ -9,6 +9,7 @@ ifneq ($(SSW_SIMD_DEBUG),0)
 endif
 
 ifeq (${MACHINE},x86_64)
+ifneq (${avx},no)
   avxflag=${shell echo "int main(){ return 0; }" | $(CXX) -x c - -DAVX512 -o /dev/null >/dev/null 2>&1 && echo yes || echo no}
   ifeq (${avxflag},yes)
     # we assume avx512 implies avx2 availability
@@ -21,6 +22,7 @@ ifeq (${MACHINE},x86_64)
       CFLAGS += -mavx2
     endif
   endif
+endif
 endif
 
 ifeq ($(SAVETEMPS),yes)
