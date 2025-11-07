@@ -9,7 +9,6 @@
 int main(int argc,char *argv[])
 {
   constexpr const int buf_size = 1 << 14;
-  std::string buffer{};
   bool haserr = false;
 
   if (argc > 2 && strcmp(argv[1],"--all") == 0)
@@ -27,7 +26,6 @@ int main(int argc,char *argv[])
       {
         all_empty_files = false;
         std::cout << line << '\n';
-        buffer.clear();
       }
     }
     catch (const std::exception &msg)
@@ -54,7 +52,6 @@ int main(int argc,char *argv[])
         {
           std::cout << line << '\n';
           this_file_is_empty = false;
-          buffer.clear();
         }
       }
       catch (const std::exception &msg)
