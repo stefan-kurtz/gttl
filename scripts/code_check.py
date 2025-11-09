@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 
 '''
-Eingabe: Dateinamen mit Programmcode (z.B. in Python oder C).
-Finde Formatierungsfehler in der Datei und breche mit exit(1) ab,
-wenn es mindestens einen Fehler gibt.
-Es werden bis zum 10 Fehler gesammelt und ausgegeben, bevor abgebraochen wird.
-Die folgendne Fehler werden mit einer Zeilennummer und einer entsprechenden
-Meldung berichtet:
+Input: Filenames with program code (e.g. in Python or C++).
+Find formatting errors in the file and abort with exit(1),
+if there is at least one error.
+Up to 10 errors are collected and output before aborting.
+The following errors are reported with a line number and a corresponding
+message:
 
-- Zeilen, die mehr als 80 Zeichen lang sind
+- Lines that are longer than 80 characters
 
 optional:
-- Option -t: Vorkommen von Tabulatoren
-- Option -w: white space am Ende einer Zeile
-- Nur sinnvoll f"ur Python:
-  Option -i: Einrueckung von Zeilen, die nicht mit einem
-  der Zeichen ."'# beginnen und nicht durch 4 oder 2 ganzzahlig teilbar sind
+- Option -t: Occurrences of tabs
+- Option -w: white space at the end of a line
+- Only useful for Python:
+  Option -i: Indentation of lines that do not start with one
+  of the characters ."'# and are not an integer multiple of 4 or 2
 
-Da Programm kann beliebig viele Dateien als Argumente verarbeiten.
-Ein Argument - wird als sys.stdin interpretiert.
+The program can process any number of files as arguments.
+An argument - is interpreted as sys.stdin.
 '''
 
 import sys, re, argparse
