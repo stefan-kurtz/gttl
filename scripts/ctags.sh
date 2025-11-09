@@ -27,4 +27,4 @@ else
   exuberantopts=""
 fi
 
-ctags -w ${exuberantopts} `find src -name '*.hpp'` `find testsuite -name '*.cpp'`
+ctags -w ${exuberantopts} $*

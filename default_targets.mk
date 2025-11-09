@@ -1,9 +1,5 @@
 include ${GTTL}/compile_targets.mk
 
-.PHONY:tags
-tags:
-	@scripts/ctags.sh
-
 .PHONY:code_check
 code_check:
 	@${GTTL}/scripts/code_check.py -wt `find . -name '*.[hc]pp'`

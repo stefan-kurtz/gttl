@@ -49,7 +49,7 @@ tidy:
 
 .PHONY:tags
 tags:
-	@./scripts/ctags.sh
+	@./scripts/ctags.sh `find src -name '*.hpp'` `find testsuite -name '*.cpp'`
 
 .PHONY:doc
 doc:
