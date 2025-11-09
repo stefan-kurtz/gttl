@@ -1,4 +1,4 @@
-GTTL ?= ../..
+GTTL=../..
 include ${GTTL}/config.mk
 
 # PROFFLAGS= -DTEXT_OUTPUT -DSAINSHOWSTATEBU -DSAINSHOWSTATE

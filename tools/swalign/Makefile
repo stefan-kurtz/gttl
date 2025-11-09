@@ -1,4 +1,4 @@
-GTTL := ../..
+GTTL=../..
 include ${GTTL}/config.mk
 
 SWAGAOBJ=sw_all_against_all.o

@@ -103,3 +103,5 @@ endif
 
 # This includes all auto-generated dependency files. .d files are generated in default_targets.mk
 -include ${wildcard *.d}
+
+.DEFAULT_GOAL := all

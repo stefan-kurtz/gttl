@@ -1,4 +1,4 @@
-GTTL := ..
+GTTL=..
 include ${GTTL}/config.mk
 
 MAIN_SRC=${shell grep -wl main *.cpp}
