@@ -8,7 +8,8 @@
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
 
-template<class HashIterator,class MinimizerProcessor,class MinimizerValueClass>
+template<class HashIterator, class MinimizerProcessor,
+         class MinimizerValueClass>
 void inline enumerate_minimizer(size_t qgram_length,
                                 size_t window_size,
                                 uint64_t hash_mask,
@@ -28,10 +29,10 @@ void inline enumerate_minimizer(size_t qgram_length,
     }
   }
   const size_t minseqlen_to_process = window_size + qgram_length - 1;
-  std::deque<MinimizerValueClass> window_deque{};
-  GttlCharRange<char_finder::NucleotideFinder,unw_nucleotide_finder,
-                true, false> ranger(sequence,seqlen);
-  std::vector<MinimizerValueClass> palindromic_vector{};
+  std::deque<MinimizerValueClass> window_deque;
+  GttlCharRange<char_finder::NucleotideFinder, unw_nucleotide_finder,
+                true, false> ranger(sequence, seqlen);
+  std::vector<MinimizerValueClass> palindromic_vector;
   for (auto const &&range : ranger)
   {
     const size_t this_length = std::get<1>(range);
@@ -132,7 +133,7 @@ void inline enumerate_minimizer(size_t qgram_length,
            not moved yet */
         if (not front_was_moved)
         {
-          minimizer_processor->apply(sequence,window_deque.front());
+          minimizer_processor->apply(sequence, window_deque.front());
           front_was_moved = true; /* we moved front element and do not
                                      want to do it again */
         }
@@ -141,7 +142,7 @@ void inline enumerate_minimizer(size_t qgram_length,
         // add minimizer of first window
         if (seqpos == window_size - 1)
         {
-          minimizer_processor->apply(sequence,window_deque.front());
+          minimizer_processor->apply(sequence, window_deque.front());
           front_was_moved = true;
         }
       }
@@ -153,7 +154,7 @@ void inline enumerate_minimizer(size_t qgram_length,
   {
     for (auto && pq : palindromic_vector)
     {
-      minimizer_processor->apply(sequence,pq);
+      minimizer_processor->apply(sequence, pq);
     }
   }
 }
