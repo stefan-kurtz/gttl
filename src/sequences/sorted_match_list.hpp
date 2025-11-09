@@ -319,7 +319,7 @@ class SortedMatchList
                             "resort to using %d bytes of space for each MEM",
                             this_match_length,sizeof_unit_match,
                                               sizeof_unit_match+1);
-              throw std::runtime_error(msg.str());
+              throw std::overflow_error(msg.str());
             } else
             {
               const StrFormat msg(": cannot store match of length %zu in 10 "
