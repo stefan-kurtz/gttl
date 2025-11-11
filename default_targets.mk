@@ -14,3 +14,8 @@ clean:
 # The following is for tools/suffixarrays
 	@${GTTL}/scripts/cleanpp.sh
 	@${RM} -r sa_induced.x.dSYM
+
+.PHONY:cxx_options
+cxx_options:
+	@echo $(CXX) $(TIME_OPTION) -DCXX_FLAGS=\"'$(CXXFLAGS) $(CFLAGS) $(CPPFLAGS)'\" -c "<file.cpp>" -o "<file.o>" $(CXXFLAGS) $(CFLAGS) $(CPPFLAGS) -MT "<file.o>" -MMD -MP -MF "<file.d>"
+	@echo $(LD) $(LDFLAGS) "<file.o>" -o "<file.x>" $(LDLIBS)

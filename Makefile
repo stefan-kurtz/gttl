@@ -63,3 +63,7 @@ code_check:
 	scripts/check_gitattributes.sh
 	scripts/check_portability.sh
 	scripts/check_all_sources_tested.py
+
+.PHONY:cxx_options
+cxx_options:
+	@make -C testsuite cxx_options

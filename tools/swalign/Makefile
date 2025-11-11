@@ -9,20 +9,20 @@ ifneq ($(SSW_SIMD_DEBUG),0)
 endif
 
 ifeq (${MACHINE},x86_64)
-ifneq (${avx},no)
-  avxflag=${shell echo "int main(){ return 0; }" | $(CXX) -x c - -DAVX512 -o /dev/null >/dev/null 2>&1 && echo yes || echo no}
-  ifeq (${avxflag},yes)
-    # we assume avx512 implies avx2 availability
-    CFLAGS += -mavx2
-    # the following does not work yet
-    # CFLAGS += -DAVX512
-  else
-    avxflag=${shell echo "int main(){ return 0; }" | $(CXX) -x c - -mavx2 -o /dev/null >/dev/null 2>&1 && echo yes || echo no}
+  ifneq (${avx},no)
+    avxflag=${shell echo "int main(){ return 0; }" | $(CXX) -x c - -DAVX512 -o /dev/null >/dev/null 2>&1 && echo yes || echo no}
     ifeq (${avxflag},yes)
+      # we assume avx512 implies avx2 availability
       CFLAGS += -mavx2
+      # the following does not work yet
+      # CFLAGS += -DAVX512
+    else
+      avxflag=${shell echo "int main(){ return 0; }" | $(CXX) -x c - -mavx2 -o /dev/null >/dev/null 2>&1 && echo yes || echo no}
+      ifeq (${avxflag},yes)
+        CFLAGS += -mavx2
+      endif
     endif
   endif
-endif
 endif
 
 ifeq ($(SAVETEMPS),yes)
