@@ -440,33 +440,33 @@ class GttlLineGenerator
   {
     private:
     GttlLineGenerator* generator;
-    bool exhausted;
+    bool iter_exhausted;
     public:
     explicit Iterator(GttlLineGenerator* _generator, bool _exhausted)
       : generator(_generator)
-      , exhausted(_exhausted)
+      , iter_exhausted(_exhausted)
     {
-      if (not exhausted)
+      if (not iter_exhausted)
       {
         ++(*this);
       }
     }
 
-    auto operator*(void) const
+    auto operator * (void) const
     {
       return generator->data_get();
     }
 
-    Iterator& operator++(void)
+    const Iterator& operator ++ (void)
     {
-      assert(not exhausted);
-      exhausted = not generator->advance();
+      assert(not iter_exhausted);
+      iter_exhausted = not generator->advance();
       return *this;
     }
 
     bool operator == (const Iterator& other) const
     {
-      return exhausted == other.exhausted and
+      return iter_exhausted == other.iter_exhausted and
              generator == other.generator;
     }
 
