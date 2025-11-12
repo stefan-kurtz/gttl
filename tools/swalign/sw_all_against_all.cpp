@@ -97,8 +97,8 @@ class Restrict2Pairs
   {
     SetOfPairs local_pairs{};
     constexpr const int buf_size = 1 << 14;
-    GttlLineGenerator<buf_size> gttl_li(inputfile);
-    for (const auto& line : gttl_li)
+    GttlLineGenerator<buf_size> gttl_lg(inputfile);
+    for (const auto& line : gttl_lg)
     {
       if (line.size() > 0 and line[0] != '#')
       {

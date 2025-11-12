@@ -99,14 +99,14 @@ class GttlFastQGenerator
     if(is_end) return false;
     if(out == nullptr)
     {
-      lg.set_out_buffer(nullptr);
+      lg.set_line_buffer(nullptr);
       for(size_t line = 0; line < 4; line++)
       {
         lg.advance();
       }
       return true;
     }
-    lg.set_out_buffer(&out->header);
+    lg.set_line_buffer(&out->header);
     const char c = lg.getc();
     if(c == EOF)
     {
@@ -120,11 +120,11 @@ class GttlFastQGenerator
                                    + ": corrupted sequence");
     }
     lg.advance();
-    lg.set_out_buffer(&out->sequence);
+    lg.set_line_buffer(&out->sequence);
     lg.advance();
-    lg.set_out_buffer(nullptr);
+    lg.set_line_buffer(nullptr);
     lg.advance();
-    lg.set_out_buffer(&out->quality);
+    lg.set_line_buffer(&out->quality);
     return lg.advance();
   }
 

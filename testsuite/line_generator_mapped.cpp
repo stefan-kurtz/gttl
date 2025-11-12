@@ -10,12 +10,11 @@
 
 static size_t count_lines(const char *file_part, size_t len)
 {
-  GttlLineGenerator liter(file_part, len);
+  GttlLineGenerator gttl_lg(file_part, len);
   size_t line_num = 0;
-  for (auto line : liter)
+  for ([[maybe_unused]] const auto &line : gttl_lg)
   {
     line_num++;
-    line.clear();
   }
   return line_num;
 }

@@ -21,8 +21,8 @@ int main(int argc,char *argv[])
     bool all_empty_files = true;
     try
     {
-      GttlLineGenerator<buf_size> gttl_li(&inputfiles);
-      for (const auto& line : gttl_li)
+      GttlLineGenerator<buf_size> gttl_lg(&inputfiles);
+      for (const auto& line : gttl_lg)
       {
         all_empty_files = false;
         std::cout << line << '\n';
@@ -47,8 +47,8 @@ int main(int argc,char *argv[])
       bool this_file_is_empty = true;
       try
       {
-        GttlLineGenerator<buf_size> gttl_li(argv[idx]);
-        for (const auto& line : gttl_li)
+        GttlLineGenerator<buf_size> gttl_lg(argv[idx]);
+        for (const auto& line : gttl_lg)
         {
           std::cout << line << '\n';
           this_file_is_empty = false;

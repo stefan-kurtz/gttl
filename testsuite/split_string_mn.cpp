@@ -16,10 +16,10 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
                                                   char sep)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlLineGenerator<buf_size> gttl_li(inputfile);
+  GttlLineGenerator<buf_size> gttl_lg(inputfile);
   size_t line_count = 0;
   size_t column_count = 0;
-  for (const auto &buffer : gttl_li)
+  for (const auto &buffer : gttl_lg)
   {
     if (buffer.size() > 0 and buffer[0] != '#')
     {

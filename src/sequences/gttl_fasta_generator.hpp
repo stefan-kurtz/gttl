@@ -103,7 +103,7 @@ class GttlFastAGenerator
 
     if(out == nullptr)
     {
-      lg.set_out_buffer(nullptr);
+      lg.set_line_buffer(nullptr);
 
       if(not lg.advance()) return false;
 
@@ -132,7 +132,7 @@ class GttlFastAGenerator
 
     out->header.clear();
     out->sequence.clear();
-    lg.set_out_buffer(&out->header);
+    lg.set_line_buffer(&out->header);
 
     if(not lg.advance())
     {
@@ -140,7 +140,7 @@ class GttlFastAGenerator
       return false;
     }
 
-    lg.set_out_buffer(&out->sequence);
+    lg.set_line_buffer(&out->sequence);
     while(true)
     {
       const int ch = lg.getc();
