@@ -431,6 +431,11 @@ class GttlLineGenerator
     return *line_ptr;
   }*/
 
+  const std::string& data_get(void) const
+  {
+    return *line_ptr;
+  }
+
   class Iterator
   {
     private:
@@ -447,11 +452,9 @@ class GttlLineGenerator
       }
     }
 
-    const std::string& operator*(void) const
+    auto operator*(void) const
     {
-      /* SK: why is line_ptr visible in this class, as line_ptr is a
-         private instance variable */
-      return *(generator->line_ptr);
+      return generator->data_get();
     }
 
     Iterator& operator++(void)
