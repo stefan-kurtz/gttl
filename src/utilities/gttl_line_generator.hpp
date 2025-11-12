@@ -12,13 +12,14 @@
 #include <string>
 #include <vector>
 
-template <size_t buf_size = (size_t{1} << size_t{14}),
+template <size_t buf_size = (size_t{1} << 14),
           bool skip_empty_lines = false>
 class GttlLineGenerator
 {
-  private:
   using CharBuffer = std::array<char, buf_size>;
   using BufferSpan = std::span<char>;
+  /* SK: please provide a short description of what are the variables used
+     for */
   CharBuffer file_buf{};
   BufferSpan file_buf_span{file_buf};
   size_t file_buf_pos = 0;
@@ -36,6 +37,7 @@ class GttlLineGenerator
   const std::vector<std::string>* file_list = nullptr;
   size_t file_index = 0;
 
+  /* this is only used skip_empty_lines is true */
   bool line_partly_read = false;
 
   bool refill_file_buffer(void)
@@ -73,6 +75,118 @@ class GttlLineGenerator
         }
       }
     }
+  }
+
+  bool read_from_mapped_string(size_t* length_ptr, bool append)
+  {
+    assert(length_ptr != nullptr and *length_ptr == 0);
+    if (current_ptr >= input_view.data() + input_view.size())
+    {
+      exhausted = true;
+      return false;
+    }
+
+    const char* const next_newline
+      = std::find(current_ptr,input_view.data() + input_view.size(),'\n');
+    const size_t line_len = static_cast<size_t>(next_newline - current_ptr);
+    const size_t copy_len = std::min(line_len, buf_size - 1);
+
+    if (line_ptr != nullptr)
+    {
+      if (append)
+      {
+        const size_t old_size = line_ptr->size();
+        line_ptr->resize(old_size + copy_len);
+        std::memcpy(line_ptr->data() + old_size, current_ptr, copy_len);
+      } else
+      {
+        line_ptr->resize(copy_len);
+        std::memcpy(line_ptr->data(), current_ptr, copy_len);
+      }
+    }
+
+    *length_ptr = copy_len;
+
+    current_ptr = (next_newline < input_view.data() + input_view.size())
+                    ? next_newline + 1
+                    : input_view.data() + input_view.size();
+    return true;
+  }
+
+  bool read_from_file(size_t* length_ptr)
+  {
+    assert(length_ptr != nullptr and *length_ptr == 0);
+    size_t len = 0;
+
+    while (true)
+    {
+      if (file_buf_pos >= file_buf_end)
+      {
+        if (not refill_file_buffer())
+        {
+          exhausted = true;
+          return len > 0;
+        }
+      }
+
+      char* const next_newline
+        = static_cast<char*>(std::memchr(file_buf_span.data() + file_buf_pos,
+                                         '\n',
+                                         file_buf_end - file_buf_pos));
+      if (next_newline != nullptr)
+      {
+        size_t line_len = next_newline - (file_buf_span.data() + file_buf_pos);
+
+        bool removed_cr = false;
+        if (line_len > 0 and file_buf_span[file_buf_pos + line_len - 1] == '\r')
+        {
+          line_len--;
+          removed_cr = true;
+        }
+
+        line_ptr->append(file_buf_span.data() + file_buf_pos, line_len);
+        len += line_len;
+        file_buf_pos += line_len + 1 + static_cast<size_t>(removed_cr);
+        break;
+      }
+
+      const size_t remaining = file_buf_end - file_buf_pos;
+      line_ptr->append(file_buf_span.data() + file_buf_pos, remaining);
+      len += remaining;
+      file_buf_pos = file_buf_end;
+    }
+
+    *length_ptr = len;
+    return true;
+  }
+
+  bool discard_line(size_t* length_ptr)
+  {
+    char ch = EOF;
+
+    assert(length_ptr != nullptr and *length_ptr == 0);
+    while (true)
+    {
+      if (file_buf_pos >= file_buf_end)
+      {
+        if (not refill_file_buffer())
+        {
+          exhausted = true;
+          return false;
+        }
+      }
+
+      ch = file_buf_span[file_buf_pos];
+      if (ch == '\n')
+      {
+        file_buf_pos++;
+        break;
+      }
+
+      file_buf_pos++;
+      (*length_ptr)++;
+    }
+    return (ch != EOF);
   }
 
   public:
@@ -192,120 +306,6 @@ class GttlLineGenerator
     gttl_fp_type_close(file);
   }
 
-  private:
-  bool read_from_mapped_string(size_t* length_ptr, bool append)
-  {
-    assert(length_ptr != nullptr and *length_ptr == 0);
-    if (current_ptr >= input_view.data() + input_view.size())
-    {
-      exhausted = true;
-      return false;
-    }
-
-    const char* const next_newline
-      = std::find(current_ptr,input_view.data() + input_view.size(),'\n');
-    const size_t line_len = static_cast<size_t>(next_newline - current_ptr);
-    const size_t copy_len = std::min(line_len, buf_size - 1);
-
-    if (line_ptr != nullptr)
-    {
-      if (append)
-      {
-        const size_t old_size = line_ptr->size();
-        line_ptr->resize(old_size + copy_len);
-        std::memcpy(line_ptr->data() + old_size, current_ptr, copy_len);
-      } else
-      {
-        line_ptr->resize(copy_len);
-        std::memcpy(line_ptr->data(), current_ptr, copy_len);
-      }
-    }
-
-    *length_ptr = copy_len;
-
-    current_ptr = (next_newline < input_view.data() + input_view.size())
-                    ? next_newline + 1
-                    : input_view.data() + input_view.size();
-    return true;
-  }
-
-  bool read_from_file(size_t* length_ptr)
-  {
-    assert(length_ptr != nullptr and *length_ptr == 0);
-    size_t len = 0;
-
-    while (true)
-    {
-      if (file_buf_pos >= file_buf_end)
-      {
-        if (not refill_file_buffer())
-        {
-          exhausted = true;
-          return len > 0;
-        }
-      }
-
-      char* const next_newline
-        = static_cast<char*>(std::memchr(file_buf_span.data() + file_buf_pos,
-                                         '\n',
-                                         file_buf_end - file_buf_pos));
-      if (next_newline != nullptr)
-      {
-        size_t line_len = next_newline - (file_buf_span.data() + file_buf_pos);
-
-        bool removed_cr = false;
-        if (line_len > 0 and file_buf_span[file_buf_pos + line_len - 1] == '\r')
-        {
-          line_len--;
-          removed_cr = true;
-        }
-
-        line_ptr->append(file_buf_span.data() + file_buf_pos, line_len);
-        len += line_len;
-        file_buf_pos += line_len + 1 + static_cast<size_t>(removed_cr);
-        break;
-      }
-
-      const size_t remaining = file_buf_end - file_buf_pos;
-      line_ptr->append(file_buf_span.data() + file_buf_pos, remaining);
-      len += remaining;
-      file_buf_pos = file_buf_end;
-    }
-
-    *length_ptr = len;
-    return true;
-  }
-
-  bool discard_line(size_t* length_ptr)
-  {
-    char ch = EOF;
-
-    assert(length_ptr != nullptr and *length_ptr == 0);
-    while (true)
-    {
-      if (file_buf_pos >= file_buf_end)
-      {
-        if (not refill_file_buffer())
-        {
-          exhausted = true;
-          return false;
-        }
-      }
-
-      ch = file_buf_span[file_buf_pos];
-      if (ch == '\n')
-      {
-        file_buf_pos++;
-        break;
-      }
-
-      file_buf_pos++;
-      (*length_ptr)++;
-    }
-    return (ch != EOF);
-  }
-
-public:
   bool advance(size_t* length_ptr = nullptr, bool append = false)
   {
     if (length_ptr != nullptr)
@@ -326,7 +326,7 @@ public:
     size_t local_len = 0;
     bool okay;
 
-    /* Do not use pointer to local_len, but return the length value
+    /* SK: Do not use pointer to local_len, but return the length value
        with the boolean value as pair. */
     if (not input_view.empty())
     {
@@ -362,94 +362,6 @@ public:
     return true;
   }
 
-  void reset(void)
-  {
-    exhausted = false;
-    line_number = 1;
-    if (not input_view.empty())
-    {
-      current_ptr = input_view.data();
-    }
-    file_buf_pos = 0;
-    file_buf_end = 0;
-    if (file_list != nullptr and not file_list->empty())
-    {
-      gttl_fp_type_close(file);
-      file_index = 0;
-      file = gttl_fp_type_open((*file_list)[0].c_str(), "rb");
-    }
-    else
-    {
-      gttl_fp_type_rewind(file);
-    }
-  }
-
-  [[nodiscard]] size_t line_number_get() const noexcept
-  {
-    return line_number;
-  }
-
-  void set_line_buffer(std::string* _line_ptr)
-  {
-    line_ptr = _line_ptr;
-  }
-
-  /*std::string operator*(void) const
-  {
-    return *line_ptr;
-  }*/
-
-  private:
-  class Iterator
-  {
-    private:
-    GttlLineGenerator* generator;
-    bool exhausted;
-    public:
-    explicit Iterator(GttlLineGenerator* _generator, bool _exhausted)
-      : generator(_generator)
-      , exhausted(_exhausted)
-    {
-      if (not exhausted)
-      {
-        ++(*this);
-      }
-    }
-
-    const std::string& operator*(void) const
-    {
-      return *(generator->line_ptr);
-    }
-
-    Iterator& operator++()
-    {
-      assert(not exhausted);
-      exhausted = not generator->advance();
-      return *this;
-    }
-
-    bool operator == (const Iterator& other) const
-    {
-      return exhausted == other.exhausted and
-             generator == other.generator;
-    }
-
-    bool operator != (const Iterator& other) const
-    {
-      return not (*this == other);
-    }
-  };
-  public:
-
-  Iterator begin(void)
-  {
-    return Iterator(this, false);
-  }
-  Iterator end(void)
-  {
-    return Iterator(this, true);
-  }
-
   char getc(void)
   {
     if (not input_view.empty())
@@ -479,6 +391,95 @@ public:
       line_partly_read = true;
     }
     return file_buf_span[file_buf_pos++];
+  }
+
+  void reset(void)
+  {
+    exhausted = false;
+    line_number = 1;
+    if (not input_view.empty())
+    {
+      current_ptr = input_view.data();
+    }
+    /* SK: why is current_ptr not reinitialized in the else case */
+    file_buf_pos = 0;
+    file_buf_end = 0;
+    if (file_list != nullptr and not file_list->empty())
+    {
+      gttl_fp_type_close(file);
+      file_index = 0;
+      file = gttl_fp_type_open((*file_list)[0].c_str(), "rb");
+    } else
+    {
+      gttl_fp_type_rewind(file);
+    }
+    /* SK: why is line_ptr, line_partly_read  not reinitialized */
+  }
+
+  [[nodiscard]] size_t line_number_get() const noexcept
+  {
+    return line_number;
+  }
+
+  void set_line_buffer(std::string* _line_ptr)
+  {
+    line_ptr = _line_ptr;
+  }
+
+  /*std::string operator*(void) const
+  {
+    return *line_ptr;
+  }*/
+
+  class Iterator
+  {
+    private:
+    GttlLineGenerator* generator;
+    bool exhausted;
+    public:
+    explicit Iterator(GttlLineGenerator* _generator, bool _exhausted)
+      : generator(_generator)
+      , exhausted(_exhausted)
+    {
+      if (not exhausted)
+      {
+        ++(*this);
+      }
+    }
+
+    const std::string& operator*(void) const
+    {
+      /* SK: why is line_ptr visible in this class, as line_ptr is a
+         private instance variable */
+      return *(generator->line_ptr);
+    }
+
+    Iterator& operator++(void)
+    {
+      assert(not exhausted);
+      exhausted = not generator->advance();
+      return *this;
+    }
+
+    bool operator == (const Iterator& other) const
+    {
+      return exhausted == other.exhausted and
+             generator == other.generator;
+    }
+
+    bool operator != (const Iterator& other) const
+    {
+      return not (*this == other);
+    }
+  };
+
+  Iterator begin(void)
+  {
+    return Iterator(this, false);
+  }
+  Iterator end(void)
+  {
+    return Iterator(this, true);
   }
 };
 #endif // GTTL_LINE_GENERATOR_HPP
