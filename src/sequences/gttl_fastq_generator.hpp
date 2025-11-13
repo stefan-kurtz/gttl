@@ -41,6 +41,19 @@ struct GttlFastQEntry
 template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastQGenerator
 {
+  private:
+  // A default output buffer, in case the caller does not provide one
+  GttlFastQEntry<buf_size> default_buffer;
+  // output-pointer towards the GttlFastAEntry in which the current line should
+  // be stored.
+  GttlFastQEntry<buf_size>* out;
+  // Whether all sequences have been read
+  bool is_end;
+  // Whether we wish to ignore empty lines
+  static constexpr const bool skip_empty_lines = true;
+  // The line-generator we use to iterate over the file
+  GttlLineGenerator<buf_size, skip_empty_lines> lg;
+
   public:
   static constexpr const bool is_fastq_generator = true;
   explicit GttlFastQGenerator(const char* file_name,
@@ -92,6 +105,12 @@ class GttlFastQGenerator
     , is_end(_is_end)
     , lg(_file_list, &out->header, _is_end)
     {}
+
+  // Delete copy/move constructur & assignment operator
+  GttlFastQGenerator(const GttlFastQGenerator&) = delete;
+  GttlFastQGenerator& operator=(const GttlFastQGenerator&) = delete;
+  GttlFastQGenerator(GttlFastQGenerator&&) = delete;
+  GttlFastQGenerator& operator=(GttlFastQGenerator&&) = delete;
 
 
   bool advance()
@@ -187,13 +206,6 @@ class GttlFastQGenerator
   {
     return Iterator(this, true);
   }
-
-  private:
-  GttlFastQEntry<buf_size> default_buffer;
-  GttlFastQEntry<buf_size>* out;
-  bool is_end;
-  static constexpr const bool skip_empty_lines = true;
-  GttlLineGenerator<buf_size, skip_empty_lines> lg;
 };
 
 #endif  // GTTL_FASTQ_GENERATOR_HPP

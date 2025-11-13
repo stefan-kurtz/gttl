@@ -42,6 +42,22 @@ struct GttlFastAEntry
 template <const size_t buf_size = (size_t{1} << size_t{14})>
 class GttlFastAGenerator
 {
+  private:
+  // A default output buffer, in case the caller does not provide one
+  GttlFastAEntry<buf_size> default_buffer;
+  // output-pointer towards the GttlFastAEntry in which the current line should
+  // be stored.
+  GttlFastAEntry<buf_size>* out;
+  // Whether all sequences have been read
+  bool is_end;
+  // Whether we are still reading the first entry.
+  // This flag is required to properly skip the initial FastA-header.
+  bool is_first_entry = true;
+  // Whether we wish to ignore empty lines
+  static constexpr const bool skip_empty_lines = true;
+  // The line-generator we use to iterate over the file
+  GttlLineGenerator<buf_size, skip_empty_lines> lg;
+
   public:
   static constexpr const bool is_fastq_generator = false;
   explicit GttlFastAGenerator(const char* file_name,
@@ -96,6 +112,12 @@ class GttlFastAGenerator
     , is_end(_is_end)
     , lg(_file_list, &out->header, _is_end)
   {}
+
+  // Delete copy/move constructur & assignment operator
+  GttlFastAGenerator(const GttlFastAGenerator&) = delete;
+  GttlFastAGenerator& operator=(const GttlFastAGenerator&) = delete;
+  GttlFastAGenerator(GttlFastAGenerator&&) = delete;
+  GttlFastAGenerator& operator=(GttlFastAGenerator&&) = delete;
 
   bool advance()
   {
@@ -215,13 +237,5 @@ class GttlFastAGenerator
   {
     return Iterator(this, true);
   }
-
-  private:
-  GttlFastAEntry<buf_size> default_buffer;
-  GttlFastAEntry<buf_size>* out;
-  bool is_end;
-  bool is_first_entry = true;
-  static constexpr const bool skip_empty_lines = true;
-  GttlLineGenerator<buf_size, skip_empty_lines> lg;
 };
 #endif // GTTL_FASTA_GENERATOR_HPP
