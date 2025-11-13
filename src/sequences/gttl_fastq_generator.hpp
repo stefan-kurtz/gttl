@@ -30,7 +30,7 @@ struct GttlFastQEntry
   std::string sequence;
   std::string quality;
 
-  GttlFastQEntry()
+  GttlFastQEntry(void)
   {
     header.reserve(buf_size);
     sequence.reserve(buf_size);
@@ -60,28 +60,33 @@ class GttlFastQGenerator
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
-    , lg(gttl_fp_type_open(file_name, "rb"), &(out->header), _is_end) {}
+    , lg(gttl_fp_type_open(file_name, "rb")
+    , &(out->header)
+    , _is_end)
+  { }
 
   explicit GttlFastQGenerator(GttlFpType fp,
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
-    , lg(fp, &out->header, _is_end) {}
-
+    , lg(fp, &out->header, _is_end)
+  { }
 
   explicit GttlFastQGenerator(const char* file_name,
                               GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
     : lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
     , out(_out)
-    , is_end(_is_end) {}
+    , is_end(_is_end)
+  { }
 
   explicit GttlFastQGenerator(GttlFpType fp,
                               GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
     : lg(fp, _out->header, _is_end)
     , out(_out)
-    , is_end(_is_end) {}
+    , is_end(_is_end)
+  { }
 
   explicit GttlFastQGenerator(const char* _input_string,
                               size_t _string_length,
@@ -89,14 +94,14 @@ class GttlFastQGenerator
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(_input_string, _string_length)
-    {}
+  { }
 
   explicit GttlFastQGenerator(const std::string_view &_input_string,
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
     , lg(_input_string.data(), _input_string.size())
-  {}
+  { }
 
   explicit GttlFastQGenerator(const std::vector<std::string>* _file_list,
                               GttlFastQEntry<buf_size> *_out = nullptr,
@@ -104,19 +109,21 @@ class GttlFastQGenerator
     : out(_out == nullptr ? &default_buffer : _out)
     , is_end(_is_end)
     , lg(_file_list, &out->header, _is_end)
-    {}
+  { }
 
   // Delete copy/move constructur & assignment operator
   GttlFastQGenerator(const GttlFastQGenerator&) = delete;
-  GttlFastQGenerator& operator=(const GttlFastQGenerator&) = delete;
+  GttlFastQGenerator& operator = (const GttlFastQGenerator&) = delete;
   GttlFastQGenerator(GttlFastQGenerator&&) = delete;
-  GttlFastQGenerator& operator=(GttlFastQGenerator&&) = delete;
+  GttlFastQGenerator& operator = (GttlFastQGenerator&&) = delete;
 
-
-  bool advance()
+  bool advance(void)
   {
-    if(is_end) return false;
-    if(out == nullptr)
+    if (is_end)
+    {
+      return false;
+    }
+    if (out == nullptr)
     {
       lg.set_line_buffer(nullptr);
       for(size_t line = 0; line < 4; line++)
@@ -126,13 +133,13 @@ class GttlFastQGenerator
       return true;
     }
     lg.set_line_buffer(&out->header);
-    const char c = lg.getc();
-    if(c == EOF)
+    const char cc = lg.getc();
+    if (cc == EOF)
     {
       is_end = true;
       return false;
     }
-    if(c != '@')
+    if (cc != '@')
     {
       throw std::ios_base::failure(std::string(", line ")
                                    + std::to_string(lg.line_number_get())
@@ -147,7 +154,7 @@ class GttlFastQGenerator
     return std::get<0>(lg.advance());
   }
 
-  void reset()
+  void reset(void)
   {
     lg.reset();
     is_end = false;
@@ -160,52 +167,55 @@ class GttlFastQGenerator
 
   class Iterator
   {
+    private:
+    GttlFastQGenerator* generator;
+    bool is_end;
     public:
-    explicit Iterator(GttlFastQGenerator* generator, bool end = false)
-      : gen(generator), is_end(end)
+    explicit Iterator(GttlFastQGenerator* _generator, bool end = false)
+      : generator(_generator)
+      , is_end(end)
     {
-      if(not end) ++(*this);
+      if (not end)
+      {
+        ++(*this);
+      }
     }
 
-    const GttlFastQEntry<buf_size>* operator*() const
+    const GttlFastQEntry<buf_size>* operator * () const
     {
-      return gen->out;
+      return generator->out;
     }
 
-    const Iterator& operator++()
+    const Iterator& operator ++ (void)
     {
-      if(not gen->advance())
+      assert(not is_end);
+      if (not generator->advance())
       {
         is_end = true;
       }
       return *this;
     }
 
-    bool operator==(const Iterator& other) const
+    bool operator == (const Iterator& other) const
     {
-      return (is_end == other.is_end) and (gen == other.gen);
+      return is_end == other.is_end and generator == other.generator;
     }
 
-    bool operator!=(const Iterator& other) const
+    bool operator != (const Iterator& other) const
     {
       return not (*this == other);
     }
 
-    private:
-    GttlFastQGenerator* gen;
-    bool is_end;
   };
 
-
-  Iterator begin()
+  Iterator begin(void)
   {
     return Iterator(this, false);
   }
 
-  Iterator end()
+  Iterator end(void)
   {
     return Iterator(this, true);
   }
 };
-
 #endif  // GTTL_FASTQ_GENERATOR_HPP

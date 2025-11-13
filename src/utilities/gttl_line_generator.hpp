@@ -39,7 +39,7 @@ class GttlLineGenerator
   // default output-buffer for when we do not want to read directly into a
   // different object's memory
   std::string default_buffer;
-  // flag to indicate whether we are fully done reading 
+  // flag to indicate whether we are fully done reading
   bool all_files_exhausted;
   // current line counter. Incremented whenever we read a line
   size_t line_number;
@@ -302,7 +302,8 @@ class GttlLineGenerator
                              bool _exhausted = false)
     : file(nullptr)
     , line_ptr(_line_ptr == nullptr ? &default_buffer : _line_ptr)
-    , all_files_exhausted(_file_list == nullptr or _file_list->empty() or _exhausted)
+    , all_files_exhausted(_file_list == nullptr or _file_list->empty()
+                                                or _exhausted)
     , line_number(1)
     , file_list(_file_list)
   {
@@ -331,7 +332,7 @@ class GttlLineGenerator
   {
     if (all_files_exhausted)
     {
-      return {false, 0};
+      return std::make_pair(false, 0);
     }
     ++line_number;
 
@@ -358,7 +359,7 @@ class GttlLineGenerator
     }
     if (not okay)
     {
-      return {false, local_len};
+      return std::make_pair(false, local_len);
     }
 
     if constexpr (skip_empty_lines)
@@ -370,7 +371,7 @@ class GttlLineGenerator
       line_partly_read = false;
     }
 
-    return {true, local_len};
+    return std::make_pair(true, local_len);
   }
 
   char getc(void)
@@ -433,7 +434,8 @@ class GttlLineGenerator
     // other places, and copying or moving ownership here would be an additional
     // cost. Hence the set_line_buffer() option.
     //
-    // line_partly_read is simply irrelevant after a reset, since we begin reading anew
+    // line_partly_read is simply irrelevant after a reset,
+    // since we begin reading anew
     // regardless.
     // It will be overwritten on the first call to advance()
   }
