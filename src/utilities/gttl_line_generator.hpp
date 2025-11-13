@@ -10,6 +10,7 @@
 #include <ios>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 template <size_t buf_size = (size_t{1} << 14),
@@ -18,23 +19,43 @@ class GttlLineGenerator
 {
   using CharBuffer = std::array<char, buf_size>;
   using BufferSpan = std::span<char>;
-  /* SK: please provide a short description of what are the variables used
-     for */
+
+  // fixed-size buffer for reading a chunk of data from the file
   CharBuffer file_buf{};
+  // A std::span view into the buffer, to provide abstraction over the
+  // otherwise complex and error-prone pointer arithmetic
   BufferSpan file_buf_span{file_buf};
+  // Current read position within the file_buf buffer
   size_t file_buf_pos = 0;
+  // index marking the end of valid content in file_buf, ie.
+  // the size of the buffer's actual content plus one
   size_t file_buf_end = 0;
 
+  // Handle to the currently open file from which we are reading
   GttlFpType file;
+  // output-pointer towards the string in which the current line should be
+  // stored.
   std::string* line_ptr;
-  bool exhausted;
+  // default output-buffer for when we do not want to read directly into a
+  // different object's memory
   std::string default_buffer;
+  // flag to indicate whether we are fully done reading 
+  bool all_files_exhausted;
+  // current line counter. Incremented whenever we read a line
   size_t line_number;
 
+  // This is a view into a memory-mapped input string, to simplify
+  // pointer-arithmetic (as done above for files) when we read from
+  // such a string.
   std::span<const char> input_view;
+  // And the current read-position within it, analogous to file_buf_pos
   const char* current_ptr = nullptr;
 
+  // A vector of multiples files from which we may want to read.
+  // Allocated only when the appropriate constructor is called
   const std::vector<std::string>* file_list = nullptr;
+  // The index of the currently read file.
+  // Files will be read consecutively, as though concatenated into a single file
   size_t file_index = 0;
 
   /* this is only used skip_empty_lines is true */
@@ -46,7 +67,7 @@ class GttlLineGenerator
     {
       if (file == nullptr)
       {
-        exhausted = true;
+        all_files_exhausted = true;
         return false;
       }
       file_buf_end = gttl_fp_type_read(file_buf.data(),
@@ -60,7 +81,7 @@ class GttlLineGenerator
       }
       if (file_list == nullptr)
       {
-        exhausted = true;
+        all_files_exhausted = true;
         return false;
       }
       gttl_fp_type_close(file);
@@ -82,7 +103,7 @@ class GttlLineGenerator
     assert(length_ptr != nullptr and *length_ptr == 0);
     if (current_ptr >= input_view.data() + input_view.size())
     {
-      exhausted = true;
+      all_files_exhausted = true;
       return false;
     }
 
@@ -124,7 +145,7 @@ class GttlLineGenerator
       {
         if (not refill_file_buffer())
         {
-          exhausted = true;
+          all_files_exhausted = true;
           return len > 0;
         }
       }
@@ -171,7 +192,7 @@ class GttlLineGenerator
       {
         if (not refill_file_buffer())
         {
-          exhausted = true;
+          all_files_exhausted = true;
           return false;
         }
       }
@@ -193,7 +214,7 @@ class GttlLineGenerator
   explicit GttlLineGenerator (GttlFpType fp, bool _exhausted = false)
     : file(fp)
     , line_ptr(&default_buffer)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -205,7 +226,7 @@ class GttlLineGenerator
   explicit GttlLineGenerator(const char* file_name, bool _exhausted = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , line_ptr(&default_buffer)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -218,7 +239,7 @@ class GttlLineGenerator
                              bool _exhausted = false)
     : file(gttl_fp_type_open(file_name.c_str(), "rb"))
     , line_ptr(&default_buffer)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -231,7 +252,7 @@ class GttlLineGenerator
                              std::string* _line_ptr, bool _exhausted = false)
     : file(gttl_fp_type_open(file_name, "rb"))
     , line_ptr(_line_ptr)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -244,7 +265,7 @@ class GttlLineGenerator
                              std::string* _line_ptr, bool _exhausted = false)
     : file(gttl_fp_type_open(file_name.c_str(), "rb"))
     , line_ptr(_line_ptr)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -257,7 +278,7 @@ class GttlLineGenerator
                              std::string* _line_ptr, bool _exhausted = false)
     : file(fp)
     , line_ptr(_line_ptr)
-    , exhausted(_exhausted)
+    , all_files_exhausted(_exhausted)
     , line_number(1)
   {
     if (file == nullptr)
@@ -270,7 +291,7 @@ class GttlLineGenerator
                              bool _exhausted = false)
     : file(nullptr)
     , line_ptr(&default_buffer)
-    , exhausted(_string_length == 0 or _exhausted)
+    , all_files_exhausted(_string_length == 0 or _exhausted)
     , line_number(1)
     , input_view(_input_string, _string_length)
     , current_ptr(input_view.data())
@@ -281,11 +302,11 @@ class GttlLineGenerator
                              bool _exhausted = false)
     : file(nullptr)
     , line_ptr(_line_ptr == nullptr ? &default_buffer : _line_ptr)
-    , exhausted(_file_list == nullptr or _file_list->empty() or _exhausted)
+    , all_files_exhausted(_file_list == nullptr or _file_list->empty() or _exhausted)
     , line_number(1)
     , file_list(_file_list)
   {
-    if (not exhausted)
+    if (not all_files_exhausted)
     {
       file = gttl_fp_type_open((*file_list)[file_index].c_str(), "rb");
       if (file == nullptr)
@@ -306,15 +327,11 @@ class GttlLineGenerator
     gttl_fp_type_close(file);
   }
 
-  bool advance(size_t* length_ptr = nullptr, bool append = false)
+  std::pair<bool, size_t> advance(bool append = false)
   {
-    if (length_ptr != nullptr)
+    if (all_files_exhausted)
     {
-      *length_ptr = 0;
-    }
-    if (exhausted)
-    {
-      return false;
+      return {false, 0};
     }
     ++line_number;
 
@@ -326,8 +343,6 @@ class GttlLineGenerator
     size_t local_len = 0;
     bool okay;
 
-    /* SK: Do not use pointer to local_len, but return the length value
-       with the boolean value as pair. */
     if (not input_view.empty())
     {
       okay = read_from_mapped_string(&local_len, append);
@@ -343,23 +358,19 @@ class GttlLineGenerator
     }
     if (not okay)
     {
-      return false;
+      return {false, local_len};
     }
 
     if constexpr (skip_empty_lines)
     {
-      if (local_len == 0 and not exhausted and not line_partly_read)
+      if (local_len == 0 and not all_files_exhausted and not line_partly_read)
       {
-        return advance(length_ptr, append);
+        return advance(append);
       }
       line_partly_read = false;
     }
 
-    if (length_ptr != nullptr)
-    {
-      *length_ptr = local_len;
-    }
-    return true;
+    return {true, local_len};
   }
 
   char getc(void)
@@ -368,7 +379,7 @@ class GttlLineGenerator
     {
       if (current_ptr >= input_view.data() + input_view.size())
       {
-        exhausted = true;
+        all_files_exhausted = true;
         return EOF;
       }
       if constexpr (skip_empty_lines)
@@ -382,7 +393,7 @@ class GttlLineGenerator
     {
       if (not refill_file_buffer())
       {
-        exhausted = true;
+        all_files_exhausted = true;
         return EOF;
       }
     }
@@ -395,13 +406,15 @@ class GttlLineGenerator
 
   void reset(void)
   {
-    exhausted = false;
+    all_files_exhausted = false;
     line_number = 1;
     if (not input_view.empty())
     {
+      // current_ptr is only relevant when we read from a memory-mapped string.
+      // Hence why we only reset it when there exists an input_view
+      // When reading from a file, we instead use file_buf_pos/file_buf_end
       current_ptr = input_view.data();
     }
-    /* SK: why is current_ptr not reinitialized in the else case */
     file_buf_pos = 0;
     file_buf_end = 0;
     if (file_list != nullptr and not file_list->empty())
@@ -413,7 +426,16 @@ class GttlLineGenerator
     {
       gttl_fp_type_rewind(file);
     }
-    /* SK: why is line_ptr, line_partly_read  not reinitialized */
+    // line_ptr may point to an externally provided memory buffer, hence
+    // why it isn't reset.
+    // Setting it to an empty string may overwrite data that would be
+    // accessed elsewhere. We are primarily providing data to be processed in
+    // other places, and copying or moving ownership here would be an additional
+    // cost. Hence the set_line_buffer() option.
+    //
+    // line_partly_read is simply irrelevant after a reset, since we begin reading anew
+    // regardless.
+    // It will be overwritten on the first call to advance()
   }
 
   [[nodiscard]] size_t line_number_get() const noexcept
@@ -431,7 +453,7 @@ class GttlLineGenerator
     return *line_ptr;
   }*/
 
-  const std::string& data_get(void) const
+  [[nodiscard]] const std::string& data_get(void) const
   {
     return *line_ptr;
   }
@@ -460,7 +482,7 @@ class GttlLineGenerator
     const Iterator& operator ++ (void)
     {
       assert(not iter_exhausted);
-      iter_exhausted = not generator->advance();
+      iter_exhausted = not std::get<0>(generator->advance());
       return *this;
     }
 

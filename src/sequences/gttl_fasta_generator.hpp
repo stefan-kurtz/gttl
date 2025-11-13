@@ -105,7 +105,7 @@ class GttlFastAGenerator
     {
       lg.set_line_buffer(nullptr);
 
-      if(not lg.advance()) return false;
+      if(not std::get<0>(lg.advance())) return false;
 
       while(true)
       {
@@ -134,7 +134,7 @@ class GttlFastAGenerator
     out->sequence.clear();
     lg.set_line_buffer(&out->header);
 
-    if(not lg.advance())
+    if(not std::get<0>(lg.advance()))
     {
       is_end = true;
       return false;
@@ -147,7 +147,7 @@ class GttlFastAGenerator
       if(ch == EOF or ch == '>') break;
 
       out->sequence.push_back(static_cast<char>(ch));
-      if(not lg.advance(nullptr, true)) break;
+      if(not std::get<0>(lg.advance(true))) break;
     }
 
     if(out->sequence_get().empty() or out->sequence_get()[0] == '>')

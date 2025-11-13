@@ -125,7 +125,7 @@ class GttlFastQGenerator
     lg.set_line_buffer(nullptr);
     lg.advance();
     lg.set_line_buffer(&out->quality);
-    return lg.advance();
+    return std::get<0>(lg.advance());
   }
 
   void reset()
