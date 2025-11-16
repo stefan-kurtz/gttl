@@ -41,6 +41,7 @@ class GttlMultiseq
   size_t sequences_total_length{0};
   size_t sequences_minimum_length{std::numeric_limits<size_t>::max()};
   size_t sequences_maximum_length{0};
+  const size_t sequence_number_offset{0};
   uint8_t padding_char;
   const bool has_constant_padding_char;
   bool has_reverse_complement;
@@ -280,11 +281,13 @@ class GttlMultiseq
                     zip_readpair_files);
   }
 
-  GttlMultiseq(bool store_sequence, uint8_t _padding_char)
-    : padding_char(_padding_char)
+  GttlMultiseq(bool store_sequence, uint8_t _padding_char,
+               size_t _sequence_number_offset = 0, bool _has_read_pairs = false)
+    : sequence_number_offset(_sequence_number_offset)
+    , padding_char(_padding_char)
     , has_constant_padding_char(true)
     , has_reverse_complement(false)
-    , has_read_pairs(false)
+    , has_read_pairs(_has_read_pairs)
   {
     if (store_sequence)
     {
@@ -384,6 +387,18 @@ class GttlMultiseq
   [[nodiscard]] bool has_read_pairs_is_set(void) const noexcept
   {
     return has_read_pairs;
+  }
+
+  [[nodiscard]] size_t sequence_number_offset_get(void) const noexcept
+  {
+    if (has_read_pairs_is_set())
+    {
+      assert(sequence_number_offset % 2 == 0);
+      return sequence_number_offset/2;
+    } else
+    {
+      return sequence_number_offset;
+    }
   }
 
   /* Give the length of sequence seqnum EXCLUDING padding symbol at the end */

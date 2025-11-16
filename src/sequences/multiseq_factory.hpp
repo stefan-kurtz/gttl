@@ -20,7 +20,6 @@ class GttlMultiseqFactory
   std::vector<GttlMultiseq *> multiseq_vector;
   std::vector<size_t> seqnum_offset_vector;
   size_t num_sequences;
-  bool fastq_paired_input;
   [[nodiscard]] size_t
   fastq_file_total_length_get(const std::string &inputfile) const
   {
@@ -41,10 +40,11 @@ class GttlMultiseqFactory
                       uint8_t padding_char,
                       bool short_header)
     : num_sequences(_num_sequences)
-    , fastq_paired_input(true)
   {
+    constexpr const bool has_read_pairs = true;
     GttlMultiseq *multiseq
-      = new GttlMultiseq(store_sequence, padding_char);/*CONSTRUCTOR */
+      = new GttlMultiseq(store_sequence, padding_char, 0,
+                         has_read_pairs);/*CONSTRUCTOR */
     if (num_parts > 0)
     {
       const size_t sequences_total_length
@@ -53,14 +53,9 @@ class GttlMultiseqFactory
       assert(len_parts == 0);
       len_parts = sequences_total_length/num_parts;
     }
-    size_t number_of_units_in_split;
-    if (len_parts > 0)
-    {
-      number_of_units_in_split = len_parts; /*total length of seq. in parts*/
-    } else
-    {
-      number_of_units_in_split = num_sequences;
-    }
+    const size_t number_of_units_in_split
+      = len_parts > 0 ? len_parts /*total length of seq. in parts*/
+                      : num_sequences;
     size_t seqnum = 0;
     size_t current_part_number_of_units = 0;
     GttlFastQGenerator<buf_size> fastq_it0(fastq_file0.c_str());
@@ -96,7 +91,8 @@ class GttlMultiseqFactory
             seqnum_offset_vector.push_back(seqnum);
           }
           multiseq = new GttlMultiseq(store_sequence,
-                                      padding_char); /* CONSTRUCTOR */
+                                      padding_char, seqnum,
+                                      has_read_pairs); /* CONSTRUCTOR */
           auto sequence0 = (*it0)->sequence_get();
           multiseq->append((*it0)->header_get(),sequence0,
                            store_header,store_sequence,padding_char);
@@ -137,13 +133,14 @@ class GttlMultiseqFactory
                       uint8_t padding_char,
                       bool short_header)
     : num_sequences(_num_sequences)
-    , fastq_paired_input(false)
   {
+    constexpr const bool has_read_pairs = false;
     constexpr const int buf_size = 1 << 14;
     GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());
 
     GttlMultiseq *multiseq
-      = new GttlMultiseq(store_sequence, padding_char); /* CONSTRUCTOR */
+      = new GttlMultiseq(store_sequence, padding_char, 0,
+                         has_read_pairs); /* CONSTRUCTOR */
     if (num_parts > 0)
     {
       GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());
@@ -155,14 +152,9 @@ class GttlMultiseqFactory
       assert(len_parts == 0);
       len_parts = sequences_total_length/num_parts;
     }
-    size_t number_of_units_in_split;
-    if (len_parts > 0)
-    {
-      number_of_units_in_split = len_parts; /*total length of seq. in parts*/
-    } else
-    {
-      number_of_units_in_split = num_sequences;
-    }
+    const size_t number_of_units_in_split
+       = len_parts > 0 ? len_parts   /*total length of seq. in parts*/
+                       : num_sequences;
     size_t seqnum = 0;
     size_t current_part_number_of_units = 0;
     for (const auto *si : fasta_it)
@@ -190,7 +182,8 @@ class GttlMultiseqFactory
             seqnum_offset_vector.push_back(seqnum);
           }
           multiseq = new GttlMultiseq(store_sequence,
-                                      padding_char); /* CONSTRUCTOR */
+                                      padding_char, seqnum,
+                                      has_read_pairs); /* CONSTRUCTOR */
           multiseq->append(si->header_get(),si->sequence_get(),
                            store_header,store_sequence,padding_char);
           current_part_number_of_units
@@ -217,6 +210,7 @@ class GttlMultiseqFactory
       }
     }
   }
+
   ~GttlMultiseqFactory(void)
   {
     for (auto &&ms : multiseq_vector)
@@ -236,15 +230,18 @@ class GttlMultiseqFactory
       assert(num_sequences > 0);
       sequence_number_offset = idx * num_sequences;
     }
+    if (multiseq_vector[idx]->has_read_pairs_is_set())
+    {
+      assert(sequence_number_offset % 2 == 0);
+      sequence_number_offset /= 2;
+    }
+    assert(multiseq_vector[idx]->sequence_number_offset_get() ==
+           sequence_number_offset);
     return std::make_pair(multiseq_vector[idx],sequence_number_offset);
   }
   [[nodiscard]] size_t size(void) const noexcept
   {
     return multiseq_vector.size();
-  }
-  [[nodiscard]] bool is_fastq_paired_input(void) const noexcept
-  {
-    return fastq_paired_input;
   }
   void statistics(void) const noexcept
   {
