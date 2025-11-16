@@ -124,7 +124,7 @@ class GttlFastQGenerator
     if (out == nullptr)
     {
       lg.set_line_buffer(nullptr);
-      for(size_t line = 0; line < 4; line++)
+      for(size_t line = 0; line < size_t(4); line++)
       {
         lg.advance();
       }

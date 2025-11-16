@@ -57,9 +57,9 @@ static void fastq_split_writer(size_t split_size,
                                const std::string &inputfilename)
 {
   constexpr const int buf_size = 1 << 14;
-  GttlFastQGenerator<buf_size> fastq_it(inputfilename.c_str());
+  GttlFastQGenerator<buf_size> fastq_gen(inputfilename.c_str());
   int file_number = 0;
-  auto it = fastq_it.begin();
+  auto it = fastq_gen.begin();
   bool exhausted = false;
   auto inputfile_basename_str{std::filesystem::path(inputfilename).filename()
                                                                   .string()};
@@ -68,7 +68,7 @@ static void fastq_split_writer(size_t split_size,
                                inputfile_basename_str.c_str());
   while (!exhausted)
   {
-    if (it == fastq_it.end())
+    if (it == fastq_gen.end())
     {
       break;
     }
@@ -79,7 +79,7 @@ static void fastq_split_writer(size_t split_size,
     out_stream.open(outfilename.str());
     for (size_t idx = 0; idx < split_size; idx++)
     {
-      if (it == fastq_it.end())
+      if (it == fastq_gen.end())
       {
         exhausted = true;
         break;
@@ -98,12 +98,12 @@ static void fastq_split_writer(size_t split_size,
 }
 
 template<class FastQGenerator>
-static void process_fastq_iter(bool statistics,
-                               bool echo,
-                               size_t fasta_output,
-                               hash_mode_type hash_mode,
-                               const std::string &inputfilename,
-                               FastQGenerator &fastq_it)
+static void process_fastq_generator(bool statistics,
+                                    bool echo,
+                                    size_t fasta_output,
+                                    hash_mode_type hash_mode,
+                                    const std::string &inputfilename,
+                                    FastQGenerator &fastq_gen)
 {
   size_t seqnum = 0;
   size_t total_length = 0;
@@ -111,7 +111,7 @@ static void process_fastq_iter(bool statistics,
   size_t max_length = 0;;
   uint64_t hash_value_sum = 0;
   std::map<size_t,size_t> length_dist_map;
-  for (const auto *fastq_entry : fastq_it)
+  for (const auto *fastq_entry : fastq_gen)
   {
     const std::string_view &sequence = fastq_entry->sequence_get();
     if (statistics)
@@ -209,9 +209,9 @@ static void process_single_file_streamed(bool statistics,
 {
   constexpr const int buf_size = 1 << 14;
   using FastQGenerator = GttlFastQGenerator<buf_size>;
-  FastQGenerator fastq_it(inputfilename.c_str());
-  process_fastq_iter<FastQGenerator>(statistics,echo,fasta_output,hash_mode,
-                                    inputfilename,fastq_it);
+  FastQGenerator fastq_gen(inputfilename.c_str());
+  process_fastq_generator<FastQGenerator>(statistics,echo,fasta_output,
+                                          hash_mode, inputfilename,fastq_gen);
 }
 
 static void process_single_file_mapped(bool statistics,
@@ -223,9 +223,9 @@ static void process_single_file_mapped(bool statistics,
   constexpr const int buf_size = 1 << 14;
   const Gttlmmap<char> mapped_file(inputfilename.c_str());
   using FastQGenerator = GttlFastQGenerator<buf_size>;
-  FastQGenerator fastq_it(mapped_file.ptr(), mapped_file.size());
-  process_fastq_iter<FastQGenerator>(statistics,echo,fasta_output,hash_mode,
-                                    inputfilename,fastq_it);
+  FastQGenerator fastq_gen(mapped_file.ptr(), mapped_file.size());
+  process_fastq_generator<FastQGenerator>(statistics,echo,fasta_output,
+                                          hash_mode,inputfilename,fastq_gen);
 }
 
 static void process_paired_files(bool statistics,
@@ -235,14 +235,14 @@ static void process_paired_files(bool statistics,
 {
   constexpr const int buf_size = 1 << 14;
   using FastQGenerator = GttlFastQGenerator<buf_size>;
-  FastQGenerator fastq_it0(filename0.c_str());
-  FastQGenerator fastq_it1(filename1.c_str());
+  FastQGenerator fastq_gen0(filename0.c_str());
+  FastQGenerator fastq_gen1(filename1.c_str());
 
   size_t seqnum = 0;
   size_t total_length[2] = {0};
-  auto it0 = fastq_it0.begin();
-  auto it1 = fastq_it1.begin();
-  while (it0 != fastq_it0.end() && it1 != fastq_it1.end())
+  auto it0 = fastq_gen0.begin();
+  auto it1 = fastq_gen1.begin();
+  while (it0 != fastq_gen0.end() && it1 != fastq_gen1.end())
   {
     const std::string_view &sequence0 = (*it0)->sequence_get();
     const std::string_view &sequence1 = (*it1)->sequence_get();
@@ -278,10 +278,10 @@ static void char_distribution_seq(const std::string &inputfilename)
     /* check_err.py checked */
   }
   constexpr const int buf_size = 1 << 14;
-  GttlFastQGenerator<buf_size> fastq_it(in_fp);
+  GttlFastQGenerator<buf_size> fastq_gen(in_fp);
   size_t dist[4] = {0};
   size_t count_entries = 0;
-  for (const auto *fastq_entry : fastq_it)
+  for (const auto *fastq_entry : fastq_gen)
   {
     count_entries++;
     const std::string_view &sequence = fastq_entry->sequence_get();
@@ -309,15 +309,15 @@ static void char_distribution_thd_gz(size_t num_threads,
   }
   constexpr const int buf_size = 1 << 12;
   using BufferedFastQIter = GttlFastQGenerator<buf_size>;
-  BufferedFastQIter fastq_it(in_fp);
+  BufferedFastQIter fastq_gen(in_fp);
   size_t *dist = static_cast<size_t *>(calloc(4 * (num_threads-1),
                                               sizeof *dist));
   std::vector<std::thread> threads{};
   ThreadsafeQueue<std::string> sequence_queue;
-  threads.push_back(std::thread([&sequence_queue, &fastq_it]
+  threads.push_back(std::thread([&sequence_queue, &fastq_gen]
   {
     size_t count_entries = 0;
-    for (const auto *fastq_entry : fastq_it)
+    for (const auto *fastq_entry : fastq_gen)
     {
       count_entries++;
       const std::string_view &seq_view = fastq_entry->sequence_get();
@@ -393,10 +393,10 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
     threads.push_back(std::thread([&sequences_split, count_entries,dist,thd_num]
     {
       const std::string_view &this_view = sequences_split[thd_num];
-      GttlFastQGenerator<16384> fastq_it(this_view.data(), this_view.size());
+      GttlFastQGenerator<16384> fastq_gen(this_view.data(), this_view.size());
       size_t local_count_entries = 0;
       size_t *const local_dist   = dist + 4 * thd_num;
-      for (const auto *fastq_entry : fastq_it)
+      for (const auto *fastq_entry : fastq_gen)
       {
         local_count_entries++;
         const std::string_view &sequence = fastq_entry->sequence_get();
