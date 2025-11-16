@@ -60,9 +60,7 @@ class GttlFastQGenerator
                               bool _is_end = false)
     : out(&default_buffer)
     , is_end(_is_end)
-    , lg(gttl_fp_type_open(file_name, "rb")
-    , &(out->header)
-    , _is_end)
+    , lg(gttl_fp_type_open(file_name, "rb"), &(out->header), _is_end)
   { }
 
   explicit GttlFastQGenerator(GttlFpType fp,
@@ -75,17 +73,17 @@ class GttlFastQGenerator
   explicit GttlFastQGenerator(const char* file_name,
                               GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
-    : lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
-    , out(_out)
+    : out(_out)
     , is_end(_is_end)
+    , lg(gttl_fp_type_open(file_name, "rb"), _out->header, _is_end)
   { }
 
   explicit GttlFastQGenerator(GttlFpType fp,
                               GttlFastQEntry<buf_size> *_out,
                               bool _is_end = false)
-    : lg(fp, _out->header, _is_end)
-    , out(_out)
+    : out(_out)
     , is_end(_is_end)
+    , lg(fp, _out->header, _is_end)
   { }
 
   explicit GttlFastQGenerator(const char* _input_string,
@@ -216,6 +214,11 @@ class GttlFastQGenerator
   Iterator end(void)
   {
     return Iterator(this, true);
+  }
+
+  Iterator null_iterator(void)
+  {
+    return Iterator(nullptr);
   }
 };
 #endif  // GTTL_FASTQ_GENERATOR_HPP
