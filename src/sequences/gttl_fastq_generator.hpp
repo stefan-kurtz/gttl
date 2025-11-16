@@ -218,7 +218,7 @@ class GttlFastQGenerator
 
   Iterator null_iterator(void)
   {
-    return Iterator(nullptr);
+    return Iterator(nullptr, true);
   }
 };
 #endif  // GTTL_FASTQ_GENERATOR_HPP
