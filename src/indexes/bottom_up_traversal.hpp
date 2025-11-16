@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <climits>
+#include <limits>
 #include <iostream>
 
 /* This file implements the essence of the bottom up traversal, independent
@@ -32,14 +32,14 @@ class BottomUpTraversalStack
   {
     if (nextfree >= allocated)
     {
-      size_t previously_allocated = allocated;
+      const size_t previously_allocated = allocated;
       allocated = (allocated * 1.2) + 32;
       space = static_cast<Basetype *>(realloc(space,allocated * sizeof *space));
       for (size_t idx = previously_allocated; idx < allocated; idx++)
       {
         space[idx].lcp = 0;
         space[idx].lb = 0;
-        space[idx].rb = ULONG_MAX;
+        space[idx].rb = std::numeric_limits<size_t>::max();
       }
     }
     space[nextfree].lcp = lcp;

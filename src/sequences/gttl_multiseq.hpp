@@ -17,7 +17,7 @@
 #include <map>
 #include <tuple>
 #include <algorithm>
-#include <climits>
+#include <limits>
 #include <cstdio>
 
 #include "sequences/gttl_fasta_generator.hpp"
@@ -40,7 +40,7 @@ class GttlMultiseq
   size_t header_total_length{0},
          sequences_number{0},
          sequences_total_length{0},
-         sequences_minimum_length{ULONG_MAX},
+         sequences_minimum_length{std::numeric_limits<size_t>::max()},
          sequences_maximum_length{0};
   uint8_t padding_char;
   bool constant_padding_char,
