@@ -7,16 +7,8 @@
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <type_traits>
-#include "sequences/gttl_fastq_generator.hpp"
 #include "threading/thread_pool_unknown_tasks.hpp"
 #include "utilities/write_output_file.hpp"
-
-template <class T>
-struct is_fastq_generator : std::false_type {};
-
-template <size_t buf_size>
-struct is_fastq_generator<GttlFastQGenerator<buf_size>> : std::true_type {};
 
 /*
 ** Split a FastQGenerator or FastAGenerator into fragments of a given length (of
@@ -29,32 +21,41 @@ struct is_fastq_generator<GttlFastQGenerator<buf_size>> : std::true_type {};
 ** This is because any non-empty sequence will always be longer than 0
 ** characters.
 */
-template <class SequenceIterator>
-void split_into_parts_length(SequenceIterator &seq_it,
+template <class SequenceGeneratorClass>
+void split_into_parts_length(SequenceGeneratorClass &seq_gen,
                              const std::string &base_name,
-                             const size_t part_length,
-                             const size_t compression_level,
-                             const size_t n_threads,
-                             const size_t padding_length = 2)
+                             size_t part_length,
+                             size_t compression_level,
+                             size_t n_threads,
+                             size_t padding_length = 2)
 {
   size_t part_number = 1;
   size_t length_iterated = 0;
   std::ostringstream s_out;
   ThreadPoolUnknownTasks<std::function<void()>> tp =
     ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
+  const std::string output_file_suffix{SequenceGeneratorClass::
+                                         is_fastq_generator ? ".fastq"
+                                                            : ".fasta"};
 
-  for (auto &&si : seq_it)
+  for (const auto *si : seq_gen)
   {
     const std::string_view &sequence = si->sequence_get();
     const std::string_view &header = si->header_get();
 
-    s_out << (is_fastq_generator<SequenceIterator>::value ? "@" : ">")
-          << header << "\n" << sequence << "\n";
+    if constexpr (SequenceGeneratorClass::is_fastq_generator)
+    {
+      s_out << "@";
+    } else
+    {
+      s_out << ">";
+    }
+    s_out << header << '\n' << sequence << '\n';
 
-    if constexpr (is_fastq_generator<SequenceIterator>::value)
+    if constexpr (SequenceGeneratorClass::is_fastq_generator)
     {
       const std::string_view &quality = si->quality_get();
-      s_out << "+\n" << quality << "\n";
+      s_out << "+\n" << quality << '\n';
     }
 
     length_iterated += sequence.size();
@@ -68,12 +69,11 @@ void split_into_parts_length(SequenceIterator &seq_it,
                         ? "0"
                         : "");
       }
-      fname_out += std::to_string(part_number) +
-          (seq_it.is_fastq_generator ? ".fastq" : ".fasta");
-      if(n_threads == 1)
+      fname_out += std::to_string(part_number) + output_file_suffix;
+      if (n_threads == 1)
       {
         write_to_output_file(fname_out, s_out.str(), compression_level);
-      }else
+      } else
       {
         tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
           write_to_output_file(fname_out, capture0, compression_level);
@@ -85,7 +85,7 @@ void split_into_parts_length(SequenceIterator &seq_it,
       part_number++;
     }
   }
-  if (!s_out.str().empty())
+  if (not s_out.str().empty())
   {
     std::string fname_out = base_name;
     for(size_t i = 1; i <= padding_length; i++)
@@ -94,12 +94,12 @@ void split_into_parts_length(SequenceIterator &seq_it,
                     ? "0"
                     : "");
     }
-    fname_out += std::to_string(part_number) +
-                (seq_it.is_fastq_generator ? ".fastq" : ".fasta");
-    if(n_threads == 1)
+    fname_out += std::to_string(part_number) + output_file_suffix;
+    if (n_threads == 1)
     {
       write_to_output_file(fname_out, s_out.str(), compression_level);
-    }else{
+    } else
+    {
       tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
         write_to_output_file(fname_out, capture0, compression_level);
       });
@@ -111,29 +111,40 @@ void split_into_parts_length(SequenceIterator &seq_it,
 ** Split a FastQGenerator or FastAGenerator into fragments of a given number of
 ** sequences each.
 */
-template <class SequenceIterator>
-void split_into_num_sequences(SequenceIterator &seq_it,
+template <class SequenceGeneratorClass>
+void split_into_num_sequences(SequenceGeneratorClass &seq_gen,
                               const std::string &base_name,
-                              size_t seqs_per_file, size_t compression_level,
-                              const size_t n_threads)
+                              size_t seqs_per_file,
+                              size_t compression_level,
+                              size_t n_threads)
 {
   ThreadPoolUnknownTasks<std::function<void()>> tp =
     ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
   size_t part_number = 1;
   size_t seqs_iterated = 0;
+  const std::string output_file_suffix{SequenceGeneratorClass::
+                                         is_fastq_generator ? ".fastq"
+                                                            : ".fasta"};
   std::ostringstream s_out;
-  for (auto &&si : seq_it)
+  for (const auto *si : seq_gen)
   {
     const std::string_view &sequence = si->sequence_get();
     const std::string_view &header = si->header_get();
 
-    s_out << (is_fastq_generator<SequenceIterator>::value ? "@" : ">")
-          << header << "\n" << sequence << "\n";
+    if constexpr (SequenceGeneratorClass::is_fastq_generator)
+    {
+      s_out << "@";
+    } else
+    {
+      s_out << ">";
+    }
 
-    if constexpr (is_fastq_generator<SequenceIterator>::value)
+    s_out << header << '\n' << sequence << '\n';
+
+    if constexpr (SequenceGeneratorClass::is_fastq_generator)
     {
       const std::string_view &quality = si->quality_get();
-      s_out << "+\n" << quality << "\n";
+      s_out << "+\n" << quality << '\n';
     }
 
     seqs_iterated++;
@@ -142,12 +153,12 @@ void split_into_num_sequences(SequenceIterator &seq_it,
     {
       const std::string fname_out = base_name + (part_number <= 9 ? "0" : "")
                                    + std::to_string(part_number)
-                                   + (seq_it.is_fastq_generator ? ".fastq" :
-                                                                  ".fasta");
-      if(n_threads == 1)
+                                   + output_file_suffix;
+      if (n_threads == 1)
       {
         write_to_output_file(fname_out, s_out.str(), compression_level);
-      }else{
+      } else
+      {
         tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
           write_to_output_file(fname_out, capture0, compression_level);
         });
@@ -158,16 +169,15 @@ void split_into_num_sequences(SequenceIterator &seq_it,
       part_number++;
     }
   }
-  if (!s_out.str().empty())
+  if (not s_out.str().empty())
   {
     const std::string fname_out = base_name + (part_number <= 9 ? "0" : "")
                                  + std::to_string(part_number)
-                                 + (seq_it.is_fastq_generator ? ".fastq" :
-                                                                ".fasta");
-    if(n_threads == 1)
+                                 + output_file_suffix;
+    if (n_threads == 1)
     {
       write_to_output_file(fname_out, s_out.str(), compression_level);
-    }else
+    } else
     {
       tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
         write_to_output_file(fname_out, capture0, compression_level);
@@ -182,20 +192,22 @@ void split_into_num_sequences(SequenceIterator &seq_it,
 ** over the entire input file once and determine total sequence length and thus
 ** the necessary length of each sequence part.
 */
-template <class SequenceIterator>
-void split_into_num_files(SequenceIterator &seq_it,
-                          const std::string &base_name, size_t part_num,
-                          size_t compression_level, const size_t n_threads)
+template <class SequenceGeneratorClass>
+void split_into_num_files(SequenceGeneratorClass &seq_gen,
+                          const std::string &base_name,
+                          size_t part_num,
+                          size_t compression_level,
+                          size_t n_threads)
 {
   size_t total_length = 0;
-  for (auto &&si : seq_it)
+  for (const auto *si : seq_gen)
   {
     total_length += si->sequence_get().size();
   }
-  const size_t part_len =
-    (total_length / part_num) + size_t{total_length % part_num != 0};
-  seq_it.reset();
-  split_into_parts_length(seq_it, base_name, part_len, compression_level,
+  assert(part_num > 0);
+  const size_t part_len = (total_length + part_num - 1)/ part_num;
+  seq_gen.reset();
+  split_into_parts_length(seq_gen, base_name, part_len, compression_level,
                           n_threads, static_cast<size_t>(std::log10(part_num)));
 }
 
