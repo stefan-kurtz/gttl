@@ -18,7 +18,6 @@ class GttlMultiseqFactory
   static constexpr const bool store_sequence = true;
   static constexpr const int buf_size = 1 << 14;
   std::vector<GttlMultiseq *> multiseq_vector;
-  std::vector<size_t> seqnum_offset_vector;
   size_t num_sequences;
   [[nodiscard]] size_t
   fastq_file_total_length_get(const std::string &inputfile) const
@@ -86,10 +85,6 @@ class GttlMultiseqFactory
             multiseq->short_header_cache_create<'|','|'>();
           }
           multiseq_vector.push_back(multiseq);
-          if (len_parts > 0)
-          {
-            seqnum_offset_vector.push_back(seqnum);
-          }
           multiseq = new GttlMultiseq(store_sequence,
                                       padding_char, seqnum,
                                       has_read_pairs); /* CONSTRUCTOR */
@@ -120,10 +115,6 @@ class GttlMultiseqFactory
         multiseq->short_header_cache_create<'|','|'>();
       }
       multiseq_vector.push_back(multiseq);
-      if (len_parts > 0)
-      {
-        seqnum_offset_vector.push_back(seqnum);
-      }
     }
   }
   GttlMultiseqFactory(const std::string &inputfile,
@@ -177,10 +168,6 @@ class GttlMultiseqFactory
             multiseq->short_header_cache_create<'|','|'>();
           }
           multiseq_vector.push_back(multiseq);
-          if (len_parts > 0)
-          {
-            seqnum_offset_vector.push_back(seqnum);
-          }
           multiseq = new GttlMultiseq(store_sequence,
                                       padding_char, seqnum,
                                       has_read_pairs); /* CONSTRUCTOR */
@@ -204,10 +191,6 @@ class GttlMultiseqFactory
         multiseq->short_header_cache_create<'|','|'>();
       }
       multiseq_vector.push_back(multiseq);
-      if (len_parts > 0)
-      {
-        seqnum_offset_vector.push_back(seqnum);
-      }
     }
   }
 
@@ -218,26 +201,9 @@ class GttlMultiseqFactory
       delete ms;
     }
   }
-  [[nodiscard]] std::pair<GttlMultiseq *, size_t> at(size_t idx) const noexcept
+  [[nodiscard]] GttlMultiseq * at(size_t idx) const noexcept
   {
-    assert(idx < multiseq_vector.size());
-    size_t sequence_number_offset;
-    if (seqnum_offset_vector.size() > 0)
-    {
-      sequence_number_offset = idx == 0 ? 0 : seqnum_offset_vector[idx-1];
-    } else
-    {
-      assert(num_sequences > 0);
-      sequence_number_offset = idx * num_sequences;
-    }
-    if (multiseq_vector[idx]->has_read_pairs_is_set())
-    {
-      assert(sequence_number_offset % 2 == 0);
-      sequence_number_offset /= 2;
-    }
-    assert(multiseq_vector[idx]->sequence_number_offset_get() ==
-           sequence_number_offset);
-    return std::make_pair(multiseq_vector[idx],sequence_number_offset);
+    return multiseq_vector[idx];
   }
   [[nodiscard]] size_t size(void) const noexcept
   {
