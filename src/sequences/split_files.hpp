@@ -32,8 +32,7 @@ void split_into_parts_length(SequenceGeneratorClass &seq_gen,
   size_t part_number = 1;
   size_t length_iterated = 0;
   std::ostringstream s_out;
-  ThreadPoolUnknownTasks<std::function<void()>> tp =
-    ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
+  ThreadPoolUnknownTasks<void, void> tp(n_threads);
   const std::string output_file_suffix{SequenceGeneratorClass::
                                          is_fastq_generator ? ".fastq"
                                                             : ".fasta"};
@@ -118,8 +117,7 @@ void split_into_num_sequences(SequenceGeneratorClass &seq_gen,
                               size_t compression_level,
                               size_t n_threads)
 {
-  ThreadPoolUnknownTasks<std::function<void()>> tp =
-    ThreadPoolUnknownTasks<std::function<void()>>(n_threads);
+  ThreadPoolUnknownTasks<void,void> tp(n_threads);
   size_t part_number = 1;
   size_t seqs_iterated = 0;
   const std::string output_file_suffix{SequenceGeneratorClass::

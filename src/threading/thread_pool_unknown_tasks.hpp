@@ -7,12 +7,14 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <type_traits>
 #include "threading/threadsafe_queue.hpp"
 
-template <class FunctionType>
+template<class CollectorClass, class ResultType>
 class ThreadPoolUnknownTasks
 {
   private:
+  using FunctionType = std::function<ResultType()>;
   std::vector<std::thread> threads;
   ThreadsafeQueue<FunctionType> tsq;
   std::mutex queue_lock;
@@ -20,12 +22,12 @@ class ThreadPoolUnknownTasks
   std::atomic<bool> stop{false};
   public:
   explicit ThreadPoolUnknownTasks(size_t num_threads
-                                    = std::thread::hardware_concurrency())
-   : stop(false)
+                                    = std::thread::hardware_concurrency(),
+                                  CollectorClass *collector = nullptr)
   {
     for (size_t td_idx = 0; td_idx < num_threads; td_idx++)
     {
-      threads.emplace_back([this]
+      threads.emplace_back([this, collector, td_idx]
       {
         while (true)
         {
@@ -42,7 +44,14 @@ class ThreadPoolUnknownTasks
             }
             task = *(tsq.dequeue());
           }
-          task();
+          if constexpr (std::is_void_v<CollectorClass>)
+          {
+            task();
+          } else
+          {
+            assert(collector != nullptr);
+            collector->add(td_idx, task());
+          }
         }
       });
     }
@@ -62,6 +71,11 @@ class ThreadPoolUnknownTasks
   {
     tsq.enqueue(task);
     tasks_changed.notify_one();
+  }
+
+  size_t size_of_queue(void) const
+  {
+    return tsq.size();
   }
 };
 
