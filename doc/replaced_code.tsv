@@ -1,1 +1,2 @@
 gttl_required_bits	#include <bit>	 std::bit_width
+GttlBasename	std::filesystem::path(pathstring).filename()
