@@ -27,33 +27,52 @@ class ThreadPoolUnknownTasks
   {
     for (size_t td_idx = 0; td_idx < num_threads; td_idx++)
     {
-      threads.emplace_back([this, collector, td_idx]
+      if constexpr (std::is_void_v<CollectorClass>)
       {
-        while (true)
+        threads.emplace_back([this]
         {
-          FunctionType task;
+          while (true)
           {
-            std::unique_lock<std::mutex> lock(queue_lock);
-            tasks_changed.wait(lock, [this]
+            FunctionType task;
             {
-              return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
-            });
-            if (stop and tsq.size() == 0)
-            {
-              return;
+              std::unique_lock<std::mutex> lock(queue_lock);
+              tasks_changed.wait(lock, [this]
+              {
+                return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
+              });
+              if (stop and tsq.size() == 0)
+              {
+                return;
+              }
+              task = *(tsq.dequeue());
             }
-            task = *(tsq.dequeue());
-          }
-          if constexpr (std::is_void_v<CollectorClass>)
-          {
             task();
-          } else
+          }
+        });
+      } else
+      {
+        threads.emplace_back([this, collector, td_idx]
+        {
+          while (true)
           {
+            FunctionType task;
+            {
+              std::unique_lock<std::mutex> lock(queue_lock);
+              tasks_changed.wait(lock, [this]
+              {
+                return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
+              });
+              if (stop and tsq.size() == 0)
+              {
+                return;
+              }
+              task = *(tsq.dequeue());
+            }
             assert(collector != nullptr);
             collector->add(td_idx, task());
           }
-        }
-      });
+        });
+      }
     }
   }
 

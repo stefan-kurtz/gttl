@@ -182,12 +182,19 @@ static void test_multiseq_factory(size_t num_parts,
   {
     multiseq_factory->sequence_output(sequence_output_width);
   }
+  size_t seqnum = 0;
   for (size_t part_idx = 0; part_idx < multiseq_factory->size(); part_idx++)
   {
-    GttlMultiseq *query_multiseq;
-    size_t query_seqnum_offset = 0;
-    std::tie(query_multiseq,query_seqnum_offset)
-      = multiseq_factory->at(part_idx);
+    const GttlMultiseq *query_multiseq = multiseq_factory->at(part_idx);
+    size_t query_seqnum_offset;
+    if (query_multiseq->has_read_pairs_is_set())
+    {
+      assert(seqnum % 2 == 0);
+      query_seqnum_offset = seqnum/2;
+    } else
+    {
+      query_seqnum_offset = seqnum;
+    }
     if (query_seqnum_offset != query_multiseq->sequence_number_offset_get())
     {
       std::cerr << "# part_idx=" << part_idx
@@ -196,6 +203,7 @@ static void test_multiseq_factory(size_t num_parts,
                 << " = sequence_number_offset_get()" << '\n';
       exit(EXIT_FAILURE);
     }
+    seqnum += query_multiseq->sequences_number_get();
   }
   delete multiseq_factory;
 }
