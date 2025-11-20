@@ -288,12 +288,14 @@ int main(int argc,char *argv[])
   }
   RunTimeClass timer{};
 
-  GttlMultiseq *db_multiseq = nullptr;
-  GttlMultiseq *query_multiseq = nullptr;
+  const GttlMultiseq *db_multiseq = nullptr;
+  const GttlMultiseq *query_multiseq = nullptr;
   bool dna_alphabet = false;
+  // NOLINTNEXTLINE(misc-const-correctness)
   int8_t **scorematrix2D = nullptr;
   int8_t smallest_score = INT8_MAX;
   size_t alphasize = 0;
+  // NOLINTNEXTLINE(misc-const-correctness)
   BlastStatistics *blast_statistics = nullptr;
 
   if (!haserr)

@@ -62,6 +62,7 @@ class ThreadsOutputFiles
                             separator,
                             t_idx);
       output_filenames.push_back(fname.str());
+      // NOLINTNEXTLINE(misc-const-correctness)
       FILE *const out_fp = std::fopen(fname.str().c_str(), "w");
       if (out_fp == nullptr)
       {

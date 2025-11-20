@@ -269,7 +269,7 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
   {
     /* Trace the column with the max alignment score for the ending
        position on query. */
-    uint{{ width }}_t *ptr = reinterpret_cast<uint{{ width }}_t*>(pvHmax);
+    const uint{{ width }}_t *ptr = reinterpret_cast<uint{{ width }}_t*>(pvHmax);
     const size_t column_len = segment_len * simd_size;
     for (size_t i = 0; GTTL_IS_LIKELY(i < column_len); ++i, ++ptr)
     {

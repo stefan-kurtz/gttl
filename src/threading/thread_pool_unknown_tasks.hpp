@@ -4,6 +4,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <cstddef>
+#include <functional>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -92,7 +93,7 @@ class ThreadPoolUnknownTasks
     tasks_changed.notify_one();
   }
 
-  size_t size_of_queue(void) const
+  [[nodiscard]] size_t size_of_queue(void) const
   {
     return tsq.size();
   }

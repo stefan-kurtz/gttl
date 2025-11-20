@@ -60,7 +60,8 @@ void run_nt_minimizer(const MinimizerOptions &options)
   constexpr const bool store_header = true;
   constexpr const bool store_sequence = true;
   constexpr const uint8_t padding_char = UINT8_MAX;
-  GttlMultiseq *multiseq = gttl_inputfiles_multiseq(options.inputfiles_get(),
+  const GttlMultiseq *multiseq = gttl_inputfiles_multiseq(
+                                                    options.inputfiles_get(),
                                                     store_header,
                                                     store_sequence,
                                                     padding_char,

@@ -3,6 +3,7 @@
 
 #include "utilities/gttl_file_open.hpp"
 #include "utilities/gttl_line_generator.hpp"
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <ios>

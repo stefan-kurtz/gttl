@@ -14,6 +14,7 @@ static inline GttlMultiseq *
                            uint8_t padding_char,
                            bool reverse_complement_option)
 {
+  // NOLINTNEXTLINE(misc-const-correctness)
   GttlMultiseq *multiseq = nullptr;
   try
   {

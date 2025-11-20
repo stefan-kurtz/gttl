@@ -1,9 +1,9 @@
 #ifndef SPLIT_FILES_HPP
 #define SPLIT_FILES_HPP
 
+#include <cassert>
 #include <cstddef>
 #include <cmath>
-#include <functional>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -74,6 +74,9 @@ void split_into_parts_length(SequenceGeneratorClass &seq_gen,
         write_to_output_file(fname_out, s_out.str(), compression_level);
       } else
       {
+        // This is an example of how one might wait until enqueueing would lead
+        // to at most 3 items in the queue
+        // while (tp.get_size() > 2) std::this_thread::sleep_for(std::chrono::milliseconds(100));
         tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
           write_to_output_file(fname_out, capture0, compression_level);
         });
@@ -151,7 +154,7 @@ void split_into_num_sequences(SequenceGeneratorClass &seq_gen,
     {
       const std::string fname_out = base_name + (part_number <= 9 ? "0" : "")
                                    + std::to_string(part_number)
-                                   + output_file_suffix;
+                                    .append(output_file_suffix);
       if (n_threads == 1)
       {
         write_to_output_file(fname_out, s_out.str(), compression_level);

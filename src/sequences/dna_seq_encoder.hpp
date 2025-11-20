@@ -276,6 +276,7 @@ class DNAEncodingForLength
                          (realloc(units,allocated * sizeof *units));
       add_factor *= 1.8;
     }
+    // NOLINTNEXTLINE(misc-const-correctness)
     StoreUnitType *const ptr = units + nextfree;
     nextfree += num_units;
     return ptr;

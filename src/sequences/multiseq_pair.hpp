@@ -14,6 +14,7 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   create_multiseq_pair(const char *dbfile,const char*queryfile)
 {
   GttlMultiseq *db_multiseq                  = nullptr;
+  // NOLINTNEXTLINE(misc-const-correctness)
   GttlMultiseq *query_multiseq               = nullptr;
   bool is_dna_alphabet = false;
   static constexpr const bool store_header = true;

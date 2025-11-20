@@ -275,7 +275,7 @@ static_cast<uint32_t>(abs_smallest_score)
   {
     /* Trace the column with the max alignment score for the ending
        position on query. */
-    uint8_t *ptr            = reinterpret_cast<uint8_t *>(pvHmax);
+    const uint8_t *ptr      = reinterpret_cast<uint8_t *>(pvHmax);
     const size_t column_len = segment_len * simd_size;
     for (size_t i = 0; GTTL_IS_LIKELY(i < column_len); ++i, ++ptr)
     {

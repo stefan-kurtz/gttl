@@ -213,6 +213,7 @@ static inline SimdIntVector ssw_seq_profile(const int8_t *score_vector,
     = SIMD_VECSIZE_INT * 4 / sizeof(Basetype);
   const size_t segment_len = ssw_len2segment_len<Basetype>(seq_len);
   const SimdIntVector vProfile(alphasize * segment_len);
+  // NOLINTNEXTLINE(misc-const-correctness)
   Basetype *ptr = reinterpret_cast<Basetype *>(vProfile.get());
   const int8_t *const score_vector_end = score_vector + alphasize * alphasize;
 

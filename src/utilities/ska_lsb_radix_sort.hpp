@@ -255,14 +255,14 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
 }
 
 template<typename Counttype>
-static Buckets<Counttype> *countingsort_skarupke([[maybe_unused]] int num_bits,
+static const Buckets<Counttype> *countingsort_skarupke([[maybe_unused]] int num_bits,
                                                  int shift,
                                                  uint64_t *array,
                                                  size_t array_len)
 {
   assert(num_bits == first_pass_msb_bits);
   constexpr const size_t num_buckets = size_t(1) << first_pass_msb_bits;
-  Buckets<Counttype> *const buckets  = countingsort_skarupke_it<
+  const Buckets<Counttype> *const buckets  = countingsort_skarupke_it<
                                 Counttype,
                                 uint8_t,
                                 num_buckets,
@@ -307,7 +307,7 @@ static Buckets<Counttype> *countingsort_skarupke_bytes(int sizeof_unit,
 }
 
 template<typename Counttype,typename basetype,int sizeof_unit>
-static std::pair<Buckets<Counttype> *,int> radixsort_ska_template(
+static std::pair<const Buckets<Counttype> *,int> radixsort_ska_template(
                                                    int num_sort_bits,
                                                    int byte_index,
                                                    basetype *array,
@@ -317,7 +317,7 @@ static std::pair<Buckets<Counttype> *,int> radixsort_ska_template(
                                                    bool reversed_byte_order)
 {
   int bits_already_sorted = byte_index * first_pass_msb_bits;
-  Buckets<Counttype> *buckets = nullptr;
+  const Buckets<Counttype> *buckets = nullptr;
   while (true)
   {
     bits_already_sorted += first_pass_msb_bits;
@@ -349,7 +349,7 @@ static std::pair<Buckets<Counttype> *,int> radixsort_ska_template(
 }
 
 template<typename Counttype,typename basetype,int sizeof_unit,class SorterClass>
-static Buckets<Counttype> *radixsort_ska_then_other_generic(
+static const Buckets<Counttype> *radixsort_ska_then_other_generic(
                                                    SorterClass *sorter_instance,
                                                    int num_sort_bits,
                                                    basetype *array,
@@ -368,7 +368,7 @@ static Buckets<Counttype> *radixsort_ska_then_other_generic(
                                        sorter_instance
                                          ->reversed_byte_order_get());
   const int bits_already_sorted = std::get<1>(result);
-  Buckets<Counttype> *const buckets = std::get<0>(result);
+  const Buckets<Counttype> *const buckets = std::get<0>(result);
   if (buckets == nullptr || bits_already_sorted >= num_sort_bits)
   {
     return buckets;
@@ -464,7 +464,7 @@ class LSBbytesSorter
 };
 
 template<typename Counttype>
-static Buckets<Counttype> *ska_lsb_radix_sort(int num_sort_bits,
+static const Buckets<Counttype> *ska_lsb_radix_sort(int num_sort_bits,
                                               uint64_t *array,
                                               size_t array_len)
 {
@@ -556,7 +556,7 @@ static void ska_large_lsb_small_radix_sort_generic(SorterClass *sorter_instance,
     const StackStruct current = stack.back();
     stack.pop_back();
 
-    Buckets<Counttype> *buckets;
+    const Buckets<Counttype> *buckets;
     if constexpr (sizeof_unit == 1)
     {
       static_assert(sizeof(basetype) == 8);

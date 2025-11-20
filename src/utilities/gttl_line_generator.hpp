@@ -4,6 +4,7 @@
 #include "utilities/gttl_file_open.hpp"
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -150,7 +151,7 @@ class GttlLineGenerator
         }
       }
 
-      char* const next_newline
+      const char* const next_newline
         = static_cast<char*>(std::memchr(file_buf_span.data() + file_buf_pos,
                                          '\n',
                                          file_buf_end - file_buf_pos));

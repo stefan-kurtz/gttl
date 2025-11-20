@@ -1,7 +1,6 @@
 #ifndef MULTISEQ_FACTORY_HPP
 #define MULTISEQ_FACTORY_HPP
 #include <cassert>
-#include <utility>
 #include <vector>
 #include <string>
 #include <cstdint>

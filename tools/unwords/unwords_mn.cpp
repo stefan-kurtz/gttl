@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   }
 
   bool haserr = false;
-  Unwords *unwords = nullptr;
+  const Unwords *unwords = nullptr;
   size_t qgram_length_max = 0;
   try
   {

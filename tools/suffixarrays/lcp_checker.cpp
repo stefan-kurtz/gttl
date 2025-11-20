@@ -35,7 +35,7 @@ int main(int argc,char *argv[])
     return EXIT_FAILURE;
   }
   const char *const indexname  = argv[1];
-  GttlSuffixArray *suffixarray = nullptr;
+  const GttlSuffixArray *suffixarray = nullptr;
   RunTimeClass rt_overall{};
   bool haserr = false;
   try

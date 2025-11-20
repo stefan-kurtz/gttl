@@ -115,8 +115,9 @@ class Sainbuffer
     } else
     {
       const size_t fillptr_offset = fillptr[charidx] - 1;
+      // NOLINTNEXTLINE(misc-const-correctness)
       SuftabBaseType *writeptr = suftab + fillptr_offset;
-      SuftabBaseType *readptr = values + offset;
+      const SuftabBaseType *readptr = values + offset;
       const SuftabBaseType *const readend =
                                    readptr + sain_buffer_key_values.buf_size;
 
@@ -139,8 +140,9 @@ class Sainbuffer
 
       if (bufleft > 0)
       {
+        // NOLINTNEXTLINE(misc-const-correctness)
         SuftabBaseType *writeptr = suftab + fillptr[charidx] - 1;
-        SuftabBaseType *readptr = values + (charidx <<
+        const SuftabBaseType *readptr = values + (charidx <<
                                             sain_buffer_key_values.log_bufsize);
         const SuftabBaseType *const readend = readptr + bufleft;
 
@@ -261,6 +263,7 @@ class SuftabResources
       {
         const size_t this_size = needed * sizeof(SuftabBaseType);
         assert(needed > 0);
+        // NOLINTNEXTLINE(misc-const-correctness)
         SuftabBaseType *const ptr = GTTL_TRACK_MALLOC(
                                      SuftabBaseType, this_size);
         vec_subtable.push_back(std::make_pair(ptr,this_size));
@@ -564,6 +567,7 @@ class GttlSainseq
     assert(numofchars == T_alphasize);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     for (size_t suftab_idx = 0; suftab_idx < nonspecialentries; suftab_idx++)
@@ -610,6 +614,7 @@ class GttlSainseq
     assert(numofchars == T_alphasize);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable != nullptr);
@@ -674,6 +679,7 @@ class GttlSainseq
   {
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable == nullptr);
@@ -711,6 +717,7 @@ class GttlSainseq
   {
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable != nullptr);
@@ -869,6 +876,7 @@ class GttlSainseq
     assert(numofchars == T_alphasize);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
     assert(roundtable == nullptr);
     sain_special_singleSinduction1(suftab, static_cast<Sint>(totallength - 1));
@@ -911,6 +919,7 @@ class GttlSainseq
     assert(numofchars == T_alphasize);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable != nullptr);
@@ -972,6 +981,7 @@ class GttlSainseq
     assert(T_alphasize == 0);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable == nullptr);
@@ -1004,6 +1014,7 @@ class GttlSainseq
     assert(T_alphasize == 0);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     assert(roundtable != nullptr);
@@ -1168,6 +1179,7 @@ class GttlSainseq
   void sain_expandorder2original(size_t numberofsuffixes,
                                  SuftabBaseType *suftab)
   {
+    // NOLINTNEXTLINE(misc-const-correctness)
     SuftabBaseType *sstarsuffixes = suftab + 2 * numberofsuffixes;
     size_t nextcc = pos2unique_int(totallength);
     bool nextisStype = true;
@@ -1343,6 +1355,7 @@ class GttlSainseq
     assert(T_alphasize == numofchars);
     SuftabBaseType *const fillptr = bucketfillptr;
     size_t lastupdatecc = 0;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     for (size_t suftab_idx = 0; suftab_idx < nonspecialentries; suftab_idx++)
@@ -1382,6 +1395,7 @@ class GttlSainseq
     assert(T_alphasize == 0);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
     for (size_t suftab_idx = 0; suftab_idx < nonspecialentries; suftab_idx++)
     {
@@ -1447,6 +1461,7 @@ class GttlSainseq
     assert(T_alphasize == 0);
     size_t lastupdatecc = 0;
     SuftabBaseType *const fillptr = bucketfillptr;
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
 
     sain_special_singleSinduction2(suftab, static_cast<Sint>(totallength - 1));
@@ -1489,6 +1504,7 @@ class GttlSainseq
     {
       induceStypes2fromspecialranges(suftab);
     }
+    // NOLINTNEXTLINE(misc-const-correctness)
     Sint *bucketptr = nullptr;
     for (size_t suftab_idx = nonspecialentries; suftab_idx > 0; /* Nothing */)
     {
@@ -2062,7 +2078,7 @@ class GttlSainseq
       {
         /* Now the name sequence is in the range from
           countSstartype .. 2 * countSstartype - 1 */
-        SuftabBaseType *const subseq = suftab + countSstartype;
+        const SuftabBaseType *const subseq = suftab + countSstartype;
 
         /* and we set all what is left of it to undefined */
         sain_set_undefined<true>(suftab, 0, countSstartype - 1);

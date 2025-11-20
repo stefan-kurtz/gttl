@@ -85,6 +85,7 @@ static FILE *outstream_create(const std::string &indexname,
 {
   const std::string outfilename{indexname + filenamesuffix};
 
+  // NOLINTNEXTLINE(misc-const-correctness)
   FILE *const out_fp = fopen(outfilename.c_str(), "wb");
   if (out_fp == nullptr)
   {
@@ -535,7 +536,7 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
               try
               {
                 assert(suftab != nullptr);
-                SainBytesUnit *const bu_suftab = reinterpret_cast<
+                const SainBytesUnit *const bu_suftab = reinterpret_cast<
                                              SainBytesUnit *>(suftab);
                 output_suftab<SainBytesUnit>(bu_suftab, totallength, indexname,
                                              ".bsf");

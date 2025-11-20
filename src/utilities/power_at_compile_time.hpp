@@ -1,6 +1,5 @@
 #ifndef POWER_AT_COMPILE_TIME_HPP
 #define POWER_AT_COMPILE_TIME_HPP
-#include <cstddef>
 #include <cstdint>
 
 template <typename T>

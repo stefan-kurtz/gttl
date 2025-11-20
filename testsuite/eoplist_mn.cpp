@@ -212,7 +212,7 @@ int main(int argc,char *argv[])
       }
       const std::string cigar_string = eoplist.cigar_string_get(
                                    distinguish_mismatch_match);
-      Eoplist *eoplist_decode = nullptr;
+      const Eoplist *eoplist_decode = nullptr;
       try
       {
         eoplist_decode = new Eoplist(distinguish_mismatch_match,cigar_string);

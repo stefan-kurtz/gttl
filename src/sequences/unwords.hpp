@@ -139,11 +139,11 @@ static Unwords *try_if_all_qgrams_occur(size_t qgram_length,
 
 template<class CharRanger, class InvertibleIntcodeIterator,
          bool reverse_complement, class SeqGenerator>
-static Unwords *unwords_binary_search(size_t qgram_length_max,
+static const Unwords *unwords_binary_search(size_t qgram_length_max,
                                       size_t alphabetsize,
                                       SeqGenerator &seq_generator)
 {
-  Unwords *last_successful_unwords = nullptr;
+  const Unwords *last_successful_unwords = nullptr;
   size_t l = 1;
   size_t r = qgram_length_max;
   while (l <= r)
@@ -151,7 +151,7 @@ static Unwords *unwords_binary_search(size_t qgram_length_max,
     const size_t qgram_length = (l+r)/2;
 
     RunTimeClass compute_unwords_runtime{};
-    Unwords *const unwords = try_if_all_qgrams_occur<
+    const Unwords *const unwords = try_if_all_qgrams_occur<
                                  CharRanger,
                                  InvertibleIntcodeIterator,
                                  reverse_complement,
@@ -177,12 +177,12 @@ static constexpr const char_finder::NucleotideFinder unw_nucleotide_finder{};
 static constexpr const char_finder::AminoacidFinder unw_aminoacid_finder{};
 
 template<class SeqGenerator>
-static Unwords *unwords_finder(bool is_protein_sequence,
+static const Unwords *unwords_finder(bool is_protein_sequence,
                                bool reverse_complement,
                                size_t qgram_length_max,
                                SeqGenerator &seq_generator)
 {
-  Unwords *unwords = nullptr;
+  const Unwords *unwords = nullptr;
   if (!is_protein_sequence)
   {
     constexpr_for<0,1+1,1>([&](auto compile_time_reverse_complement)

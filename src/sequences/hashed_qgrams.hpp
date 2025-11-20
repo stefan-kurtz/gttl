@@ -619,7 +619,7 @@ class HashedQgramsGeneric
       RunTimeClass rt_sort{};
       if constexpr (sizeof_unit == 8)
       {
-        Buckets<size_t> *const buckets = ska_lsb_radix_sort<size_t>(
+        const Buckets<size_t> *const buckets = ska_lsb_radix_sort<size_t>(
                                  hashbits,
                                  reinterpret_cast<uint64_t *>(
                                    hashed_qgram_vector.data()),

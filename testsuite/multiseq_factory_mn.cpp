@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include "sequences/gttl_multiseq.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/str_format.hpp"
 #include "sequences/multiseq_factory.hpp"
@@ -151,7 +152,7 @@ static void test_multiseq_factory(size_t num_parts,
 {
   const uint8_t padding_char = UINT8_MAX;
   const bool short_header = true;
-  GttlMultiseqFactory *multiseq_factory = nullptr;
+  const GttlMultiseqFactory *multiseq_factory = nullptr;
   if (inputfiles.size() == 1)
   {
     multiseq_factory
@@ -185,7 +186,7 @@ static void test_multiseq_factory(size_t num_parts,
   size_t seqnum = 0;
   for (size_t part_idx = 0; part_idx < multiseq_factory->size(); part_idx++)
   {
-    const GttlMultiseq *query_multiseq = multiseq_factory->at(part_idx);
+    const GttlMultiseq * const query_multiseq = multiseq_factory->at(part_idx);
     size_t query_seqnum_offset;
     if (query_multiseq->has_read_pairs_is_set())
     {
