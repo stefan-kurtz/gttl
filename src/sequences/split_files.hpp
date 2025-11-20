@@ -76,7 +76,8 @@ void split_into_parts_length(SequenceGeneratorClass &seq_gen,
       {
         // This is an example of how one might wait until enqueueing would lead
         // to at most 3 items in the queue
-        // while (tp.get_size() > 2) std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // while (tp.get_size() > 2)
+        //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
         tp.enqueue([fname_out, capture0 = s_out.str(), compression_level] {
           write_to_output_file(fname_out, capture0, compression_level);
         });

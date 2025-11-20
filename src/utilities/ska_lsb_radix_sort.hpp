@@ -255,7 +255,8 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
 }
 
 template<typename Counttype>
-static const Buckets<Counttype> *countingsort_skarupke([[maybe_unused]] int num_bits,
+static const Buckets<Counttype> *countingsort_skarupke(
+                                                 [[maybe_unused]] int num_bits,
                                                  int shift,
                                                  uint64_t *array,
                                                  size_t array_len)
