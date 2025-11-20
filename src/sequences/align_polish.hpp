@@ -31,10 +31,7 @@ class AlignmentPolishing
       values[prefix].score_sum = static_cast<int16_t>(score);
     } else
     {
-      if (score > maxscore)
-      {
-        maxscore = score;
-      }
+      maxscore = std::max(score, maxscore);
       assert(score >= INT16_MIN - difference_score);
       fill_polishing_info(currentdepth+1, prefix << 1,
                           score - difference_score,maxscore);

@@ -1,6 +1,7 @@
 #ifndef NTTABLE_HPP
 #define NTTABLE_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -124,12 +125,9 @@ class NtTable
   [[nodiscard]] NtTableResult estimate_all(void) const
   {
     size_t t_max = 0;
-    for (auto t : table)
+    if (not table.empty())
     {
-      if (t > t_max)
-      {
-        t_max = t;
-      }
+      t_max = std::ranges::max(table);
     }
 
     std::vector<size_t> p(t_max + 1, 0);

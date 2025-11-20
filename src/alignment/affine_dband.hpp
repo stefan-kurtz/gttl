@@ -1,5 +1,6 @@
 #ifndef AFFINE_DBAND_HPP
 #define AFFINE_DBAND_HPP
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -725,14 +726,9 @@ class GttlAffineDPbanded
 
       assert(left_dist <= std::min(int64_t(0),lendiff) &&
              right_dist >= std::max(int64_t(0),lendiff));
-      if (left_dist < -static_cast<int64_t>(usubstring.size()))
-      {
-        left_dist = -static_cast<int64_t>(usubstring.size());
-      }
-      if (right_dist > static_cast<int64_t>(vsubstring.size()))
-      {
-        right_dist = static_cast<int64_t>(vsubstring.size());
-      }
+      left_dist = std::max(left_dist, -static_cast<int64_t>(usubstring.size()));
+      right_dist = std::min(right_dist,
+                            static_cast<int64_t>(vsubstring.size()));
       const ScoreType dpscore
         = lastcolumnRvalue_get<CharType>(alphasize,
                                          eoplist != nullptr,

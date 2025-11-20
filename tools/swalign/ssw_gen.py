@@ -6,7 +6,8 @@ import jinja2
 # https://realpython.com/primer-on-jinja-templating/#install-jinja
 
 environment = jinja2.Environment()
-template = environment.from_string('''#include <alignment/ssw.hpp>
+template = environment.from_string('''#include <algorithm>
+#include <alignment/ssw.hpp>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -277,10 +278,7 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
       {
         const size_t current_end
           = i / simd_size + (i % simd_size) * segment_len;
-        if (current_end < sw_simd_result.on_query)
-        {
-          sw_simd_result.on_query = current_end;
-        }
+        sw_simd_result.on_query = std::min(current_end, sw_simd_result.on_query);
       }
     }
     sw_simd_result.opt_loc_alignment_score = max_align_score;
