@@ -29,7 +29,7 @@
 /* checks first chars of sequence, returns true if sequence is
    definitely a protein sequence */
 
-#define GUESS_SIZE_TO_DECIDE 1000
+inline constexpr size_t GUESS_SIZE_TO_DECIDE = 1000;
 
 inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
 {
@@ -40,7 +40,7 @@ inline bool guess_if_protein_sequence(const char *sequence,size_t seqlen)
     for_protein_only_lookup[static_cast<int>(protein_only_characters[idx])] =
                             true;
   }
-  for (size_t idx = 0; idx < std::min(size_t(GUESS_SIZE_TO_DECIDE),seqlen);
+  for (size_t idx = 0; idx < std::min(GUESS_SIZE_TO_DECIDE,seqlen);
        idx++)
   {
     if (for_protein_only_lookup[static_cast<int>(sequence[idx])])
@@ -115,7 +115,7 @@ bool guess_if_protein_multiseq(const MultiseqClass *multiseq)
       is_protein_sequence = true;
       break;
     }
-    if (sequences_total_length >= size_t{GUESS_SIZE_TO_DECIDE})
+    if (sequences_total_length >= GUESS_SIZE_TO_DECIDE)
     {
       break;
     }

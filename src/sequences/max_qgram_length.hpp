@@ -16,5 +16,6 @@
 */
 #ifndef MAX_QGRAM_LENGTH_HPP
 #define MAX_QGRAM_LENGTH_HPP
-#define MAX_QGRAM_LENGTH 64
+#include <cstddef>
+inline constexpr size_t MAX_QGRAM_LENGTH = 64;
 #endif

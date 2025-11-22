@@ -19,8 +19,8 @@
 #define BITS2SPLIT_HPP
 #include <cassert>
 #include <cstddef>
-#define MIN_NUM_SPLIT 1
-#define MAX_NUM_SPLIT 64
+inline constexpr size_t MIN_NUM_SPLIT = 1;
+inline constexpr size_t MAX_NUM_SPLIT = 64;
 static const int bits2split[] = {
   /* 1 */ 1,
   /* 2 */ 2,
@@ -154,7 +154,7 @@ const int split_group_start[] = {
 252, /* 64 */
 260
 };
-#define BIT_COUNTS_LAST_NUM_RANGE 8
+inline constexpr size_t BIT_COUNTS_LAST_NUM_RANGE = 8;
 static inline const int *bit_counts_get(size_t *num_ranges, int numbits)
 {
 #ifndef NDEBUG

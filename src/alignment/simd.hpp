@@ -7,36 +7,36 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define AVX512_ALIGN_DOUBLE 64
-#define AVX512_VECSIZE_DOUBLE 8
-#define AVX512_ALIGN_FLOAT 64
-#define AVX512_VECSIZE_FLOAT 16
-#define AVX512_ALIGN_INT 64
-#define AVX512_VECSIZE_INT 16
+inline constexpr size_t AVX512_ALIGN_DOUBLE = 64;
+inline constexpr size_t AVX512_VECSIZE_DOUBLE = 8;
+inline constexpr size_t AVX512_ALIGN_FLOAT = 64;
+inline constexpr size_t AVX512_VECSIZE_FLOAT = 16;
+inline constexpr size_t AVX512_ALIGN_INT = 64;
+inline constexpr size_t AVX512_VECSIZE_INT = 16;
 
-#define AVX_ALIGN_DOUBLE 32
-#define AVX_VECSIZE_DOUBLE 4
-#define AVX_ALIGN_FLOAT 32
-#define AVX_VECSIZE_FLOAT 8
-#define AVX2_ALIGN_INT 32
-#define AVX2_VECSIZE_INT 8
+inline constexpr size_t AVX_ALIGN_DOUBLE = 32;
+inline constexpr size_t AVX_VECSIZE_DOUBLE = 4;
+inline constexpr size_t AVX_ALIGN_FLOAT = 32;
+inline constexpr size_t AVX_VECSIZE_FLOAT = 8;
+inline constexpr size_t AVX2_ALIGN_INT = 32;
+inline constexpr size_t AVX2_VECSIZE_INT = 8;
 
-#define SSE_ALIGN_DOUBLE 16
-#define SSE_VECSIZE_DOUBLE 2
-#define SSE_ALIGN_FLOAT 16
-#define SSE_VECSIZE_FLOAT 4
-#define SSE_ALIGN_INT 16
-#define SSE_VECSIZE_INT 4
+inline constexpr size_t SSE_ALIGN_DOUBLE = 16;
+inline constexpr size_t SSE_VECSIZE_DOUBLE = 2;
+inline constexpr size_t SSE_ALIGN_FLOAT = 16;
+inline constexpr size_t SSE_VECSIZE_FLOAT = 4;
+inline constexpr size_t SSE_ALIGN_INT = 16;
+inline constexpr size_t SSE_VECSIZE_INT = 4;
 
-#define NEON_ALIGN_INT 16
-#define NEON_VECSIZE_INT 4
+inline constexpr size_t NEON_ALIGN_INT = 16;
+inline constexpr size_t NEON_VECSIZE_INT = 4;
 
-#define MAX_ALIGN_DOUBLE AVX512_ALIGN_DOUBLE
-#define MAX_VECSIZE_DOUBLE AVX512_VECSIZE_DOUBLE
-#define MAX_ALIGN_FLOAT AVX512_ALIGN_FLOAT
-#define MAX_VECSIZE_FLOAT AVX512_VECSIZE_FLOAT
-#define MAX_ALIGN_INT AVX512_ALIGN_INT
-#define MAX_VECSIZE_INT AVX512_VECSIZE_INT
+inline constexpr size_t MAX_ALIGN_DOUBLE = AVX512_ALIGN_DOUBLE;
+inline constexpr size_t MAX_VECSIZE_DOUBLE = AVX512_VECSIZE_DOUBLE;
+inline constexpr size_t MAX_ALIGN_FLOAT = AVX512_ALIGN_FLOAT;
+inline constexpr size_t MAX_VECSIZE_FLOAT = AVX512_VECSIZE_FLOAT;
+inline constexpr size_t MAX_ALIGN_INT = AVX512_ALIGN_INT;
+inline constexpr size_t MAX_VECSIZE_INT = AVX512_VECSIZE_INT;
 
 #ifdef __AVX2__
 #define AVX2

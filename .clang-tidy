@@ -16,7 +16,12 @@ Checks: >
   modernize-use-using,
   modernize-use-starts-ends-with,
   modernize-use-constraints,
-  modernize-use-nullptr
+  modernize-use-nullptr,
+  modernize-macro-to-enum,
+  -modernize-use-auto,
+  -modernize-use-trailing-return-type,
+  -modernize-redundant-void-arg,
+  -modernize-avoid-c-arrays
 
 HeaderFilterRegex: '.*'
 SystemHeaders: false
