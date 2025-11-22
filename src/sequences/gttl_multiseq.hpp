@@ -494,7 +494,7 @@ class GttlMultiseq
       length_dist_table.reserve(length_dist_map.size());
       for (auto const& [length,  count] : length_dist_map)
       {
-        length_dist_table.push_back(std::make_pair(length, count));
+        length_dist_table.emplace_back(length, count);
       }
     } else
     {
@@ -506,7 +506,7 @@ class GttlMultiseq
       length_dist_table.reserve(length_dist_bins.size());
       for (auto const& [length,  count] : length_dist_bins)
       {
-        length_dist_table.push_back(std::make_pair(length, count));
+        length_dist_table.emplace_back(length, count);
       }
     }
     std::sort(length_dist_table.begin(), length_dist_table.end());
@@ -615,7 +615,7 @@ class GttlMultiseq
       std::tie(header_ptr, header_len)
         = header_ptr_with_length(seqnum, short_header);
       const std::string header_substring(header_ptr, header_len);
-      header_with_seqnum.push_back(std::make_pair(header_substring, seqnum));
+      header_with_seqnum.emplace_back(header_substring, seqnum);
     }
     std::sort(header_with_seqnum.begin(), header_with_seqnum.end());
     for (size_t idx = 1; idx < header_with_seqnum.size(); idx++)
@@ -666,9 +666,8 @@ class GttlMultiseq
       std::tie(sh_offset, sh_len)
         = short_header_substring<first_delim, second_delim>(header);
       assert(sh_offset <= UINT16_MAX and sh_len <= UINT16_MAX);
-      short_header_cache.push_back(std::make_pair(
-                                     static_cast<uint16_t>(sh_offset),
-                                     static_cast<uint16_t>(sh_len)));
+      short_header_cache.emplace_back(static_cast<uint16_t>(sh_offset),
+                                     static_cast<uint16_t>(sh_len));
     }
   }
 
@@ -683,9 +682,8 @@ class GttlMultiseq
       std::tie(sh_offset, sh_len)
         = short_header_substring(header);
       assert(sh_offset <= UINT16_MAX and sh_len <= UINT16_MAX);
-      short_header_cache.push_back(std::make_pair(
-                                     static_cast<uint16_t>(sh_offset),
-                                     static_cast<uint16_t>(sh_len)));
+      short_header_cache.emplace_back(static_cast<uint16_t>(sh_offset),
+                                     static_cast<uint16_t>(sh_len));
     }
   }
 };

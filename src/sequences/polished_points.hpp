@@ -196,7 +196,7 @@ class PolishedPoints
           }
           best.resize(best.size() - n_rm);
         }
-        best.push_back(PolishedPoint(_distance,_row,_aligned_len,_unit_cost));
+        best.emplace_back(_distance,_row,_aligned_len,_unit_cost);
       } else
       {
         if (smallest_error_percentage > this_error_percentage)
@@ -213,8 +213,7 @@ class PolishedPoints
             n_rm += (best[read_idx].aligned_len_get() <= _aligned_len);
           }
           best.resize(best.size() - n_rm);
-          best.push_back(PolishedPoint(_distance,_row,_aligned_len,
-                                       _unit_cost));
+          best.emplace_back(_distance,_row,_aligned_len,_unit_cost);
         }
         /* in the else case the current match does neither improve the
            aligned length value nor the error percentage and so we can ignore
@@ -225,7 +224,7 @@ class PolishedPoints
       defined = true;
       longest_aligned_len = _aligned_len;
       smallest_error_percentage = this_error_percentage;
-      best.push_back(PolishedPoint(_distance,_row,_aligned_len, _unit_cost));
+      best.emplace_back(_distance,_row,_aligned_len, _unit_cost);
     }
   }
   bool operator == (const PolishedPoints& other) const noexcept

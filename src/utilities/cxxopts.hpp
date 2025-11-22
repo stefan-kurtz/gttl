@@ -2828,7 +2828,7 @@ Options::help_one_group(const std::string& g) const
 
     auto s = format_option(o);
     longest = (std::max)(longest, stringLength(s));
-    format.push_back(std::make_pair(s, String()));
+    format.emplace_back(s, String());
   }
   longest = (std::min)(longest, OPTION_LONGEST);
 

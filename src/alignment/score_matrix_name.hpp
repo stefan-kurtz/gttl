@@ -79,7 +79,7 @@ class ScoreMatrixName
     vec_s.reserve(num_values);
     for (size_t idx = 0; idx < num_values; idx++)
     {
-      vec_s.push_back(string_values[idx]);
+      vec_s.emplace_back(string_values[idx]);
     }
     return vec_s;
   }

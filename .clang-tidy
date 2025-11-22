@@ -18,6 +18,7 @@ Checks: >
   modernize-use-constraints,
   modernize-use-nullptr,
   modernize-macro-to-enum,
+  modernize-use-emplace,
   -modernize-use-auto,
   -modernize-use-trailing-return-type,
   -modernize-redundant-void-arg,

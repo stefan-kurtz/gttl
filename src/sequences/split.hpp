@@ -62,7 +62,7 @@ class SequencesSplit
     assert(num_parts > 0 && mapped_file.size() > 0);
     if (num_parts > mapped_file.size())
     {
-      intervals.push_back(std::string_view(file_contents, mapped_file.size()));
+      intervals.emplace_back(file_contents, mapped_file.size());
       return;
     }
     const size_t part_size = mapped_file.size() / num_parts;
@@ -83,14 +83,14 @@ class SequencesSplit
                                         current);
       }
       assert(current_start < current);
-      intervals.push_back(std::string_view(file_contents + current_start,
-                                           current - current_start));
+      intervals.emplace_back(file_contents + current_start,
+                             current - current_start);
       current_start = current;
     }
     if (current_start < mapped_file.size())
     {
-      intervals.push_back(std::string_view(file_contents + current_start,
-                                           mapped_file.size() - current_start));
+      intervals.emplace_back(file_contents + current_start,
+                             mapped_file.size() - current_start);
     }
   }
   [[nodiscard]] double variance(void) const

@@ -182,8 +182,7 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
           if (firstspecial == totallength)
           {
             firstspecial = idx;
-            rangestore.push_back(Rangewithchar(rangestart,idx - 1,
-                                               previouscc));
+            rangestore.emplace_back(rangestart, idx - 1, previouscc);
           }
           if (isspecial<is_multiseq>(padding_char, previouscc, wildcard))
           {
@@ -221,8 +220,7 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
             {
               if (previouscc < cc)
               {
-                rangestore.push_back(Rangewithchar(rangestart,idx - 1,
-                                                   previouscc));
+                rangestore.emplace_back(rangestart, idx - 1, previouscc);
                 rangestart = idx;
               }
             }
@@ -252,7 +250,7 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
         }
         if (previouscc < cc)
         {
-          rangestore.push_back(Rangewithchar(rangestart,idx - 1,previouscc));
+          rangestore.emplace_back(rangestart, idx - 1, previouscc);
           rangestart = idx;
         }
       }
@@ -269,7 +267,7 @@ static void gttl_suftab_lightweightcheck(const SequenceType *sequence,
   if (firstspecial == totallength)
   {
     assert(firstspecial > 0);
-    rangestore.push_back(Rangewithchar(rangestart,firstspecial - 1,previouscc));
+    rangestore.emplace_back(rangestart, firstspecial - 1, previouscc);
   }
 #ifndef NDEBUG
   size_t rangeidx = 0;

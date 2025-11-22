@@ -31,7 +31,7 @@ class StringTokenizer
         {
           if (buffer.size() > 0)
           {
-            token_list.push_back(std::string(buffer));
+            token_list.emplace_back(buffer);
             buffer.clear();
           }
           inword = false;
@@ -40,7 +40,7 @@ class StringTokenizer
     }
     if (inword && buffer.size() > 0)
     {
-      token_list.push_back(std::string(buffer));
+      token_list.emplace_back(buffer);
     }
   }
   [[nodiscard]] const std::vector<std::string> &

@@ -314,7 +314,7 @@ static void char_distribution_thd_gz(size_t num_threads,
                                               sizeof *dist));
   std::vector<std::thread> threads{};
   ThreadsafeQueue<std::string> sequence_queue;
-  threads.push_back(std::thread([&sequence_queue, &fastq_gen]
+  threads.emplace_back([&sequence_queue, &fastq_gen]
   {
     size_t count_entries = 0;
     for (const auto *fastq_entry : fastq_gen)
@@ -324,10 +324,10 @@ static void char_distribution_thd_gz(size_t num_threads,
       sequence_queue.enqueue(std::string(seq_view.begin(),seq_view.end()));
     }
     std::cout << "# total_count_entries\t" << count_entries << '\n';
-  }));
+  });
   for (size_t thd_num = 1; thd_num < num_threads; thd_num++)
   {
-    threads.push_back(std::thread([&sequence_queue, &dist, thd_num] {
+    threads.emplace_back([&sequence_queue, &dist, thd_num] {
       size_t *const local_dist = dist + 4 * (thd_num - 1);
       using namespace std::chrono_literals;
       // The "ms" operator is defined in a header that is not to
@@ -346,7 +346,7 @@ static void char_distribution_thd_gz(size_t num_threads,
           local_dist[(static_cast<uint8_t>(cc) >> 1) & uint8_t(3)]++;
         }
       }
-    }));
+    });
   }
   for (auto &th : threads)
   {
@@ -390,7 +390,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
   threads.reserve(sequences_split.size());
   for (size_t thd_num = 0; thd_num < sequences_split.size(); thd_num++)
   {
-    threads.push_back(std::thread([&sequences_split, count_entries,dist,thd_num]
+    threads.emplace_back([&sequences_split, count_entries,dist,thd_num]
     {
       const std::string_view &this_view = sequences_split[thd_num];
       GttlFastQGenerator<16384> fastq_gen(this_view.data(), this_view.size());
@@ -406,7 +406,7 @@ static void char_distribution_thd(const SequencesSplit &sequences_split)
         }
       }
       count_entries[thd_num] = local_count_entries;
-    }));
+    });
   }
   for (auto &th : threads)
   {

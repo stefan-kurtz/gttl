@@ -684,8 +684,8 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
     threads.reserve(part_info_tab.size());
     for (size_t thd_num = 0; thd_num < part_info_tab.size(); thd_num++)
     {
-      threads.push_back(std::thread([&part_info_tab, array,
-                                     num_sort_bits, thd_num]
+      threads.emplace_back([&part_info_tab, array,
+                            num_sort_bits, thd_num]
       {
         size_t left;
         size_t width;
@@ -697,7 +697,7 @@ static inline void ska_large_lsb_small_radix_sort(int num_sort_bits,
                                                num_sort_bits,
                                                array + left,
                                                width);
-      }));
+      });
     }
     for (auto &th : threads)
     {

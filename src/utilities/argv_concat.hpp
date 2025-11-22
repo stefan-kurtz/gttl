@@ -31,7 +31,7 @@ class ArgvConcat
         {
           if (arg_vector.back().at(0) == '-')
           {
-            arg_vector.push_back(std::string(argv[idx]));
+            arg_vector.emplace_back(argv[idx]);
           } else
           {
             arg_vector.back() += (separator + std::string(argv[idx]));
@@ -39,11 +39,11 @@ class ArgvConcat
         } else
         {
           concat = false;
-          arg_vector.push_back(std::string(argv[idx]));
+          arg_vector.emplace_back(argv[idx]);
         }
       } else
       {
-        arg_vector.push_back(std::string(argv[idx]));
+        arg_vector.emplace_back(argv[idx]);
         for (auto &&opt : concat_options)
         {
           if (std::string(argv[idx]) == opt)

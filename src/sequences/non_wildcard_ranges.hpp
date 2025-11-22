@@ -202,7 +202,7 @@ class NonWildCardRangeIterator
           assert(start <= seqlen - 1);
           if (seqlen - start >= minimum_length)
           {
-            non_wildcard_ranges.push_back({start,seqlen-1});
+            non_wildcard_ranges.emplace_back(start,seqlen-1);
           }
           break;
         }
@@ -210,7 +210,7 @@ class NonWildCardRangeIterator
         assert(width > 0);
         if (width >= minimum_length)
         {
-          non_wildcard_ranges.push_back({start,start + width - 1});
+          non_wildcard_ranges.emplace_back(start,start + width - 1);
         }
         current = static_cast<const char *>(gttl_memcchr<wildcard>
                                              (next_wildcard+1,

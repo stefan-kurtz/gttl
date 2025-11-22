@@ -156,11 +156,11 @@ class TrackEditoperations
       assert(u_remain > match_length &&
              v_remain > match_length &&
              front_mid >= 2 * current_d);
-      stack->push_back(StackElem(u_remain - (match_length + 1),
-                                 v_remain - (match_length + 1),
-                                 current_d - 1,
-                                 front_mid - 2 * current_d,
-                                 diag));
+      stack->emplace_back(u_remain - (match_length + 1),
+                          v_remain - (match_length + 1),
+                          current_d - 1,
+                          front_mid - 2 * current_d,
+                          diag);
       has_pushed = true;
     }
     if (br.has_deletion())
@@ -169,11 +169,11 @@ class TrackEditoperations
       assert(u_remain > match_length &&
              v_remain >= match_length &&
              front_mid >= 2 * current_d);
-      stack->push_back(StackElem(u_remain - (match_length + 1),
-                                 v_remain - match_length,
-                                 current_d - 1,
-                                 front_mid - 2 * current_d,
-                                 diag + 1));
+      stack->emplace_back(u_remain - (match_length + 1),
+                          v_remain - match_length,
+                          current_d - 1,
+                          front_mid - 2 * current_d,
+                          diag + 1);
       has_pushed = true;
     }
     if (br.has_insertion())
@@ -182,11 +182,11 @@ class TrackEditoperations
       assert(u_remain >= match_length &&
              v_remain > match_length &&
              front_mid >= 2 * current_d);
-      stack->push_back(StackElem(u_remain - match_length,
-                                 v_remain - (match_length + 1),
-                                 current_d - 1,
-                                 front_mid - 2 * current_d,
-                                 diag - 1));
+      stack->emplace_back(u_remain - match_length,
+                          v_remain - (match_length + 1),
+                          current_d - 1,
+                          front_mid - 2 * current_d,
+                          diag - 1);
       has_pushed = true;
     }
     if (!has_pushed)

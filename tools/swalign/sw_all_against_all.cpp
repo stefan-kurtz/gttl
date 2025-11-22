@@ -248,7 +248,7 @@ static void multiway_merge_results(
   {
     SWResultVector *result_t = sw_store_best_results_get_thread_related[t];
     result_t->sort();
-    all_best.push_back(BestFromThread(result_t));
+    all_best.emplace_back(result_t);
   }
   for (size_t b = 0; b < best and not all_best.empty(); b++)
   {
