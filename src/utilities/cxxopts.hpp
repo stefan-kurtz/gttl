@@ -134,9 +134,9 @@ namespace cxxopts {
 static constexpr struct {
   uint8_t major, minor, patch;
 } version = {
-  CXXOPTS__VERSION_MAJOR,
-  CXXOPTS__VERSION_MINOR,
-  CXXOPTS__VERSION_PATCH
+  .major=CXXOPTS__VERSION_MAJOR,
+  .minor=CXXOPTS__VERSION_MINOR,
+  .patch=CXXOPTS__VERSION_PATCH
 };
 } // namespace cxxopts
 
@@ -2770,12 +2770,14 @@ Options::add_option
 
   auto& options = m_help[group];
 
-  options.options.emplace_back(HelpOptionDetails{s, l, stringDesc,
-      value->has_default(), value->get_default_value(),
-      value->has_implicit(), value->get_implicit_value(),
-      std::move(arg_help),
-      value->is_container(),
-      value->is_boolean()});
+  options.options.emplace_back(HelpOptionDetails{.s=s, .l=l, .desc=stringDesc,
+      .has_default=value->has_default(),
+      .default_value=value->get_default_value(),
+      .has_implicit=value->has_implicit(),
+      .implicit_value=value->get_implicit_value(),
+      .arg_help=std::move(arg_help),
+      .is_container=value->is_container(),
+      .is_boolean=value->is_boolean()});
 }
 
 inline

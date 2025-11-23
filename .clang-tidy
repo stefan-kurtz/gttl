@@ -19,6 +19,7 @@ Checks: >
   modernize-use-nullptr,
   modernize-macro-to-enum,
   modernize-use-emplace,
+  modernize-use-designated-initializers,
   -modernize-use-auto,
   -modernize-use-trailing-return-type,
   -modernize-redundant-void-arg,
