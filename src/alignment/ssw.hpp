@@ -319,8 +319,7 @@ class SSWprofile
   {
     PRINT_ALL_SSW_PROFILES;
   }
-  ~SSWprofile(void)
-  { }
+  ~SSWprofile(void) = default;
   [[nodiscard]] size_t size_in_bytes(void) const noexcept
   {
     return profile_uint8.size_in_bytes() +

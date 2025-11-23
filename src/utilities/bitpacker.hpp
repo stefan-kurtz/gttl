@@ -44,7 +44,7 @@ struct GttlBitPacker
     int overflow_left_shift;
     uint64_t max_overflow;
 
-    GttlBitPacker(void) {}
+    GttlBitPacker(void) = default;
     GttlBitPacker(const std::array<int, bit_groups> _bit_group_sizes) :
       overflow_left_shift(0),
       max_overflow(0)

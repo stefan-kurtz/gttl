@@ -169,8 +169,7 @@ class RunTimeAtLevel
 {
   std::vector<size_t> run_time_vec;
   public:
-  RunTimeAtLevel(void)
-  { }
+  RunTimeAtLevel(void) = default;
   void add_level(void)
   {
     run_time_vec.push_back(0);

@@ -33,8 +33,7 @@ using SWResultVector = FSPrioStore<StoredLocalAlignmentCoordinates>;
 class SWStoreBestResultsShared
 {
   public:
-  SWStoreBestResultsShared(void)
-  { }
+  SWStoreBestResultsShared(void) = default;
   bool process(SWResultVector *store,
                const LocalAlignmentCoordinates &best_coords,
                size_t i, size_t j) const

@@ -408,7 +408,7 @@ struct HashedQgramVectorTable
     }
     return total_has_wildcards;
   }
-  ~HashedQgramVectorTable(void) {}
+  ~HashedQgramVectorTable(void) = default;
 };
 
 template<int sizeof_unit,class HashIterator>

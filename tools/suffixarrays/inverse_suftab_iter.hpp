@@ -72,7 +72,6 @@ class InverseSuftabReader
   }
   [[nodiscard]] auto begin(void) const { return inverse_suftab_reader.begin(); }
   [[nodiscard]] auto end(void) const { return inverse_suftab_reader.end(); }
-  ~InverseSuftabReader(void)
-  { }
+  ~InverseSuftabReader(void) = default;
 };
 #endif

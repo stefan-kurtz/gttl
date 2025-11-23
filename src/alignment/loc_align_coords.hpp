@@ -16,7 +16,7 @@ struct LocalAlignmentCoordinates
                               in <vseq> */
   uint32_t raw_score; /* score of local alignment */
   bool forward_strand;
-  LocalAlignmentCoordinates(void) {};
+  LocalAlignmentCoordinates(void) = default;
   void show(FILE *fpout,bool dna_alphabet,const GttlMultiseq *multiseq,
             size_t seqnum) const noexcept
   {

@@ -325,8 +325,7 @@ class GttlMultiseq
     padding_after_last_sequence(this_padding_char);
   }
 
-  ~GttlMultiseq(void)
-  { }
+  ~GttlMultiseq(void) = default;
 
   [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {

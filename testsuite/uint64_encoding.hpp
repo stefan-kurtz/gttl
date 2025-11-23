@@ -41,7 +41,7 @@ class Uint64Encoding
       of numbers in code, the values are for the number of bits which will
       be used for the values in en/decoding, make shure it summs to not more
       than 64 bits */
-    Uint64Encoding(void) {}
+    Uint64Encoding(void) = default;
     Uint64Encoding(const std::array<int, bit_groups> _bit_group_sizes)
     {
       int count = 0;

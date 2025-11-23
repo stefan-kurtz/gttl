@@ -52,7 +52,7 @@ class SainOptions
   LcptabMethod lcptab_method = Lcptab_no;
   int intset_sizeof = -1;
  public:
-  SainOptions(void) { }
+  SainOptions(void) = default;
   void parse(int argc, char **argv);
 
   [[nodiscard]] bool help_opt_is_set(void) const noexcept;

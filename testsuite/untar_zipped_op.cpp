@@ -10,7 +10,7 @@ static void usage(const cxxopts::Options &options)
   std::cerr << options.help() << '\n';
 }
 
-UnzippedTarOptions::UnzippedTarOptions(void) {}
+UnzippedTarOptions::UnzippedTarOptions(void) = default;
 
 void UnzippedTarOptions::parse(int argc, char **argv)
 {

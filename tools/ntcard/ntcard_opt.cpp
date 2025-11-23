@@ -11,7 +11,7 @@ static void usage(const cxxopts::Options& options)
   std::cerr << options.help() << '\n';
 }
 
-NtcardOptions::NtcardOptions(){};
+NtcardOptions::NtcardOptions() = default;
 
 void NtcardOptions::parse(int argc, char** argv)
 {

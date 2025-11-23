@@ -36,7 +36,7 @@ class SumFibThreadData
       std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << '\n';
     }
   }
-  ~SumFibThreadData(void) { }
+  ~SumFibThreadData(void) = default;
 };
 
 static void sum_fibonacci(size_t thread_id, [[maybe_unused]] size_t task_id,

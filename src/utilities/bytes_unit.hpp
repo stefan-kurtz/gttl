@@ -23,7 +23,7 @@ class BytesUnit
   private:
     uint8_t bytes[sizeof_unit];
   public:
-    BytesUnit() {};
+    BytesUnit() = default;
     BytesUnit(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
     {

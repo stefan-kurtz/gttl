@@ -39,8 +39,7 @@ class DisplayOptions
                                                  "tistab"};
   std::vector<std::string> args_set;
   public:
-  DisplayOptions(void)
-  { }
+  DisplayOptions(void) = default;
 
   [[nodiscard]] std::string allowed_help(void) const
   {

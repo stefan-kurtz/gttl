@@ -54,7 +54,7 @@ class CharRangeOptions
        invert_option = false, reverse_option = false;
 
  public:
-  CharRangeOptions() {};
+  CharRangeOptions() = default;
 
   void parse(int argc, char **argv)
   {

@@ -15,7 +15,7 @@ class VirtualQueue {
     {
       assert(number_of_elements > 0);
     }
-    ~VirtualQueue(void) {}
+    ~VirtualQueue(void) = default;
     size_t next_element(void)
     {
       return current++;

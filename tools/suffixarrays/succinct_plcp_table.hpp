@@ -77,8 +77,7 @@ class SuccinctPlcpTable
    , totallength(succinct_plcp_table.get_rank(succinct_plcp_table.get_length(),
                                               true))
   { }
-  ~SuccinctPlcpTable(void)
-  { }
+  ~SuccinctPlcpTable(void) = default;
   [[nodiscard]] Iterator begin(void) const
   {
     return Iterator(totallength, 0, suftab_inputfile, &succinct_plcp_table);
