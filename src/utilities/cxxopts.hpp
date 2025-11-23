@@ -27,6 +27,7 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP
 #define CXXOPTS_HPP
 
+#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <cstdlib>
@@ -2359,6 +2360,7 @@ OptionAdder::operator()
     // (length-1) and longer names
   std::string short_name {""};
   auto first_short_name_iter =
+    // NOLINTNEXTLINE(modernize-use-ranges)
     std::partition(option_names.begin(), option_names.end(),
       [&](const std::string& name) { return name.length() > 1; }
     );

@@ -1,5 +1,6 @@
 #ifndef NON_REDUNDANT_MATCHES_HPP
 #define NON_REDUNDANT_MATCHES_HPP
+#include <algorithm>
 #include <cstdint>
 #include <utility>
 #include <cstddef>
@@ -61,7 +62,7 @@ class NonRedundantMatches
                                   elements[idx].primary_len_get(),
                                   (idx << 1) + 1);
     }
-    std::sort(event_schedule.begin(), event_schedule.end());
+    std::ranges::sort(event_schedule);
 
     for (auto it_sweep_line = event_schedule.begin();
          it_sweep_line != event_schedule.end(); /* Nothing */)

@@ -57,7 +57,7 @@ class DisplayOptions
     const std::vector<std::string> split_args = gttl_split_string(args,',');
     for (auto &&arg : split_args)
     {
-      if (std::find(allowed_options.begin(), allowed_options.end(), arg)
+      if (std::ranges::find(allowed_options, arg)
             != allowed_options.end())
       {
         args_set.push_back(arg);
@@ -73,7 +73,7 @@ class DisplayOptions
 #define DISPLAY_FUNCTION(KEY)\
 bool KEY##_output(void) const\
 {\
-  return std::find(args_set.begin(), args_set.end(), #KEY) != args_set.end();\
+  return std::ranges::find(args_set, #KEY) != args_set.end();\
 }
   DISPLAY_FUNCTION(abs_suftab)
   DISPLAY_FUNCTION(rel_suftab)

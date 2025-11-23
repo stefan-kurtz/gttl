@@ -252,6 +252,7 @@ static void multiway_merge_results(
   }
   for (size_t b = 0; b < best and not all_best.empty(); b++)
   {
+    // NOLINTNEXTLINE(modernize-use-ranges)
     const std::vector<BestFromThread>::iterator next_best = std::min_element(
                                  all_best.begin(), all_best.end());
     const StoredLocalAlignmentCoordinates &slac = *(next_best->it);

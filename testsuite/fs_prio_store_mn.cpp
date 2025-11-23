@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <algorithm>
 #include <iostream>
@@ -26,7 +27,7 @@ static void run_trial(size_t num_elements,size_t max_value,size_t capacity)
     all_elements.push_back(v);
     fspq.add(v);
   }
-  std::sort(all_elements.begin(),all_elements.end());
+  std::ranges::sort(all_elements);
   fspq.sort();
   size_t check_idx = all_elements.size();
   for (auto &v : fspq)

@@ -17,6 +17,7 @@
 #ifndef GTTL_SUFFIXARRAY_HPP
 #define GTTL_SUFFIXARRAY_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <string>
@@ -142,7 +143,7 @@ class GttlSuffixArray
 
   [[nodiscard]] int key2index(const std::string &key) const noexcept
   {
-    auto found = std::find(keys.begin(), keys.end(), key);
+    auto found = std::ranges::find(keys, key);
     if (found == keys.end())
     {
       return -1;

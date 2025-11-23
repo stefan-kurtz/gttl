@@ -26,7 +26,7 @@ class OptionChoices
     }
     const char * const delim = "; ";
     std::ostringstream help_line_os;
-    std::copy(helpline_vec.begin(), helpline_vec.end(),
+    std::ranges::copy(helpline_vec,
               std::ostream_iterator<std::string>(help_line_os, delim));
     return help_line_os.str();
   }

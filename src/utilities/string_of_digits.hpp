@@ -6,6 +6,6 @@
 
 inline bool string_of_digits(const std::string &s)
 {
-  return not s.empty() and std::all_of(s.begin(), s.end(), ::isdigit);
+  return not s.empty() and std::ranges::all_of(s, ::isdigit);
 }
 #endif

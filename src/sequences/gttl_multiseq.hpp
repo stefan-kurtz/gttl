@@ -1,6 +1,7 @@
 #ifndef GTTL_MULTISEQ_HPP
 #define GTTL_MULTISEQ_HPP
 
+#include <algorithm>
 #include <bit>
 #include <cstdint>
 #include <cassert>
@@ -509,7 +510,7 @@ class GttlMultiseq
         length_dist_table.emplace_back(length, count);
       }
     }
-    std::sort(length_dist_table.begin(), length_dist_table.end());
+    std::ranges::sort(length_dist_table);
     return length_dist_table;
   }
   [[nodiscard]] size_t
@@ -617,7 +618,7 @@ class GttlMultiseq
       const std::string header_substring(header_ptr, header_len);
       header_with_seqnum.emplace_back(header_substring, seqnum);
     }
-    std::sort(header_with_seqnum.begin(), header_with_seqnum.end());
+    std::ranges::sort(header_with_seqnum);
     for (size_t idx = 1; idx < header_with_seqnum.size(); idx++)
     {
       assert(std::get<0>(header_with_seqnum[idx-1]) <=
