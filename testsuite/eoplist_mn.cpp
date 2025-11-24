@@ -109,10 +109,10 @@ static void display_alignment(const Eoplist &eoplist)
 int main(int argc,char *argv[])
 {
   constexpr const bool debug = false;
-  long trials;
+  size_t trials;
   if (argc != 3 || (strcmp(argv[1],"silent") != 0 &&
                     strcmp(argv[1],"display") != 0) ||
-      sscanf(argv[2],"%ld",&trials) != 1 || trials < 1)
+      sscanf(argv[2],"%zu",&trials) != 1 || trials < 1)
   {
     std::cerr << "Usage: " << argv[0] << " silent|display <trials>\n";
     return EXIT_FAILURE;

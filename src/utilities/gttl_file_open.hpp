@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <string>
 #include <stdexcept>
+#include <utility>
 #include "utilities/file_size.hpp"
 #include "utilities/has_gzip_header.hpp"
 
@@ -110,7 +111,7 @@ static inline std::basic_string<BaseType>
                                    + inputfile);
         }
         assert (static_cast<size_t>(bytes_read) <= buf_size);
-        if (static_cast<size_t>(bytes_read) < buf_size)
+        if (std::cmp_less(bytes_read, buf_size))
         {
           concatenated_content.resize(offset + bytes_read);
         }

@@ -28,7 +28,7 @@
  * handling the encoding and decoding of given numbers in one uint64_t (64bits)
  */
 
-template <int bit_groups>
+template <unsigned int bit_groups>
 class Uint64Encoding
 {
   private:
@@ -45,7 +45,7 @@ class Uint64Encoding
     Uint64Encoding(const std::array<int, bit_groups> _bit_group_sizes)
     {
       int count = 0;
-      for (int idx = 0; idx < bit_groups; idx++)
+      for (unsigned int idx = 0; idx < bit_groups; idx++)
       {
         bit_group_sizes[idx] = _bit_group_sizes[idx];
         assert(_bit_group_sizes[idx] < 64);
@@ -65,7 +65,7 @@ class Uint64Encoding
     {
       uint64_t code = 0;
 
-      for (int idx = 0; idx < bit_groups; idx++)
+      for (unsigned int idx = 0; idx < bit_groups; idx++)
       {
         if (arr[idx] > mask_tab[idx])
         {

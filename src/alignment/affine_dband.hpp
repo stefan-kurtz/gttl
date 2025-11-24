@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cassert>
 #include <algorithm>
+#include <utility>
 #include "sequences/eoplist.hpp"
 #include "sequences/gttl_substring.hpp"
 
@@ -132,7 +133,7 @@ class GttlAffineDPbanded
       bitmatrix[j] = colptr - low_row;
       /* below diagonal band*/
       assert(right_dist >= 0);
-      if (j <= static_cast<size_t>(right_dist))
+      if (std::cmp_less_equal(j, right_dist))
       {
         assert(low_row <= prev_high_row);
         first_ivalue = columnspace[low_row].Ivalue - gap_extension;
@@ -193,7 +194,7 @@ class GttlAffineDPbanded
         bitmatrix[j][i].edge_set_all(rmaxedge,dmaxedge,imaxedge);
       }
       assert(low_row < high_row && right_dist >= 0);
-      if (j > static_cast<size_t>(right_dist))
+      if (std::cmp_greater(j, right_dist))
       {
         low_row++;
       }
@@ -274,7 +275,7 @@ class GttlAffineDPbanded
 
       assert(low_row <= high_row &&
              static_cast<size_t>(high_row - low_row + 1) <= band_width);
-      if (j <= static_cast<size_t>(right_dist))
+      if (std::cmp_less_equal(j, right_dist))
       {
         assert(low_row <= prev_high_row);
         first_ivalue = columnspace[low_row].Ivalue - gap_extension;
@@ -317,7 +318,7 @@ class GttlAffineDPbanded
                               + static_cast<ScoreType>(score_row[ca_idx]);
         columnspace[high_row] = currententry;
       }
-      if (j > static_cast<size_t>(right_dist))
+      if (std::cmp_greater(j, right_dist))
       {
         low_row++;
       }

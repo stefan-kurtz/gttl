@@ -158,7 +158,7 @@ class Chain
                                                        + weight)
                                          - elements[current].gap_score(
                                                elements[previous]);
-            if (score > static_cast<int32_t>(weight))
+            if (std::cmp_greater(score, weight))
             {
               scores[current] = static_cast<uint32_t>(score);
               precursors[current] = previous;

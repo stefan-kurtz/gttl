@@ -48,11 +48,11 @@ class DNASeqEncoder
   private:
   static constexpr const alphabet::GttlAlphabet_UL_0 dna_alphabet{};
   /* Number of bits which can be stored in a unit */
-  static constexpr const int bits_in_store_unit
+  static constexpr const size_t bits_in_store_unit
     = sizeof(StoreUnitType) * CHAR_BIT;
   /* Number of character which can be stored in a unit:
      we need two bits per character */
-  static constexpr const int characters_per_unit = bits_in_store_unit/2;
+  static constexpr const size_t characters_per_unit = bits_in_store_unit/2;
   const size_t prefix_length;
   const int additional_bits;
 #ifndef NDEBUG
@@ -75,10 +75,11 @@ class DNASeqEncoder
   }
   [[nodiscard]] int additional_shift_get(void) const noexcept
   {
-    const int remainder = prefix_length % characters_per_unit;
+    const unsigned int remainder = prefix_length % characters_per_unit;
     if (remainder > 0)
     {
-      if (additional_bits >= (bits_in_store_unit - remainder * 2))
+      if (std::cmp_greater_equal(additional_bits,
+                                 (bits_in_store_unit - remainder * 2)))
       {
         return additional_bits - (bits_in_store_unit - remainder * 2);
       } else
@@ -155,7 +156,8 @@ class DNASeqEncoder
       encoding[encoding_index++] = value;
     }
     int remaining_additional_bits = additional_shift;
-    while (remaining_additional_bits >= bits_in_store_unit)
+    while (std::cmp_greater_equal(remaining_additional_bits,
+                                  bits_in_store_unit))
     {
       remaining_additional_bits -= bits_in_store_unit;
       assert(encoding_index < num_units);
@@ -235,7 +237,7 @@ class DNASeqEncoder
     }
     int remaining_bits = additional_shift;
     size_t decoding_index = (prefix_length+3)/4;
-    while (remaining_bits >= bits_in_store_unit)
+    while (std::cmp_greater_equal(remaining_bits, bits_in_store_unit))
     {
       remaining_bits -= bits_in_store_unit;
       assert(decoding_index < num_units);

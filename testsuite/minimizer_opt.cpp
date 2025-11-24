@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <utility>
 #include <vector>
 #include <stdexcept>
 #include "utilities/str_format.hpp"
@@ -84,7 +85,7 @@ void MinimizerOptions::parse(int argc, char **argv)
         hash_bits = 2 * qgram_length;
       } else
       {
-        if (hash_bits < static_cast<int>(2 * qgram_length))
+        if (std::cmp_less(hash_bits, 2 * qgram_length))
         {
           const StrFormat msg("hash_bits = %d < %zu = 2 * kmer_length is "
                               "not possible",

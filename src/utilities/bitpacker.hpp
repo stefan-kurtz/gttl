@@ -30,7 +30,7 @@
    and all, but the last bitgroup fits into the first value of type
    basetype */
 
-template <int sizeof_unit,int bit_groups>
+template <int sizeof_unit,size_t bit_groups>
 struct GttlBitPacker
 {
   private:
@@ -60,7 +60,7 @@ struct GttlBitPacker
                     sizeof_unit <= sizeof(basetype) + 7);
       static constexpr const int bits_basetype = CHAR_BIT * sizeof(basetype);
       int count = 0;
-      int idx;
+      unsigned int idx;
       for (idx = 0; idx < bit_groups; idx++)
       {
         bit_group_sizes[idx] = _bit_group_sizes[idx];

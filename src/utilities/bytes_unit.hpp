@@ -10,7 +10,7 @@
 #include "utilities/constexpr_for.hpp"
 #include "utilities/bitpacker.hpp"
 
-template<int sizeof_unit,int bit_groups>
+template<size_t sizeof_unit,int bit_groups>
 class BytesUnit
 {
   using basetype = std::conditional_t<

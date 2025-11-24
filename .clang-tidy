@@ -22,6 +22,7 @@ Checks: >
   modernize-use-designated-initializers,
   modernize-use-ranges,
   modernize-use-equals-default,
+  modernize-use-integer-sign-comparison,
   -modernize-use-auto,
   -modernize-use-trailing-return-type,
   -modernize-redundant-void-arg,

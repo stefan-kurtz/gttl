@@ -6,7 +6,7 @@
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/literate_multiseq.hpp"
 
-template<int alphasize>
+template<size_t alphasize>
 static inline int8_t **scorematrix2D_get(const int8_t
                                            matrix[alphasize][alphasize])
 {
