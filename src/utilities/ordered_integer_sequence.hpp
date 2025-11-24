@@ -22,7 +22,8 @@ class OrderedIntegerSequence
          *sectionstart;
 
 #ifndef NDEBUG
-  [[nodiscard]] size_t linearsearch_sec_idx_largest_leq(size_t idx) const noexcept
+  [[nodiscard]]
+  size_t linearsearch_sec_idx_largest_leq(size_t idx) const noexcept
   {
     size_t section = 0;
     for (section = 0; section < numofsections && idx >= sectionstart[section];

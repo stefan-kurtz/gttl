@@ -256,7 +256,8 @@ class Eoplist
           length = 0;
         } else
         {
-          assert(std::cmp_less(ft_eopcode_maxmatches - eoplist[eoplist.size()-1],
+          assert(std::cmp_less(ft_eopcode_maxmatches -
+                                 eoplist[eoplist.size()-1],
                                length));
           length = ft_eopcode_maxmatches - eoplist[eoplist.size()-1];
           /* R max */
