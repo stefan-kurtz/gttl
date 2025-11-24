@@ -114,7 +114,7 @@ class SSWresources
 #endif
   { }
 #ifndef NDEBUG
-  size_t maximum_seq_len_get(void) const noexcept
+  [[nodiscard]] size_t maximum_seq_len_get(void) const noexcept
   {
     return maximum_seq_len;
   }

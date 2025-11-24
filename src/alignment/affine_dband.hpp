@@ -1,6 +1,7 @@
 #ifndef AFFINE_DBAND_HPP
 #define AFFINE_DBAND_HPP
 #include <algorithm>
+#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -330,8 +331,8 @@ class GttlAffineDPbanded
         colptr += width;
       }
       assert(low_row < high_row &&
-             ((j <= static_cast<size_t>(right_dist) && low_row == 0) ||
-              (j > static_cast<size_t>(right_dist) &&
+             ((std::cmp_less_equal(j, right_dist) && low_row == 0) ||
+              (std::cmp_greater(j, right_dist) &&
                low_row == j - static_cast<size_t>(right_dist))) &&
              (high_row == std::min(usubstring.size(),
                                    j + static_cast<size_t>(-left_dist))));
@@ -391,7 +392,7 @@ class GttlAffineDPbanded
   size_t low_row_on_the_fly(size_t j,int64_t right_dist)
   {
     assert(right_dist >= 0);
-    return j <= static_cast<size_t>(right_dist)
+    return std::cmp_less_equal(j, right_dist)
              ? 0
              : j - static_cast<size_t>(right_dist);
   }

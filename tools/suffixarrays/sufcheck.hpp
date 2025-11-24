@@ -43,7 +43,7 @@ class Rangewithchar
   { }
   [[nodiscard]] size_t start_get(void) const { return start; }
 #ifndef NDEBUG
-  size_t width_get(void) const
+  [[nodiscard]] size_t width_get(void) const
   {
     return end - start + 1;
   }

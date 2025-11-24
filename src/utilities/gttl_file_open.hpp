@@ -110,7 +110,7 @@ static inline std::basic_string<BaseType>
           throw std::runtime_error(std::string("Error reading from gzip file ")
                                    + inputfile);
         }
-        assert (static_cast<size_t>(bytes_read) <= buf_size);
+        assert (std::cmp_less_equal(bytes_read, buf_size));
         if (std::cmp_less(bytes_read, buf_size))
         {
           concatenated_content.resize(offset + bytes_read);

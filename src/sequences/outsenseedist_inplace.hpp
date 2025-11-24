@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <utility>
 #include "sequences/lcs_lcp_len_type.hpp"
 
 template<bool track_eop,class FrontValue,
@@ -251,7 +252,7 @@ static size_t fastedist_inplace_continue(const FrontValue *previousfront,
 
   if constexpr (d_max_defined)
   {
-    assert(d_max > 0 && static_cast<size_t>(previous_d) < d_max);
+    assert(d_max > 0 && std::cmp_less(previous_d, d_max));
     allocated = 2 * d_max + 1;
   } else
   {

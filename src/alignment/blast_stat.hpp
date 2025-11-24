@@ -7,6 +7,7 @@
 #include <cassert>
 #include <numbers>
 #include <stdexcept>
+#include <utility>
 #include "utilities/str_format.hpp"
 
 class BlastStatistics
@@ -73,7 +74,7 @@ class BlastStatistics
                           gap_extension_penalty);
       throw std::runtime_error(msg.str());
     }
-    assert(idx >= 0 && idx < static_cast<int>(items));
+    assert(idx >= 0 && std::cmp_less(idx, items));
     const double lambda = stat[idx].lambda;
     const double kappa = stat[idx].kappa;
     log_kappa_d_log2 = log(kappa)/std::numbers::ln2;

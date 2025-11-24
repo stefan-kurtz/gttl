@@ -40,6 +40,7 @@
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #ifndef NDEBUG
+#include "sequences/nthash_fwd.hpp"
 #include "sequences/nthash_fwd_aminoacids.hpp"
 #include <type_traits>
 #endif
@@ -165,8 +166,8 @@ static std::tuple<uint64_t,uint64_t,size_t,size_t,size_t> apply_qgram_iterator(
   using TransformerType = typename std::conditional_t<is_aminoacid,
                                                 NtHashAminoacidsTransformer,
                                                 NThashTransformer>;
-  uint8_t *qgram_buffer = new uint8_t [qgram_length];
-  TransformerType nt_hash_transformer(qgram_length);
+  uint8_t * const qgram_buffer = new uint8_t [qgram_length];
+  const TransformerType nt_hash_transformer(qgram_length);
   auto alphabet = HashValueIterator::alphabet;
 #endif
 

@@ -16,17 +16,19 @@
 static constexpr const char_finder::NucleotideFinder nucleotide_finder{};
 
 #ifndef NDEBUG
-#include "utilities/str_format.hpp"
+#include <cassert>
+#include <cstring>
+#include "sequences/complement_uint8.hpp"
 template<class HashValuePairIterator>
 static void verify_hash_value_pair(HashValuePairIterator &qgiter,
                                    uint64_t hash_value,
                                    uint64_t compl_hash_value)
 {
-  size_t qgram_length = qgiter.qgram_length_get();
-  const uint8_t *qgram = qgiter.qgram_decode(hash_value);
-  uint8_t *qgram_direct = new uint8_t [qgram_length];
+  const size_t qgram_length = qgiter.qgram_length_get();
+  const uint8_t * const qgram = qgiter.qgram_decode(hash_value);
+  uint8_t * const qgram_direct = new uint8_t [qgram_length];
   memcpy(qgram_direct,qgram,qgram_length * sizeof *qgram);
-  const uint8_t *qgram_rc = qgiter.qgram_decode(compl_hash_value);
+  const uint8_t * const qgram_rc = qgiter.qgram_decode(compl_hash_value);
   for (size_t idx = 0; idx < qgram_length; idx++)
   {
     uint8_t cc = qgram_rc[qgram_length - 1 - idx];

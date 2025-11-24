@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cassert>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -255,8 +256,8 @@ class Eoplist
           length = 0;
         } else
         {
-          assert(static_cast<size_t>(ft_eopcode_maxmatches -
-                                     eoplist[eoplist.size()-1]) < length);
+          assert(std::cmp_less(ft_eopcode_maxmatches - eoplist[eoplist.size()-1],
+                               length));
           length = ft_eopcode_maxmatches - eoplist[eoplist.size()-1];
           /* R max */
           eoplist[eoplist.size()-1] = ft_eopcode_maxmatches - 1;

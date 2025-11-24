@@ -240,11 +240,11 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
   {
     for (Counttype j = std::get<0>(bck) + 1;  j < std::get<1>(bck); j++)
     {
-      const uint64_t a = functor(shift,array,static_cast<size_t>(j-1)),
-                     b = functor(shift,array,static_cast<size_t>(j));
+      const uint64_t a = functor(shift,array,static_cast<size_t>(j-1));
+      const uint64_t b = functor(shift,array,static_cast<size_t>(j));
       if (a != b)
       {
-        std::cerr << "a=" << a << " != " << b << std::endl;
+        std::cerr << "a=" << a << " != " << b << '\n';
         exit(EXIT_FAILURE);
       }
     }

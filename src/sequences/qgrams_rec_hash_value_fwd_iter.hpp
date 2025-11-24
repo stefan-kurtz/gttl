@@ -21,6 +21,7 @@
 #include <iterator>
 #include <utility>
 #ifndef NDEBUG
+#include <cassert>
 #include <cmath>
 #endif
 #include "utilities/cyclic_buffer.hpp"

@@ -1,6 +1,7 @@
 #ifndef ALIGN_POLISH_HPP
 #define ALIGN_POLISH_HPP
 #include <algorithm>
+#include <climits>
 #include <cstddef>
 #include <cassert>
 #include <string>

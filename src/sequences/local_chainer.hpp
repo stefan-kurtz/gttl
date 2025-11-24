@@ -283,7 +283,7 @@ class LocalChainer
         const size_t j_match_length = seed_table.length_get(segment_start + j);
         ScoreType j_maxscore = static_cast<ScoreType>(j_match_length);
         var_chain_elem_info->chain_elem_init(j);
-        assert(step < 0 || static_cast<size_t>(step) <= j);
+        assert(step < 0 || std::cmp_less_equal(step, j));
         size_t i = j - step;
         while (true)
         {
@@ -349,7 +349,7 @@ class LocalChainer
           {
             break;
           }
-          assert(step < 0 || static_cast<size_t>(step) <= i);
+          assert(step < 0 || std::cmp_less_equal(step, i));
           i -= step;
         }
         var_chain_elem_info->score_set(j,j_maxscore);

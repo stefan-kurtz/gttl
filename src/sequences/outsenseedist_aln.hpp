@@ -2,6 +2,7 @@
 #define OUTSENSEEDIST_ALN_HPP
 #include <cassert>
 #include <cstdint>
+#include <utility>
 #include <vector>
 #include <cstdio>
 #include <cmath>
@@ -52,8 +53,8 @@ class TrackEditoperations
     const size_t max_d = max_d_get();
     assert(trace.size() >= max_d + 1);
 #ifndef NDEBUG
-    size_t u_remain = ulen,
-           v_remain = vlen;
+    size_t u_remain = ulen;
+    size_t v_remain = vlen;
 #endif
     size_t front_mid = trace.size() - 1 - max_d;
     assert(front_mid + vlen >= ulen);
@@ -62,7 +63,7 @@ class TrackEditoperations
     for (size_t current_d = max_d; /* Nothing */; current_d--)
     {
       assert(diag >= -static_cast<int64_t>(current_d) &&
-             diag <= static_cast<int64_t>(current_d));
+             std::cmp_less_equal(diag, current_d));
       const Backreference &br = trace[front_mid + diag];
       const uint32_t match_length = br.local_matchcount_get();
       if (match_length > 0)

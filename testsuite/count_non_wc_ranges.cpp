@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include <string_view>
 #include <vector>
 #include <utility>
 #include "sequences/gttl_fasta_generator.hpp"

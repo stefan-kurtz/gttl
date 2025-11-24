@@ -155,12 +155,12 @@ const int split_group_start[] = {
 260
 };
 inline constexpr size_t BIT_COUNTS_LAST_NUM_RANGE = 8;
-static inline const int *bit_counts_get(size_t *num_ranges, int numbits)
+static inline const int *bit_counts_get(size_t *num_ranges, unsigned int numbits)
 {
 #ifndef NDEBUG
   const size_t num_groups = sizeof split_group_start/
-                            sizeof split_group_start[0],
-               num_split_elems = sizeof bits2split/
+                            sizeof split_group_start[0];
+  const size_t num_split_elems = sizeof bits2split/
                                  sizeof bits2split[0];
 #endif
   assert(numbits >= MIN_NUM_SPLIT);

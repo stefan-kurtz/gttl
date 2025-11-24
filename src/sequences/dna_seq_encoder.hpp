@@ -106,14 +106,14 @@ class DNASeqEncoder
 #ifndef NDEBUG
     if constexpr (verbose)
     {
-      std::cout << "# num_bits=" << num_bits << std::endl;
-      std::cout << "# num_units=" << num_units << std::endl;
-      assert(additional_bits
-               < static_cast<int>(sizeof(size_t) * bits_in_store_unit));
-      std::cout << "# additional_bits=" << additional_bits << std::endl;
-      std::cout << "# bits_in_store_unit=" << bits_in_store_unit << std::endl;
-      std::cout << "# prefix_length=" << prefix_length << std::endl;
-      std::cout << "# characters_per_unit=" << characters_per_unit << std::endl;
+      std::cout << "# num_bits=" << num_bits << '\n';
+      std::cout << "# num_units=" << num_units << '\n';
+      assert(std::cmp_less(additional_bits,
+                           sizeof(size_t) * bits_in_store_unit));
+      std::cout << "# additional_bits=" << additional_bits << '\n';
+      std::cout << "# bits_in_store_unit=" << bits_in_store_unit << '\n';
+      std::cout << "# prefix_length=" << prefix_length << '\n';
+      std::cout << "# characters_per_unit=" << characters_per_unit << '\n';
     }
 #endif
   }
@@ -166,7 +166,7 @@ class DNASeqEncoder
     }
     if (remaining_additional_bits > 0)
     {
-      assert(remaining_additional_bits < bits_in_store_unit);
+      assert(std::cmp_less(remaining_additional_bits, bits_in_store_unit));
       encoding[encoding_index++]
         = static_cast<StoreUnitType>(a_val << (bits_in_store_unit -
                                                remaining_additional_bits));
@@ -181,13 +181,13 @@ class DNASeqEncoder
     int shift = bits_in_store_unit - 2;
     for (size_t char_idx = 0; char_idx < prefix_length; char_idx++)
     {
-      const uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx]),
-                   er = static_cast<uint8_t>((encoding[encoding_index] >> shift)
+      const uint8_t r = dna_alphabet.char_to_rank(char_seq[char_idx]);
+      const uint8_t er = static_cast<uint8_t>((encoding[encoding_index] >> shift)
                                              & uint8_t(3));
       if (r != er)
       {
         std::cerr << "r = " << static_cast<int>(r) << " != "
-                  << static_cast<int>(er) << " = er" << std::endl;
+                  << static_cast<int>(er) << " = er" << '\n';
         exit(EXIT_FAILURE);
       }
       if (shift >= 2)
@@ -246,7 +246,7 @@ class DNASeqEncoder
     }
     if (remaining_bits > 0)
     {
-      assert(remaining_bits < bits_in_store_unit && decoding_index < num_units);
+      assert(std::cmp_less(remaining_bits, bits_in_store_unit) && decoding_index < num_units);
       additional_value |= static_cast<size_t>(encoding[decoding_index]
                                               >> (bits_in_store_unit -
                                                   remaining_bits));
