@@ -30,7 +30,7 @@
    and all, but the last bitgroup fits into the first value of type
    basetype */
 
-template <int sizeof_unit,size_t bit_groups>
+template <int sizeof_unit,int bit_groups>
 struct GttlBitPacker
 {
   private:
