@@ -60,7 +60,7 @@ struct GttlBitPacker
                     sizeof_unit <= sizeof(basetype) + 7);
       static constexpr const int bits_basetype = CHAR_BIT * sizeof(basetype);
       int count = 0;
-      unsigned int idx;
+      int idx;
       for (idx = 0; idx < bit_groups; idx++)
       {
         bit_group_sizes[idx] = _bit_group_sizes[idx];
@@ -111,7 +111,7 @@ struct GttlBitPacker
     void pretty_print(const char *tag) const noexcept
     {
       std::cout << "# " << tag << '\n';
-      for (size_t idx = 0; idx < bit_groups; idx++)
+      for (int idx = 0; idx < bit_groups; idx++)
       {
         std::cout << "# bit_group\t" << idx << "\t" << bit_group_sizes[idx]
                   << '\n';
