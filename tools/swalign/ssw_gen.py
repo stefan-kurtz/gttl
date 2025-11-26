@@ -14,7 +14,8 @@ template = environment.from_string('''#include <algorithm>
 #include "alignment/simd.hpp"
 #include "sequences/complement_uint8.hpp"
 #include "utilities/gcc_builtin.hpp"
-template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_uint{{ width }} (
+template<bool forward_reading,bool forward_strand> static SWsimdResult
+sw_simd_uint{{ width }} (
                                  [[maybe_unused]]
                                  const uint8_t *original_dbseq,
                                  [[maybe_unused]] size_t original_dbseq_len,
@@ -111,7 +112,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
                              + segment_len * static_cast<size_t>(current_char);
 
     print_simd_int<uint{{ width }}_t>("Initial vH: ", vH);
-    vH = simdi8_shiftl{{width//8}}(vH); /* Shift the value in vH left by 2 byte. */
+    /* Shift the value in vH left by 2 byte. */
+    vH = simdi8_shiftl{{width//8}}(vH);
 
     print_simd_int<uint{{ width }}_t>("vH shifted: ", vH);
 
@@ -123,9 +125,11 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     pvHStoreNextNext = pv;
 
     /* inner loop to process the query sequence */
-    for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len); ++segment_pos)
+    for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
+         ++segment_pos)
     {
-      vH = simd{{ ui_for_8 }}{{ width }}_adds(vH, simdi_load(vP + segment_pos));{{ vH_subs }}
+      vH = simd{{ ui_for_8 }}{{ width }}_adds(vH, simdi_load(vP + segment_pos));
+      {{ vH_subs }}
       print_simd_int<uint{{ width }}_t>("for loop 1 vH: ", vH);
 
       /* Get max from vH, vE and vF. */
@@ -141,7 +145,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
       simdi_store(pvHStore + segment_pos, vH);
 
       /* Update vE value. */
-      vH = simdui{{ width }}_subs(vH, vGapO); /* saturation arithmetic, result >= 0 */
+      /* saturation arithmetic, result>=0 */
+      vH = simdui{{ width }}_subs(vH, vGapO);
       e = simdui{{ width }}_subs(e, vGapE);
       e = simd{{ ui_for_8 }}{{ width }}_max(e, vH);
       simdi_store(pvE + segment_pos, e);
@@ -174,7 +179,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     vTemp = simdui8_subs(vF, vTemp);
     vTemp = simdi8_eq(vTemp, vZero);
 
-    for (cmp = simdi8_movemask(vTemp), segment_pos = 0; cmp != SSW_MAX_CMP_VALUE;
+    for (cmp = simdi8_movemask(vTemp), segment_pos = 0;
+         cmp != SSW_MAX_CMP_VALUE;
          cmp = simdi8_movemask(vTemp))
     {
       vH = simdui8_max (vH, vF);
@@ -196,7 +202,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     for (size_t k = 0; GTTL_IS_LIKELY(k < simd_size); ++k)
     {
       vF = simdi8_shiftl{{ width//8 }}(vF);
-      for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len); ++segment_pos)
+      for (segment_pos = 0; GTTL_IS_LIKELY(segment_pos < segment_len);
+           ++segment_pos)
       {
         vH = simdi_load(pvHStore + segment_pos);
         vH = simdi{{ width }}_max(vH, vF);
@@ -227,7 +234,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     cmp = simdi8_movemask(vTemp);
     if (cmp != SSW_MAX_CMP_VALUE)
     {
-      const uint{{ width }}_t local_max_score = simdi{{ width }}_hmax(vMaxScore);
+      const uint{{ width }}_t local_max_score
+        = simdi{{ width }}_hmax(vMaxScore);
 
       vMaxMark = vMaxScore;
       if (GTTL_IS_LIKELY(local_max_score > max_align_score))
@@ -252,7 +260,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     }
 
     /* Record the max score of current column. */
-    if (expected_score > 0 && simdi{{ width }}_hmax(vMaxColumn) == expected_score)
+    if (expected_score > 0 &&
+        simdi{{ width }}_hmax(vMaxColumn) == expected_score)
     {
       break;
     }
@@ -266,7 +275,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
 #endif
   }
 
-  if (static_cast<uint32_t>(max_align_score) + static_cast<uint32_t>(abs_smallest_score) < UINT{{ width }}_MAX)
+  if (static_cast<uint32_t>(max_align_score) +
+      static_cast<uint32_t>(abs_smallest_score) < UINT{{ width }}_MAX)
   {
     /* Trace the column with the max alignment score for the ending
        position on query. */
@@ -278,7 +288,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
       {
         const size_t current_end
           = i / simd_size + (i % simd_size) * segment_len;
-        sw_simd_result.on_query = std::min(current_end, sw_simd_result.on_query);
+        sw_simd_result.on_query
+          = std::min(current_end, sw_simd_result.on_query);
       }
     }
     sw_simd_result.opt_loc_alignment_score = max_align_score;
@@ -288,7 +299,8 @@ template<bool forward_reading,bool forward_strand> static SWsimdResult sw_simd_u
     delete ssw_resources;
   }
 #if SSW_SIMD_DEBUG > 0
-  printf("alignment uint{{ width }} %zu/%zu\\n", column_max_move_count, column_count);
+  printf("alignment uint{{ width }} %zu/%zu\\n",
+         column_max_move_count, column_count);
 #endif
   return sw_simd_result;
 }''')
@@ -303,8 +315,8 @@ def parse_arguments(argv):
 args = parse_arguments(sys.argv[1:])
 
 if args.width == 8:
-    v_bias_init_expr = ('\nconst simd_int vBias = simdi{}_set(abs_smallest_score);'
-                        .format(args.width))
+    v_bias_init_expr \
+      = f'\nconst simd_int vBias = simdi{args.width}_set(abs_smallest_score);'
 else:
     v_bias_init_expr = ''
 print('/* generated by {} DO NOT EDIT */'.format(' '.join(sys.argv)))
@@ -312,7 +324,10 @@ print('#ifndef SW_SIMD_UINT{}_HPP'.format(args.width))
 print('#define SW_SIMD_UINT{}_HPP'.format(args.width))
 print(template.render(width=args.width,
                       ui_for_8='ui' if args.width == 8 else 'i',
-                      vH_subs='\nvH = simdui8_subs(vH, vBias); /* vH will be always > 0 */' if args.width == 8 else '',
+                      vH_subs=('\nvH = simdui8_subs(vH, vBias); '
+                               ' /* vH will be always > 0 */') \
+                               if args.width == 8 else '',
                       v_bias_init_var=v_bias_init_expr,
-                      correct_comment='\n/* correct 8 -> 16 in the next line */' if args.width >= 16 else ''))
+                      correct_comment=('\n/* correct 8 -> 16 in next line */'
+                                       if args.width >= 16 else '')))
 print('#endif')

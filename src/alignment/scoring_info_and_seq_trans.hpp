@@ -10,14 +10,14 @@
 #include "alignment/unit_score_nuc_lower.hpp"
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "sequences/gttl_multiseq.hpp"
-#include "utilities/str_format.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 
-inline static std::tuple<int8_t **, int8_t, size_t>
+static std::tuple<int8_t **, int8_t, size_t>
 scoring_info_and_seq_trans(const char *score_matrix_id,
                            const ScoreMatrixName &score_matrix_name,
                            bool dna_alphabet, GttlMultiseq *db_multiseq,
@@ -35,13 +35,13 @@ scoring_info_and_seq_trans(const char *score_matrix_id,
                 Unit_score_aa::smallest_score,
                 literate_multiseqs<Unit_score_aa>(db_multiseq, query_multiseq)};
       } else {
-        const ScoreMatrixName score_matrix_name_instance{};
-        const StrFormat msg(
-            ": score matrix %s is not possible for protein "
-            "sequences; the following choices are available: %s",
-            score_matrix_id,
-            score_matrix_name_instance.string_values_joined(", ").c_str());
-        throw std::runtime_error(msg.str());
+        const ScoreMatrixName smn_instance{};
+        auto score_matrix_names = smn_instance.string_values_joined(", ");
+        throw std::runtime_error(
+            std::format(": score matrix {} is not possible for "
+                        "protein sequences; the following "
+                        "choices are available: {}",
+                        score_matrix_id, score_matrix_names));
       }
     }
   } else {
@@ -74,14 +74,13 @@ scoring_info_and_seq_trans(const char *score_matrix_id,
                     literate_multiseqs<Unit_score_nuc_upper>(db_multiseq,
                                                              query_multiseq)};
           } else {
-            const ScoreMatrixName score_matrix_name_instance{};
-            const StrFormat msg(
-                ": score matrix %s is not possible for DNA "
-                "sequences; the following choices are "
-                "available: %s",
-                score_matrix_id,
-                score_matrix_name_instance.string_values_joined(", ").c_str());
-            throw std::runtime_error(msg.str());
+            const ScoreMatrixName smn_instance{};
+            auto score_matrix_names = smn_instance.string_values_joined(", ");
+            throw std::runtime_error(
+                std::format(": score matrix {} is not possible "
+                            "for DNA sequences; the following "
+                            "choices are available: {}",
+                            score_matrix_id, score_matrix_names));
           }
         }
       }

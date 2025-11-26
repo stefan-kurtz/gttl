@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <format>
 #include "sequences/char_finder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
@@ -13,7 +14,6 @@
 #include "unwords_opt.hpp"
 #include "utilities/file_size.hpp"
 #include "utilities/runtime_class.hpp"
-#include "utilities/str_format.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
         sequences.emplace_back(std::string(""),
                                std::string(si->sequence_get()));
       }
-      const StrFormat msg("storing %zu sequences", sequences.size());
-      rt_sequence_storing.show(msg.str());
+      rt_sequence_storing.show(std::format("storing {} sequences",
+                                           sequences.size()));
       unwords = unwords_finder<std::vector<GttlFastAEntry<buf_size>>>
                               (guessed_protein_sequences,
                                !options

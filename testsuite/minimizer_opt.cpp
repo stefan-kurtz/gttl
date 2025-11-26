@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
-#include "utilities/str_format.hpp"
+#include <format>
 #include "utilities/cxxopts.hpp"
 #include "minimizer_opt.hpp"
 
@@ -87,11 +87,11 @@ void MinimizerOptions::parse(int argc, char **argv)
       {
         if (std::cmp_less(hash_bits, 2 * qgram_length))
         {
-          const StrFormat msg("hash_bits = %d < %zu = 2 * kmer_length is "
+          throw cxxopts::exceptions::exception(
+                  std::format("hash_bits = {} < {} = 2 * kmer_length is "
                               "not possible",
                               hash_bits,
-                              2 * qgram_length);
-          throw cxxopts::exceptions::exception(msg.str());
+                              2 * qgram_length));
         }
       }
       if (show_mode != 0 and show_mode != 1 and show_mode != 2)

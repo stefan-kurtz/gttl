@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <format>
 #include "sequences/gttl_multiseq.hpp"
 #include "utilities/cxxopts.hpp"
-#include "utilities/str_format.hpp"
 #include "sequences/multiseq_factory.hpp"
 
 static void usage(const cxxopts::Options &options)
@@ -21,9 +21,10 @@ static void usage(const cxxopts::Options &options)
 #define CHECK_PAIRWISE_EXCLUDE(I_IDX,J_IDX)\
         if (std::get<1>(values[I_IDX]) > 0 and std::get<1>(values[J_IDX]) > 0)\
         {\
-          const StrFormat msg("option %s and %s exclude each other", \
-                        std::get<0>(values[I_IDX]),std::get<0>(values[J_IDX]));\
-          throw std::invalid_argument(msg.str());\
+          throw std::invalid_argument(\
+                  std::format("option {} and {} exclude each other", \
+                              std::get<0>(values[I_IDX]),\
+                              std::get<0>(values[J_IDX])));\
         }
 
 class MultiseqFactoryOptions

@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <deque>
 
 #include "utilities/bitpacker.hpp"
@@ -21,7 +22,6 @@
 #include "utilities/runtime_class.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "utilities/is_big_endian.hpp"
-#include "utilities/str_format.hpp"
 #include "threading/thread_pool_var.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
@@ -70,8 +70,8 @@ static void validate_minimizers(
     }
     if (minimizer_set.count(min_hash) == 0)
     {
-      StrFormat msg("cannot find minimizer %zu",static_cast<size_t>(min_hash));
-      throw std::runtime_error(msg.str());
+      throw std::runtime_error(std::format("cannot find minimizer {}",
+                                           min_hash));
     }
   }
 }
@@ -605,13 +605,11 @@ class HashedQgramsGeneric
                             std::to_string(this->size()));
       const double density
         = static_cast<double>(size())/this->count_all_qgrams_get();
-      const StrFormat s_density("hashed kmers density\t%.2f", density);
-      log_vector->push_back(s_density.str());
+      log_vector->push_back(std::format("hashed kmers density\t{:.2f}",
+                                        density));
       const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
-      const StrFormat s_space("SPACE\thashed kmers (MB)\t%zu",
-                              static_cast<size_t>(std::ceil(
-                                                        space_in_mega_bytes)));
-      log_vector->push_back(s_space.str());
+      log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t%{:.0f}",
+                                        std::ceil(space_in_mega_bytes)));
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }
     if (sort_by_hashvalue)

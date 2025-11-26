@@ -29,10 +29,13 @@ input_cmds = ['-d testdata/seq18.fasta -c 50',
               '-d testdata/smrt100-2000-first.fna',
               '-d testdata/seq18.fasta -q testdata/query-protein_f5.fsa -c 50',
               '-d testdata/seq18.fasta -q testdata/query-protein_f5.fsa',
-              '-d testdata/seq18.fasta -q testdata/query-protein_f5.fsa -s unit_score_aa',
-              '-d testdata/smrt100-2000-first.fna -q testdata/smrt100-2000-last.fna',
+              '-d testdata/seq18.fasta -q testdata/query-protein_f5.fsa '
+                  '-s unit_score_aa',
+              '-d testdata/smrt100-2000-first.fna -q '
+                  'testdata/smrt100-2000-last.fna',
               '-d testdata/query-protein_f5.fsa -q testdata/seq18.fasta',
-              '-d testdata/smrt100-2000-last.fna -q testdata/smrt100-2000-first.fna']
+              '-d testdata/smrt100-2000-last.fna '
+                  '-q testdata/smrt100-2000-first.fna']
 
 gap_scoring = ['-g 7 2','']
 vectorized = ['-v {}'.format(v) for v in [1,2]]

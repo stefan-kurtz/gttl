@@ -5,7 +5,8 @@ from jinja2 import Environment, Template
 # https://realpython.com/primer-on-jinja-templating/#install-jinja
 
 environment = Environment()
-template = environment.from_string('''/* created by {{ program_call }} DO NOT EDIT */
+template \
+  = environment.from_string('''/* created by {{ program_call }} DO NOT EDIT */
 #ifndef {{ unique_file_key }}
 #define {{ unique_file_key }}
 #include <cstddef>
@@ -13,6 +14,7 @@ template = environment.from_string('''/* created by {{ program_call }} DO NOT ED
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <format>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
 #include "alignment/unit_score_nuc.hpp"
@@ -22,7 +24,6 @@ template = environment.from_string('''/* created by {{ program_call }} DO NOT ED
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
 #include "sequences/gttl_multiseq.hpp"
-#include "utilities/str_format.hpp"
 {{ include_extra }}
 
 static {{ return_type }} {{ function_name }}
@@ -43,13 +44,14 @@ static {{ return_type }} {{ function_name }}
         {{ do_replacement('Unit_score_aa') }}
       } else
       {
-        const ScoreMatrixName score_matrix_name_instance{};
-        const StrFormat msg(": score matrix %s is not possible for protein "
-                      "sequences; the following choices are available: %s",
-                      score_matrix_id,
-                      score_matrix_name_instance.string_values_joined(", ")
-                                                .c_str());
-        throw std::runtime_error(msg.str());
+        const ScoreMatrixName smn_instance{};
+        auto score_matrix_names = smn_instance.string_values_joined(", ");
+        throw std::runtime_error(
+                std::format(": score matrix {} is not possible for "
+                            "protein sequences; the following "
+                            "choices are available: {}",
+                            score_matrix_id,
+                            score_matrix_names));
       }
     }
   } else
@@ -76,14 +78,14 @@ static {{ return_type }} {{ function_name }}
             {{ do_replacement('Unit_score_nuc_upper') }}
           } else
           {
-            const ScoreMatrixName score_matrix_name_instance{};
-            const StrFormat msg(": score matrix %s is not possible for DNA "
-                          "sequences; the following choices are "
-                          "available: %s",
-                          score_matrix_id,
-                          score_matrix_name_instance.string_values_joined(", ")
-                                                    .c_str());
-            throw std::runtime_error(msg.str());
+            const ScoreMatrixName smn_instance{};
+            auto score_matrix_names = smn_instance.string_values_joined(", ");
+            throw std::runtime_error(
+                    std::format(": score matrix {} is not possible "
+                                "for DNA sequences; the following "
+                                "choices are available: {}",
+                                score_matrix_id,
+                                score_matrix_names));
           }
         }
       }

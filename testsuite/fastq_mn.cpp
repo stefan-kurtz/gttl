@@ -33,10 +33,10 @@
 #include <limits>
 #include <map>
 #include <filesystem>
-#include "utilities/gttl_file_open.hpp"
+#include <format>
 #include <vector>
+#include "utilities/gttl_file_open.hpp"
 #include "utilities/mathsupport.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
 #include "utilities/mathsupport.hpp"
@@ -72,11 +72,10 @@ static void fastq_split_writer(size_t split_size,
     {
       break;
     }
-    const StrFormat outfilename("%s_%02d",
-                                inputfile_basename_ptr,
-                                file_number++);
     std::ofstream out_stream;
-    out_stream.open(outfilename.str());
+    out_stream.open(std::format("{}_{:02d}",
+                                inputfile_basename_ptr,
+                                file_number++));
     for (size_t idx = 0; idx < split_size; idx++)
     {
       if (it == fastq_gen.end())

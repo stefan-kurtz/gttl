@@ -27,11 +27,11 @@
 #include <tuple>
 #include <cinttypes>
 #include <vector>
+#include <format>
 #include "sequences/dna_seq_encoder.hpp"
 #include "sequences/gttl_fasta_generator.hpp"
 #include "utilities/bitpacker.hpp"
 #include "utilities/gttl_file_open.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
@@ -395,13 +395,12 @@ static void enumerate_nt_hash(const char *inputfilename,
       CALL_enumerate_nt_hash_template(9,false);
     }
   }
-  const StrFormat msg("nthash\t%s\t%zu\t%d\t%d\t%d",
-                      inputfilename,
-                      qgram_length,
-                      hashbits,
-                      sequences_number_bits,
-                      sequences_length_bits);
-  rt_nthash.show(msg.str());
+  rt_nthash.show(std::format("nthash\t{}\t{}\t{}\t{}\t{}",
+                             inputfilename,
+                             qgram_length,
+                             hashbits,
+                             sequences_number_bits,
+                             sequences_length_bits));
 }
 
 int main(int argc,char *argv[])

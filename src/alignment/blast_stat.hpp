@@ -8,7 +8,7 @@
 #include <numbers>
 #include <stdexcept>
 #include <utility>
-#include "utilities/str_format.hpp"
+#include <format>
 
 class BlastStatistics
 {
@@ -67,12 +67,12 @@ class BlastStatistics
                                          gap_extension_penalty);
     if (idx == -1)
     {
-      const StrFormat msg(": no Gumbel parameters for computing bits scores "
+      throw std::runtime_error(
+              std::format(": no Gumbel parameters for computing bits scores "
                           "available for blosum62 matrix and gap parameters"
-                          " %d/%d",
+                          " {}/{}",
                           gap_open_penalty,
-                          gap_extension_penalty);
-      throw std::runtime_error(msg.str());
+                          gap_extension_penalty));
     }
     assert(idx >= 0 && std::cmp_less(idx, items));
     const double lambda = stat[idx].lambda;

@@ -6,8 +6,8 @@
 #include <ios>
 #include <cassert>
 #include <fcntl.h>
+#include <format>
 #include "utilities/file_size.hpp"
-#include "utilities/str_format.hpp"
 #ifdef _WIN32
   #define NOMINMAX
   #include <io.h>
@@ -33,27 +33,26 @@ class Gttlmmap
   {
     if (size_of_file % sizeof(T) != 0)
     {
-      const StrFormat msg("file %s contains %zu bytes which is not a "
-                          "multiple of %zu",
+      throw std::ios_base::failure(
+              std::format("file {} contains {} bytes which is not a "
+                          "multiple of {}",
                           filename,
                           size_of_file,
-                          sizeof(T));
-      throw std::ios_base::failure(msg.str());
+                          sizeof(T)));
     }
     filedesc = open(filename, O_RDONLY);
     if (filedesc < 0)
     {
-      const StrFormat msg("cannot open file %s", filename);
-      throw std::ios_base::failure(msg.str());
+      throw std::ios_base::failure(std::format("cannot open file {}",filename));
     }
     memorymap = mmap(nullptr, size_of_file, PROT_READ, MAP_FILE | MAP_SHARED,
                      filedesc, 0);
     if (memorymap == MAP_FAILED)
     {
-      const StrFormat msg("cannot memory map %zu elements from file %s",
+      throw std::ios_base::failure(
+              std::format("cannot memory map {} elements from file {}",
                           num_values,
-                          filename);
-      throw std::ios_base::failure(msg.str());
+                          filename));
     }
   }
 

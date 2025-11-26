@@ -19,11 +19,11 @@
 #include <tuple>
 #include <algorithm>
 #include <limits>
+#include <format>
 #include <cstdio>
 
 #include "sequences/gttl_fasta_generator.hpp"
 #include "sequences/gttl_fastq_generator.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/cycle_of_numbers.hpp"
 
 /* A class to store various sequences and their header information.
@@ -167,13 +167,13 @@ class GttlMultiseq
       const bool snd_more = (it0 == fastq_it0.end() and it1 != fastq_it1.end());
       if (fst_more or snd_more)
       {
-        const StrFormat msg("processing readpair files %s and %s: %s file"
-                            " contains more sequences than %s file",
-                            inputfiles[0].c_str(),
-                            inputfiles[1].c_str(),
+        throw std::runtime_error(
+                std::format("processing readpair files {} and {}: {} file"
+                            " contains more sequences than {} file",
+                            inputfiles[0],
+                            inputfiles[1],
                             fst_more ? "first" : "second",
-                            fst_more ? "second" : "fist");
-        throw std::runtime_error(msg.str());
+                            fst_more ? "second" : "fist"));
       }
     } else
     {

@@ -7,7 +7,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-#include "utilities/str_format.hpp"
+#include <format>
 #include "utilities/split_string.hpp"
 #include "utilities/concatenate_strings.hpp"
 #include "utilities/gttl_line_generator.hpp"
@@ -30,10 +30,9 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
                                    vec.begin(), vec.end(), sep_string);
       if (buffer != line_from_vec)
       {
-        const StrFormat msg(": '%s' != '%s'",
-                            buffer.c_str(),
-                            line_from_vec.c_str());
-        throw std::runtime_error{msg.str()};
+        throw std::runtime_error(std::format(": '%s' != '%s'",
+                                             buffer,
+                                             line_from_vec));
       }
     }
     line_count++;

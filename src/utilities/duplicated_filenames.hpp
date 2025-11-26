@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "utilities/str_format.hpp"
+#include <format>
 
 static inline bool gttl_files_with_same_path(const std::string &path0,
                                              const std::string &path1)
@@ -31,12 +31,12 @@ static inline void gttl_duplicated_filenames(const std::vector<std::string>
     {
       if (gttl_files_with_same_path(input_files[i],input_files[j]))
       {
-        const StrFormat msg("%s appears twice in list of input files; if you "
+        throw std::runtime_error(
+                std::format("{} appears twice in list of input files; if you "
                             "want to compare each sequence of a file against "
                             "each other (e.g. to search for repeats), then run "
                             "the program only with this single filename",
-                            input_files[i].c_str());
-        throw std::runtime_error(msg.str());
+                            input_files[i]));
       }
     }
   }

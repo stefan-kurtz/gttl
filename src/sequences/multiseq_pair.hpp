@@ -6,9 +6,9 @@
 #include <exception>
 #include <stdexcept>
 #include <tuple>
+#include <format>
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/guess_if_protein_seq.hpp"
-#include "utilities/str_format.hpp"
 
 static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
   create_multiseq_pair(const char *dbfile,const char*queryfile)
@@ -54,11 +54,11 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     {
       if(db_multiseq != query_multiseq) delete query_multiseq;
       delete db_multiseq;
-      const StrFormat msg(": incompatible files: file \"%s\" contains protein "
-                          "sequences, but file \"%s\" does not",
+      throw std::runtime_error(
+              std::format(": incompatible files: file \"{}\" contains protein "
+                          "sequences, but file \"{}\" does not",
                           dbfile,
-                          queryfile);
-      throw std::runtime_error(msg.str());
+                          queryfile));
     }
   } else
   {
@@ -68,11 +68,11 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
     {
       if(db_multiseq != query_multiseq) delete query_multiseq;
       delete db_multiseq;
-      const StrFormat msg(": incompatible files: file \"%s\" does not contain "
-                          "protein sequences, but file \"%s\" does",
+      throw std::runtime_error(
+              std::format(": incompatible files: file \"{}\" does not contain "
+                          "protein sequences, but file \"{}\" does",
                           dbfile,
-                          queryfile);
-      throw std::runtime_error(msg.str());
+                          queryfile));
     }
   }
   return std::tuple<GttlMultiseq *,GttlMultiseq *,bool>

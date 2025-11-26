@@ -7,10 +7,10 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <format>
 #include "utilities/access_maybe_pointer.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/constexpr_for.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/multibitvector.hpp"
 #include "sequences/char_range.hpp"
 #include "sequences/char_finder.hpp"
@@ -157,8 +157,8 @@ static const Unwords *unwords_binary_search(size_t qgram_length_max,
                                  reverse_complement,
                                  SeqGenerator>(
                                  qgram_length, alphabetsize, seq_generator);
-    const StrFormat msg("count number of different %zu-grams", qgram_length);
-    compute_unwords_runtime.show(msg.str());
+    compute_unwords_runtime.show(std::format("count number of different "
+                                             "{}-grams", qgram_length));
     if (unwords->size() > 0)
     {
       delete last_successful_unwords;

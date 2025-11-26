@@ -62,28 +62,32 @@ for filename, msg in files2msg.items():
                       expected_error_code,full_msg)
 
 err_calls_with_msgs \
-  = [('{} -d testdata/gsa-seqpair.fasta -q testdata/simple_fwd.fna'.format(program_name),
-      ('{}: file "testdata/gsa-seqpair.fasta": incompatible files: '
-       'file "testdata/gsa-seqpair.fasta" contains protein sequences, but '
-       'file "testdata/simple_fwd.fna" does not').format(program_name)),
-     ('{} -d testdata/simple_fwd.fna -q testdata/gsa-seqpair.fasta'.format(program_name),
-      ('{}: file "testdata/simple_fwd.fna": incompatible files: file '
-       '"testdata/simple_fwd.fna" does not contain protein sequences, '
-       'but file "testdata/gsa-seqpair.fasta" does').format(program_name)),
-     ('{} -d testdata/seq18.fasta -g 8 1 -c 50'.format(program_name),
-      ('{}: file "testdata/seq18.fasta": no Gumbel parameters for computing bits scores '
-       'available for blosum62 matrix and gap '
-       'parameters 8/1').format(program_name)),
-     ('{} -d testdata/seq18.fasta -s unit_score_nuc'.format(program_name),
-      ('{}: file "testdata/seq18.fasta": score matrix unit_score_nuc is not possible '
-       'for protein sequences; the following choices are available: blosum62, '
-       'unit_score_aa, unit_score_nuc, unit_score_nuc_2_2, '
-       'unit_score_nuc_lower, unit_score_nuc_upper').format(program_name)),
-     ('{} -d testdata/simple_fwd.fna -s unit_score_aa'.format(program_name),
-      ('{}: file "testdata/simple_fwd.fna": score matrix unit_score_aa is not possible '
+  = [(f'{program_name} -d testdata/gsa-seqpair.fasta '
+       '-q testdata/simple_fwd.fna',
+      f'{program_name}: file "testdata/gsa-seqpair.fasta": '
+        'incompatible files: '
+        'file "testdata/gsa-seqpair.fasta" contains protein sequences, but '
+        'file "testdata/simple_fwd.fna" does not'),
+     (f'{program_name} -d testdata/simple_fwd.fna '
+       '-q testdata/gsa-seqpair.fasta',
+      f'{program_name}: file "testdata/simple_fwd.fna": incompatible files: '
+       'file "testdata/simple_fwd.fna" does not contain protein sequences, '
+       'but file "testdata/gsa-seqpair.fasta" does'),
+     (f'{program_name} -d testdata/seq18.fasta -g 8 1 -c 50',
+      f'{program_name}: file "testdata/seq18.fasta": no Gumbel parameters '
+       'for computing bits scores available for blosum62 matrix and gap '
+       'parameters 8/1'),
+     (f'{program_name} -d testdata/seq18.fasta -s unit_score_nuc',
+      f'{program_name}: file "testdata/seq18.fasta": score matrix '
+       'unit_score_nuc is not possible for protein sequences; the following '
+       'choices are available: blosum62, unit_score_aa, unit_score_nuc, '
+       'unit_score_nuc_2_2, unit_score_nuc_lower, unit_score_nuc_upper'),
+     (f'{program_name} -d testdata/simple_fwd.fna -s unit_score_aa',
+      f'{program_name}: file "testdata/simple_fwd.fna": score matrix '
+       'unit_score_aa is not possible '
        'for DNA sequences; the following choices are available: blosum62, '
        'unit_score_aa, unit_score_nuc, unit_score_nuc_2_2, '
-       'unit_score_nuc_lower, unit_score_nuc_upper').format(program_name)),
+       'unit_score_nuc_lower, unit_score_nuc_upper'),
      ('{} -q abc'.format(program_name),
       ('{}: option -d is mandatory'.format(program_name))),
      ('{} -q'.format(program_name),

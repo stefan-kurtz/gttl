@@ -4,8 +4,8 @@
 #include <exception>
 #include <iostream>
 #include <stdexcept>
+#include <format>
 #include "utilities/gttl_line_generator.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/gttl_mmap.hpp"
 
 static size_t count_lines(const char *file_part, size_t len)
@@ -46,10 +46,10 @@ static void process_file(const char *filename)
                                       mapped_file.size() - mid));
   if(next_newline == nullptr)
   {
-    const StrFormat msg(": second part of file beginning at offset %zu "
+    throw std::runtime_error(
+            std::format(": second part of file beginning at offset {} "
                         " does not contain new line character",
-                        mid);
-    throw std::runtime_error{msg.str()};
+                        mid));
   }
   const size_t start_part2 = static_cast<size_t>(
                                next_newline + 1 - file_contents);
@@ -62,13 +62,13 @@ static void process_file(const char *filename)
   std::cout << "# lines all\t" << lines_all << '\n';
   if (lines_all != lines1 + lines2)
   {
-    const StrFormat msg(": inconsistent number of lines: lines_all = %zu != "
-                        "%zu = %zu + %zu = lines1 + lines2",
+    throw std::runtime_error(
+            std::format(": inconsistent number of lines: "
+                        "lines_all = {} != {} = {} + {} = lines1 + lines2",
                         lines_all,
                         lines1 + lines2,
                         lines1,
-                        lines2);
-    throw std::runtime_error{msg.str()};
+                        lines2));
   }
 }
 

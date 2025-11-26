@@ -8,8 +8,8 @@
 #include <vector>
 #include <filesystem>
 #include <ios>
+#include <format>
 #include "utilities/file_size.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/gttl_line_generator.hpp"
 
 template<typename T>
@@ -26,12 +26,12 @@ std::vector<T> gttl_read_vector(const std::string& filename)
     }
     if (file_content.size() % sizeof(T) != 0)
     {
-      const StrFormat msg("file %s contains %zu bytes which is not a "
-                          "multiple of %zu",
+      throw std::ios_base::failure(
+              std::format("file {} contains {} bytes which is not a "
+                          "multiple of {}",
                           filename.c_str(),
                           file_content.size(),
-                          sizeof(T));
-      throw std::ios_base::failure(msg.str());
+                          sizeof(T)));;
     }
     std::vector<T> vec(reinterpret_cast<const T*>(file_content.data()),
                        reinterpret_cast<const T*>(file_content.data() +
@@ -46,28 +46,28 @@ std::vector<T> gttl_read_vector(const std::string& filename)
   const size_t size_of_file = gttl_file_size(filename);
   if (size_of_file % sizeof(T) != 0)
   {
-    const StrFormat msg("file %s contains %zu bytes which is not a "
-                        "multiple of %zu",
+    throw std::ios_base::failure(
+            std::format("file {} contains {} bytes which is not a "
+                        "multiple of {}",
                         filename.c_str(),
                         size_of_file,
-                        sizeof(T));
-    throw std::ios_base::failure(msg.str());
+                        sizeof(T)));
   }
   // Open the stream to 'lock' the file.
   std::ifstream instream(filename, std::ios::in | std::ios::binary);
   if (instream.fail())
   {
-    const StrFormat msg("cannot open file %s", filename.c_str());
-    throw std::ios_base::failure(msg.str());
+    throw std::ios_base::failure(std::format("cannot open file {}",
+                                             filename.c_str()));
   }
   const size_t num_values = size_of_file/sizeof(T);
   std::vector<T> vec(num_values);
   if (!instream.read(reinterpret_cast<char*>(vec.data()), size_of_file))
   {
-    const StrFormat msg("cannot only read %zu bytes from file %s",
+    throw std::ios_base::failure(
+            std::format("cannot only read {} bytes from file {}",
                         instream.gcount(),
-                        filename.c_str());
-    throw std::ios_base::failure(msg.str());
+                        filename));
   }
   return vec;
 }

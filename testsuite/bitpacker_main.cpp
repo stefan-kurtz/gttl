@@ -7,12 +7,12 @@
 #include <cstring>
 #include <random>
 #include <iostream>
+#include <format>
 #include "utilities/bitpacker.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "utilities/constexpr_for.hpp"
-#include "utilities/str_format.hpp"
 #include "uint64_encoding.hpp"
 
 static void show_uint64_t_bytes([[maybe_unused]] uint64_t value)
@@ -147,21 +147,18 @@ int main(int argc,char *argv[])
   {
     RunTimeClass rt64;
     runner<uint64_t,overflow>(false,num_values);
-    const StrFormat msg64("%zu bytes", sizeof(uint64_t) + overflow);
-    rt64.show(msg64.str());
+    rt64.show(std::format("{} bytes", sizeof(uint64_t) + overflow));
     if constexpr (overflow <= 3)
     {
       RunTimeClass rt32;
       runner<uint32_t,overflow>(false,num_values);
-      const StrFormat msg32("%zu bytes", sizeof(uint32_t) + overflow);
-      rt32.show(msg32.str());
+      rt32.show(std::format("{} bytes", sizeof(uint32_t) + overflow));
     }
     if constexpr (overflow <= 1)
     {
       RunTimeClass rt16;
       runner<uint16_t,overflow>(false,num_values);
-      const StrFormat msg16("%zu bytes", sizeof(uint16_t) + overflow);
-      rt16.show(msg16.str());
+      rt16.show(std::format("{} bytes", sizeof(uint16_t) + overflow));
     }
   });
   return EXIT_SUCCESS;

@@ -108,7 +108,8 @@ sw_simd_uint8([[maybe_unused]] const uint8_t *original_dbseq,
 static_cast<size_t>(current_char);
 
     print_simd_int<uint8_t>("Initial vH: ", vH);
-    vH = simdi8_shiftl1(vH); /* Shift the value in vH left by 2 byte. */
+    /* Shift the value in vH left by 2 byte. */
+    vH = simdi8_shiftl1(vH);
 
     print_simd_int<uint8_t>("vH shifted: ", vH);
 
@@ -124,6 +125,7 @@ static_cast<size_t>(current_char);
          ++segment_pos)
     {
       vH = simdui8_adds(vH, simdi_load(vP + segment_pos));
+
       vH = simdui8_subs(vH, vBias); /* vH will be always > 0 */
       print_simd_int<uint8_t>("for loop 1 vH: ", vH);
 
@@ -140,7 +142,8 @@ static_cast<size_t>(current_char);
       simdi_store(pvHStore + segment_pos, vH);
 
       /* Update vE value. */
-      vH = simdui8_subs(vH, vGapO); /* saturation arithmetic, result >= 0 */
+      /* saturation arithmetic, result>=0 */
+      vH = simdui8_subs(vH, vGapO);
       e  = simdui8_subs(e, vGapE);
       e  = simdui8_max(e, vH);
       simdi_store(pvE + segment_pos, e);

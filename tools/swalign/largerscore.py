@@ -50,7 +50,7 @@ firstlarger = 0
 secondlarger = 0
 for seqpair in  seqpairs1:
   sseq, qseq = seqpair
-  v1 = keyhash1[sseq][qseq] 
+  v1 = keyhash1[sseq][qseq]
   v2 = keyhash2[sseq][qseq]
   if v1 > v2:
     sys.stderr.write('{}: for key {}/{}: v1 = {} > {} = v2\n'

@@ -13,10 +13,10 @@
 #include <cinttypes>
 #include <type_traits>
 #include <algorithm>
+#include <format>
 #include "utilities/cxxopts.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/mathsupport.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/is_big_endian.hpp"
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
@@ -356,13 +356,13 @@ static void sort_values(unsigned int seed,
                                        num_threads);
       }
     }
-    const StrFormat msg("sort %zu %s with ska_large_lsb_small_radix_sort "
-                        "and %zu thread%s",
-                        values.size(),
-                        tag,
-                        num_threads,
-                        num_threads == 1 ? "" : "s");
-    rt_sorting.show(msg.str());
+    rt_sorting.show(std::format("sort {} {} with "
+                                "ska_large_lsb_small_radix_sort "
+                                "and {} thread{}",
+                                values.size(),
+                                tag,
+                                num_threads,
+                                num_threads == 1 ? "" : "s"));
   } else
   {
     if (sort_mode == 1)
@@ -370,13 +370,13 @@ static void sort_values(unsigned int seed,
       const unsigned int n_threads = 1;
       merge_sort<decltype(values.begin())>(values.begin(),values.end(),
                                            n_threads);
-      const StrFormat msg("sort %zu %s with mergesort", values.size(), tag);
-      rt_sorting.show(msg.str());
+      rt_sorting.show(std::format("sort {} {} with mergesort",
+                                  values.size(), tag));
     } else
     {
       std::sort(values.begin(),values.end());
-      const StrFormat msg("sort %zu %s with std::sort", values.size(), tag);
-      rt_sorting.show(msg.str());
+      rt_sorting.show(std::format("sort {} {} with std::sort",
+                                  values.size(), tag));
     }
   }
   if (show)

@@ -10,6 +10,7 @@
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include <format>
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -17,7 +18,6 @@
 #include <io.h>
 #include "utilities/windows_mkdtemp.hpp"
 #endif
-#include "utilities/str_format.hpp"
 
 
 class ThreadsOutputFiles
@@ -56,18 +56,17 @@ class ThreadsOutputFiles
     }
     for (size_t t_idx = 0; t_idx < num_threads; t_idx++)
     {
-      constexpr const char *file_format_string = "%s%cthread_%02zu.tsv";
-      const StrFormat fname(file_format_string,
-                            cc_threads_out_prefix,
-                            separator,
-                            t_idx);
-      output_filenames.push_back(fname.str());
+      const std::string fname{std::format("{}{}thread_{:02d}.tsv",
+                                          cc_threads_out_prefix,
+                                          separator,
+                                          t_idx)};
+      output_filenames.push_back(fname);
       // NOLINTNEXTLINE(misc-const-correctness)
-      FILE *const out_fp = std::fopen(fname.str().c_str(), "w");
+      FILE *const out_fp = std::fopen(fname.c_str(), "w");
       if (out_fp == nullptr)
       {
-        const StrFormat msg("cannot create file \"%s\"", fname.str().c_str());
-        throw std::ios_base::failure(msg.str());
+        throw std::ios_base::failure(
+                std::format("cannot create file \"{}\"", fname));
       }
       output_filepointers.push_back(out_fp);
     }
@@ -80,7 +79,7 @@ class ThreadsOutputFiles
     }
     if (!has_threads_out_prefix)
     {
-      for (auto &fname : output_filenames)
+      for (const auto &fname : output_filenames)
       {
         FILE *const in_fp     = std::fopen(fname.c_str(), "r");
         const size_t buf_size = size_t(1) << 14;
@@ -102,7 +101,7 @@ class ThreadsOutputFiles
       free(dirname_template);
     } else
     {
-      for (auto &fname : output_filenames)
+      for (const auto &fname : output_filenames)
       {
         printf("# output file\t%s\n",fname.c_str());
       }

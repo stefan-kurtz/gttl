@@ -27,6 +27,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <format>
 
 #include "utilities/bitpacker.hpp"
 #include "utilities/mathsupport.hpp"
@@ -35,7 +36,6 @@
 #include "utilities/remove_duplicates.hpp"
 #include "utilities/bytes_unit.hpp"
 #include "sequences/matching_characters.hpp"
-#include "utilities/str_format.hpp"
 
 template<bool check_bounds,bool (*matching_method)(char,char)>
 static inline std::pair<size_t,size_t> maximize_on_both_ends(
@@ -315,17 +315,19 @@ class SortedMatchList
             length_stored = maximum_storable_match_length;
             if (sizeof_unit_match >= 8 || sizeof_unit_match == 9)
             {
-              StrFormat msg("cannot store match of length %zu in %d bytes, "
-                            "resort to using %d bytes of space for each MEM",
-                            this_match_length,sizeof_unit_match,
-                                              sizeof_unit_match+1);
-              throw std::overflow_error(msg.str());
+              throw std::overflow_error(
+                      std::format("cannot store match of length {} in {} "
+                                  "bytes, resort to using {} bytes of space "
+                                  "for each MEM",
+                                  this_match_length,
+                                  sizeof_unit_match,
+                                  sizeof_unit_match+1));
             } else
             {
-              const StrFormat msg(": cannot store match of length %zu in 10 "
+              throw std::runtime_error(
+                      std::format(": cannot store match of length %zu in 10 "
                                   "bytes, please inform the developer",
-                                  this_match_length);
-              throw std::runtime_error(msg.str());
+                                  this_match_length));
             }
           } else
           {

@@ -21,11 +21,11 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <format>
 #include "utilities/runtime_class.hpp"
 #include "indexes/gttl_suffixarray.hpp"
 #include "indexes/succinct_bitvector.hpp"
 #include "succinct_plcp_table.hpp"
-#include "utilities/str_format.hpp"
 
 int main(int argc,char *argv[])
 {
@@ -110,8 +110,7 @@ int main(int argc,char *argv[])
   delete suffixarray;
   if (!haserr)
   {
-    const StrFormat msg("sa_reader\t%s", indexname);
-    rt_overall.show(msg.str());
+    rt_overall.show(std::format("sa_reader\t{}", indexname));
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
 }

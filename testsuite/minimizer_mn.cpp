@@ -26,6 +26,7 @@
 #include <utility>
 #include <tuple>
 #include <vector>
+#include <format>
 
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/inputfiles_multiseq.hpp"
@@ -33,7 +34,6 @@
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
 #include "minimizer_opt.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/constexpr_for.hpp"
 
@@ -48,10 +48,10 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
       return std::make_pair(bits - sequences_bits,bytes);
     }
   }
-  const StrFormat msg("cannot handle sequences_bits + hash_bits = %d + %d > 72",
+  throw std::runtime_error(
+          std::format("cannot handle sequences_bits + hash_bits = {} + {} > 72",
                       sequences_bits,
-                      requested_hash_bits);
-  throw std::runtime_error{msg.str()};
+                      requested_hash_bits));
 }
 
 void run_nt_minimizer(const MinimizerOptions &options)

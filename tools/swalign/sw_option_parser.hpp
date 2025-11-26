@@ -16,7 +16,7 @@
 #include <cstring>
 #include <exception>
 #include <stdexcept>
-#include "utilities/str_format.hpp"
+#include <format>
 #include "threading/threads_output_files.hpp"
 #include "alignment/score_matrix_name.hpp"
 #include "alignment_display.hpp"
@@ -125,9 +125,9 @@ struct SWOptions
             if (optind > argc - 1 ||
                 std::sscanf(argv[optind],"%d",&readint) != 1)
             {
-              const StrFormat msg("missing or illegal argument to option -%c",
-                                  c_opt);
-              throw std::invalid_argument{msg.str()};
+              throw std::invalid_argument(
+                      std::format("missing or illegal argument to option -{}",
+                                  c_opt));
             }
             if (c_opt == 't')
             {
@@ -190,8 +190,8 @@ struct SWOptions
           {
             if (optind > argc - 1)
             {
-              const StrFormat msg("missing argument to option -%c", c_opt);
-              throw std::invalid_argument{msg.str()};
+              throw std::invalid_argument(
+                      std::format("missing argument to option -{}", c_opt));
             }
             if (c_opt == 's')
             {
@@ -251,15 +251,14 @@ struct SWOptions
           break;
         default:
           {
-          const StrFormat msg("illegal option -%c", c_opt);
-          throw std::invalid_argument(msg.str());
+          throw std::invalid_argument(std::format("illegal option -{}", c_opt));
           }
       }
     }
     if (optind < argc)
     {
-      const StrFormat msg("superfluous arguments %s", argv[optind]);
-      throw std::invalid_argument(msg.str());
+      throw std::invalid_argument(std::format("superfluous arguments {}",
+                                              argv[optind]));
     }
     assert (optind == argc);
     if (dbfile == nullptr)

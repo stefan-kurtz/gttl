@@ -6,11 +6,11 @@
 #include <exception>
 #include <iostream>
 #include <string>
+#include <format>
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "utilities/has_fasta_or_fastq_extension.hpp"
 #include "utilities/runtime_class.hpp"
-#include "utilities/str_format.hpp"
 #include "utilities/nttable.hpp"
 #include "utilities/binary_nttable.hpp"
 #include "sequences/ntcard.hpp"
@@ -143,10 +143,9 @@ int main(int argc, char **argv)
     std::cerr << argv[0] << ": " << err.what() << '\n';
     return EXIT_FAILURE;
   }
-  const StrFormat msg("ntcard.all\t%c\t%zu\t\t%s",
-                      options.binary_option_is_set() ? 'b' : 'n',
-                      options.num_threads_get(),
-                      options.inputfile_get().c_str());
-  rt_all.show(msg.str());
+  rt_all.show(std::format("ntcard.all\t{}\t{}\t\t{}",
+                          options.binary_option_is_set() ? 'b' : 'n',
+                          options.num_threads_get(),
+                          options.inputfile_get()));
   return EXIT_SUCCESS;
 }
