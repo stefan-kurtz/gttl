@@ -608,7 +608,7 @@ class HashedQgramsGeneric
       log_vector->push_back(std::format("hashed kmers density\t{:.2f}",
                                         density));
       const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
-      log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t%{:.0f}",
+      log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t{:.0f}",
                                         std::ceil(space_in_mega_bytes)));
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }
