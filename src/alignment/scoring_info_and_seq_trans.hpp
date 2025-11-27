@@ -14,10 +14,9 @@
 #include <cstdint>
 #include <format>
 #include <stdexcept>
-#include <string>
 #include <tuple>
 
-static std::tuple<int8_t **, int8_t, size_t>
+static inline std::tuple<int8_t **, int8_t, size_t>
 scoring_info_and_seq_trans(const char *score_matrix_id,
                            const ScoreMatrixName &score_matrix_name,
                            bool dna_alphabet, GttlMultiseq *db_multiseq,

@@ -10,16 +10,12 @@
 #include "alignment/unit_score_nuc_lower.hpp"
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "sequences/alignment_output.hpp"
-#include "sequences/gttl_multiseq.hpp"
 #include "sequences/gttl_substring.hpp"
-#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <stdexcept>
-#include <string>
-#include <tuple>
 
-static auto
+static inline auto
 alignment_output_function_get(const char *score_matrix_id,
                               const ScoreMatrixName &score_matrix_name,
                               bool dna_alphabet) {

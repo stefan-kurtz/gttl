@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include <tuple>
 #include <format>
 #include "alignment/blosum62.hpp"
 #include "alignment/unit_score_aa.hpp"
@@ -15,7 +14,6 @@
 #include "alignment/unit_score_nuc_upper.hpp"
 #include "alignment/score_class_base.hpp"
 #include "alignment/score_matrix_name.hpp"
-#include "sequences/gttl_multiseq.hpp"
 #include "sequences/gttl_substring.hpp"
 
 template <class SeqClass, typename CharType, char (&to_char)(CharType)>
@@ -29,7 +27,7 @@ static std::string sequence_decode(const SeqClass &seq)
   return s;
 }
 
-static auto
+static inline auto
 sequence_decode_function_get(const char *score_matrix_id,
                              const ScoreMatrixName &score_matrix_name,
                              bool dna_alphabet)
