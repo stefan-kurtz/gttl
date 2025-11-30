@@ -20,7 +20,7 @@ static inline GttlMultiseq *
   {
     if (reverse_complement_option)
     {
-      multiseq = multiseq_with_reverse_complement<complement_plain>
+      multiseq = multiseq_with_reverse_complement<gttl_complement_plain>
                                                  (inputfiles,
                                                   store_header,
                                                   store_sequence,

@@ -27,7 +27,7 @@
 #include "utilities/cycle_of_numbers.hpp"
 
 /* A class to store various sequences and their header information.
- the inputfile is read in using fasta_reader.
+ the inputfile is read in using GttlFastAGenerator
  Constructor may throw std::runtime_error
  - std::range_error */
 
@@ -94,7 +94,6 @@ class GttlMultiseq
               const std::string_view sequence,
               bool store_header,
               bool store_sequence,
-              [[maybe_unused]] /* if not store_sequence */
               uint8_t this_padding_char)
   {
     if (store_header)
@@ -136,8 +135,11 @@ class GttlMultiseq
     multipadding(true, this_padding_char, 7);
   }
 
+  /* This method is used for all constructors for which the inputfiles or the
+     file pointer is provided with the constructor. */
   void multiseq_reader(const std::vector<std::string> &inputfiles,
-                       bool store_header, bool store_sequence,
+                       bool store_header,
+                       bool store_sequence,
                        bool zip_readpair_files)
   {
     if (store_sequence)
@@ -180,8 +182,11 @@ class GttlMultiseq
       GttlFastAGenerator<buf_size> gttl_fg(&inputfiles);
       for (const auto *si : gttl_fg)
       {
-        append(si->header_get(), si->sequence_get(), store_header,
-               store_sequence, padding_char);
+        append(si->header_get(),
+               si->sequence_get(),
+               store_header,
+               store_sequence,
+               padding_char);
       }
     }
   }
@@ -202,27 +207,26 @@ class GttlMultiseq
   [[nodiscard]] std::pair<size_t, size_t>
   short_header_substring(const std::string_view header) const noexcept
   {
-    const char *const first_delim_ptr = static_cast<const char *>(std::memchr(
-                                 static_cast<const void *>(header.data()),
-                                 first_delim,
-                                 header.size()));
-    if(first_delim_ptr != nullptr)
+    const char *const first_delim_ptr
+      = static_cast<const char *>
+                   (std::memchr(static_cast<const void *>(header.data()),
+                                first_delim,
+                                header.size()));
+    if (first_delim_ptr != nullptr)
     {
-      const char *const second_delim_ptr = static_cast<const char *>(memchr(
-                                   static_cast<const void *>(first_delim_ptr
-                                                             + 1),
-                                   second_delim,
-                                   static_cast<size_t>(header.data()
+      const char *const second_start = first_delim_ptr + 1;
+      const char *const second_delim_ptr
+        = static_cast<const char *>
+                     (std::memchr(static_cast<const void *>(second_start),
+                                  second_delim,
+                                  static_cast<size_t>(header.data()
                                                        + header.size()
-                                                       - (first_delim_ptr
-                                                          + 1))));
-      const char *const header_end       = second_delim_ptr != nullptr ?
-                                         second_delim_ptr :
-                                         (header.data() + header.size());
-      return std::make_pair(static_cast<size_t>(first_delim_ptr + 1 -
-                                                header.data()),
-                            static_cast<size_t>(header_end -
-                                                (first_delim_ptr+1)));
+                                                       - second_start)));
+      const char *const header_end
+        = second_delim_ptr != nullptr ? second_delim_ptr
+                                      : (header.data() + header.size());
+      return std::make_pair(static_cast<size_t>(second_start - header.data()),
+                            static_cast<size_t>(header_end - second_start));
     }
     return short_header_substring(header);
   }
@@ -234,7 +238,9 @@ class GttlMultiseq
     multipadding(false, this_padding_char, 6);
   }
 
-  GttlMultiseq(const char *inputfile, bool store_header, bool store_sequence,
+  GttlMultiseq(const char *inputfile,
+               bool store_header,
+               bool store_sequence,
                uint8_t _padding_char)
     : padding_char(_padding_char)
     , has_constant_padding_char(true)
@@ -242,11 +248,14 @@ class GttlMultiseq
     , has_read_pairs(false)
   {
     const std::vector<std::string> inputfiles{std::string(inputfile)};
-    multiseq_reader(inputfiles, store_header, store_sequence, false);
+    constexpr const bool zip_readpair_files = false;
+    multiseq_reader(inputfiles, store_header, store_sequence,
+                    zip_readpair_files);
   }
 
   GttlMultiseq(const std::string &inputfile,
-               bool store_header, bool store_sequence,
+               bool store_header,
+               bool store_sequence,
                uint8_t _padding_char)
     : padding_char(_padding_char)
     , has_constant_padding_char(true)
@@ -254,23 +263,30 @@ class GttlMultiseq
     , has_read_pairs(false)
   {
     const std::vector<std::string> inputfiles{inputfile};
-    multiseq_reader(inputfiles, store_header, store_sequence, false);
+    constexpr const bool zip_readpair_files = false;
+    multiseq_reader(inputfiles, store_header, store_sequence,
+                    zip_readpair_files);
   }
 
   GttlMultiseq(const std::vector<std::string> &inputfiles,
-               bool store_header, bool store_sequence,
+               bool store_header,
+               bool store_sequence,
                uint8_t _padding_char)
     : padding_char(_padding_char)
     , has_constant_padding_char(true)
     , has_reverse_complement(false)
     , has_read_pairs(false)
   {
-    multiseq_reader(inputfiles, store_header, store_sequence, false);
+    constexpr const bool zip_readpair_files = false;
+    multiseq_reader(inputfiles, store_header, store_sequence,
+                    zip_readpair_files);
   }
 
   GttlMultiseq(const std::string &readpair_file1,
                const std::string &readpair_file2,
-               bool store_header, bool store_sequence, uint8_t _padding_char)
+               bool store_header,
+               bool store_sequence,
+               uint8_t _padding_char)
     : padding_char(_padding_char)
     , has_constant_padding_char(true)
     , has_reverse_complement(false)
@@ -282,8 +298,10 @@ class GttlMultiseq
                     zip_readpair_files);
   }
 
-  GttlMultiseq(bool store_sequence, uint8_t _padding_char,
-               size_t _sequence_number_offset = 0, bool _has_read_pairs = false)
+  GttlMultiseq(bool store_sequence,
+               uint8_t _padding_char,
+               size_t _sequence_number_offset = 0,
+               bool _has_read_pairs = false)
     : sequence_number_offset(_sequence_number_offset)
     , padding_char(_padding_char)
     , has_constant_padding_char(true)
@@ -312,7 +330,10 @@ class GttlMultiseq
     {
       this_padding_char = cycle_of_numbers.next();
       constexpr const bool store_sequence = true;
-      append(si->header_get(), si->sequence_get(), store_header, store_sequence,
+      append(si->header_get(),
+             si->sequence_get(),
+             store_header,
+             store_sequence,
              this_padding_char);
     }
     /* in case the computation of the lcp is a suffix of the last sequence,
@@ -541,8 +562,9 @@ class GttlMultiseq
     }
     return std::make_pair(header.data() + header_offset, header_len);
   }
-  void show_single_sequence(size_t width, bool short_header, size_t seqnum)
-        const noexcept
+  void show_single_sequence(size_t width,
+                            bool short_header,
+                            size_t seqnum) const noexcept
   {
     printf(">");
     const char *header_ptr;
@@ -679,21 +701,20 @@ class GttlMultiseq
       const std::string_view header = header_get(seqnum);
       size_t sh_offset;
       size_t sh_len;
-      std::tie(sh_offset, sh_len)
-        = short_header_substring(header);
+      std::tie(sh_offset, sh_len) = short_header_substring(header);
       assert(sh_offset <= UINT16_MAX and sh_len <= UINT16_MAX);
       short_header_cache.emplace_back(static_cast<uint16_t>(sh_offset),
-                                     static_cast<uint16_t>(sh_len));
+                                      static_cast<uint16_t>(sh_len));
     }
   }
 };
 
 template<char (*complement_base)(char)>
 static inline GttlMultiseq *multiseq_with_reverse_complement(
-                           const std::vector<std::string> &inputfiles,
-                           bool store_header,
-                           bool store_sequence,
-                           uint8_t padding_char)
+                             const std::vector<std::string> &inputfiles,
+                             bool store_header,
+                             bool store_sequence,
+                             uint8_t padding_char)
 {
   static constexpr const int buf_size = 1 << 14;
   GttlFastAGenerator<buf_size> gttl_fg(&inputfiles);
@@ -703,7 +724,10 @@ static inline GttlMultiseq *multiseq_with_reverse_complement(
   for (const auto *si : gttl_fg)
   {
     const std::string_view &seq = si->sequence_get();
-    multiseq->append(si->header_get(), seq, store_header, store_sequence,
+    multiseq->append(si->header_get(),
+                     seq,
+                     store_header,
+                     store_sequence,
                      padding_char);
     std::string rc_seq;
     rc_seq.reserve(seq.size());

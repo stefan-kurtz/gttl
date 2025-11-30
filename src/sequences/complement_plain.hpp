@@ -1,6 +1,6 @@
 #ifndef COMPLEMENT_PLAIN_HPP
 #define COMPLEMENT_PLAIN_HPP
-static inline char complement_plain(char cc)
+static inline char gttl_complement_plain(char cc)
 {
   switch (cc)
   {

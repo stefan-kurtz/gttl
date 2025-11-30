@@ -13,7 +13,6 @@
 class GttlMultiseqFactory
 {
   private:
-  static constexpr const bool store_header = true;
   static constexpr const bool store_sequence = true;
   static constexpr const int buf_size = 1 << 14;
   std::vector<GttlMultiseq *> multiseq_vector;
@@ -36,9 +35,11 @@ class GttlMultiseqFactory
                       size_t len_parts,
                       size_t _num_sequences,
                       uint8_t padding_char,
+                      bool store_header,
                       bool short_header)
     : num_sequences(_num_sequences)
   {
+    assert(not short_header or store_header);
     constexpr const bool has_read_pairs = true;
     GttlMultiseq *multiseq
       = new GttlMultiseq(store_sequence, padding_char, 0,
@@ -121,9 +122,11 @@ class GttlMultiseqFactory
                       size_t len_parts,
                       size_t _num_sequences,
                       uint8_t padding_char,
+                      bool store_header,
                       bool short_header)
     : num_sequences(_num_sequences)
   {
+    assert(not short_header or store_header);
     constexpr const bool has_read_pairs = false;
     constexpr const int buf_size = 1 << 14;
     GttlFastAGenerator<buf_size> fasta_it(inputfile.c_str());

@@ -152,29 +152,25 @@ static void test_multiseq_factory(size_t num_parts,
                                   const std::vector<std::string> &inputfiles)
 {
   const uint8_t padding_char = UINT8_MAX;
-  const bool short_header = true;
-  const GttlMultiseqFactory *multiseq_factory = nullptr;
-  if (inputfiles.size() == 1)
-  {
-    multiseq_factory
-      = new GttlMultiseqFactory(inputfiles[0],
-                                num_parts,
-                                len_parts,
-                                num_sequences,
-                                padding_char,
-                                short_header);
-  } else
-  {
-    assert (inputfiles.size() == 2);
-    multiseq_factory
-      = new GttlMultiseqFactory(inputfiles[0],
-                                inputfiles[1],
-                                num_parts,
-                                len_parts,
-                                num_sequences,
-                                padding_char,
-                                short_header);
-  }
+  constexpr const bool store_header = true;
+  constexpr const bool short_header = true;
+  assert (inputfiles.size() == 1 or inputfiles.size() == 2);
+  const GttlMultiseqFactory *multiseq_factory
+    = inputfiles.size() == 2 ? new GttlMultiseqFactory(inputfiles[0],
+                                                       inputfiles[1],
+                                                       num_parts,
+                                                       len_parts,
+                                                       num_sequences,
+                                                       padding_char,
+                                                       store_header,
+                                                       short_header)
+                             : new GttlMultiseqFactory(inputfiles[0],
+                                                       num_parts,
+                                                       len_parts,
+                                                       num_sequences,
+                                                       padding_char,
+                                                       store_header,
+                                                       short_header);
   std::cout << "# number of parts\t" << multiseq_factory->size() << '\n';
   if (statistics_option)
   {

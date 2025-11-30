@@ -17,7 +17,9 @@ struct LocalAlignmentCoordinates
   uint32_t raw_score; /* score of local alignment */
   bool forward_strand;
   LocalAlignmentCoordinates(void) = default;
-  void show(FILE *fpout,bool dna_alphabet,const GttlMultiseq *multiseq,
+  void show(FILE *fpout,
+            bool dna_alphabet,
+            const GttlMultiseq *multiseq,
             size_t seqnum) const noexcept
   {
     if (usubstringlength + vsubstringlength == 0)

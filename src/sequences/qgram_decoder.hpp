@@ -43,7 +43,7 @@ class QgramDecoder
     {
       if constexpr (reverse_complement)
       {
-        characters[idx] = complement_plain(_characters[idx]);
+        characters[idx] = gttl_complement_plain(_characters[idx]);
       } else
       {
         characters[idx] = _characters[idx];
