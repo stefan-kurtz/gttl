@@ -41,7 +41,7 @@ class ThreadsafeQueue
 
   ThreadsafeQueue(ThreadsafeQueue<T>&& other) noexcept(false)
   {
-    std::lock_guard<std::mutex> lock(q_mutex);
+    std::scoped_lock<std::mutex> lock(q_mutex);
     if (not empty())
     {
       throw non_empty_queue(std::string("Moving into a non-empty queue"));
@@ -51,7 +51,7 @@ class ThreadsafeQueue
 
   ~ThreadsafeQueue(void) noexcept(false)
   {
-    const std::lock_guard<std::mutex> lock(q_mutex);
+    const std::scoped_lock<std::mutex> lock(q_mutex);
     if (not empty())
     {
       throw non_empty_queue(std::string("Destroying a non-empty queue"));
@@ -61,13 +61,13 @@ class ThreadsafeQueue
 
   void enqueue(const T &item)
   {
-    const std::lock_guard<std::mutex> lock(q_mutex);
+    const std::scoped_lock<std::mutex> lock(q_mutex);
     the_queue.push(item);
   }
 
   std::optional<T> dequeue(void)
   {
-    const std::lock_guard<std::mutex> lock(q_mutex);
+    const std::scoped_lock<std::mutex> lock(q_mutex);
     if (the_queue.empty())
     {
       return {};
@@ -79,7 +79,7 @@ class ThreadsafeQueue
 
   size_t size(void) const
   {
-    const std::lock_guard<std::mutex> lock(q_mutex);
+    const std::scoped_lock<std::mutex> lock(q_mutex);
     return the_queue.size();
   }
 

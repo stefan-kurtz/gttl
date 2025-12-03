@@ -6,7 +6,7 @@
   #include "utilities/windows_fork.hpp"
 #else
   #include <unistd.h>
-  #include <stdio.h> // NOLINT(modernize-deprecated-header)
+  #include <stdio.h> // NOLINT(modernize-deprecated-headers)
 #endif
 #include <cstdio>
 #include <cstdlib>

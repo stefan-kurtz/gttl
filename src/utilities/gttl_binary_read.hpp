@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 // 4KB is default page size, 8/16 might be more memory friendly,
 // but 64KB is the default of std::ifstream. I assume this is reasonable.
@@ -155,8 +156,8 @@ class BinaryFileReader
   private:
   const std::string inputfile;
   public:
-  explicit BinaryFileReader(const std::string &_inputfile)
-    : inputfile(_inputfile)
+  explicit BinaryFileReader(std::string _inputfile)
+    : inputfile(std::move(_inputfile))
   { }
   [[nodiscard]] Iterator begin(void) const { return Iterator(inputfile); }
   [[nodiscard]] Iterator end(void) const { return Iterator(); }
