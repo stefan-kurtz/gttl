@@ -66,9 +66,9 @@ int main(int argc,char *argv[])
     const LCPtable &lcptable = suffixarray->lcptable_get();
     size_t idx = 0;
     size_t lcpvalue_sum = 0;
-    for (auto it = lcptable.begin(); it != lcptable.end(); ++it)
+    for (const uint32_t lcpvalue : lcptable)
     {
-      const uint32_t lcpvalue = *it; /* at idx */
+       /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
 

@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <stdexcept>
@@ -180,9 +179,9 @@ void SainOptions::parse(int argc, char **argv)
     {
       throw std::invalid_argument("missing positional reference file argument");
     }
-    for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+    for (const auto & unmatched_arg : unmatched_args)
     {
-      inputfiles.push_back(unmatched_args[idx]);
+      inputfiles.push_back(unmatched_arg);
     }
     display_options.set(show_options_spec);
     abs_suftab_show_opt = display_options.abs_suftab_output();

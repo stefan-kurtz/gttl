@@ -13,11 +13,10 @@ class StringTokenizer
     bool inword = false;
     std::string buffer;
 
-    for (auto it = instring.begin(); it != instring.end(); ++it)
+    for (const char cc : instring)
     {
       /* split string in maximum length substrings of alphabetic/digit/_/.
          and store each substring in vector */
-      const char cc = *it;
       static constexpr const int underscore = static_cast<int>('_');
       static constexpr const int dot = static_cast<int>('.');
 

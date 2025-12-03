@@ -23,6 +23,8 @@ Checks: >
   modernize-use-ranges,
   modernize-use-equals-default,
   modernize-use-integer-sign-comparison,
+  modernize-loop-convert,
+  -modernize-use-default-member-init,
   -modernize-use-auto,
   -modernize-use-trailing-return-type,
   -modernize-redundant-void-arg,

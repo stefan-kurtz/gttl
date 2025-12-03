@@ -155,7 +155,7 @@ static void test_multiseq_factory(size_t num_parts,
   constexpr const bool store_header = true;
   constexpr const bool short_header = true;
   assert (inputfiles.size() == 1 or inputfiles.size() == 2);
-  const GttlMultiseqFactory *multiseq_factory
+  const GttlMultiseqFactory * const multiseq_factory
     = inputfiles.size() == 2 ? new GttlMultiseqFactory(inputfiles[0],
                                                        inputfiles[1],
                                                        num_parts,

@@ -2222,14 +2222,14 @@ format_description
   {
     String desc2;
     auto size = std::size_t{ 0 };
-    for (auto c = std::begin(desc); c != std::end(desc); ++c)
+    for (const char & c : desc)
     {
-      if (*c == '\n')
+      if (c == '\n')
       {
-        desc2 += *c;
+        desc2 += c;
         size = 0;
       }
-      else if (*c == '\t')
+      else if (c == '\t')
       {
         auto skip = 8 - size % 8;
         stringAppend(desc2, skip, ' ');
@@ -2237,7 +2237,7 @@ format_description
       }
       else
       {
-        desc2 += *c;
+        desc2 += c;
         ++size;
       }
     }

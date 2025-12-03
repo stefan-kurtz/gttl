@@ -83,9 +83,9 @@ class CharRangeOptions
         usage(options);
       }
       const std::vector<std::string>& unmatched_args = result.unmatched();
-      for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+      for (const auto & unmatched_arg : unmatched_args)
       {
-        this->inputfiles.push_back(unmatched_args[idx]);
+        this->inputfiles.push_back(unmatched_arg);
       }
     }
     catch (const cxxopts::exceptions::exception &e)

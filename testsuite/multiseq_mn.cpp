@@ -115,9 +115,9 @@ class MultiseqOptions
         {
           throw std::invalid_argument("at least one inputput file is required");
         }
-        for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+        for (const auto & unmatched_arg : unmatched_args)
         {
-          inputfiles.push_back(unmatched_args[idx]);
+          inputfiles.push_back(unmatched_arg);
         }
       }
       if (zipped_option && inputfiles.size() != 2)
