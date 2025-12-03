@@ -159,7 +159,7 @@ static void check_bu_suftab_MULTISEQ(const SuftabBaseType *suftab,
   const uint8_t padding_char = multiseq->padding_char_get();
   const OrderedIntegerSequence<uint32_t> separator_positions_uint =
                                separator_positions_get<uint32_t>(multiseq);
-  std::vector<T_bu> bu_suftab = gttl_read_vector<T_bu>(filename.c_str());
+  std::vector<T_bu> bu_suftab = gttl_read_vector<T_bu>(filename);
 
   for (size_t idx = 0; idx <= totallength; idx++)
   {

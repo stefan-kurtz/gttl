@@ -73,7 +73,7 @@ class SuccinctPlcpTable
   SuccinctPlcpTable(const std::string &indexname)
    : suftab_inputfile(indexname + ".suf")
    , lcp_inputfile(indexname + ".lls")
-   , succinct_plcp_table(lcp_inputfile.c_str())
+   , succinct_plcp_table(lcp_inputfile)
    , totallength(succinct_plcp_table.get_rank(succinct_plcp_table.get_length(),
                                               true))
   { }

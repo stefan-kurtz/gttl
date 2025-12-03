@@ -55,7 +55,7 @@ int main(int argc,char *argv[])
               << ".lls\n";
   }
   const std::string filename          = std::string(indexname) + ".lls";
-  const SuccinctBitvector succinctlcp = SuccinctBitvector(filename.c_str());
+  const SuccinctBitvector succinctlcp = SuccinctBitvector(filename);
 
   const std::string indexstring(indexname);
   const SuccinctPlcpTable<uint32_t> succinctplcptable(indexstring);

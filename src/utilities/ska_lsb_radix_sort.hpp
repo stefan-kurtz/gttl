@@ -255,6 +255,7 @@ static Buckets<Counttype> *countingsort_skarupke_it(basetype *array,
 }
 
 template<typename Counttype>
+// NOLINTNEXTLINE(readability-suspicious-call-argument)
 static const Buckets<Counttype> *countingsort_skarupke(
                                                  [[maybe_unused]] int num_bits,
                                                  int shift,
@@ -325,6 +326,7 @@ static std::pair<const Buckets<Counttype> *,int> radixsort_ska_template(
     if constexpr (sizeof_unit == 1)
     {
       static_assert(sizeof(basetype) == 8);
+      // NOLINTNEXTLINE(readability-suspicious-call-argument)
       buckets = countingsort_skarupke<Counttype>(first_pass_msb_bits,
                                                  64 - bits_already_sorted,
                                                  array,

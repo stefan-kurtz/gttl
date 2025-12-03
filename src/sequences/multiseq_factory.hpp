@@ -93,7 +93,7 @@ class GttlMultiseqFactory
                            store_header,store_sequence,padding_char);
           auto sequence1 = (*it1)->sequence_get();
           multiseq->append((*it1)->header_get(),sequence1,
-                           store_sequence,store_header,padding_char);
+                           store_header,store_sequence,padding_char);
           current_part_number_of_units
             = (len_parts > 0 ? (sequence0.size() + sequence1.size())
                              : 2);

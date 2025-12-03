@@ -96,7 +96,7 @@ static inline std::vector<uint32_t> gttl_lcp9_kasai(
   uint32_t lcpvalue = 0;
   const std::string suftab_file{indexname + ".suf"};
   std::vector<SuftabBaseType> suftab
-    = gttl_read_vector<SuftabBaseType>(suftab_file.c_str());
+    = gttl_read_vector<SuftabBaseType>(suftab_file);
   memory_tracker->track(suftab.data(),__FILE__,__LINE__,
                         (totallength + 1) * sizeof(SuftabBaseType));
   for (size_t pos = 0; pos <= totallength; pos++)

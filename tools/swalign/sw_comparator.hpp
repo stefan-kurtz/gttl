@@ -60,10 +60,8 @@ class SWcomparator
   }
   void preprocess(size_t i, const std::string_view &db_seq)
   {
-    if (ssw_profile != nullptr)
-    {
-      delete ssw_profile;
-    }
+    delete ssw_profile;
+
     current_i = i;
     ssw_profile = new SSWprofile (alphasize,
                                   scorematrix2D[0],

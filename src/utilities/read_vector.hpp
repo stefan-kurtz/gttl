@@ -29,7 +29,7 @@ std::vector<T> gttl_read_vector(const std::string& filename)
       throw std::ios_base::failure(
               std::format("file {} contains {} bytes which is not a "
                           "multiple of {}",
-                          filename.c_str(),
+                          filename,
                           file_content.size(),
                           sizeof(T)));;
     }
@@ -49,7 +49,7 @@ std::vector<T> gttl_read_vector(const std::string& filename)
     throw std::ios_base::failure(
             std::format("file {} contains {} bytes which is not a "
                         "multiple of {}",
-                        filename.c_str(),
+                        filename,
                         size_of_file,
                         sizeof(T)));
   }
@@ -58,7 +58,7 @@ std::vector<T> gttl_read_vector(const std::string& filename)
   if (instream.fail())
   {
     throw std::ios_base::failure(std::format("cannot open file {}",
-                                             filename.c_str()));
+                                             filename));
   }
   const size_t num_values = size_of_file/sizeof(T);
   std::vector<T> vec(num_values);

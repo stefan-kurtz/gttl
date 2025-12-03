@@ -256,14 +256,8 @@ class GttlSuffixArray
   }
   ~GttlSuffixArray()
   {
-    if (lcptable != nullptr)
-    {
-      delete lcptable;
-    }
-    if (gttl_mmap_suftab_bytes != nullptr)
-    {
-      delete gttl_mmap_suftab_bytes;
-    }
+    delete lcptable;
+    delete gttl_mmap_suftab_bytes;
   }
   [[nodiscard]] const std::vector<SuftabBaseType> &
   get_suftab_abspos() const noexcept
@@ -293,7 +287,7 @@ class GttlSuffixArray
   }
   [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
-    return int_values[key2index("reverse_complement")] == 1 ? true : false;
+    return int_values[key2index("reverse_complement")] == 1;
   }
   [[nodiscard]] size_t nonspecial_suffixes_get(void) const noexcept
   {
