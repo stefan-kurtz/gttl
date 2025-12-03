@@ -288,8 +288,13 @@ int main(int argc,char *argv[])
       {
         constexpr const bool store_header = true;
         constexpr const bool store_sequence = true;
-        multiseq = new GttlMultiseq(inputfile.c_str(),
-                                    store_header,store_sequence,UINT8_MAX);
+        constexpr const uint8_t padding_char = UINT8_MAX;
+        constexpr const bool with_reverse_complement = false;
+        multiseq = new GttlMultiseq(inputfile, /* CONSTRUCTOR*/
+                                    store_header,
+                                    store_sequence,
+                                    padding_char,
+                                    with_reverse_complement);
       }
       catch (const std::exception &err)
       {

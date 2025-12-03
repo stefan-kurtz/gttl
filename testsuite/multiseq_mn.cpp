@@ -302,12 +302,19 @@ int main(int argc, char *argv[])
     const uint8_t padding_char = UINT8_MAX;
     if (options.zipped_option_is_set() && store_sequence)
     {
-      multiseq = new GttlMultiseq(inputfiles[0],inputfiles[1],
-                                  store_header,store_sequence,padding_char);
+      multiseq = new GttlMultiseq(inputfiles[0], /* CONSTRUCTOR*/
+                                  inputfiles[1],
+                                  store_header,
+                                  store_sequence,
+                                  padding_char);
     } else
     {
-      multiseq = new GttlMultiseq(inputfiles,store_header,store_sequence,
-                                  padding_char);
+      constexpr const bool with_reverse_complement = false;
+      multiseq = new GttlMultiseq(inputfiles, /* CONSTRUCTOR*/
+                                  store_header,
+                                  store_sequence,
+                                  padding_char,
+                                  with_reverse_complement);
     }
   }
   catch (const std::exception &err)

@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include "sequences/gttl_multiseq.hpp"
-#include "sequences/complement_plain.hpp"
 
 static inline GttlMultiseq *
   gttl_inputfiles_multiseq(const std::vector<std::string> &inputfiles,
@@ -18,20 +17,11 @@ static inline GttlMultiseq *
   GttlMultiseq *multiseq = nullptr;
   try
   {
-    if (reverse_complement_option)
-    {
-      multiseq = multiseq_with_reverse_complement<gttl_complement_plain>
-                                                 (inputfiles,
-                                                  store_header,
-                                                  store_sequence,
-                                                  padding_char);
-    } else
-    {
-      multiseq = new GttlMultiseq(inputfiles,
-                                  store_header,
-                                  store_sequence,
-                                  padding_char);
-    }
+     multiseq = new GttlMultiseq(inputfiles, /* CONSTRUCTOR */
+                                 store_header,
+                                 store_sequence,
+                                 padding_char,
+                                 reverse_complement_option);
   }
   catch (const std::exception &err)
   {

@@ -369,10 +369,13 @@ static void enumerate_nt_hash(const char *inputfilename,
 {
   constexpr const bool store_header = false;
   constexpr const bool store_sequence = false;
-  const GttlMultiseq multiseq(inputfilename,
+  constexpr const uint8_t padding_char = UINT8_MAX;
+  constexpr const bool with_reverse_complement = false;
+  const GttlMultiseq multiseq(std::string(inputfilename), /* CONSTRUCTOR*/
                               store_header,
                               store_sequence,
-                              UINT8_MAX);
+                              padding_char,
+                              with_reverse_complement);
   const int sequences_number_bits = multiseq.sequences_number_bits_get();
   const int sequences_length_bits = multiseq.sequences_length_bits_get();
   RunTimeClass rt_nthash{};

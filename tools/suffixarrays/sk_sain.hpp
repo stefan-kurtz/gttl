@@ -282,12 +282,12 @@ class GttlSainseq
   using Sint =
                                std::conditional_t<sizeof(SuftabBaseType) == 4,
                                                   int32_t, int64_t>;
-  using T_seq = std::conditional_t<
-                               T_seqtype == GTTL_SAIN_PLAINSEQ, uint8_t,
-                               std::conditional_t
-                                 <T_seqtype == GTTL_SAIN_MULTISEQ,
-                                                  GttlMultiseq,
-                                                  SuftabBaseType>>;
+  using T_seq = std::conditional_t<T_seqtype == GTTL_SAIN_PLAINSEQ,
+                                   uint8_t,
+                                   std::conditional_t<T_seqtype
+                                                       == GTTL_SAIN_MULTISEQ,
+                                                      GttlMultiseq,
+                                                      SuftabBaseType>>;
   [[nodiscard]] size_t pos2unique_int(size_t pos) const noexcept
   {
     return pos + UCHAR_MAX + 1;

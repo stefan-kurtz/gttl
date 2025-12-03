@@ -242,7 +242,7 @@ test_line_generator_mapped:line_generator_mapped.x
 
 .PHONY:test_minimizer_count
 test_minimizer_count:minimizer_mn.x
-#	@./check_err.py ./minimizer_mn.x
+	@./check_err.py ./minimizer_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "# number of hashed kmers	37465" > ${TMPFILE}
 	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}

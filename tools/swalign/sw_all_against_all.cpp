@@ -111,8 +111,8 @@ class Restrict2Pairs
     }
     if (local_pairs.size() == 0)
     {
-      throw std::invalid_argument(
-        "file specified with option -r cannot be empty");
+      throw std::invalid_argument("file specified with option -r cannot "
+                                  "be empty");
     }
     std::cout << "# local_pairs\t" << local_pairs.size() << '\n';
     return local_pairs;

@@ -44,8 +44,8 @@ class LiterateMultiseq
                           _multiseq.sequence_length_get(snum));
     }
   }
-  LiterateMultiseq(GttlMultiseq *_multiseq) :
-    multiseq(_multiseq)
+  LiterateMultiseq(GttlMultiseq *_multiseq)
+    : multiseq(_multiseq)
   {
     rank_dist.fill(0);
     for (size_t snum = 0; snum < multiseq->sequences_number_get(); snum++)

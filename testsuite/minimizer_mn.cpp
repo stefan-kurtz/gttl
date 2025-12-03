@@ -29,7 +29,6 @@
 #include <format>
 
 #include "sequences/gttl_multiseq.hpp"
-#include "sequences/inputfiles_multiseq.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
@@ -60,45 +59,34 @@ void run_nt_minimizer(const MinimizerOptions &options)
   constexpr const bool store_header = true;
   constexpr const bool store_sequence = true;
   constexpr const uint8_t padding_char = UINT8_MAX;
-  const GttlMultiseq *multiseq = gttl_inputfiles_multiseq(
-                                                    options.inputfiles_get(),
-                                                    store_header,
-                                                    store_sequence,
-                                                    padding_char,
-                                                    options
-                                                      .canonical_option_is_set()
-                                                   );
+  GttlMultiseq multiseq(options.inputfiles_get(), /* CONSTRUCTOR*/
+                        store_header,
+                        store_sequence,
+                        padding_char,
+                        options.canonical_option_is_set());
   rt_create_multiseq.show("reading input files and creating multiseq");
-  for (auto &log : multiseq->statistics())
+  for (auto &log : multiseq.statistics())
   {
     std::cout << "# " << log << '\n';
   }
   int hash_bits = -1;
   int var_sizeof_unit_hashed_qgram;
   assert(options.hash_bits_get() != -1);
-  try
-  {
-    std::tie(hash_bits,var_sizeof_unit_hashed_qgram)
-      = determine_hash_bits(multiseq->sequences_bits_get(),
-                            options.hash_bits_get());
-  }
-  catch (const std::exception &err)
-  {
-    delete multiseq;
-    throw;
-  }
+  std::tie(hash_bits,var_sizeof_unit_hashed_qgram)
+    = determine_hash_bits(multiseq.sequences_bits_get(),
+                          options.hash_bits_get());
   assert(var_sizeof_unit_hashed_qgram == 8 or
          var_sizeof_unit_hashed_qgram == 9);
-  constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
-  {
-    if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
-    {
-      std::vector<std::string> log_vector{};
-      if (options.canonical_option_is_set())
+   constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
+   {
+     if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
+     {
+       std::vector<std::string> log_vector;
+       if (options.canonical_option_is_set())
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashIterator4>;
-        const HashedQgrams hqg(*multiseq,
+        const HashedQgrams hqg(multiseq,
                                options.number_of_threads_get(),
                                options.qgram_length_get(),
                                options.window_size_get(),
@@ -114,7 +102,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashFwdIterator4>;
-        const HashedQgrams hqg(*multiseq,
+        const HashedQgrams hqg(multiseq,
                                options.number_of_threads_get(),
                                options.qgram_length_get(),
                                options.window_size_get(),
@@ -149,7 +137,6 @@ void run_nt_minimizer(const MinimizerOptions &options)
       }
     }
   });
-  delete multiseq;
 }
 
 int main(int argc, char *argv[])

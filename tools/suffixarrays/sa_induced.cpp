@@ -47,7 +47,6 @@
 #include "sequences/guess_if_protein_seq.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/literate_multiseq.hpp"
-#include "sequences/inputfiles_multiseq.hpp"
 #include "indexes/succinct_bitvector.hpp"
 
 #include "sa_induced_options.hpp"
@@ -356,7 +355,6 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
   const int sequences_number_bits = multiseq->sequences_number_bits_get();
   const int sequences_length_bits = multiseq->sequences_length_bits_get();
   const int required_bits = sequences_number_bits + sequences_length_bits;
-  memory_tracker->track(multiseq,__FILE__,__LINE__,multiseq->size_in_bytes());
 
   if (sainoptions.verbose_opt_is_set())
   {
@@ -374,7 +372,8 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
 
   SuftabBaseType *suftab = nullptr;
   size_t nonspecial_suffixes = 0;
-  constexpr_for<4, 20 + 1, 16>([&](auto const_alphasize) {
+  constexpr_for<4, 20 + 1, 16>([&](auto const_alphasize)
+  {
     if (const_alphasize == 4 and not is_protein)
     {
       LiterateMultiseq<alphabet::nucleotides_upper_lower,const_alphasize>
@@ -772,29 +771,27 @@ int main(int argc, char *argv[])
       memory_tracker.untrack(filecontents.data(),__FILE__,__LINE__);
     } else
     {
-      GttlMultiseq *multiseq;
       RunTimeClass rt_input_files{};
       const bool is_protein
         = guess_if_protein_file(sainoptions.inputfiles_get());
       if (is_protein and sainoptions.reverse_complement_option_is_set())
       {
-        throw std::invalid_argument(
-          std::string(": option --reverse_complement is "
-                      "only possible for DNA sequences"));
+        throw std::invalid_argument(std::string(": option --reverse_complement "
+                                                "is only possible for DNA "
+                                                "sequences"));
       }
       constexpr const bool store_header = false;
       constexpr const bool store_sequence = true;
       const uint8_t padding_char = is_protein ? uint8_t(20) : uint8_t(4);
-      multiseq = gttl_inputfiles_multiseq(sainoptions.inputfiles_get(),
-                                          store_header,
-                                          store_sequence,
-                                          padding_char,
-                                          sainoptions
-                                            .reverse_complement_option_is_set()
-                                         );
-      assert(multiseq != nullptr);
-      totallength = multiseq->sequences_number_get() +
-                    multiseq->sequences_total_length_get() - 1;
+      GttlMultiseq multiseq (sainoptions.inputfiles_get(),
+                             store_header,
+                             store_sequence,
+                             padding_char,
+                             sainoptions.reverse_complement_option_is_set());
+      memory_tracker.track(&multiseq,__FILE__,__LINE__,
+                           multiseq.size_in_bytes());
+      totallength = multiseq.sequences_number_get() +
+                    multiseq.sequences_total_length_get() - 1;
       if (sainoptions.verbose_opt_is_set())
       {
         rt_input_files.show("input of file(s)");
@@ -807,18 +804,16 @@ int main(int argc, char *argv[])
           ? enhanced_suffixarray_multiseq<uint32_t>
           : enhanced_suffixarray_multiseq<uint64_t>)(&memory_tracker,
                                                      sainoptions,
-                                                     multiseq,
+                                                     &multiseq,
                                                      totallength,
                                                      is_protein);
       }
       catch (const std::exception &err)
       {
-        memory_tracker.untrack(multiseq,__FILE__,__LINE__);
-        delete multiseq;
+        memory_tracker.untrack(&multiseq,__FILE__,__LINE__);
         throw;
       }
-      memory_tracker.untrack(multiseq,__FILE__,__LINE__);
-      delete multiseq;
+      memory_tracker.untrack(&multiseq,__FILE__,__LINE__);
     }
     if (sainoptions.verbose_opt_is_set())
     {
