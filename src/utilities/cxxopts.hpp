@@ -1736,13 +1736,13 @@ CXXOPTS_DIAGNOSTIC_POP
   Iterator
   begin() const
   {
-    return Iterator(this);
+    return this;
   }
 
   Iterator
   end() const
   {
-    return Iterator(this, true);
+    return {this, true};
   }
 
   std::size_t
@@ -2342,7 +2342,7 @@ inline
 OptionAdder
 Options::add_options(std::string group)
 {
-  return OptionAdder(*this, std::move(group));
+  return {*this, std::move(group)};
 }
 
 inline

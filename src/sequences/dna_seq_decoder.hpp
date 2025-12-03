@@ -68,11 +68,11 @@ class DNAQgramDecoder
   {}
   [[nodiscard]] Iterator begin(void) const
   {
-    return Iterator(qgram_length,0,sub_unit_ptr);
+    return {qgram_length, 0, sub_unit_ptr};
   }
   [[nodiscard]] Iterator end(void) const
   {
-    return Iterator(qgram_length,number_of_qgrams,sub_unit_ptr);
+    return {qgram_length, number_of_qgrams, sub_unit_ptr};
   }
 };
 

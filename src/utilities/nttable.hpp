@@ -176,7 +176,7 @@ class NtTable
       F1 += static_cast<double>(i) * f_n[i];
     }
 
-    return NtTableResult(f_n, t_max, F0, F1, qgram_count);
+    return {f_n, t_max, F0, F1, qgram_count};
   }
 
   [[nodiscard]] size_t F1_count_get(void) const noexcept { return qgram_count; }
