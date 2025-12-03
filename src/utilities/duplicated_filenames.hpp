@@ -1,7 +1,7 @@
 #ifndef DUPLICATED_FILENAMES_HPP
 #define DUPLICATED_FILENAMES_HPP
 
-#include <stdlib.h>
+#include <stdlib.h> // NOLINT(modernize-deprecated-header)
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
