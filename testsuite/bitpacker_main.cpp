@@ -139,7 +139,7 @@ int main(int argc,char *argv[])
   for (int direct = 0; direct < 2; direct++)
   {
     RunTimeClass rt;
-    runner<uint64_t,0>(direct ? true : false,num_values);
+    runner<uint64_t,0>(direct != 0,num_values);
     rt.show(direct ? "8 bytes direct" : "8 bytes");
   }
 

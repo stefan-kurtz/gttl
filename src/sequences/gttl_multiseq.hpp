@@ -693,7 +693,7 @@ class GttlMultiseq
   {
     const char *const seq_ptr = sequence_ptr_get(idx);
     const size_t len = sequence_length_get(idx);
-    return std::string_view(seq_ptr, len);
+    return {seq_ptr, len};
   }
 
   template<class T, void (*transformation)(T &, char *, size_t)>

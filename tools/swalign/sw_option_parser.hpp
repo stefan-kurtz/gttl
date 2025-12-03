@@ -415,7 +415,7 @@ struct SWOptions
   }
   void show_fields(FILE *fpout,
                    bool dna_alphabet,
-                   bool with_bit_score)
+                   bool with_bit_score) const
   {
     const char *const tag = header_display ? "id" : "num";
 

@@ -77,9 +77,9 @@ class ScoreMatrixName
   {
     std::vector<std::string> vec_s{};
     vec_s.reserve(num_values);
-    for (size_t idx = 0; idx < num_values; idx++)
+    for (auto string_value : string_values)
     {
-      vec_s.emplace_back(string_values[idx]);
+      vec_s.emplace_back(string_value);
     }
     return vec_s;
   }

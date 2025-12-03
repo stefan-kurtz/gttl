@@ -18,9 +18,9 @@ int main(void)
 
   std::cout << "# query_start,query_end,ref_start,ref_end,identity\n";
   std::cout << "# before filtering\n";
-  for (size_t idx = 0; idx < matches.size(); idx++)
+  for (const auto & match : matches)
   {
-    std::cout << matches[idx].to_string() << '\n';
+    std::cout << match.to_string() << '\n';
   }
   const NonRedundantMatches<GttlStoredMatch> non_redundant_matches(matches);
   std::cout << "# after filtering\n";

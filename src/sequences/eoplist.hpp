@@ -349,11 +349,11 @@ class Eoplist
   }
   [[nodiscard]] Iterator begin(void) const
   {
-    return Iterator(eoplist,distinguish_mismatch_match,false);
+    return {eoplist,distinguish_mismatch_match,false};
   }
   [[nodiscard]] Iterator end(void) const
   {
-    return Iterator(eoplist,distinguish_mismatch_match,true);
+    return {eoplist,distinguish_mismatch_match,true};
   }
   [[nodiscard]] std::string to_string(void) const noexcept
   {

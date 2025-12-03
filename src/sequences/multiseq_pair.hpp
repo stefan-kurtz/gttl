@@ -93,7 +93,6 @@ static inline std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
                           queryfile));
     }
   }
-  return std::tuple<GttlMultiseq *,GttlMultiseq *,bool>
-                   (db_multiseq,query_multiseq,is_dna_alphabet);
+  return {db_multiseq, query_multiseq, is_dna_alphabet};
 }
 #endif

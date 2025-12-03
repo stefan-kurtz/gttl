@@ -1,7 +1,7 @@
 #ifndef DUPLICATED_FILENAMES_HPP
 #define DUPLICATED_FILENAMES_HPP
 
-#include <stdlib.h>
+#include <stdlib.h> // NOLINT(modernize-deprecated-headers)
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -15,8 +15,8 @@ static inline bool gttl_files_with_same_path(const std::string &path0,
 {
   char *const fullpath_0 = realpath(path0.c_str(), nullptr);
   char *const fullpath_1 = realpath(path1.c_str(), nullptr);
-  const bool same_files = (std::strcmp(fullpath_0,
-                                       fullpath_1) == 0) ? true : false;
+  const bool same_files = std::strcmp(fullpath_0,
+                                      fullpath_1) == 0;
   free(fullpath_0);
   free(fullpath_1);
   return same_files;

@@ -364,7 +364,7 @@ class SortedMatchList
         }
         number_of_seeds++;
       }
-      const bool reversed_byte_order = is_big_endian() ? false : true;
+      const bool reversed_byte_order = not is_big_endian();
       ska_large_lsb_small_radix_sort(sizeof_unit_match,
                                      bits_for_sequences,
                                      reinterpret_cast<uint8_t *>

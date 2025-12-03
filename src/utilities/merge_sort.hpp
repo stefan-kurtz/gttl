@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 #include <algorithm>
-#include <stddef.h>
+#include <cstddef>
 #include <thread>
 #include <iterator>
 

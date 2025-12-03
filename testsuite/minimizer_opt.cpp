@@ -72,9 +72,9 @@ void MinimizerOptions::parse(int argc, char **argv)
     } else
     {
       const std::vector<std::string>& unmatched_args = result.unmatched();
-      for (size_t idx = 0; idx < unmatched_args.size(); idx++)
+      for (const auto & unmatched_arg : unmatched_args)
       {
-        inputfiles.push_back(unmatched_args[idx]);
+        inputfiles.push_back(unmatched_arg);
       }
       if (inputfiles.size() < 1)
       {

@@ -1736,13 +1736,13 @@ CXXOPTS_DIAGNOSTIC_POP
   Iterator
   begin() const
   {
-    return Iterator(this);
+    return this;
   }
 
   Iterator
   end() const
   {
-    return Iterator(this, true);
+    return {this, true};
   }
 
   std::size_t
@@ -2222,14 +2222,14 @@ format_description
   {
     String desc2;
     auto size = std::size_t{ 0 };
-    for (auto c = std::begin(desc); c != std::end(desc); ++c)
+    for (const char & c : desc)
     {
-      if (*c == '\n')
+      if (c == '\n')
       {
-        desc2 += *c;
+        desc2 += c;
         size = 0;
       }
-      else if (*c == '\t')
+      else if (c == '\t')
       {
         auto skip = 8 - size % 8;
         stringAppend(desc2, skip, ' ');
@@ -2237,7 +2237,7 @@ format_description
       }
       else
       {
-        desc2 += *c;
+        desc2 += c;
         ++size;
       }
     }
@@ -2342,7 +2342,7 @@ inline
 OptionAdder
 Options::add_options(std::string group)
 {
-  return OptionAdder(*this, std::move(group));
+  return {*this, std::move(group)};
 }
 
 inline

@@ -46,7 +46,7 @@ static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
 static inline void gttl_reverse_complement_encoded_inplace(uint8_t *sequence,
                                                            size_t len)
 {
-  return gttl_reverse_complement_encoded_inplace<complement_uint8_wc_remains>
-                                                (sequence,len);
+  gttl_reverse_complement_encoded_inplace<complement_uint8_wc_remains>
+                                         (sequence,len);
 }
 #endif

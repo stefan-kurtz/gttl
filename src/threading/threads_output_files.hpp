@@ -1,7 +1,7 @@
 #ifndef THREADS_OUTPUT_FILES_HPP
 #define THREADS_OUTPUT_FILES_HPP
-#include <string.h>
-#include <stdlib.h>
+#include <string.h> // NOLINT(modernize-deprecated-headers)
+#include <stdlib.h> // NOLINT (modernize-deprecated-headers)
 #include <cassert>
 #include <cstddef>
 #include <string>

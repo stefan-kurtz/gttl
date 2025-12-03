@@ -328,7 +328,7 @@ static void sort_values(unsigned int seed,
     {
       static constexpr const int sizeof_unit
         = static_cast<int>(sizeof(T));
-      const bool reversed_byte_order = is_big_endian() ? false : true;
+      const bool reversed_byte_order = not is_big_endian();
       ska_large_lsb_small_radix_sort(sizeof_unit,
                                      num_sort_bits,
                                      reinterpret_cast<uint8_t *>(values.data()),

@@ -4,8 +4,8 @@
 
 #ifndef SIMD_HPP
 #define SIMD_HPP
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 inline constexpr size_t AVX512_ALIGN_DOUBLE = 64;
 inline constexpr size_t AVX512_VECSIZE_DOUBLE = 8;
