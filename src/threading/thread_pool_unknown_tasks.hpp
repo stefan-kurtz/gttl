@@ -11,11 +11,10 @@
 #include <type_traits>
 #include "threading/threadsafe_queue.hpp"
 
-template<class CollectorClass, class ResultType>
 class ThreadPoolUnknownTasks
 {
   private:
-  using FunctionType = std::function<ResultType()>;
+  using FunctionType = std::function<void()>;
   std::vector<std::thread> threads;
   ThreadsafeQueue<FunctionType> tsq;
   std::mutex queue_lock;
@@ -23,57 +22,30 @@ class ThreadPoolUnknownTasks
   std::atomic<bool> stop{false};
   public:
   explicit ThreadPoolUnknownTasks(size_t num_threads
-                                    = std::thread::hardware_concurrency(),
-                                  CollectorClass *collector = nullptr)
+                                    = std::thread::hardware_concurrency())
   {
     for (size_t td_idx = 0; td_idx < num_threads; td_idx++)
     {
-      if constexpr (std::is_void_v<CollectorClass>)
+      threads.emplace_back([this]
       {
-        threads.emplace_back([this]
+        while (true)
         {
-          while (true)
+          FunctionType task;
           {
-            FunctionType task;
+            std::unique_lock<std::mutex> lock(queue_lock);
+            tasks_changed.wait(lock, [this]
             {
-              std::unique_lock<std::mutex> lock(queue_lock);
-              tasks_changed.wait(lock, [this]
-              {
-                return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
-              });
-              if (stop and tsq.size() == 0)
-              {
-                return;
-              }
-              task = *(tsq.dequeue());
-            }
-            task();
-          }
-        });
-      } else
-      {
-        threads.emplace_back([this, collector, td_idx]
-        {
-          while (true)
-          {
-            FunctionType task;
+              return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
+            });
+            if (stop and tsq.size() == 0)
             {
-              std::unique_lock<std::mutex> lock(queue_lock);
-              tasks_changed.wait(lock, [this]
-              {
-                return tsq.size() != 0 or stop.load(std::memory_order_relaxed);
-              });
-              if (stop and tsq.size() == 0)
-              {
-                return;
-              }
-              task = *(tsq.dequeue());
+              return;
             }
-            assert(collector != nullptr);
-            collector->add(td_idx, task());
+            task = *(tsq.dequeue());
           }
-        });
-      }
+          task();
+        }
+      });
     }
   }
 
