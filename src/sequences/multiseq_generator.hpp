@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "sequences/gttl_multiseq.hpp"
+#include "utilities/string_values_join.hpp"
 
 template <class GeneratorClass, bool Condition>
 class OptionalGenerator;
@@ -18,8 +19,8 @@ class OptionalGenerator<GeneratorClass, true>
   GeneratorClass gen;
   GeneratorClass::Iterator it;
   public:
-  OptionalGenerator(const char *inputfile)
-    : gen(inputfile)
+  OptionalGenerator(const std::vector<std::string> *inputfiles)
+    : gen(inputfiles)
     , it(gen.begin())
   { }
   bool end(void)
@@ -40,7 +41,7 @@ template <class GeneratorClass>
 class OptionalGenerator<GeneratorClass, false>
 {
   public:
-  OptionalGenerator([[maybe_unused]] const char *inputfile)
+  OptionalGenerator([[maybe_unused]] const std::vector<std::string> *inputfiles)
   { }
 };
 
@@ -48,9 +49,25 @@ template<class SequenceGeneratorClass, bool fastq_paired_input>
 class GttlMultiseqGenerator
 {
   private:
+  using StrVec = std::vector<std::string>;
+  StrVec extract_file_list(size_t remainder, const StrVec &svec) const
+  {
+    assert(remainder == 0 or remainder == 1);
+    StrVec selection;
+    for (size_t idx = 0; idx < svec.size(); idx++)
+    {
+      if (idx % 2 == remainder)
+      {
+        selection.push_back(svec[idx]);
+      }
+    }
+    return selection;
+  }
   static constexpr const bool store_sequence = true;
-  const std::vector<std::string> &inputfiles;
+  const StrVec &inputfiles;
   GttlMultiseq *multiseq;
+  StrVec file_list0;
+  StrVec file_list1;
   OptionalGenerator<SequenceGeneratorClass, true> fastq_gen0;
   OptionalGenerator<SequenceGeneratorClass, fastq_paired_input> fastq_gen1;
   const size_t max_num_sequences;
@@ -59,29 +76,44 @@ class GttlMultiseqGenerator
   const bool store_header;
   const bool has_owner_ship;
   bool plan_for_exhausted;
-  const std::string unequal_length_error(const std::string &first_file,
-                                         const std::string &second_file)
+  const std::string unequal_length_error(const StrVec &f0, const StrVec &f1)
+    const
   {
-    return std::string("paired readfiles have different number of reads: ") +
-           first_file + std::string(" has less reads than ") + second_file;
+    const std::string fst_list = string_values_join(", ",f0.begin(),f0.end());
+    const std::string snd_list = string_values_join(", ",f1.begin(),f1.end());
+    return std::string("the read files ") + fst_list +
+           std::string("have less reads than the read files ") + snd_list;
   }
   public:
-  explicit GttlMultiseqGenerator(const std::vector<std::string> &_inputfiles,
+  explicit GttlMultiseqGenerator(const StrVec &_inputfiles,
                                  bool _store_header,
                                  size_t _max_num_sequences,
                                  uint8_t _padding_char,
                                  bool grant_owner_ship)
     : inputfiles(_inputfiles)
     , multiseq(nullptr)
-    , fastq_gen0(inputfiles[0].c_str())
-    , fastq_gen1(fastq_paired_input ? inputfiles[1].c_str() : nullptr)
+    , file_list0(fastq_paired_input ? extract_file_list(size_t(0),_inputfiles)
+                                    : _inputfiles)
+    , file_list1(fastq_paired_input ? extract_file_list(size_t(1),_inputfiles)
+                                    : StrVec{})
+    , fastq_gen0(&file_list0)
+    , fastq_gen1(file_list1.size() > 0 ? &file_list1 : nullptr)
     , max_num_sequences(_max_num_sequences)
     , sequence_number_offset(0)
     , padding_char(_padding_char)
     , store_header(_store_header)
     , has_owner_ship(grant_owner_ship)
     , plan_for_exhausted(false)
-  { }
+  {
+    if constexpr (fastq_paired_input)
+    {
+      if (file_list0.size() != file_list1.size())
+      {
+        throw std::string("if the input consist of paired read files, the "
+                          "number of files must be even");
+      }
+    }
+  }
 
   ~GttlMultiseqGenerator(void)
   {
@@ -126,8 +158,8 @@ class GttlMultiseqGenerator
         {
           if (not fastq_gen1.end())
           {
-            throw std::runtime_error(unequal_length_error(inputfiles[0],
-                                                          inputfiles[1]));
+            throw std::runtime_error(unequal_length_error(file_list0,
+                                                          file_list1));
           }
         }
         plan_for_exhausted = true;
@@ -137,8 +169,7 @@ class GttlMultiseqGenerator
       {
         if (fastq_gen1.end())
         {
-          throw std::runtime_error(unequal_length_error(inputfiles[1],
-                                                        inputfiles[0]));
+          throw std::runtime_error(unequal_length_error(file_list1,file_list0));
         }
       }
       multiseq->append(fastq_gen0.get()->header_get(),
