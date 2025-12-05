@@ -68,8 +68,8 @@ class GttlMultiseqGenerator
   GttlMultiseq *multiseq;
   StrVec file_list0;
   StrVec file_list1;
-  OptionalGenerator<SequenceGeneratorClass, true> fastq_gen0;
-  OptionalGenerator<SequenceGeneratorClass, fastq_paired_input> fastq_gen1;
+  OptionalGenerator<SequenceGeneratorClass, true> gen0;
+  OptionalGenerator<SequenceGeneratorClass, fastq_paired_input> gen1;
   const size_t max_num_sequences;
   size_t sequence_number_offset;
   const uint8_t padding_char;
@@ -96,8 +96,8 @@ class GttlMultiseqGenerator
                                     : _inputfiles)
     , file_list1(fastq_paired_input ? extract_file_list(size_t(1),_inputfiles)
                                     : StrVec{})
-    , fastq_gen0(&file_list0)
-    , fastq_gen1(file_list1.size() > 0 ? &file_list1 : nullptr)
+    , gen0(&file_list0)
+    , gen1(file_list1.size() > 0 ? &file_list1 : nullptr)
     , max_num_sequences(_max_num_sequences)
     , sequence_number_offset(0)
     , padding_char(_padding_char)
@@ -152,11 +152,11 @@ class GttlMultiseqGenerator
     size_t seqnum;
     for (seqnum = 0; seqnum < seqnum_upper_bound; ++seqnum)
     {
-      if (fastq_gen0.end())
+      if (gen0.end())
       {
         if constexpr (fastq_paired_input)
         {
-          if (not fastq_gen1.end())
+          if (not gen1.end())
           {
             throw std::runtime_error(unequal_length_error(file_list0,
                                                           file_list1));
@@ -167,25 +167,25 @@ class GttlMultiseqGenerator
       }
       if constexpr (fastq_paired_input)
       {
-        if (fastq_gen1.end())
+        if (gen1.end())
         {
           throw std::runtime_error(unequal_length_error(file_list1,file_list0));
         }
       }
-      multiseq->append(fastq_gen0.get()->header_get(),
-                       fastq_gen0.get()->sequence_get(),
+      multiseq->append(gen0.get()->header_get(),
+                       gen0.get()->sequence_get(),
                        store_header,
                        store_sequence,
                        padding_char);
-      ++fastq_gen0;
+      ++gen0;
       if constexpr (fastq_paired_input)
       {
-        multiseq->append(fastq_gen1.get()->header_get(),
-                         fastq_gen1.get()->sequence_get(),
+        multiseq->append(gen1.get()->header_get(),
+                         gen1.get()->sequence_get(),
                          store_header,
                          store_sequence,
                          padding_char);
-        ++fastq_gen1;
+        ++gen1;
       }
     }
     if constexpr (fastq_paired_input)
@@ -200,11 +200,12 @@ class GttlMultiseqGenerator
   class Iterator
   {
     private:
-    GttlMultiseqGenerator *generator;
+    GttlMultiseqGenerator *multiseq_generator;
     bool iter_exhausted;
     public:
-    explicit Iterator(GttlMultiseqGenerator* _generator, bool _exhausted)
-      : generator(_generator)
+    explicit Iterator(GttlMultiseqGenerator* _multiseq_generator,
+                      bool _exhausted)
+      : multiseq_generator(_multiseq_generator)
       , iter_exhausted(_exhausted)
     {
       if (not iter_exhausted)
@@ -215,20 +216,20 @@ class GttlMultiseqGenerator
 
     auto operator * (void) const
     {
-      return generator->data_get();
+      return multiseq_generator->data_get();
     }
 
     const Iterator& operator ++ (void)
     {
       assert(not iter_exhausted);
-      iter_exhausted = not generator->advance();
+      iter_exhausted = not multiseq_generator->advance();
       return *this;
     }
 
     bool operator == (const Iterator& other) const
     {
       return iter_exhausted == other.iter_exhausted and
-             generator == other.generator;
+             multiseq_generator == other.multiseq_generator;
     }
 
     bool operator != (const Iterator& other) const
