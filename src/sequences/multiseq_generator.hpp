@@ -64,10 +64,9 @@ class GttlMultiseqGenerator
     return selection;
   }
   static constexpr const bool store_sequence = true;
-  const StrVec &inputfiles;
   GttlMultiseq *multiseq;
-  StrVec file_list0;
-  StrVec file_list1;
+  const StrVec file_list0;
+  const StrVec file_list1;
   OptionalGenerator<SequenceGeneratorClass, true> gen0;
   OptionalGenerator<SequenceGeneratorClass, fastq_paired_input> gen1;
   const size_t max_num_sequences;
@@ -85,16 +84,15 @@ class GttlMultiseqGenerator
            std::string("have less reads than the read files ") + snd_list;
   }
   public:
-  explicit GttlMultiseqGenerator(const StrVec &_inputfiles,
+  explicit GttlMultiseqGenerator(const StrVec &inputfiles,
                                  bool _store_header,
                                  size_t _max_num_sequences,
                                  uint8_t _padding_char,
                                  bool grant_owner_ship)
-    : inputfiles(_inputfiles)
-    , multiseq(nullptr)
-    , file_list0(fastq_paired_input ? extract_file_list(size_t(0),_inputfiles)
-                                    : _inputfiles)
-    , file_list1(fastq_paired_input ? extract_file_list(size_t(1),_inputfiles)
+    : multiseq(nullptr)
+    , file_list0(fastq_paired_input ? extract_file_list(size_t(0),inputfiles)
+                                    : inputfiles)
+    , file_list1(fastq_paired_input ? extract_file_list(size_t(1),inputfiles)
                                     : StrVec{})
     , gen0(&file_list0)
     , gen1(file_list1.size() > 0 ? &file_list1 : nullptr)
