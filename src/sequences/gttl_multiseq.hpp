@@ -136,6 +136,7 @@ class GttlMultiseq
     multipadding(true, this_padding_char, 7);
   }
 
+  [[nodiscard]]
   std::string reverse_complement_construct(const std::string_view &seq) const
   {
     std::string rc_seq;

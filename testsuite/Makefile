@@ -444,5 +444,8 @@ fasta_mn.x:fasta_mn.o seq_reader_options.o
 minimizer_mn.x:minimizer_opt.o minimizer_mn.o
 	$(CXX) ${LDFLAGS} minimizer_opt.o minimizer_mn.o -o $@ ${LDLIBS}
 
+minimizer_gen_mn.x:minimizer_gen_mn.o minimizer_opt.o
+	$(CXX) ${LDFLAGS} minimizer_gen_mn.o minimizer_opt.o -o $@ ${LDLIBS}
+
 untar_zipped_mn.x:untar_zipped_mn.o untar_zipped_op.o
 	$(CXX) ${LDFLAGS} untar_zipped_mn.o untar_zipped_op.o -o $@ ${LDLIBS}

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cassert>
 #include <mutex>
+#include <thread>
 #include <map>
 
 class ThreadSpecificIndex

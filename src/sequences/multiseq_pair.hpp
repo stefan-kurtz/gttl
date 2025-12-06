@@ -5,6 +5,7 @@
 #include <cassert>
 #include <exception>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <format>
 #include "sequences/gttl_multiseq.hpp"

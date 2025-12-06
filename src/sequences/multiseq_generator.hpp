@@ -2,7 +2,6 @@
 #define MULTISEQ_GENERATOR_HPP
 #include <cstddef>
 #include <cassert>
-#include <utility>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -50,6 +49,7 @@ class GttlMultiseqGenerator
 {
   private:
   using StrVec = std::vector<std::string>;
+  [[nodiscard]]
   StrVec extract_file_list(size_t remainder, const StrVec &svec) const
   {
     assert(remainder == 0 or remainder == 1);
@@ -75,6 +75,7 @@ class GttlMultiseqGenerator
   const bool store_header;
   const bool has_owner_ship;
   bool plan_for_exhausted;
+  [[nodiscard]]
   const std::string unequal_length_error(const StrVec &f0, const StrVec &f1)
     const
   {
@@ -107,8 +108,8 @@ class GttlMultiseqGenerator
     {
       if (file_list0.size() != file_list1.size())
       {
-        throw std::string("if the input consist of paired read files, the "
-                          "number of files must be even");
+        throw std::invalid_argument("if the input consist of paired read files,"
+                                    " the number of files must be even");
       }
     }
   }
@@ -122,7 +123,7 @@ class GttlMultiseqGenerator
     }
   }
 
-  GttlMultiseq *data_get(void) const
+  [[nodiscard]] GttlMultiseq *data_get(void) const
   {
     return multiseq;
   }
