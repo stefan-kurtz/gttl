@@ -52,8 +52,6 @@ class GttlMinimizerGenerator
   size_t seqpos;
 
   HashIterator* qgiter;
-  decltype(std::declval<HashIterator>().begin()) qgiter_it;
-  decltype(std::declval<HashIterator>().end()) qgiter_end;
   bool front_was_moved;
   bool using_palindromic;
 
@@ -141,8 +139,6 @@ class GttlMinimizerGenerator
           seqptr = sequence + seqpos;
 
           qgiter = new HashIterator(qgram_length, seqptr, this_length);
-          qgiter_it = qgiter->begin();
-          qgiter_end = qgiter->end();
 
           window_deque.clear();
           front_was_moved = false;
@@ -163,10 +159,11 @@ class GttlMinimizerGenerator
       }
 
       // iterate qgrams
-      while (qgiter_it != qgiter_end)
+      for (auto it = qgiter->begin(), it_end = qgiter->end();
+           it != it_end; ++it)
       {
-        const auto &code_pair = *qgiter_it;
-        ++qgiter_it;
+        const auto &code_pair = *it;
+        ++it;
 
         uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
 
