@@ -114,7 +114,7 @@ test_nthash_wc_palindrome:enum_nthash.x
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_multiseq
-test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq
+test_multiseq:./multiseq_mn.x test_sorted_by_header_multiseq test_sorted_by_length_multiseq
 	@./check_err.py ./multiseq_mn.x
 	@${VALGRIND} ./multiseq_mn.x --width 0 ../testdata/small.fna | diff --strip-trailing-cr -I '^#' - ../testdata/small.fna
 	@${VALGRIND} ./multiseq_mn.x --width 60 ${SW175} | diff --strip-trailing-cr -I '^#' - ${SW175}
@@ -139,6 +139,16 @@ test_sorted_by_header_multiseq:./multiseq_mn.x
 	@./cmp_sorted_by_header.sh ${Y3}
 	@./cmp_sorted_by_header.sh ${SW175}
 	@./cmp_sorted_by_header.sh ${AT1MB}
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_sorted_by_length_multiseq
+test_sorted_by_length_multiseq:./multiseq_mn.x
+	@./cmp_sorted_by_length.sh ../testdata/small.fna
+	@./cmp_sorted_by_length.sh ../testdata/varlen_paired_1.fasta
+	@./cmp_sorted_by_length.sh ${VAC}
+	@./cmp_sorted_by_length.sh ${Y3}
+	@./cmp_sorted_by_length.sh ${SW175}
+	@./cmp_sorted_by_length.sh ${AT1MB}
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_line_generator

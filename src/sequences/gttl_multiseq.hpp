@@ -655,19 +655,28 @@ class GttlMultiseq
     assert(found_minimum_seq_length);
     assert(found_maximum_seq_length);
   }
-  void show_sorted_by_header(size_t width, bool short_header) const
+  std::vector<size_t> sequences_sorted_by_header(size_t min_length,
+                                                 size_t opt_max_length,
+                                                 bool short_header) const
   {
+    const size_t max_length = opt_max_length == 0
+                                ? std::numeric_limits<size_t>::max()
+                                : opt_max_length;
     assert(concatenated_sequences.size() > 0);
     std::vector<std::pair<std::string, size_t>> header_with_seqnum;
     header_with_seqnum.reserve(sequences_number_get());
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
     {
-      const char *header_ptr;
-      size_t header_len;
-      std::tie(header_ptr, header_len)
-        = header_ptr_with_length(seqnum, short_header);
-      const std::string header_substring(header_ptr, header_len);
-      header_with_seqnum.emplace_back(header_substring, seqnum);
+      const size_t current_length = this->sequence_length_get(seqnum);
+      if (current_length >= min_length and current_length <= max_length)
+      {
+        const char *header_ptr;
+        size_t header_len;
+        std::tie(header_ptr, header_len)
+          = header_ptr_with_length(seqnum, short_header);
+        const std::string header_substring(header_ptr, header_len);
+        header_with_seqnum.emplace_back(header_substring, seqnum);
+      }
     }
     std::ranges::sort(header_with_seqnum);
     for (size_t idx = 1; idx < header_with_seqnum.size(); idx++)
@@ -682,10 +691,40 @@ class GttlMultiseq
                                  std::get<0>(header_with_seqnum[idx]));
       }
     }
+    std::vector<size_t> sorted_seqnums;
+    sorted_seqnums.reserve(header_with_seqnum.size());
     for (auto &&hws : header_with_seqnum)
     {
-      show_single_sequence(width, short_header, std::get<1>(hws));
+      sorted_seqnums.push_back(std::get<1>(hws));
     }
+    return sorted_seqnums;
+  }
+
+  std::vector<size_t> sequences_sorted_by_length(size_t min_length,
+                                                 size_t opt_max_length) const
+  {
+    const size_t max_length = opt_max_length == 0
+                                ? std::numeric_limits<size_t>::max()
+                                : opt_max_length;
+    assert(concatenated_sequences.size() > 0);
+    std::vector<std::pair<size_t, size_t>> length_with_seqnum;
+    length_with_seqnum.reserve(sequences_number_get());
+    for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
+    {
+      const size_t current_length = this->sequence_length_get(seqnum);
+      if (current_length >= min_length and current_length <= max_length)
+      {
+        length_with_seqnum.emplace_back(current_length, seqnum);
+      }
+    }
+    std::ranges::sort(length_with_seqnum);
+    std::vector<size_t> sorted_seqnums;
+    sorted_seqnums.reserve(length_with_seqnum.size());
+    for (auto &&lws : length_with_seqnum)
+    {
+      sorted_seqnums.push_back(std::get<1>(lws));
+    }
+    return sorted_seqnums;
   }
 
   /* Overload access operator[] */

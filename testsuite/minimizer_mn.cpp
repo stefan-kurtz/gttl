@@ -83,7 +83,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
      {
        std::vector<std::string> log_vector;
        if (options.canonical_option_is_set())
-      {
+       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
                                                  QgramNtHashIterator4>;
         const HashedQgrams hqg(multiseq,

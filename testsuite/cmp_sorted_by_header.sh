@@ -12,5 +12,5 @@ TMPFILE1=`mktemp --tmpdir=.` || exit 1
 TMPFILE2=`mktemp --tmpdir=.` || exit 1
 grep -v '^#' ${TMPFILE1} | grep '^>' > ${TMPFILE2}
 grep '^>' ${inputfile} | sort | diff --strip-trailing-cr - ${TMPFILE2}
-../scripts/cmp_sorted_by_header.py ${inputfile} ${TMPFILE1}
+../scripts/cmp_sorted_sequences.py ${inputfile} ${TMPFILE1}
 rm -f ${TMPFILE1} ${TMPFILE2}

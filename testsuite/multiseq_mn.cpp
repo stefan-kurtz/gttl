@@ -29,6 +29,7 @@ class MultiseqOptions
   bool rankdist_option;
   bool short_header_option;
   bool sorted_by_header_option;
+  bool sorted_by_length_option;
   bool statistics_option;
   size_t sample_size;
   size_t length_dist_bin_size;
@@ -44,6 +45,7 @@ class MultiseqOptions
    , rankdist_option(false)
    , short_header_option(false)
    , sorted_by_header_option(false)
+   , sorted_by_length_option(false)
    , statistics_option(false)
    , sample_size(0)
    , length_dist_bin_size(0)
@@ -95,6 +97,10 @@ class MultiseqOptions
                             "then only the short header determines the order; "
                             "option requires to use option -w/--width",
         cxxopts::value<bool>(sorted_by_header_option)->default_value("false"))
+       ("sorted_by_length", "output sequences sorted in ascending order of "
+                            "their length; option requires to use "
+                            "option -w/--width",
+        cxxopts::value<bool>(sorted_by_length_option)->default_value("false"))
        ("w,width", "output headers and sequences; "
                    "width specifies the linewidth of the"
                    "sequence output; 0 means to output "
@@ -129,6 +135,16 @@ class MultiseqOptions
       {
         throw std::invalid_argument("option --sorted_by_header requires to "
                                     "use option -w/--width");
+      }
+      if (sorted_by_length_option and width_arg == -1)
+      {
+        throw std::invalid_argument("option --sorted_by_length requires to "
+                                    "use option -w/--width");
+      }
+      if (sorted_by_length_option and sorted_by_header_option)
+      {
+        throw std::invalid_argument("option --sorted_by_length and option "
+                                    "--sorted_by_header are not compatible");
       }
       if (length_dist_bin_size > 0)
       {
@@ -198,6 +214,10 @@ class MultiseqOptions
   [[nodiscard]] bool sorted_by_header_option_is_set(void) const noexcept
   {
     return sorted_by_header_option;
+  }
+  [[nodiscard]] bool sorted_by_length_option_is_set(void) const noexcept
+  {
+    return sorted_by_length_option;
   }
   [[nodiscard]] bool statistics_option_is_set(void) const noexcept
   {
@@ -334,6 +354,8 @@ int main(int argc, char *argv[])
 
   if (options.width_option_get() >= 0)
   {
+    const size_t width = static_cast<size_t>(options.width_option_get());
+    const bool short_header = options.short_header_option_is_set();
     if (options.sample_size_get() > 0)
     {
       try
@@ -353,10 +375,7 @@ int main(int argc, char *argv[])
                                            options.seed_get());
         for (const auto seqnum : sample)
         {
-          multiseq->show_single_sequence(
-                      static_cast<size_t>(options.width_option_get()),
-                      options.short_header_option_is_set(),
-                      seqnum);
+          multiseq->show_single_sequence(width, short_header, seqnum);
         }
         const std::string msg
           = (options.min_length_get() > 0 or options.max_length_get() > 0)
@@ -382,35 +401,40 @@ int main(int argc, char *argv[])
       }
     } else
     {
-      if (options.min_length_get() > 0 or options.max_length_get() > 0)
+      if (options.sorted_by_header_option_is_set() or
+          options.sorted_by_length_option_is_set())
       {
-        const size_t min_length = options.min_length_get();
-        const size_t max_length = options.max_length_get() == 0
-                                    ? std::numeric_limits<size_t>::max()
-                                    : options.max_length_get();
-        for (size_t seqnum = 0; seqnum < multiseq->sequences_number_get();
-             seqnum++)
+        const std::vector<size_t> sorted_vector
+          = options.sorted_by_header_option_is_set()
+              ? multiseq->sequences_sorted_by_header(options.min_length_get(),
+                                                     options.max_length_get(),
+                                                     short_header)
+              : multiseq->sequences_sorted_by_length(options.min_length_get(),
+                                                     options.max_length_get());
+        for (auto seqnum : sorted_vector)
         {
-          const size_t current_length = multiseq->sequence_length_get(seqnum);
-          if (current_length >= min_length and current_length <= max_length)
-          {
-            multiseq->show_single_sequence(
-                        static_cast<size_t>(options.width_option_get()),
-                        options.short_header_option_is_set(),
-                        seqnum);
-          }
+          multiseq->show_single_sequence(width,short_header, seqnum);
         }
       } else
       {
-        if (options.sorted_by_header_option_is_set())
+        if (options.min_length_get() > 0 or options.max_length_get() > 0)
         {
-          multiseq->show_sorted_by_header(
-                      static_cast<size_t>(options.width_option_get()),
-                      options.short_header_option_is_set());
+          const size_t min_length = options.min_length_get();
+          const size_t max_length = options.max_length_get() == 0
+                                      ? std::numeric_limits<size_t>::max()
+                                      : options.max_length_get();
+          for (size_t seqnum = 0; seqnum < multiseq->sequences_number_get();
+               seqnum++)
+          {
+            const size_t current_length = multiseq->sequence_length_get(seqnum);
+            if (current_length >= min_length and current_length <= max_length)
+            {
+              multiseq->show_single_sequence(width,short_header, seqnum);
+            }
+          }
         } else
         {
-          multiseq->show(static_cast<size_t>(options.width_option_get()),
-                         options.short_header_option_is_set());
+          multiseq->show(width, short_header);
         }
       }
     }
