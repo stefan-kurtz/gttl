@@ -8,7 +8,6 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <type_traits>
 #include "threading/threadsafe_queue.hpp"
 
 class ThreadPoolUnknownTasks
