@@ -1,14 +1,14 @@
 #ifndef THREAD_SPECIFIC_INDEX_HPP
 #define THREAD_SPECIFIC_INDEX_HPP
 #include <cstddef>
-#include <cassert>
+#include <format>
 #include <mutex>
 #include <thread>
 #include <map>
 
 class ThreadSpecificIndex
 {
-  size_t num_threads;
+  const size_t num_threads;
   std::mutex thread_id_mutex{};
   std::map<std::thread::id, size_t> thread_id_map;
   public:
@@ -25,7 +25,13 @@ class ThreadSpecificIndex
       thread_id_map[t_id] = current_size;
     } else
     {
-      assert(thread_id_map.size() == num_threads);
+      if (thread_id_map.size() != num_threads)
+      {
+        throw std::string(std::format("thread_id_map.size() = {} != "
+                                      "{} = num_threads",
+                                      thread_id_map.size(),
+                                      num_threads));
+      }
     }
     thread_id_mutex.unlock();
     return thread_id_map[t_id];
