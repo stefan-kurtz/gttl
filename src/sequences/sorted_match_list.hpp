@@ -117,11 +117,11 @@ class SortedMatchList
   using BytesUnitMatch = BytesUnit<sizeof_unit_match,5>;
   private:
   std::vector<BytesUnitMatch> encoded_match_list;
-  size_t minimum_mem_length,
-         number_of_seeds,
-         number_of_all_matches;
-  int bits_for_sequences;
-  int remaining_bits_for_length;
+  const size_t minimum_mem_length;
+  const int sequence_bits_sum;
+  const int remaining_bits_for_length;
+  size_t number_of_seeds;
+  size_t number_of_all_matches;
   const SequenceClass &ref_multiseq,
                       &query_multiseq;
   GttlBitPacker<sizeof_unit_match,5> match_packer;
@@ -132,18 +132,17 @@ class SortedMatchList
                   const SeedEnumeratorClass &seed_enumerator,
                   const SequenceClass &_ref_multiseq,
                   const SequenceClass &_query_multiseq)
-    : encoded_match_list({})
-    , minimum_mem_length(_minimum_mem_length)
+    : minimum_mem_length(_minimum_mem_length)
+                         /* sequence_sum_bits is the sum of the number of bits
+                            needed for the sequence positions and the sequence
+                            numbers. If all positions refer to the same
+                            sequences, then the sequence number are
+                            represented by 0 bits. */
+    , sequence_bits_sum(seed_enumerator.sequences_bits_sum_get())
+    , remaining_bits_for_length(sizeof_unit_match * CHAR_BIT -
+                                sequence_bits_sum)
     , number_of_seeds(0)
     , number_of_all_matches(0)
-                         /* this must deliver sum of number of bits needed for
-                            the sequence positions and the sequence numbers.
-                            If all positions refer to the same sequences,
-                            then the sequence number are represented by 0
-                            bits. */
-    , bits_for_sequences(seed_enumerator.sequences_bits_sum_get())
-    , remaining_bits_for_length(sizeof_unit_match * CHAR_BIT -
-                                bits_for_sequences)
     , ref_multiseq(_ref_multiseq)
     , query_multiseq(_query_multiseq)
     , match_packer(/* Deliver a std::array<int,5> such that at
@@ -317,7 +316,7 @@ class SortedMatchList
             {
               throw std::overflow_error(
                       std::format("cannot store match of length {} in {} "
-                                  "bytes, resort to using {} bytes of space "
+                                  "bytes => resort to using {} bytes of space "
                                   "for each MEM",
                                   this_match_length,
                                   sizeof_unit_match,
@@ -366,7 +365,7 @@ class SortedMatchList
       }
       const bool reversed_byte_order = not is_big_endian();
       ska_large_lsb_small_radix_sort(sizeof_unit_match,
-                                     bits_for_sequences,
+                                     sequence_bits_sum,
                                      reinterpret_cast<uint8_t *>
                                        (encoded_match_list.data()),
                                      encoded_match_list.size(),
@@ -462,7 +461,7 @@ class SortedMatchList
   }
   void statistics(FILE *out_fp) const noexcept
   {
-    fprintf(out_fp,"# bits for sequences\t%d\n",bits_for_sequences);
+    fprintf(out_fp,"# sequence_bits_sum\t%d\n",sequence_bits_sum);
     fprintf(out_fp,"# number of seeds\t%zu\n",number_of_seeds_get());
     fprintf(out_fp,"# number of all matches\t%zu\n",
             number_of_all_matches_get());
