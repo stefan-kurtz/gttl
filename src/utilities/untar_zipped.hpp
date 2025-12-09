@@ -249,12 +249,12 @@ class TarReader
 
   Iterator begin(void)
   {
-    return this;
+    return Iterator(this);
   }
 
   Iterator end(void)
   {
-    return {};
+    return Iterator();
   }
 };
 #endif

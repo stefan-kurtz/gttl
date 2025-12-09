@@ -12,7 +12,7 @@ static inline std::string string_values_join(const char *sep,
 {
   if (begin >= end)
   {
-    return "";
+    return std::string("");
   }
   FwdIter it = begin;
   std::string out_string{*it};
