@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
-#include <utility>
 #include <vector>
 #include "sequences/char_finder.hpp"
 #include "sequences/char_range.hpp"
@@ -165,6 +164,7 @@ class GttlMinimizerGenerator
         const auto &code_pair = *it;
         ++it;
 
+        // NOLINTNEXTLINE(misc-const-correctness)
         uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
 
         size_t stored_seqnum;
@@ -217,6 +217,7 @@ class GttlMinimizerGenerator
 
         if (seqpos >= window_size)
         {
+          // NOLINTNEXTLINE(misc-const-correctness)
           uint64_t min_pos = std::get<2>(window_deque.front());
 
           if constexpr (HashIterator::handle_both_strands)

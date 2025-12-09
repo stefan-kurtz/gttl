@@ -19,7 +19,7 @@ class ThreadSpecificIndex
   size_t get(void)
   {
     const std::thread::id t_id = std::this_thread::get_id();
-    std::scoped_lock<std::mutex> thread_id_lock(thread_id_mutex);
+    const std::scoped_lock<std::mutex> thread_id_lock(thread_id_mutex);
     if (thread_id_map.size() < num_threads)
     {
       const size_t current_size = thread_id_map.size();

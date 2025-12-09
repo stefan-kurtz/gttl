@@ -1,11 +1,16 @@
+#include <cassert>
 #include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cinttypes>
+#include <cstdlib>
 #include <exception>
+#include <format>
+#include <iostream>
 #include <stdexcept>
 #include <tuple>
+#include <utility>
 #include "minimizer_opt.hpp"
 #include "sequences/gttl_multiseq.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
@@ -48,7 +53,7 @@ inline void run_minimizer_generator(const GttlMultiseq &multiseq,
 
   for (size_t seqid = 0; seqid < nseq; ++seqid)
   {
-    const char* seqptr = multiseq.sequence_ptr_get(seqid);
+    const char* const seqptr = multiseq.sequence_ptr_get(seqid);
     const size_t seqlen = multiseq.sequence_length_get(seqid);
 
     std::cout << "# sequence " << seqid << " (len=" << seqlen << ")\n";
@@ -92,11 +97,11 @@ int main(int argc, char *argv[])
     constexpr bool store_sequence = true;
     constexpr uint8_t padding_char = UINT8_MAX;
 
-    GttlMultiseq multiseq(options.inputfiles_get(),
-                          store_header,
-                          store_sequence,
-                          padding_char,
-                          options.canonical_option_is_set());
+    const GttlMultiseq multiseq(options.inputfiles_get(),
+                                store_header,
+                                store_sequence,
+                                padding_char,
+                                options.canonical_option_is_set());
     rt_create_multiseq.show("reading input files and creating multiseq");
 
     for (auto &log : multiseq.statistics())

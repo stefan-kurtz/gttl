@@ -656,6 +656,7 @@ class GttlMultiseq
     assert(found_minimum_seq_length);
     assert(found_maximum_seq_length);
   }
+  [[nodiscard]]
   std::vector<size_t> sequences_sorted_by_header(size_t min_length,
                                                  size_t opt_max_length,
                                                  bool short_header) const
@@ -701,6 +702,7 @@ class GttlMultiseq
     return sorted_seqnums;
   }
 
+  [[nodiscard]]
   std::vector<size_t> sequences_sorted_by_length(size_t min_length,
                                                  size_t opt_max_length) const
   {

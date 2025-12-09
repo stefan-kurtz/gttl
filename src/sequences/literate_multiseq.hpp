@@ -65,7 +65,7 @@ class LiterateMultiseq
   }
   void show_rank_dist(std::mutex *cout_mutex) const noexcept
   {
-    optional_lock lock(cout_mutex);
+    const optional_lock lock(cout_mutex);
     for (size_t idx = 0; idx < rank_dist.size(); idx++)
     {
       if (rank_dist[idx] > 0)
