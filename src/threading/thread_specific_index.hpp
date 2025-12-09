@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <format>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
 #include <map>
 
@@ -18,7 +19,7 @@ class ThreadSpecificIndex
   size_t get(void)
   {
     const std::thread::id t_id = std::this_thread::get_id();
-    thread_id_mutex.lock();
+    std::scoped_lock<std::mutex> thread_id_lock(thread_id_mutex);
     if (thread_id_map.size() < num_threads)
     {
       const size_t current_size = thread_id_map.size();
@@ -27,13 +28,12 @@ class ThreadSpecificIndex
     {
       if (thread_id_map.size() != num_threads)
       {
-        throw std::string(std::format("thread_id_map.size() = {} != "
-                                      "{} = num_threads",
-                                      thread_id_map.size(),
-                                      num_threads));
+        throw std::runtime_error(std::format("thread_id_map.size() = {} != "
+                                             "{} = num_threads",
+                                             thread_id_map.size(),
+                                             num_threads));
       }
     }
-    thread_id_mutex.unlock();
     return thread_id_map[t_id];
   }
 };

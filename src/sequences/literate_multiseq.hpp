@@ -9,6 +9,7 @@
 #include <iostream>
 #include "sequences/alphabet.hpp"
 #include "sequences/gttl_multiseq.hpp"
+#include "threading/optional_lock.hpp"
 
 template<const char *char_spec,uint8_t undefined_rank>
 class LiterateMultiseq
@@ -64,10 +65,7 @@ class LiterateMultiseq
   }
   void show_rank_dist(std::mutex *cout_mutex) const noexcept
   {
-    if (cout_mutex != nullptr)
-    {
-      cout_mutex->lock();
-    }
+    optional_lock lock(cout_mutex);
     for (size_t idx = 0; idx < rank_dist.size(); idx++)
     {
       if (rank_dist[idx] > 0)
@@ -75,10 +73,6 @@ class LiterateMultiseq
         std::cout << "# occurrence\t" << idx << "\t" << rank_dist[idx]
                   << std::endl;
       }
-    }
-    if (cout_mutex != nullptr)
-    {
-      cout_mutex->unlock();
     }
   }
   [[nodiscard]] size_t *rank_dist_copy(void) const noexcept
