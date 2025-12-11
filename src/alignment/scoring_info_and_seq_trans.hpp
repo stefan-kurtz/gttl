@@ -85,6 +85,6 @@ scoring_info_and_seq_trans(const char *score_matrix_id,
       }
     }
   }
-  return {nullptr, INT8_MAX, 0};
+  return std::tuple<int8_t **, int8_t, size_t>(nullptr, INT8_MAX, 0);
 }
 #endif /* SCORING_INFO_AND_SEQ_TRANS_HPP */

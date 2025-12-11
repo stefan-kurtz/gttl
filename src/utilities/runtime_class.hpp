@@ -66,18 +66,14 @@ class RunTimeClass
   size_t locked_show(std::mutex *cout_mutex,const char *msg)
   {
     assert(cout_mutex != nullptr);
-    cout_mutex->lock();
-    const size_t elapsed_micro = this->show(msg);
-    cout_mutex->unlock();
-    return elapsed_micro;
+    const std::scoped_lock<std::mutex> cout_lock(*cout_mutex);
+    return this->show(msg);
   }
   size_t locked_show(std::mutex *cout_mutex,const std::string &msg)
   {
     assert(cout_mutex != nullptr);
-    cout_mutex->lock();
-    const size_t elapsed_micro = this->show(msg);
-    cout_mutex->unlock();
-    return elapsed_micro;
+    const std::scoped_lock<std::mutex> cout_lock(*cout_mutex);
+    return this->show(msg);
   }
   size_t elapsed(void)
   {

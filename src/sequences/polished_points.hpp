@@ -276,9 +276,9 @@ class PolishedPoints
   }
   [[nodiscard]] Iterator begin(void) const noexcept
   {
-    return {best, static_cast<int64_t>(best.size())};
+    return Iterator(best,best.size());
   }
-  [[nodiscard]] Iterator end(void) const { return {best, -1}; }
+  [[nodiscard]] Iterator end(void) const { return Iterator(best, -1); }
 };
 
 /* FrontValueClass need to implement the following functions:

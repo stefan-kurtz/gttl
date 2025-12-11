@@ -1,6 +1,7 @@
 #ifndef SPLIT_STRING_HPP
 #define SPLIT_STRING_HPP
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <cassert>
 #include <algorithm>
@@ -49,7 +50,7 @@ static inline std::string split_string_identity([[maybe_unused]]
                                                  size_t column_idx,
                                                  const std::string &s)
 {
-  return s;
+  return std::ref(s);
 }
 
 static inline std::vector<std::string> gttl_split_string(const std::string &str,

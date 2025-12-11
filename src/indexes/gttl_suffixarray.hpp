@@ -101,11 +101,11 @@ public:
 
   [[nodiscard]] Iterator begin(void) const noexcept
   {
-    return {small_lcptab, ll2tab, ll4tab};
+    return Iterator(small_lcptab, ll2tab, ll4tab);
   }
   [[nodiscard]] Iterator end(void) const noexcept
   {
-    return {small_lcptab, ll2tab, ll4tab};
+    return Iterator(small_lcptab, ll2tab, ll4tab);
   }
 };
 
