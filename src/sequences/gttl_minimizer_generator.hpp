@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <optional>
 #include <vector>
 #include "sequences/char_finder.hpp"
 #include "sequences/char_range.hpp"
@@ -51,6 +52,13 @@ class GttlMinimizerGenerator
   size_t seqpos;
 
   HashIterator* qgiter;
+
+  // We use std::optionals here so that these variables are NEVER
+  // default-initialized. This is necessary because there is no default
+  // constructor for them.
+  std::optional<decltype(qgiter->begin())> current_it;
+  std::optional<decltype(qgiter->end())> current_it_end;
+
   bool front_was_moved;
   bool using_palindromic;
 
@@ -138,6 +146,9 @@ class GttlMinimizerGenerator
           seqptr = sequence + seqpos;
 
           qgiter = new HashIterator(qgram_length, seqptr, this_length);
+          // "emplace" in this case simply populates a std::optional
+          current_it.emplace(qgiter->begin());
+          current_it_end.emplace(qgiter->end());
 
           window_deque.clear();
           front_was_moved = false;
@@ -158,11 +169,10 @@ class GttlMinimizerGenerator
       }
 
       // iterate qgrams
-      for (auto it = qgiter->begin(), it_end = qgiter->end();
-           it != it_end; ++it)
+      while (current_it != current_it_end)
       {
-        const auto &code_pair = *it;
-        ++it;
+        const auto &code_pair = *(current_it.value());
+        ++current_it.value();
 
         // NOLINTNEXTLINE(misc-const-correctness)
         uint64_t this_hash = std::get<0>(code_pair) & hash_mask;
