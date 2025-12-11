@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <cstring> /* for cache input/output */
+#include <fstream> /* for cache input/output */
 #include <utility>
 #include <tuple>
 #include <vector>
@@ -29,6 +31,31 @@
 
 template<int sizeof_unit>
 using HashedQgramVector = std::vector<BytesUnit<sizeof_unit,3>>;
+
+/* Header for cache of reference index,
+   so the load-method can identify it */
+struct HashedQgramsCacheHeader
+{
+  char magic[8];
+  uint32_t version;
+  uint8_t sizeof_unit;
+  uint8_t handle_both_strands;
+  uint8_t possible_false_positive;
+  uint8_t at_constant_distance;
+  uint8_t has_wildcards;
+  uint8_t reserved[3];
+  uint64_t qgram_length;
+  int64_t hashbits;
+  uint64_t count_all_qgrams;
+  uint64_t ref_window_size;
+  uint64_t sequences_number_bits;
+  uint64_t sequences_length_bits;
+  uint64_t hashed_qram_vector_size;
+};
+
+static constexpr const char hashed_qgrams_cache_magic[8]
+  = {'H','Q','G','I','D','X','0','1'};
+static constexpr const uint32_t hashed_qgrams_cache_version = 1;
 
 /* validation is slow, so make sure that #undef is used */
 #undef VALIDATE_MINIMIZER
@@ -640,6 +667,23 @@ class HashedQgramsGeneric
       }
     }
   }
+  /* Konstruktor to be instantiated by Vector of bitpacker (Cached IO) */
+  HashedQgramsGeneric(const GttlMultiseq &_multiseq,
+                      size_t _qgram_length,
+                      int _hashbits,
+                      size_t _count_all_qgrams,
+                      bool _has_wildcards,
+                      const GttlBitPacker<sizeof_unit,3>
+                        &_hashed_qgram_packer,
+                      HashedQgramVector<sizeof_unit> &&_hashed_qgram_vector)
+    : multiseq(_multiseq)
+    , hashed_qgram_vector(std::move(_hashed_qgram_vector))
+    , has_wildcards(_has_wildcards)
+    , hashbits(_hashbits)
+    , count_all_qgrams(_count_all_qgrams)
+    , qgram_length(_qgram_length)
+    , hashed_qgram_packer(_hashed_qgram_packer)
+  {}
   [[nodiscard]] size_t count_all_qgrams_get(void) const noexcept
   {
     return count_all_qgrams;
@@ -695,6 +739,202 @@ class HashedQgramsGeneric
   {
     return Iterator (hashed_qgram_vector,hashed_qgram_packer,
                      hashed_qgram_vector.size());
+  }
+  /* save index to file */
+  bool save_cache(const std::string &cache_path,
+                  uint64_t ref_window_size,
+                  bool at_constant_distance_flag) const
+  {
+    std::ofstream os(cache_path,std::ios::binary | std::ios::trunc);
+    if (!os)
+    {
+      return false;
+    }
+    HashedQgramsCacheHeader header{};
+    std::memcpy(header.magic,hashed_qgrams_cache_magic,
+                sizeof hashed_qgrams_cache_magic);
+    header.version = hashed_qgrams_cache_version;
+    header.sizeof_unit = static_cast<uint8_t>(sizeof_unit);
+    header.handle_both_strands
+      = HashIterator::handle_both_strands ? 1 : 0;
+    header.possible_false_positive
+      = HashIterator::possible_false_positive_matches ? 1 : 0;
+    header.at_constant_distance = at_constant_distance_flag ? 1 : 0;
+    header.has_wildcards = has_wildcards ? 1 : 0;
+    header.qgram_length = static_cast<uint64_t>(qgram_length);
+    header.hashbits = static_cast<int64_t>(hashbits);
+    header.count_all_qgrams = static_cast<uint64_t>(count_all_qgrams);
+    header.ref_window_size = ref_window_size;
+    header.sequences_number_bits
+      = static_cast<uint64_t>(multiseq.sequences_number_bits_get());
+    header.sequences_length_bits
+      = static_cast<uint64_t>(multiseq.sequences_length_bits_get());
+    header.hashed_qram_vector_size
+      = static_cast<uint64_t>(hashed_qgram_vector.size());
+    os.write(reinterpret_cast<const char *>(&header),sizeof header);
+    if (!os)
+    {
+      return false;
+    }
+    if (!hashed_qgram_vector.empty())
+    {
+      os.write(reinterpret_cast<const char *>(hashed_qgram_vector.data()),
+               hashed_qgram_vector.size()
+                 * sizeof (BytesUnit<sizeof_unit,3>));
+      if (!os)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /* load index from cache wieder, fails if parameters are incorrect */
+  static HashedQgramsGeneric /* read header, vector, bitpacker */
+    load_cache(const std::string &cache_path,
+               const GttlMultiseq &multiseq,
+               size_t expected_qgram_length,
+               int expected_hashbits,
+               uint64_t ref_window_size,
+               bool at_constant_distance_flag)
+  {
+    std::ifstream is(cache_path,std::ios::binary);
+    if (!is)
+    {
+      throw std::runtime_error(std::format("cache file {}: cannot open",
+                                           cache_path));
+    }
+    HashedQgramsCacheHeader header{};
+    is.read(reinterpret_cast<char *>(&header),sizeof header);
+    if (!is)
+    {
+      throw std::runtime_error(std::format("cache file {}: cannot read header",
+                                           cache_path));
+    }
+    if (std::memcmp(header.magic,hashed_qgrams_cache_magic,
+                    sizeof hashed_qgrams_cache_magic) != 0)
+    {
+      throw std::runtime_error(std::format("cache file {}: invalid magic "
+                                           "header",cache_path));
+    }
+    if (header.version != hashed_qgrams_cache_version)
+    {
+      throw std::runtime_error(std::format("cache file {}: unsupported cache "
+                                           "version {}",
+                                           cache_path,header.version));
+    }
+    if (header.sizeof_unit != static_cast<uint8_t>(sizeof_unit))
+    {
+      throw std::runtime_error(std::format("cache file {}: incompatible "
+                                           "sizeof_unit ({} != {})",
+                                           cache_path,
+                                           sizeof_unit,
+                                           header.sizeof_unit));
+    }
+    const uint8_t expected_handle_both_strands
+      = HashIterator::handle_both_strands ? 1 : 0;
+    if (header.handle_both_strands != expected_handle_both_strands)
+    {
+      throw std::runtime_error(std::format("cache file {}: reverse-complement "
+                                           " handling differs from cached "
+                                           "version",cache_path));
+    }
+    const uint8_t expected_possible_false_positive
+      = HashIterator::possible_false_positive_matches ? 1 : 0;
+    if (header.possible_false_positive != expected_possible_false_positive)
+    {
+      throw std::runtime_error(std::format("cache file {}: hash method "
+                                           "not compatible with cached version",
+                                           cache_path));
+    }
+    if (header.at_constant_distance
+          != static_cast<uint8_t>(at_constant_distance_flag ? 1 : 0))
+    {
+      throw std::runtime_error(std::format("cache file {}: constant-distance "
+                                           "flag not compatible with cached "
+                                           "version", cache_path));
+    }
+    if (header.qgram_length != expected_qgram_length)
+    {
+      throw std::runtime_error(std::format("cache file {}: kmer size {} is "
+                                           "not comptable with cached version "
+                                           "which was created for k={}",
+                                           cache_path,
+                                           expected_qgram_length,
+                                           header.qgram_length));
+    }
+    if (header.hashbits != expected_hashbits)
+    {
+      throw std::runtime_error(std::format("cache file {}: hash_bits={} is "
+                                           "not compatible with {} as used in "
+                                           "the cached version",
+                                           cache_path,
+                                           expected_hashbits,
+                                           header.hashbits));
+    }
+    if (header.ref_window_size != ref_window_size)
+    {
+      throw std::runtime_error(std::format("cache file {}: "
+                                           "window_size={} is not compatible "
+                                           "with {} as used in the cached "
+                                           "version",
+                                           cache_path,
+                                           ref_window_size,
+                                           header.ref_window_size));
+    }
+    if (header.sequences_number_bits
+          != static_cast<uint64_t>(multiseq.sequences_number_bits_get()))
+    {
+      throw std::runtime_error(std::format("cache file {}: sequence number "
+                                           "bits {} of reference sequence is "
+                                           "not compatible with {} as used in "
+                                           "the cached verstion",
+                                           cache_path,
+                                           multiseq.sequences_number_bits_get(),
+                                           header.sequences_number_bits));
+    }
+    if (header.sequences_length_bits
+          != static_cast<uint64_t>(multiseq.sequences_length_bits_get()))
+    {
+      throw std::runtime_error(std::format("cache file {}: sequence length "
+                                           "bits {} of reference sequence is "
+                                           "not compatible with {} as used in "
+                                           "the cached verstion",
+                                           cache_path,
+                                           multiseq.sequences_length_bits_get(),
+                                           header.sequences_length_bits));
+    }
+    if (header.hashed_qram_vector_size
+          > static_cast<uint64_t>(SIZE_MAX / sizeof (BytesUnit<sizeof_unit,3>)))
+    {
+      throw std::runtime_error(std::format("cache file {}: hashed qgram vector "
+                                           "is too large",
+                                           cache_path));
+    }
+    HashedQgramVector<sizeof_unit>
+      hashed_qgrams(static_cast<size_t>(header.hashed_qram_vector_size));
+    if (!hashed_qgrams.empty())
+    {
+      is.read(reinterpret_cast<char *>(hashed_qgrams.data()),
+              hashed_qgrams.size() * sizeof (BytesUnit<sizeof_unit,3>));
+      if (!is)
+      {
+        throw std::runtime_error(std::format("cache file {}: truncated hashed "
+                                             "qgram data",
+                                             cache_path));
+      }
+    }
+    const GttlBitPacker<sizeof_unit,3> packer(
+      {expected_hashbits,
+       multiseq.sequences_number_bits_get(),
+       multiseq.sequences_length_bits_get()});
+    return HashedQgramsGeneric(multiseq,
+                               expected_qgram_length,
+                               expected_hashbits,
+                               static_cast<size_t>(header.count_all_qgrams),
+                               header.has_wildcards != 0,
+                               packer,
+                               std::move(hashed_qgrams));
   }
 };
 #endif
