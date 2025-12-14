@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cstdint>
 #include <exception>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -32,9 +31,9 @@
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
-#include "minimizer_opt.hpp"
 #include "utilities/runtime_class.hpp"
 #include "utilities/constexpr_for.hpp"
+#include "minimizer_opt.hpp"
 
 std::pair<int,int> determine_hash_bits(int sequences_bits,
                                        int requested_hash_bits)
@@ -65,9 +64,9 @@ void run_nt_minimizer(const MinimizerOptions &options)
                         padding_char,
                         options.canonical_option_is_set());
   rt_create_multiseq.show("reading input files and creating multiseq");
-  for (auto &log : multiseq.statistics())
+  for (auto &msg : multiseq.statistics())
   {
-    std::cout << "# " << log << '\n';
+    printf("# %s\n",msg.c_str());
   }
   int hash_bits = -1;
   int var_sizeof_unit_hashed_qgram;
@@ -93,6 +92,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
                                hash_bits,
                                options.sort_by_hash_value_option_is_set(),
                                options.at_constant_distance_option_is_set(),
+                               options.max_replicates_get(),
                                &log_vector);
         RunTimeClass rt_output_hashed_qgrams{};
         hqg.show();
@@ -109,6 +109,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
                                hash_bits,
                                options.sort_by_hash_value_option_is_set(),
                                options.at_constant_distance_option_is_set(),
+                               options.max_replicates_get(),
                                &log_vector);
         if (options.show_mode_get() != 0)
         {
@@ -118,13 +119,23 @@ void run_nt_minimizer(const MinimizerOptions &options)
             hqg.show();
           } else
           {
-            assert(options.show_mode_get() == 2);
-            for (auto &&dhqg : hqg)
+            if (options.show_mode_get() == 2)
             {
-              printf("%" PRIu64 "\t%zu\t%zu\n",
-                     dhqg.hash_value,
-                     dhqg.sequence_number,
-                     dhqg.startpos);
+              for (auto &&dhqg : hqg)
+              {
+                printf("%" PRIu64 "\t%zu\t%zu\n",
+                       dhqg.hash_value,
+                       dhqg.sequence_number,
+                       dhqg.startpos);
+              }
+            } else
+            {
+              assert(options.show_mode_get() == 3);
+              auto count_runs = hqg.hash_value_run_statistics();
+              for (auto &[r,c] : count_runs)
+              {
+                printf("%zu\t%zu\n",r,c);
+              }
             }
           }
           log_vector.push_back(rt_output_hashed_qgrams
@@ -133,7 +144,7 @@ void run_nt_minimizer(const MinimizerOptions &options)
       }
       for (auto &msg : log_vector)
       {
-        std::cout << "# " << msg << '\n';
+        printf("# %s\n",msg.c_str());
       }
     }
   });
@@ -150,7 +161,7 @@ int main(int argc, char *argv[])
   }
   catch (const std::invalid_argument &err) /* check_err.py */
   {
-    std::cerr << argv[0] << ": file " << err.what() << '\n';
+    fprintf(stderr,"%s: %s\n",argv[0],err.what());
     return EXIT_FAILURE;
   }
   if (options.help_option_is_set())
@@ -165,8 +176,8 @@ int main(int argc, char *argv[])
   {
     for (auto &&inputfile : options.inputfiles_get())
     {
-      std::cerr << argv[0] << ": file \"" << inputfile << "\"" << err.what()
-                << '\n';
+      fprintf(stderr,"%s: file \"%s\"%s\n",argv[0],inputfile.c_str(),
+                                           err.what());
     }
     return EXIT_FAILURE;
   }

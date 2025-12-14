@@ -152,7 +152,7 @@ static std::pair<size_t,bool> append_minimizers(
     count_all_qgrams += (this_length - qgram_length - 1);
 
 #ifdef VALIDATE_MINIMIZER
-    HashedQgramVector<sizeof_unit> all_hashed_qgrams{};
+    HashedQgramVector<sizeof_unit> all_hashed_qgrams;
     size_t search_start = 0;
 #endif
     bool front_was_moved = false;
@@ -541,6 +541,48 @@ class HashedQgramsGeneric
   size_t count_all_qgrams;
   size_t qgram_length;
   GttlBitPacker<sizeof_unit,3> hashed_qgram_packer;
+  size_t match_pos_pair_determine_length(uint64_t first_code,
+                                         size_t start_range) const noexcept
+  {
+    size_t idx;
+
+    for (idx = start_range + 1;
+         idx < hashed_qgram_vector.size() &&
+         first_code == this->hash_value_get(idx);
+         idx++)
+      /* Nothing */;
+    return idx - start_range;
+  }
+  size_t remove_replicates_inplace(size_t max_replicates)
+  {
+    assert(max_replicates > 0);
+    if (hashed_qgram_vector.size() <= 1)
+    {
+      return 0;
+    }
+    size_t r_idx = 0, w_idx = 0;
+    while (r_idx < hashed_qgram_vector.size())
+    {
+      const uint64_t first_code = this->hash_value_get(r_idx);
+      const size_t replicate_len
+        = match_pos_pair_determine_length(first_code,r_idx);
+      assert(w_idx <= r_idx);
+      if (replicate_len <= max_replicates)
+      {
+        if (w_idx < r_idx)
+        {
+          for (size_t idx = 0; idx < replicate_len; idx++)
+          {
+            hashed_qgram_vector[w_idx+idx] = hashed_qgram_vector[r_idx+idx];
+          }
+        }
+        w_idx += replicate_len;
+      }
+      r_idx += replicate_len;
+    }
+    hashed_qgram_vector.resize(w_idx);
+    return r_idx - w_idx;
+  }
   public:
   static constexpr const bool possible_false_positive_matches
     = HashIterator::possible_false_positive_matches;
@@ -555,9 +597,9 @@ class HashedQgramsGeneric
                       int _hashbits,
                       bool sort_by_hashvalue,
                       bool at_constant_distance,
+                      size_t max_replicates,
                       std::vector<std::string> *log_vector)
     : multiseq(_multiseq)
-    , hashed_qgram_vector({})
     , has_wildcards(false)
     , hashbits(_hashbits)
     , count_all_qgrams(0)
@@ -628,27 +670,17 @@ class HashedQgramsGeneric
     }
     if (log_vector != nullptr)
     {
-      log_vector->push_back(std::string("number of hashed kmers\t") +
-                            std::to_string(this->size()));
-      const double density
-        = static_cast<double>(size())/this->count_all_qgrams_get();
-      log_vector->push_back(std::format("hashed kmers density\t{:.2f}",
-                                        density));
-      const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
-      log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t{:.0f}",
-                                        std::ceil(space_in_mega_bytes)));
       log_vector->push_back(rt_collect.to_string("collect hashed kmers"));
     }
+
     if (sort_by_hashvalue)
     {
-      RunTimeClass rt_sort{};
+      RunTimeClass rt_postprocess{};
       if constexpr (sizeof_unit == 8)
       {
-        const Buckets<size_t> *const buckets = ska_lsb_radix_sort<size_t>(
-                                 hashbits,
-                                 reinterpret_cast<uint64_t *>(
-                                   hashed_qgram_vector.data()),
-                                 hashed_qgram_vector.size());
+        uint64_t *ptr =reinterpret_cast<uint64_t *>(hashed_qgram_vector.data());
+        const Buckets<size_t> *const buckets
+          = ska_lsb_radix_sort<size_t>(hashbits,ptr,hashed_qgram_vector.size());
         delete buckets;
       } else
       {
@@ -662,12 +694,38 @@ class HashedQgramsGeneric
       }
       if (log_vector != nullptr)
       {
-        log_vector->push_back(rt_sort.
+        log_vector->push_back(rt_postprocess.
                               to_string("sort hashed kmers by hash value"));
       }
+      if (max_replicates > 0)
+      {
+        rt_postprocess.reset();
+        const size_t orig_size = hashed_qgram_vector.size();
+        const size_t removed = remove_replicates_inplace(max_replicates);
+        const double percentage = 100 * static_cast<double>(removed)/orig_size;
+        auto t_msg = std::format("removed {} replicates with more than {} "
+                                 "occurrences ({:.2f}% of all {} minimizers)",
+                                 removed,
+                                 max_replicates,
+                                 percentage,
+                                 orig_size);
+        log_vector->push_back(rt_postprocess.to_string(t_msg));
+      }
+    }
+    if (log_vector != nullptr)
+    {
+      log_vector->push_back(std::string("number of hashed kmers\t") +
+                            std::to_string(this->size()));
+      const double density
+        = static_cast<double>(size())/this->count_all_qgrams_get();
+      log_vector->push_back(std::format("hashed kmers density\t{:.2f}",
+                                        density));
+      const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
+      log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t{:.0f}",
+                                        std::ceil(space_in_mega_bytes)));
     }
   }
-  /* Konstruktor to be instantiated by Vector of bitpacker (Cached IO) */
+  /* Construktor to be instantiated by Vector of bitpacker (Cached IO) */
   HashedQgramsGeneric(const GttlMultiseq &_multiseq,
                       size_t _qgram_length,
                       int _hashbits,
@@ -683,7 +741,7 @@ class HashedQgramsGeneric
     , count_all_qgrams(_count_all_qgrams)
     , qgram_length(_qgram_length)
     , hashed_qgram_packer(_hashed_qgram_packer)
-  {}
+  { }
   [[nodiscard]] size_t count_all_qgrams_get(void) const noexcept
   {
     return count_all_qgrams;
@@ -696,6 +754,40 @@ class HashedQgramsGeneric
   {
     assert(idx < size());
     return hashed_qgram_vector[idx].template decode_at<0>(hashed_qgram_packer);
+  }
+  std::map<size_t, size_t> hash_value_run_statistics(void) const
+  {
+    std::map<size_t, size_t> count_runs;
+    if (hashed_qgram_vector.size() > 0)
+    {
+      uint64_t previous_hash_value = hash_value_get(0);
+      size_t run_length = size_t(1);
+      for (size_t idx = 1; idx < hashed_qgram_vector.size(); idx++)
+      {
+        const uint64_t this_hash_value = hash_value_get(idx);
+        if (previous_hash_value != this_hash_value)
+        {
+          count_runs[run_length]++;
+          run_length = size_t(1);
+          previous_hash_value = this_hash_value;
+        } else
+        {
+          run_length++;
+        }
+      }
+      count_runs[run_length]++;
+      size_t total_runs = 0;
+      for (auto &[r, c] : count_runs)
+      {
+        total_runs += r * c;
+      }
+      if (total_runs != hashed_qgram_vector.size())
+      {
+        throw std::format("sum of runs = {} != {} = number of minimizers",
+                           total_runs, hashed_qgram_vector.size());
+      }
+    }
+    return count_runs;
   }
   [[nodiscard]] size_t sequence_number_get(size_t idx) const noexcept
   {

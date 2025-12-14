@@ -262,6 +262,8 @@ test_minimizer_count:minimizer_mn.x
 	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 -c -t 2 -s ${AT1MB} | grep 'number of hashed kmers' | diff --strip-trailing-cr - ${TMPFILE}
 	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 --show_mode 1 ${AT1MB} > ${TMPFILE}
 	@${VALGRIND} ./minimizer_mn.x -w 30 -k 18 --show_mode 2 ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${TMPFILE}
+	@echo "# number of hashed kmers	69663" > ${TMPFILE}
+	@${VALGRIND} ./minimizer_mn.x -w 15 -k 18 -r 5 -s ${AT1MB} | diff --strip-trailing-cr -I '^#' - ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
 
