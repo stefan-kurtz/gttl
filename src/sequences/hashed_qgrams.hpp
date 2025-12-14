@@ -702,14 +702,18 @@ class HashedQgramsGeneric
         rt_postprocess.reset();
         const size_t orig_size = hashed_qgram_vector.size();
         const size_t removed = remove_replicates_inplace(max_replicates);
-        const double percentage = 100 * static_cast<double>(removed)/orig_size;
-        auto t_msg = std::format("removed {} replicates with more than {} "
-                                 "occurrences ({:.2f}% of all {} minimizers)",
-                                 removed,
-                                 max_replicates,
-                                 percentage,
-                                 orig_size);
-        log_vector->push_back(rt_postprocess.to_string(t_msg));
+        if (log_vector != nullptr)
+        {
+          const double percentage
+            = 100 * static_cast<double>(removed)/orig_size;
+          auto t_msg = std::format("removed {} replicates with more than {} "
+                                   "occurrences ({:.2f}% of all {} minimizers)",
+                                   removed,
+                                   max_replicates,
+                                   percentage,
+                                   orig_size);
+          log_vector->push_back(rt_postprocess.to_string(t_msg));
+        }
       }
     }
     if (log_vector != nullptr)
