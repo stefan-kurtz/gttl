@@ -94,7 +94,7 @@ class NtHashOptions
     try
     {
       auto result = options.parse(argc, argv);
-      if (result.count("help") > 0)
+      if (result.contains("help"))
       {
         help_option = true;
         usage(options);
@@ -105,7 +105,7 @@ class NtHashOptions
         {
           inputfiles.push_back(unmatched_arg);
         }
-        if (inputfiles.size() < 1)
+        if (inputfiles.empty())
         {
           throw cxxopts::exceptions::exception("not enough input files");
         }

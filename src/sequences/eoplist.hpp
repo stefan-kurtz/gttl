@@ -246,7 +246,7 @@ class Eoplist
     counter_for_matches += length;
     while (length > 0)
     {
-      if (eoplist.size() > 0 &&
+      if (not eoplist.empty() and
           eoplist[eoplist.size()-1] < ft_eopcode_maxmatches - 1)
       {
         if (static_cast<size_t>(eoplist[eoplist.size()-1]) + length
@@ -557,7 +557,7 @@ class Eoplist
   }
   bool cut_off_unpolished_tail(void)
   {
-    assert(eoplist.size() > 0);
+    assert(not eoplist.empty());
     size_t idx = eoplist.size()-1;
     uint8_t eopcode;
 

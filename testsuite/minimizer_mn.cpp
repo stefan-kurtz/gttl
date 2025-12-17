@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <climits>
+#include <cstdio>
 #include <cstdlib>
 #include <cstdint>
 #include <exception>
@@ -28,7 +29,6 @@
 #include <format>
 
 #include "sequences/gttl_multiseq.hpp"
-#include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/qgrams_hash_nthash.hpp"
 #include "sequences/hashed_qgrams.hpp"
 #include "utilities/runtime_class.hpp"

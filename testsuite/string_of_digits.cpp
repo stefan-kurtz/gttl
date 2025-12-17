@@ -20,7 +20,7 @@ constexpr const char *is_not_digits[] = {"",       "a",      "12345a", "a12345",
 
 int main()
 {
-  for (const auto str : is_digits)
+  for (const auto *const str : is_digits)
   {
     if (!string_of_digits(str))
     {
@@ -29,7 +29,7 @@ int main()
       return EXIT_FAILURE;
     }
   }
-  for (const auto str : is_not_digits)
+  for (const auto *const str : is_not_digits)
   {
     if (string_of_digits(str))
     {

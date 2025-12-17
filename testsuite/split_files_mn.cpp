@@ -43,13 +43,13 @@ int main(int argc, char *argv[])
 
   const size_t num_threads = result["threads"].as<size_t>();
 
-  if (result.count("help"))
+  if (result.contains("help"))
   {
     std::cout << options.help() << '\n';
     exit(EXIT_SUCCESS);
   }
 
-  if (!result.count("file"))
+  if (!result.contains("file"))
   {
     std::cout << options.help() << '\n';
     exit(EXIT_FAILURE);
@@ -67,12 +67,12 @@ int main(int argc, char *argv[])
   size_t num_parts;
   size_t len_parts;
   size_t num_sequences;
-  if (result.count("num_parts"))
+  if (result.contains("num_parts"))
   {
     num_parts = result["num_parts"].as<size_t>();
     len_parts = 0;
     num_sequences = 0;
-  } else if (result.count("len_parts"))
+  } else if (result.contains("len_parts"))
   {
     num_parts = 0;
     len_parts = result["len_parts"].as<size_t>();
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
   const std::string ifilename = result["file"].as<std::string>();
 
   std::string output_basename;
-  if (result.count("output"))
+  if (result.contains("output"))
   {
     output_basename = result["output"].as<std::string>();
   } else

@@ -37,7 +37,7 @@ void UnwordsOptions::parse(int argc, char **argv)
   try
   {
     auto result = options.parse(argc, argv);
-    if (result.count("help") > 0)
+    if (result.contains("help"))
     {
       help_option = true;
     }
@@ -48,7 +48,7 @@ void UnwordsOptions::parse(int argc, char **argv)
     {
       inputfiles.push_back(unmatched_arg);
     }
-    if (inputfiles.size() < 1)
+    if (inputfiles.empty())
     {
       throw cxxopts::exceptions::exception("not enough inputfiles");
     }

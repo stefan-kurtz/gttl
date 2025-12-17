@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
-#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <cinttypes>
@@ -21,7 +20,6 @@
 #include "utilities/uniform_random_double.hpp"
 #include "utilities/ska_lsb_radix_sort.hpp"
 #include "utilities/merge_sort.hpp"
-#include "utilities/runtime_class.hpp"
 
 static void usage(const cxxopts::Options &options)
 {
@@ -73,7 +71,7 @@ class SortKeyValuePairsOptions
     try
     {
       auto result = options.parse(argc, argv);
-      if (result.count("help") > 0)
+      if (result.contains("help"))
       {
         help_option = true;
         usage(options);
@@ -82,7 +80,7 @@ class SortKeyValuePairsOptions
         help_option = false;
       }
       const std::vector<std::string>& unmatched_args = result.unmatched();
-      if (unmatched_args.size() < 1)
+      if (unmatched_args.empty())
       {
         throw std::invalid_argument("missing positional number_of_values "
                                     "argument");

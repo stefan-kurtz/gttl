@@ -183,10 +183,10 @@ static inline uint64_t _wyr3(const uint8_t *p, size_t k)
 static inline uint64_t wyhash(const void *key, size_t len, uint64_t seed)
 {
   // the default secret parameters
-  static constexpr const uint64_t secret[] = {0x2d358dccaa6c78a5ull,
-                                              0x8bb84b93962eacc9ull,
-                                              0x4b33a62ed433d4a3ull,
-                                              0x4d5a2da51de1aa47ull};
+  static constexpr const uint64_t secret[] = {0x2d358dccaa6c78a5ULL,
+                                              0x8bb84b93962eacc9ULL,
+                                              0x4b33a62ed433d4a3ULL,
+                                              0x4d5a2da51de1aa47ULL};
 
   const uint8_t *p = (const uint8_t *) key;
   seed ^= _wymix(seed ^ secret[0], secret[1]);

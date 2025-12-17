@@ -125,7 +125,6 @@ class QgramRecHashValueFwdIterator
       }
   };
 
-  private:
     QgramTransformer qgram_transformer;
     size_t qgram_length;
     const SequenceBaseType *sequence;

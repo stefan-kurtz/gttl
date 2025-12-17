@@ -100,7 +100,7 @@ class Restrict2Pairs
     GttlLineGenerator<buf_size> gttl_lg(inputfile);
     for (const auto& line : gttl_lg)
     {
-      if (line.size() > 0 and line[0] != '#')
+      if (not line.empty() and line[0] != '#')
       {
         std::vector<std::string> vec = gttl_split_string(line, '\t');
         assert(vec.size() >= 2);
@@ -109,7 +109,7 @@ class Restrict2Pairs
         local_pairs.insert(std::make_pair(i,j));
       }
     }
-    if (local_pairs.size() == 0)
+    if (local_pairs.empty())
     {
       throw std::invalid_argument("file specified with option -r cannot "
                                   "be empty");
@@ -144,7 +144,7 @@ class Restrict2Pairs
   {}
   bool check(size_t i, size_t j) const noexcept
   {
-    return pairs.size() == 0 or pairs.count(std::make_pair(i,j)) > 0;
+    return pairs.empty() or pairs.contains(std::make_pair(i,j));
   }
 };
 

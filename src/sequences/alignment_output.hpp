@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstddef>
-#include <cmath>
 #include <cassert>
 #include "sequences/eoplist.hpp"
 

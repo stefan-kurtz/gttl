@@ -88,7 +88,7 @@ void SeqReaderOptions::parse(int argc, char **argv)
   try
   {
     auto result = options.parse(argc, argv);
-    if (result.count("help") > 0)
+    if (result.contains("help"))
     {
       help_option = true;
       usage(options);
@@ -98,7 +98,7 @@ void SeqReaderOptions::parse(int argc, char **argv)
     {
       inputfiles.push_back(unmatched_arg);
     }
-    if (inputfiles.size() < 1)
+    if (inputfiles.empty())
     {
       throw cxxopts::exceptions::exception("not enough input files");
     }
@@ -203,7 +203,7 @@ const std::vector<std::string> &SeqReaderOptions::inputfiles_get(void)
 
 hash_mode_type SeqReaderOptions::hash_mode_get(void) const
 {
-  if (hash_method.size() == 0)
+  if (hash_method.empty())
   {
     return hash_mode_none;
   }

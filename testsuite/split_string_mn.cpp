@@ -21,7 +21,7 @@ static std::pair<size_t,size_t> test_split_string(const char *inputfile,
   size_t column_count = 0;
   for (const auto &buffer : gttl_lg)
   {
-    if (buffer.size() > 0 and buffer[0] != '#')
+    if (not buffer.empty() and buffer[0] != '#')
     {
       std::vector<std::string> vec = gttl_split_string(buffer, sep);
       column_count += vec.size();

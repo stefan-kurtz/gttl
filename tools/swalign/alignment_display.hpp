@@ -95,7 +95,7 @@ class AlignmentDisplay
     const std::vector<std::string> numbers = gttl_split_string(arg_opt, '+', 1);
     size_t previous_number = 0;
     bool alignment_width_set = false;
-    for (auto &s : numbers)
+    for (const auto &s : numbers)
     {
       int readint;
       if (std::sscanf(s.c_str(),"%d",&readint) != 1 or readint < 1)

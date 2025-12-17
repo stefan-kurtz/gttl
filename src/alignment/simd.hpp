@@ -287,8 +287,8 @@ inline __m256i _mm256_shift_left4(__m256i a)
   const __m256i mask = _mm256_permute2x128_si256(a, a, _MM_SHUFFLE(0, 0, 3, 0));
   return _mm256_alignr_epi8(a, mask, 16 - 4);
 }
-inline uint16_t simd_hmax16_avx(const __m256i buffer);
-inline uint8_t simd_hmax8_avx(const __m256i buffer);
+inline uint16_t simd_hmax16_avx(__m256i buffer);
+inline uint8_t simd_hmax8_avx(__m256i buffer);
 
 using simd_int = __m256i;
 #define simdi32_add(x, y) _mm256_add_epi32(x, y)

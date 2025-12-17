@@ -28,7 +28,6 @@
 #include <cstdint>
 #include <cinttypes>
 #include <tuple>
-#include <algorithm>
 
 #include "utilities/read_vector.hpp"
 #include "utilities/gttl_mmap.hpp"

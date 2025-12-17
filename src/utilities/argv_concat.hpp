@@ -25,7 +25,7 @@ class ArgvConcat
     {
       if (concat)
       {
-        assert(arg_vector.size() > 0);
+        assert(not arg_vector.empty());
         const std::string key(argv[idx]);
         if (strlen(argv[idx]) > 0 && argv[idx][0] != '-')
         {
@@ -57,7 +57,7 @@ class ArgvConcat
     my_argv = new char * [arg_vector.size()];
     for (size_t idx = 0; idx < arg_vector.size(); idx++)
     {
-      assert(arg_vector[idx].size() > 0);
+      assert(not arg_vector[idx].empty());
       if (replace_single_hyphen_options &&
           arg_vector[idx].size() > 2 &&
           arg_vector[idx][0] == '-' &&

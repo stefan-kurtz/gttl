@@ -38,7 +38,7 @@ void NtcardOptions::parse(int argc, char** argv)
   try
   {
     auto result = options.parse(argc, argv);
-    if (result.count("help") > 0)
+    if (result.contains("help"))
     {
       help_option = true;
       usage(options);
@@ -46,7 +46,7 @@ void NtcardOptions::parse(int argc, char** argv)
     {
       help_option = false;
       const std::vector<std::string>& unmatched_args = result.unmatched();
-      if (unmatched_args.size() < 1)
+      if (unmatched_args.empty())
       {
         throw cxxopts::exceptions::exception("missing input file");
       }

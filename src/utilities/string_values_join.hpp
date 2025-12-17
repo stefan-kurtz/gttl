@@ -2,7 +2,6 @@
 #define STRING_VALUES_JOIN_HPP
 
 #include <string>
-#include <string>
 #include <type_traits>
 
 template<class FwdIter>

@@ -96,7 +96,7 @@ class GttlMultiseqGenerator
     , file_list1(fastq_paired_input ? extract_file_list(size_t(1),inputfiles)
                                     : StrVec{})
     , gen0(&file_list0)
-    , gen1(file_list1.size() > 0 ? &file_list1 : nullptr)
+    , gen1(file_list1.empty() ? nullptr : &file_list1)
     , max_num_sequences(_max_num_sequences)
     , sequence_number_offset(0)
     , padding_char(_padding_char)

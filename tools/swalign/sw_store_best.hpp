@@ -57,7 +57,7 @@ class SWStoreBestResultsGetThreadRelated
   }
   ~SWStoreBestResultsGetThreadRelated(void)
   {
-    for (auto v : results)
+    for (auto *v : results)
     {
       delete v;
     }

@@ -28,7 +28,7 @@ class StringTokenizer
       {
         if (inword)
         {
-          if (buffer.size() > 0)
+          if (not buffer.empty())
           {
             token_list.emplace_back(buffer);
             buffer.clear();
@@ -37,7 +37,7 @@ class StringTokenizer
         }
       }
     }
-    if (inword && buffer.size() > 0)
+    if (inword and not buffer.empty())
     {
       token_list.emplace_back(buffer);
     }

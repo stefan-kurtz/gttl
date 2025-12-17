@@ -77,13 +77,13 @@ class MultiseqFactoryOptions
     try
     {
       auto result = options.parse(argc, argv);
-      if (result.count("help") > 0)
+      if (result.contains("help"))
       {
         help_option = true;
         usage(options);
       }
       const std::vector<std::string>& unmatched_args = result.unmatched();
-      if (unmatched_args.size() < 1)
+      if (unmatched_args.empty())
       {
         throw std::invalid_argument("missing positional inputfiles "
                                     "(one or two are required)");

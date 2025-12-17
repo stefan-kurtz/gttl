@@ -36,7 +36,6 @@
 #include <format>
 #include <vector>
 #include "utilities/gttl_file_open.hpp"
-#include "utilities/mathsupport.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/wyhash.hpp"
 #include "utilities/mathsupport.hpp"
@@ -457,7 +456,7 @@ static void verify_consecutive_qgrams(const uint64_t *sub_unit_ptr,
     const std::string qgram(qgram_decode(qgram_code,qgram_length));
     //std::cout << qgram_code << "\t"
               //<< qgram << std::endl;
-    if (previous_qgram.size() > 0)
+    if (not previous_qgram.empty())
     {
       for (size_t idx = 0; idx < qgram_length-1; idx++)
       {

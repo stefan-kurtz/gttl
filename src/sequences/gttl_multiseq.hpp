@@ -16,8 +16,6 @@
 #include <utility>
 #include <vector>
 #include <map>
-#include <tuple>
-#include <algorithm>
 #include <limits>
 #include <format>
 #include <cstdio>
@@ -631,7 +629,7 @@ class GttlMultiseq
      normal symbols for readability*/
   void show(size_t width, bool short_header) const noexcept
   {
-    assert(concatenated_sequences.size() > 0);
+    assert(not concatenated_sequences.empty());
 #ifndef NDEBUG
     bool found_maximum_seq_length = false;
     bool found_minimum_seq_length = false;
@@ -664,7 +662,7 @@ class GttlMultiseq
     const size_t max_length = opt_max_length == 0
                                 ? std::numeric_limits<size_t>::max()
                                 : opt_max_length;
-    assert(concatenated_sequences.size() > 0);
+    assert(not concatenated_sequences.empty());
     std::vector<std::pair<std::string, size_t>> header_with_seqnum;
     header_with_seqnum.reserve(sequences_number_get());
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)
@@ -709,7 +707,7 @@ class GttlMultiseq
     const size_t max_length = opt_max_length == 0
                                 ? std::numeric_limits<size_t>::max()
                                 : opt_max_length;
-    assert(concatenated_sequences.size() > 0);
+    assert(not concatenated_sequences.empty());
     std::vector<std::pair<size_t, size_t>> length_with_seqnum;
     length_with_seqnum.reserve(sequences_number_get());
     for (size_t seqnum = 0; seqnum < sequences_number_get(); seqnum++)

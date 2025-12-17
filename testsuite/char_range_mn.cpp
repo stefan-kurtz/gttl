@@ -77,7 +77,7 @@ class CharRangeOptions
     try
     {
       auto result = options.parse(argc, argv);
-      if (result.count("help") > 0)
+      if (result.contains("help"))
       {
         help_option = true;
         usage(options);

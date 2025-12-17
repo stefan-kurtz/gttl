@@ -6,6 +6,9 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <map>
+#include <stdexcept>
+#include <iostream>
 #include <string>
 #include <cstring> /* for cache input/output */
 #include <fstream> /* for cache input/output */
@@ -541,6 +544,7 @@ class HashedQgramsGeneric
   size_t count_all_qgrams;
   size_t qgram_length;
   GttlBitPacker<sizeof_unit,3> hashed_qgram_packer;
+  [[nodiscard]]
   size_t match_pos_pair_determine_length(uint64_t first_code,
                                          size_t start_range) const noexcept
   {
@@ -560,7 +564,8 @@ class HashedQgramsGeneric
     {
       return 0;
     }
-    size_t r_idx = 0, w_idx = 0;
+    size_t r_idx = 0;
+    size_t w_idx = 0;
     while (r_idx < hashed_qgram_vector.size())
     {
       const uint64_t first_code = this->hash_value_get(r_idx);
@@ -678,7 +683,8 @@ class HashedQgramsGeneric
       RunTimeClass rt_postprocess{};
       if constexpr (sizeof_unit == 8)
       {
-        uint64_t *ptr =reinterpret_cast<uint64_t *>(hashed_qgram_vector.data());
+        uint64_t * const ptr =
+          reinterpret_cast<uint64_t *>(hashed_qgram_vector.data());
         const Buckets<size_t> *const buckets
           = ska_lsb_radix_sort<size_t>(hashbits,ptr,hashed_qgram_vector.size());
         delete buckets;
@@ -759,7 +765,7 @@ class HashedQgramsGeneric
     assert(idx < size());
     return hashed_qgram_vector[idx].template decode_at<0>(hashed_qgram_packer);
   }
-  std::map<size_t, size_t> hash_value_run_statistics(void) const
+  [[nodiscard]] std::map<size_t, size_t> hash_value_run_statistics(void) const
   {
     std::map<size_t, size_t> count_runs;
     if (hashed_qgram_vector.size() > 0)
@@ -787,8 +793,9 @@ class HashedQgramsGeneric
       }
       if (total_runs != hashed_qgram_vector.size())
       {
-        throw std::format("sum of runs = {} != {} = number of minimizers",
-                           total_runs, hashed_qgram_vector.size());
+        throw std::runtime_error(
+          std::format("sum of runs = {} != {} = number of minimizers",
+                      total_runs, hashed_qgram_vector.size()));
       }
     }
     return count_runs;
@@ -837,9 +844,9 @@ class HashedQgramsGeneric
                      hashed_qgram_vector.size());
   }
   /* save index to file */
-  bool save_cache(const std::string &cache_path,
-                  uint64_t ref_window_size,
-                  bool at_constant_distance_flag) const
+  [[nodiscard]] bool save_cache(const std::string &cache_path,
+                                uint64_t ref_window_size,
+                                bool at_constant_distance_flag) const
   {
     std::ofstream os(cache_path,std::ios::binary | std::ios::trunc);
     if (!os)
@@ -978,8 +985,8 @@ class HashedQgramsGeneric
                                            ref_window_size,
                                            header.ref_window_size));
     }
-    if (header.sequences_number_bits
-          != static_cast<uint64_t>(multiseq.sequences_number_bits_get()))
+    if (std::cmp_not_equal(header.sequences_number_bits,
+                           multiseq.sequences_number_bits_get()))
     {
       throw std::runtime_error(std::format("cache file {}: sequence number "
                                            "bits {} of reference sequence is "
@@ -989,8 +996,8 @@ class HashedQgramsGeneric
                                            multiseq.sequences_number_bits_get(),
                                            header.sequences_number_bits));
     }
-    if (header.sequences_length_bits
-          != static_cast<uint64_t>(multiseq.sequences_length_bits_get()))
+    if (std::cmp_not_equal(header.sequences_length_bits,
+                           multiseq.sequences_length_bits_get()))
     {
       throw std::runtime_error(std::format("cache file {}: sequence length "
                                            "bits {} of reference sequence is "

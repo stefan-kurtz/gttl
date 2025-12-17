@@ -75,7 +75,7 @@ class GttlMemoryTracker
     }
     if (ptr != nullptr)
     {
-      assert(malloced_ptrs.count(ptr) == 0);
+      assert(not malloced_ptrs.contains(ptr));
       malloced_ptrs[ptr] = Entry(codefile_name,codefile_line,amount);
     }
   }
@@ -94,7 +94,7 @@ class GttlMemoryTracker
   }
   void untrack(void *ptr,const char *codefile_name, int codefile_line)
   {
-    if (malloced_ptrs.count(ptr) == 0)
+    if (not malloced_ptrs.contains(ptr))
     {
       fprintf(stderr,"file %s, line %d: cannot free memory\n",
                      codefile_name,codefile_line);

@@ -73,7 +73,7 @@ class ThreadsOutputFiles
   }
   ~ThreadsOutputFiles(void)
   {
-    for (auto out_fp : output_filepointers)
+    for (auto *out_fp : output_filepointers)
     {
       fclose(out_fp);
     }

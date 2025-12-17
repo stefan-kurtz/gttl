@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <cstddef>
 #include <cassert>
-#include <algorithm>
 #include <utility>
 #include "sequences/eoplist.hpp"
 #include "sequences/gttl_substring.hpp"

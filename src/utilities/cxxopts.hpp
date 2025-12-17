@@ -46,7 +46,6 @@ THE SOFTWARE.
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <algorithm>
 #include <locale>
 
 #ifdef CXXOPTS_NO_EXCEPTIONS
@@ -966,8 +965,8 @@ integer_parser(const std::string& text, T& value)
   using US                 = std::make_unsigned_t<T>;
   constexpr bool is_signed = std::numeric_limits<T>::is_signed;
 
-  const bool          negative    = int_desc.negative.length() > 0;
-  const uint8_t       base        = int_desc.base.length() > 0 ? 16 : 10;
+  const bool          negative    = !int_desc.negative.empty();
+  const uint8_t       base        = int_desc.base.empty() ? 10 : 16;
   const std::string & value_match = int_desc.value;
 
   US result = 0;
@@ -1767,6 +1766,7 @@ CXXOPTS_DIAGNOSTIC_POP
   bool
   contains(const std::string& o) const
   {
+    // NOLINTNEXTLINE(readability-container-contains)
     return static_cast<bool>(count(o));
   }
 
@@ -2627,7 +2627,7 @@ OptionParser::parse(int argc, const char* const* argv)
           }
         }
       }
-      else if (argu_desc.arg_name.length() != 0)
+      else if (!argu_desc.arg_name.empty())
       {
         const std::string& name = argu_desc.arg_name;
 
@@ -2667,9 +2667,9 @@ OptionParser::parse(int argc, const char* const* argv)
     ++current;
   }
 
-  for (auto& opt : m_options)
+  for (const auto& opt : m_options)
   {
-    auto& detail = opt.second;
+    const auto& detail = opt.second;
     const auto& value = detail->value();
 
     auto& store = m_parsed[detail->hash()];
@@ -2715,7 +2715,7 @@ inline
 void
 OptionParser::finalise_aliases()
 {
-  for (auto& option: m_options)
+  for (const auto& option: m_options)
   {
     auto& detail = *option.second;
     auto hash = detail.hash();
@@ -2765,7 +2765,7 @@ Options::add_option
 
   //add the help details
 
-  if (m_help.find(group) == m_help.end())
+  if (!m_help.contains(group))
   {
     m_group.push_back(group);
   }
@@ -2823,8 +2823,8 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    if (o.l.size() &&
-        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
+    if (!o.l.empty() &&
+        m_positional_set.contains(o.l.front()) &&
         !m_show_positional)
     {
       continue;
@@ -2846,8 +2846,8 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    if (o.l.size() &&
-        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
+    if (!o.l.empty() &&
+        m_positional_set.contains(o.l.front()) &&
         !m_show_positional)
     {
       continue;

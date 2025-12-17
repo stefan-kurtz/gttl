@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <vector>
 #include <set>
-#include <algorithm>
 #include <cassert>
 #include "utilities/multibitvector.hpp"
 

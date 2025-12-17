@@ -26,7 +26,6 @@
 #include "utilities/cyclic_buffer.hpp"
 #include "sequences/alphabet.hpp"
 #include "sequences/max_qgram_length.hpp"
-#include "sequences/max_qgram_length.hpp"
 #include "sequences/complement_uint8.hpp"
 
 /* Implementation of iterator class follows concept described in
@@ -125,7 +124,6 @@ class QgramRecHashValueIterator
       }
   };
 
-  private:
     QgramTransformer qgram_transformer;
     size_t qgram_length;
     const SequenceBaseType *sequence;

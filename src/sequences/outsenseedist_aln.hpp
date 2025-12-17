@@ -209,7 +209,7 @@ class TrackEditoperations
                          static_cast<int64_t>(ulen);
     std::vector<StackElem> stack{};
     expand(&stack,ulen,vlen,max_d,front_mid,diag);
-    while (stack.size() > 0)
+    while (not stack.empty())
     {
       const StackElem se = stack[stack.size() - 1];
       stack.pop_back();

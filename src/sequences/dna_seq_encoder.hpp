@@ -377,7 +377,7 @@ static inline bool decide_append_previous(const std::vector<size_t> &size_vec,
                                    size_t total_size,
                                    size_t local_sum)
 {
-  if (size_vec.size() == 0)
+  if (size_vec.empty())
   {
     return false;
   }
@@ -460,7 +460,7 @@ class DNAEncodingMultiLength
   void key_values_show(const KeyValuesType &key_values) const
   {
     size_t idx = 0;
-    for (auto &kv : key_values)
+    for (const auto &kv : key_values)
     {
       std::cout << idx << "\t"
                 << enc_vec[std::get<0>(kv)]->sequence_length_get() << "\t"
@@ -485,7 +485,7 @@ class DNAEncodingMultiLength
     size_t local_sum = 0;
     size_t idx = 0;
     std::vector<size_t> size_vec;
-    assert(end_idx_of_part_vec.size() == 0);
+    assert(end_idx_of_part_vec.empty());
     for (auto &kv : expanded_vec)
     {
       auto s = std::get<1>(kv) * std::get<2>(kv);
@@ -783,7 +783,7 @@ class DNAEncodingMultiLength
 
   [[nodiscard]] auto begin(size_t part_idx = 0) const
   {
-    if (expanded_vec.size() == 0 or end_idx_of_part_vec.size() == 0)
+    if (expanded_vec.empty() or end_idx_of_part_vec.empty())
     {
       std::cerr << "need to call prepare_view before\n";
       exit(EXIT_FAILURE);

@@ -26,7 +26,7 @@ class DecompressedFile
   {}
   [[nodiscard]] bool is_directory(void) const
   {
-    assert(current_filename.size() > 0);
+    assert(not current_filename.empty());
     return current_filename.back() == '/';
   }
   void set(const std::string &_current_filename,

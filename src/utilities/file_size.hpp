@@ -43,7 +43,7 @@ inline size_t gttl_file_size(const std::string &inputfile)
 inline size_t gttl_file_size(const std::vector<std::string> &inputfiles)
 {
   size_t files_bytes = 0;
-  for (auto &inputfile : inputfiles)
+  for (const auto &inputfile : inputfiles)
   {
     files_bytes += gttl_file_size(inputfile);
   }
