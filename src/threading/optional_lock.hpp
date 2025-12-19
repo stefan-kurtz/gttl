@@ -2,17 +2,17 @@
 #define OPTIONAL_LOCK_HPP
 
 #include <mutex>
-class optional_lock
+class OptionalLock
 {
   std::mutex* mut;
 
   public:
-  optional_lock(std::mutex* m) : mut(m)
+  OptionalLock(std::mutex* m) : mut(m)
   {
     if (mut != nullptr) mut->lock();
   }
 
-  ~optional_lock()
+  ~OptionalLock()
   {
     if (mut != nullptr) mut->unlock();
   }
