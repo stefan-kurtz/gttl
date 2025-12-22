@@ -1,6 +1,5 @@
 #ifndef HAS_SUFFIX_OR_PREFIX_HPP
 #define HAS_SUFFIX_OR_PREFIX_HPP
-#include <algorithm>
 #include <string>
 #include <vector>
 static inline bool gttl_has_suffix_with_extension(const std::string &to_check,
@@ -16,9 +15,13 @@ static inline bool gttl_has_any_suffix_with_extension(
   const std::vector<std::string> &suffixes,
   const std::string &extension)
 {
-  return std::ranges::any_of(suffixes, [&](const std::string& suf)
+  for (const std::string& suf : suffixes)
   {
-    return gttl_has_suffix_with_extension(to_check, suf, extension);
-  });
+    if (gttl_has_suffix_with_extension(to_check, suf, extension))
+    {
+      return true;
+    }
+  }
+  return false;
 }
 #endif

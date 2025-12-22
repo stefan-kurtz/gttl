@@ -25,6 +25,7 @@ Checks: >
   readability-container-contains,
   readability-duplicate-include,
   -readability-avoid-unconditional-preprocessor-if,
+  -readability-use-anyofallof,
   modernize-*,
   -modernize-return-braced-init-list,
   -modernize-use-default-member-init,

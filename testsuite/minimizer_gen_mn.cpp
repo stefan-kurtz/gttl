@@ -124,13 +124,15 @@ int main(int argc, char *argv[])
     if (options.canonical_option_is_set())
     {
       using HashIter = QgramNtHashIterator4;
-      using GeneratorT = GttlHashedMinimizerGenerator<HashIter, MinimizerValueClass>;
+      using GeneratorT = GttlHashedMinimizerGenerator<HashIter,
+                                                      MinimizerValueClass>;
 
       run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);
     } else {
       using HashIter = QgramNtHashFwdIterator4;
-      using GeneratorT = GttlHashedMinimizerGenerator<HashIter, MinimizerValueClass>;
+      using GeneratorT = GttlHashedMinimizerGenerator<HashIter,
+                                                      MinimizerValueClass>;
 
       run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);

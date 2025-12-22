@@ -1,5 +1,5 @@
-#ifndef UHS_HPP
-#define UHS_HPP
+#ifndef UNIVERSAL_HITTING_SET_HPP
+#define UNIVERSAL_HITTING_SET_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -77,4 +77,4 @@ class GttlUHS
   }
 };
 
-#endif // UHS_HPP
+#endif // UNIVERSAL_HITTING_SET_HPP

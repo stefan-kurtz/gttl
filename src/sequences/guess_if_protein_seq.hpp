@@ -89,11 +89,11 @@ inline bool guess_if_protein_file(const char *filename)
 
 inline bool guess_if_protein_file(const std::vector<std::string> &inputfiles)
 {
-  return (std::ranges::any_of(inputfiles,
-                              [](const auto& inputfile)
-                              {
-                                return guess_if_protein_file(inputfile.c_str());
-                              }));
+  for (const std::string& file : inputfiles)
+  {
+    if (guess_if_protein_file(file.c_str())) return true;
+  }
+  return false;
 }
 
 template<class MultiseqClass>

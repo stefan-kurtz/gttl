@@ -32,14 +32,14 @@ class FixedBitClass
     overlay.two_values.a = _a;
     overlay.two_values.b = _b;
   }
-  std::string to_string(void) const
+  [[nodiscard]] std::string to_string(void) const
   {
     std::string s = "(" + std::to_string(overlay.two_values.a) +
                     "," + std::to_string(overlay.two_values.b) +
                     ")";
-    for (int idx = 0; idx < num_bytes; idx++)
+    for (unsigned char idx : overlay.vector)
     {
-      s += std::format(" {:b}",overlay.vector[idx]);
+      s += std::format(" {:b}",idx);
     }
     return s;
   }
@@ -52,6 +52,6 @@ class FixedBitClass
 int main(void)
 {
   const uint64_t max_value = (uint64_t(1) << FixedBitClass::num_bits);
-  FixedBitClass fixed_bits(max_value, max_value);
+  const FixedBitClass fixed_bits(max_value, max_value);
   std::cout << fixed_bits.to_string() << '\n';
 };

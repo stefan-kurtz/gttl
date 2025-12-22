@@ -1,6 +1,5 @@
 #ifndef HAS_FASTA_OR_FASTQ_EXTENSION_HPP
 #define HAS_FASTA_OR_FASTQ_EXTENSION_HPP
-#include <algorithm>
 #include <string>
 #include <vector>
 #include "utilities/has_suffix_or_prefix.hpp"
@@ -9,11 +8,12 @@ static inline bool gttl_likely_fasta_format(const std::string &inputfilename)
 {
   const std::vector<std::string> fq_suffixes{".fq",".fastq",
                                              ".fq.gz",".fastq.gz"};
-  return std::ranges::none_of(fq_suffixes,
-                              [&inputfilename](const std::string& suf)
-                              {
-                                return inputfilename.ends_with(suf);
-                              });
+
+  for (const std::string& suf : fq_suffixes)
+  {
+    if (inputfilename.ends_with(suf)) return false;
+  }
+  return true;
 }
 
 static inline bool gttl_likely_gzipped_fastq_format(
