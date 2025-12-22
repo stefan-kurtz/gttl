@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 #include <memory>
-#include "virtual_queue.hpp"
+#include "threading/virtual_queue.hpp"
 
 class GttlThreadPoolVar
 {

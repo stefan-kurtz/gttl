@@ -4,7 +4,7 @@
 #include <cassert>
 #include <thread>
 #include <vector>
-#include "virtual_queue.hpp"
+#include "threading/virtual_queue.hpp"
 
 template<class ThreadData>
 using GttlThreadFunc = void (*)(size_t thread_id,size_t task_num,
