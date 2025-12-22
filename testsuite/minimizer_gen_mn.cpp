@@ -48,7 +48,7 @@ inline void run_minimizer_generator(const GttlMultiseq &multiseq,
 
   const size_t nseq = multiseq.sequences_number_get();
 
-  std::cout << "# Running GttlMinimizerGenerator test on " << nseq
+  std::cout << "# Running GttlHashedMinimizerGenerator test on " << nseq
             << " sequences\n";
 
   for (size_t seqid = 0; seqid < nseq; ++seqid)
@@ -124,13 +124,13 @@ int main(int argc, char *argv[])
     if (options.canonical_option_is_set())
     {
       using HashIter = QgramNtHashIterator4;
-      using GeneratorT = GttlMinimizerGenerator<HashIter, MinimizerValueClass>;
+      using GeneratorT = GttlHashedMinimizerGenerator<HashIter, MinimizerValueClass>;
 
       run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);
     } else {
       using HashIter = QgramNtHashFwdIterator4;
-      using GeneratorT = GttlMinimizerGenerator<HashIter, MinimizerValueClass>;
+      using GeneratorT = GttlHashedMinimizerGenerator<HashIter, MinimizerValueClass>;
 
       run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);

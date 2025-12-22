@@ -6,12 +6,18 @@
 #include <cstdint>
 #include <deque>
 #include <optional>
+#include <string_view>
 #include <vector>
 #include "sequences/char_finder.hpp"
 #include "sequences/char_range.hpp"
 
+// MinimizerValueClass is a std::tuple<uint64_t, size_t, size_t>
+// in our testsuite code. It may instead be a bitpacker or similar type,
+// given that it supports construction from a 3-tuple
+// (hash_value, seqnum, position)
+// and can be copied, moved and stored in an STL-container.
 template <class HashIterator, class MinimizerValueClass>
-class GttlMinimizerGenerator
+class GttlHashedMinimizerGenerator
 {
   private:
   // Default output buffer, in case the caller does not provide one
@@ -64,7 +70,7 @@ class GttlMinimizerGenerator
 
   public:
 
-  explicit GttlMinimizerGenerator(size_t _qgram_length,
+  explicit GttlHashedMinimizerGenerator(size_t _qgram_length,
                                   size_t _window_size,
                                   uint64_t _hash_mask,
                                   const char* _sequence,
@@ -102,10 +108,14 @@ class GttlMinimizerGenerator
   }
 
   // Delete copy/move constructor & assignment operator
-  GttlMinimizerGenerator(const GttlMinimizerGenerator&) = delete;
-  GttlMinimizerGenerator& operator=(const GttlMinimizerGenerator&) = delete;
-  GttlMinimizerGenerator(GttlMinimizerGenerator&&) = delete;
-  GttlMinimizerGenerator& operator=(GttlMinimizerGenerator&&) = delete;
+  GttlHashedMinimizerGenerator(const GttlHashedMinimizerGenerator&)
+    = delete;
+  GttlHashedMinimizerGenerator& operator=(const GttlHashedMinimizerGenerator&)
+    = delete;
+  GttlHashedMinimizerGenerator(GttlHashedMinimizerGenerator&&)
+    = delete;
+  GttlHashedMinimizerGenerator& operator=(GttlHashedMinimizerGenerator&&)
+    = delete;
 
   bool advance(void)
   {
@@ -275,6 +285,187 @@ class GttlMinimizerGenerator
     qgiter = nullptr;
     is_end = false;
     using_palindromic = false;
+  }
+
+  class Iterator
+  {
+    private:
+    GttlHashedMinimizerGenerator* generator;
+    bool is_end;
+    public:
+    explicit Iterator(GttlHashedMinimizerGenerator* _generator,
+                      bool end = false)
+      : generator(_generator)
+      , is_end(end)
+    {
+      if (not end)
+      {
+        ++(*this);
+      }
+    }
+
+    const MinimizerValueClass* operator * () const
+    {
+      return generator->out;
+    }
+
+    const Iterator& operator ++ (void)
+    {
+      assert(not is_end);
+      if (not generator->advance())
+      {
+        is_end = true;
+      }
+      return *this;
+    }
+
+    bool operator == (const Iterator& other) const
+    {
+      return is_end == other.is_end and generator == other.generator;
+    }
+
+    bool operator != (const Iterator& other) const
+    {
+      return not (*this == other);
+    }
+
+  };
+
+  Iterator begin(void)
+  {
+    return Iterator(this, false);
+  }
+
+  Iterator end(void)
+  {
+    return Iterator(this, true);
+  }
+};
+
+
+
+
+
+// Hash must have an operator() that induces a
+// strict weak ordering on kmers.
+// An example might be std::hash(a) < std::hash(b)
+template <class MinimizerValueClass, class KeyBuilder>
+class GttlMinimizerGenerator
+{
+  private:
+  // Default output buffer, in case the caller does not provide one
+  MinimizerValueClass default_buffer;
+  // output-pointer towards a minimizer value where the
+  // current minimizer should be stored.
+  MinimizerValueClass* out;
+  // Whether all minimizers have been generated
+  bool is_end;
+
+  // Minimizer parameters (these are constant for the lifetime of the generator)
+  const size_t qgram_length;
+  const size_t window_size;
+  const std::string_view sequence;
+  const size_t seqlen;
+  const size_t minseqlen_to_process;
+
+  // Internal state
+  static constexpr const char_finder::NucleotideFinder unw_nucleotide_finder{};
+
+  std::deque<MinimizerValueClass> window_deque;
+
+  size_t this_length;
+  size_t seqpos;
+
+  bool front_was_moved;
+  size_t last_emitted_pos = SIZE_MAX;
+
+  const KeyBuilder key_builder{};
+
+  public:
+
+  explicit GttlMinimizerGenerator(size_t _qgram_length,
+                                  size_t _window_size,
+                                  std::string_view _sequence,
+                                  KeyBuilder kb,
+                                  MinimizerValueClass* _out = nullptr,
+                                  bool _is_end = false)
+    : out(_out == nullptr ? &default_buffer : _out)
+    , is_end(_is_end)
+    , qgram_length(_qgram_length)
+    , window_size(_window_size)
+    , sequence(_sequence)
+    , seqlen(_sequence.size())
+    , minseqlen_to_process(window_size + qgram_length - 1)
+    , this_length(0)
+    , seqpos(0)
+    , front_was_moved(false)
+    , key_builder(kb)
+  {
+    if (seqlen < minseqlen_to_process)
+    {
+      is_end = true;
+    }
+  }
+
+  // Delete copy/move constructor & assignment operator
+  GttlMinimizerGenerator(const GttlMinimizerGenerator&) = delete;
+  GttlMinimizerGenerator& operator=(const GttlMinimizerGenerator&) = delete;
+  GttlMinimizerGenerator(GttlMinimizerGenerator&&) = delete;
+  GttlMinimizerGenerator& operator=(GttlMinimizerGenerator&&) = delete;
+
+  bool advance(void)
+  {
+    if (is_end) [[unlikely]]
+    {
+      return false;
+    }
+
+    while (seqpos + qgram_length <= seqlen)
+    {
+      const bool out_of_window =
+        seqpos >= window_size and
+        std::get<1>(window_deque.front()) <= seqpos - window_size;
+
+      if (not window_deque.empty() and out_of_window)
+      {
+        window_deque.pop_front();
+      }
+
+      const auto key = key_builder(sequence.substr(seqpos, qgram_length));
+
+      while (not window_deque.empty() and
+             key < std::get<0>(window_deque.back()))
+      {
+        window_deque.pop_back();
+      }
+
+      window_deque.emplace_back(MinimizerValueClass({key,
+                                                     seqpos}));
+
+      if (seqpos >= window_size - 1) [[unlikely]]
+      {
+        const size_t current_min = std::get<1>(window_deque.front());
+        if (last_emitted_pos != current_min)
+        {
+          *out = window_deque.front();
+          last_emitted_pos = current_min;
+          ++seqpos;
+          return true;
+        }
+      }
+
+      ++seqpos;
+    }
+
+    is_end = true;
+    return false;
+  }
+
+  void reset(void)
+  {
+    seqpos = 0;
+    window_deque.clear();
+    is_end = seqlen < minseqlen_to_process;
   }
 
   class Iterator
