@@ -25,9 +25,7 @@ test:test_alphabet \
      test_fasta_generator \
      test_multiseq \
      test_thread_pool \
-     test_sort_kvt \
-     test_sort_kvp \
-     test_sort_i \
+     test_sort \
      test_eoplist \
      test_invint \
      test_line_generator_mapped \
@@ -229,6 +227,10 @@ test_sort_i:sort_key_value_pairs.x
 	   ./sort_key_value_pairs.x -d i -m mergesort $$num || exit 1;\
 	   ./sort_key_value_pairs.x -d i -m stdsort $$num || exit 1;\
 	done
+	@echo "Congratulations. $@ passed."
+
+.PHONY:test_sort
+test_sort:test_sort_i test_sort_kvp test_sort_kvt
 	@echo "Congratulations. $@ passed."
 
 .PHONY:test_eoplist

@@ -43,7 +43,7 @@ class SortKeyValuePairsOptions
     , data_type_option('i')
     , sort_mode(0)
     , sort_mode_option("lsb-radix")
-  {}
+  { }
 
   void parse(int argc, char **argv)
   {
@@ -168,36 +168,40 @@ class SortKeyValuePairsOptions
 static std::string int2byte(int i)
 {
   assert(i <= UINT8_MAX and i >= 0);
-  const size_t leading_zeros = i < 10 ? 2 : (i < 100 ? 1 : 0);
-  return std::string(leading_zeros,'0') + std::to_string(i);
+  return std::format("{:03}",i);
 }
 
+template<typename KeyType, typename ValueType>
 class KeyValuePair
 {
-  double key;
-  size_t value;
+  KeyType key;
+  ValueType value;
   public:
+  using key_type = KeyType;
+  using value_type = ValueType;
   KeyValuePair(void)
     : key(0)
     , value(0)
-  {}
-  KeyValuePair(double _key,size_t _value)
+  { }
+  KeyValuePair(KeyType _key,ValueType _value)
     : key(_key)
     , value(_value)
-  {}
+  { }
   [[nodiscard]] std::string to_string(void) const noexcept
   {
-    std::string s{};
-    const uint8_t *const ds = reinterpret_cast<const uint8_t *>(&key);
-    for (size_t idx = 0; idx < sizeof(double); idx++)
+    std::string s;
+    const uint8_t *const ks = reinterpret_cast<const uint8_t *>(&key);
+    for (size_t idx = 0; idx < sizeof(KeyType); idx++)
     {
-      s += int2byte(static_cast<int>(ds[idx]));
-      if (idx < sizeof(double) - 1)
-      {
-        s += " ";
-      }
+      s += int2byte(static_cast<int>(ks[idx])) +
+           ((idx < sizeof(KeyType) - 1) ? ' ' : '\t');
     }
-    s += '\t' + std::to_string(value);
+    const uint8_t *const vs = reinterpret_cast<const uint8_t *>(&value);
+    for (size_t idx = 0; idx < sizeof(ValueType); idx++)
+    {
+      s += int2byte(static_cast<int>(vs[idx])) +
+           ((idx < sizeof(ValueType) - 1) ? " " : "");
+    }
     return s;
   }
   bool operator < (const KeyValuePair& other) const noexcept
@@ -233,7 +237,7 @@ class Key2ValuePair
   }
   [[nodiscard]] std::string to_string(void) const noexcept
   {
-    std::string s{};
+    std::string s;
     for (size_t idx = 0; idx < sizeof_key; idx++)
     {
       s += int2byte(static_cast<int>(keys_as_bytes[idx]));
@@ -251,14 +255,14 @@ class Key2ValuePair
   }
 };
 
-template<class It>
+template<class It, typename KeyType, typename ValueType>
 static inline void show_values(It begin, It end)
 {
   for (auto it = begin; it != end; ++it)
   {
     auto v = *it;
     using T = decltype(v);
-    if constexpr (std::is_same_v<T, KeyValuePair> ||
+    if constexpr (std::is_same_v<T, KeyValuePair<KeyType, ValueType>> ||
                   std::is_same_v<T, Key2ValuePair>)
     {
       std::cout << v.to_string() << std::endl;
@@ -268,6 +272,8 @@ static inline void show_values(It begin, It end)
     }
   }
 }
+
+using ThisKeyValuePair = KeyValuePair<double, size_t>;
 
 template<class T>
 static void sort_values(unsigned int seed,
@@ -279,14 +285,14 @@ static void sort_values(unsigned int seed,
                         int num_sort_bits,
                         size_t num_threads)
 {
-  std::vector<T> values{};
+  std::vector<T> values;
   values.reserve(number_of_values);
   UniformRandomDouble urd_gen(0,max_random,seed);
   RunTimeClass rt_random_number_generation{};
   for (size_t idx = 0; idx < number_of_values; idx++)
   {
     const double r = urd_gen.get();
-    if constexpr (std::is_same_v<T, KeyValuePair>)
+    if constexpr (std::is_same_v<T, ThisKeyValuePair>)
     {
       values.push_back(T(r,idx));
     } else
@@ -307,7 +313,7 @@ static void sort_values(unsigned int seed,
             << std::endl;
   RunTimeClass rt_sorting{};
   const char *tag;
-  if constexpr (std::is_same_v<T, KeyValuePair>)
+  if constexpr (std::is_same_v<T, ThisKeyValuePair>)
   {
     tag = "key value pairs";
   } else
@@ -322,7 +328,7 @@ static void sort_values(unsigned int seed,
   }
   if (sort_mode == 0)
   {
-    if constexpr (std::is_same_v<T, KeyValuePair>)
+    if constexpr (std::is_same_v<T, ThisKeyValuePair>)
     {
       static constexpr const int sizeof_unit
         = static_cast<int>(sizeof(T));
@@ -379,7 +385,9 @@ static void sort_values(unsigned int seed,
   }
   if (show)
   {
-    show_values<decltype(values.begin())>(values.begin(),values.end());
+    show_values<decltype(values.begin()),
+                ThisKeyValuePair::key_type,
+                ThisKeyValuePair::value_type>(values.begin(),values.end());
   }
   if (values.size() > 1)
   {
@@ -389,7 +397,7 @@ static void sort_values(unsigned int seed,
       T v = values[idx];
       if (v < previous)
       {
-        if constexpr (std::is_same_v<T, KeyValuePair> ||
+        if constexpr (std::is_same_v<T, ThisKeyValuePair> ||
                       std::is_same_v<T, Key2ValuePair>)
         {
           std::cerr << progname << ": previous=" << previous.to_string()
@@ -408,7 +416,7 @@ static void sort_values(unsigned int seed,
 
 int main(int argc, char *argv[])
 {
-  static_assert(sizeof(KeyValuePair) == 2 * sizeof(void *));
+  static_assert(sizeof(ThisKeyValuePair) == 2 * sizeof(void *));
 
   SortKeyValuePairsOptions options;
   try
@@ -431,7 +439,7 @@ int main(int argc, char *argv[])
   {
     static constexpr const int num_sort_bits
       = static_cast<int>(CHAR_BIT * sizeof(double));
-    sort_values<KeyValuePair>(seed,argv[0],show,sort_mode,
+    sort_values<ThisKeyValuePair>(seed,argv[0],show,sort_mode,
                               options.number_of_values_get(),
                               DBL_MAX,num_sort_bits,
                               size_t(1));
