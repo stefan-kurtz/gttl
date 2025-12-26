@@ -16,6 +16,9 @@ def parse_arguments(argv):
                   choices=['kasai13n','kasai9n','plcp5n'],
                   help=('construct lcptable using one of the three possible '
                         'implementations, default: None'))
+  p.add_argument('--succinct',action='store_true',default=False,
+                 help=('also construct the succinct representation of '
+                       'lcp-table in file with suffix .llv'))
   p.add_argument('--reverse_complement',action='store_true',default=False,
                  help='consider the reverse complement if sequence is DNA')
   p.add_argument('-v','--verbose',action='store_true',default=False,
@@ -40,7 +43,7 @@ file_list_plain_paths = [filename for filename in os.listdir('.')
                                   if not is_index_file(filename)]
 
 for file_list, plain in [(file_list_plain_paths,True),
-                         (os.environ.get("FASTA_FILES").split(" "),False)]:
+                         (os.environ.get('FASTA_FILES').split(' '),False)]:
   for filename in file_list:
     if filename == '':
       continue
@@ -63,21 +66,20 @@ for file_list, plain in [(file_list_plain_paths,True),
                      if plain and not args.relative_suftab else '',
                    absolute_suftab,
                    '--relative_suftab' if args.relative_suftab else '',
-                   '--lcptab {}'.format(args.lcptab) if args.lcptab else '',
+                   f'--lcptab {args.lcptab if args.lcptab else ""}',
                    check_suftab,
                    reverse_complement,
                    filename]
     clean_option_list = [opt for opt in option_list if opt != '']
-    cmd = './sa_induced.x {}'.format(' '.join(clean_option_list))
+    cmd = f'./sa_induced.x {" ".join(clean_option_list)}'
     if args.dry_run:
       print(cmd)
     else:
       try:
         subprocess.run(shlex.split(cmd))
       except subprocess.CalledProcessError as exc:
-        sys.stderr.write('{}: {} failed: exit code {}\n'.format(sys.argv[0],
-                                                                exc.returncode,
-                                                                exc.output))
+        sys.stderr.write(f'{sys.argv[0]}: {exc.returncode} failed: exit code '
+                         f'{exc.output}\n')
         exit(1)
     indexname = os.path.basename(filename)
     for suffix in ['prj','lcp','ll2','ll4','suf','tis','isa','bsf']:

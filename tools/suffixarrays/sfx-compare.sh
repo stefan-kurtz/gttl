@@ -21,7 +21,7 @@ then
   echo "$0: environment variable GTDIR not defined => skip test"
   exit 0
 fi
-if test -d "${GTDIR}" -ne 0
+if test ! -d "${GTDIR}"
 then
   echo "$0: directory ${GTDIR} does not exist => skip test"
   exit 0

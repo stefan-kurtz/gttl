@@ -51,17 +51,15 @@ int main(int argc,char *argv[])
   if (!haserr)
   {
     /* HAL: add your code here */
-    std::cout << "read the succinct representaton from file " << indexname
+    std::cout << "# read the succinct representaton from file " << indexname
               << ".lls\n";
   }
-  const std::string filename          = std::string(indexname) + ".lls";
-  const SuccinctBitvector succinctlcp = SuccinctBitvector(filename);
-
-  const std::string indexstring(indexname);
-  const SuccinctPlcpTable<uint32_t> succinctplcptable(indexstring);
-  auto succinctplcpiter = succinctplcptable.begin();
   if (!haserr)
   {
+    const std::string lls_filename{std::string(indexname) + ".lls"};
+    const SuccinctBitvector succinctlcp = SuccinctBitvector(lls_filename);
+    const SuccinctPlcpTable<uint32_t> succinctplcptable(indexname);
+    auto succinctplcpiter = succinctplcptable.begin();
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
     const LCPtable &lcptable = suffixarray->lcptable_get();
     size_t idx = 0;
@@ -79,9 +77,11 @@ int main(int argc,char *argv[])
 
 
       const uint32_t succinct_lcp = *succinctplcpiter;
-      if (lcp != lcpvalue || succinct_lcp != lcpvalue) {
-        printf("lcpmismatch: %zu, %d, %zu, %d\n",
-               idx, lcpvalue, lcp, succinct_lcp);
+      if (lcp != lcpvalue || succinct_lcp != lcpvalue)
+      {
+        fprintf(stderr,"lcpmismatch: %zu, %" PRIu32 ", %zu, %" PRIu32 "\n",
+                       idx, lcpvalue, lcp, succinct_lcp);
+        exit(EXIT_FAILURE);
       }
 
       ++succinctplcpiter;

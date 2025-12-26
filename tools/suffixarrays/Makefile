@@ -37,7 +37,8 @@ install:sa_induced.x
 	mv $< ${HOME}/bin-ops/${CONFIGGUESS}/.
 
 .PHONY:text
-test:test_error \
+test:all \
+     test_error \
      test_plain_mixed_gzip \
      test_skylines \
      test_check_guess_and_multi \

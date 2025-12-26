@@ -21,7 +21,7 @@ if args.valgrind and os.uname().sysname != 'Darwin' and \
   valgrind_opts = ['--quiet', '--tool=memcheck', '--memcheck:leak-check=full',
                    '--memcheck:leak-resolution=high','--error-exitcode=1',
                    '--log-fd=1','--error-limit=yes','--dsymutil=yes']
-  prefix = 'valgrind {} '.format(' '.join(valgrind_opts))
+  prefix = f'valgrind {" ".join(valgrind_opts)}'
 else:
   prefix = ''
 
@@ -33,44 +33,39 @@ the expected error code (which is EXIT_FAILURE in the
 C/C++-source) is always 1.
 '''
 
-prot_file = '{}/testdata/sw175.fna'.format(args.path)
-test_cases = [(('./sa_induced.x {}/testdata/non_existing.fna')
-                .format(args.path),
-               ('./sa_induced.x: file "{}/testdata/non_existing.fna": '
-                'cannot open file')
-                .format(args.path,args.path)),
-               ('./sa_induced.x --plain_input_format {}/testdata/empty.fna'
-                .format(args.path),
-                ('./sa_induced.x: file "{}/testdata/empty.fna"'
-                 ': cannot construct suffix array from empty string')
-                 .format(args.path)),
-                ('./sa_induced.x --reverse_complement {}'.format(prot_file),
-                 ('./sa_induced.x: file "{}": option --reverse_complement is '
-                  'only possible for DNA sequences').format(prot_file))
+prot_file = f'{args.path}/testdata/sw175.fna'
+test_cases = [(f'./sa_induced.x {args.path}/testdata/non_existing.fna',
+               f'./sa_induced.x: file "{args.path}/testdata/non_existing.fna": '
+                'cannot open file'),
+              ('./sa_induced.x --plain_input_format '
+               f'{args.path}/testdata/empty.fna',
+               f'./sa_induced.x: file "{args.path}/testdata/empty.fna"'
+                ': cannot construct suffix array from empty string'),
+              (f'./sa_induced.x --reverse_complement {prot_file}',
+               f'./sa_induced.x: file "{prot_file}": option '
+                '--reverse_complement is only possible for DNA sequences')
               ]
 
-dna_file = '{}/testdata/at1MB.fna'.format(args.path)
+dna_file = f'{args.path}/testdata/at1MB.fna'
 for plaininput in [True,False]:
   for option, suffix in [('-a','suf'),('-r','bsf')]:
-    test_cases.append(('./sa_induced.x -o unwritable_dir/tmp {} {} {}'\
-                       .format(option,
-                               '--plain_input_format' \
-                                  if plaininput and suffix == 'suf' else '',
-                               dna_file),
-                       ('./sa_induced.x: file "{}": cannot create file '
-                       '"unwritable_dir/tmp.{}"').format(dna_file,suffix)))
+    plain_opt = '--plain_input_format' if plaininput and suffix == 'suf' else ''
+    test_cases.append((f'./sa_induced.x -o unwritable_dir/tmp {option} '
+                       f'{plain_opt} {dna_file}',
+                       f'./sa_induced.x: file "{dna_file}": cannot create file '
+                       f'"unwritable_dir/tmp.{suffix}"'))
 
 if args.echo:
   print('#!/bin/sh')
   print('set -e -x')
 expected_error_code = 1
 for call, expected_err_msg in test_cases:
-  prefix_call = '{}{}'.format(prefix,call)
+  prefix_call = f'{prefix}{call}'
   if args.echo:
-    print('{} {}'.format(args.echo,prefix_call))
+    print(f'{args.echo} {prefix_call}')
   else:
     mysubprocess_expect(prefix_call,expected_error_code,expected_err_msg)
 
 if not args.echo:
-  sys.stderr.write('Congratulations: {} checked {} test cases for ./sa_induced.x\n'
-                    .format(sys.argv[0],len(test_cases)))
+  sys.stderr.write(f'Congratulations: {sys.argv[0]} checked {len(test_cases)} '
+                   ' test cases for ./sa_induced.x\n')
