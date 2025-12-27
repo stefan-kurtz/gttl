@@ -147,7 +147,7 @@ void SainOptions::parse(int argc, char **argv)
      ("t,tistab", "write translated sequence to file",
       cxxopts::value<bool>(tistab_out_opt)->default_value("false"))
 
-     ("reverse_complement", "compute index for all sequencees including "
+     ("reverse_complement", "compute index for all sequences including "
       "their reverse complement",
       cxxopts::value<bool>(reverse_complement_option) ->default_value("false"))
 

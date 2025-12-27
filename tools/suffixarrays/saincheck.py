@@ -18,7 +18,7 @@ def parse_arguments(argv):
                         'implementations, default: None'))
   p.add_argument('--succinct',action='store_true',default=False,
                  help=('also construct the succinct representation of '
-                       'lcp-table in file with suffix .llv'))
+                       'lcp-table in file with suffix .lls'))
   p.add_argument('--reverse_complement',action='store_true',default=False,
                  help='consider the reverse complement if sequence is DNA')
   p.add_argument('-v','--verbose',action='store_true',default=False,
@@ -28,26 +28,42 @@ def parse_arguments(argv):
 def split_lines(bstring):
   return [bs.decode() for bs in bstring.split(b'\n')]
 
-def is_index_file(filename):
-  for suffix in ['prj','lcp','ll2','ll4','bsf','suf']:
+def is_index_file(filename, index_suffixes):
+  for suffix in index_suffixes:
     if filename.endswith(suffix):
       return True
   return False
 
+def my_run(cmd):
+  try:
+    subprocess.run(shlex.split(cmd))
+  except subprocess.CalledProcessError as exc:
+    sys.stderr.write(f'{sys.argv[0]}: {cmd} failed with returncode '
+                     f'{exc.returncode} failed, output: {exc.output}\n')
+    exit(1)
+
 args = parse_arguments(sys.argv[1:])
+
+index_suffixes = ['prj','lcp','ll2','ll4','lls','suf','tis','isa','bsf']
 
 verbose_opt = '-v' if args.verbose else ''
 file_list_plain_paths = [filename for filename in os.listdir('.')
                                   if os.path.getsize(filename) > 0
                                   if os.path.isfile(filename)
-                                  if not is_index_file(filename)]
+                                  if not is_index_file(filename,index_suffixes)]
 
-for file_list, plain in [(file_list_plain_paths,True),
-                         (os.environ.get('FASTA_FILES').split(' '),False)]:
+if 'FASTA_FILES' in os.environ:
+  fasta_files = os.environ.get('FASTA_FILES').split(' ')
+else:
+  fasta_files = [f'{os.environ["GTTL"]}/testdata/at1MB.fna']
+
+if args.dry_run:
+  print('#!/bin/sh')
+  print('set -e -x')
+for file_list, plain in [(file_list_plain_paths,True), (fasta_files,False)]:
   for filename in file_list:
     if filename == '':
       continue
-    print(filename)
     if args.reverse_complement and not plain and \
        not guess_if_protein_file([filename]):
       reverse_complement = '--reverse_complement'
@@ -63,26 +79,30 @@ for file_list, plain in [(file_list_plain_paths,True),
       check_suftab = ''
     option_list = [verbose_opt,
                    '--plain_input_format' \
-                     if plain and not args.relative_suftab else '',
+                     if plain else '',
                    absolute_suftab,
-                   '--relative_suftab' if args.relative_suftab else '',
-                   f'--lcptab {args.lcptab if args.lcptab else ""}',
+                   '--relative_suftab' if (not plain and \
+                                           args.relative_suftab) else '',
+                   f'--lcptab {args.lcptab}' if args.lcptab else "",
                    check_suftab,
                    reverse_complement,
                    filename]
     clean_option_list = [opt for opt in option_list if opt != '']
     cmd = f'./sa_induced.x {" ".join(clean_option_list)}'
+    indexname = os.path.basename(filename)
     if args.dry_run:
       print(cmd)
     else:
-      try:
-        subprocess.run(shlex.split(cmd))
-      except subprocess.CalledProcessError as exc:
-        sys.stderr.write(f'{sys.argv[0]}: {exc.returncode} failed: exit code '
-                         f'{exc.output}\n')
-        exit(1)
-    indexname = os.path.basename(filename)
-    for suffix in ['prj','lcp','ll2','ll4','suf','tis','isa','bsf']:
-      this_filename = f'{indexname}.{suffix}'
-      if os.path.isfile(this_filename):
-         pathlib.Path(this_filename).unlink()
+      my_run(cmd)
+    if not plain and args.lcptab and args.succinct:
+      cmd1 = f'./sa_induced.x --succinct {" ".join(clean_option_list)}'
+      cmd2 = f'./lcp_checker.x {indexname}'
+      for cmd in cmd1,cmd2:
+        if args.dry_run:
+          print(cmd)
+        else:
+          my_run(cmd)
+  for suffix in index_suffixes:
+    this_filename = f'{indexname}.{suffix}'
+    if os.path.isfile(this_filename):
+      pathlib.Path(this_filename).unlink()

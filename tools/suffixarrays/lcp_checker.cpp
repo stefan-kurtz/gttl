@@ -50,12 +50,8 @@ int main(int argc,char *argv[])
   }
   if (!haserr)
   {
-    /* HAL: add your code here */
     std::cout << "# read the succinct representaton from file " << indexname
               << ".lls\n";
-  }
-  if (!haserr)
-  {
     const std::string lls_filename{std::string(indexname) + ".lls"};
     const SuccinctBitvector succinctlcp = SuccinctBitvector(lls_filename);
     const SuccinctPlcpTable<uint32_t> succinctplcptable(indexname);
@@ -69,19 +65,25 @@ int main(int argc,char *argv[])
        /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
-
       const uint32_t suffix = suffixarray->get_suftab_abspos().at(idx + 1) + 1;
-      const size_t select_1 = succinctlcp.get_select(suffix, true);
-      const size_t lcp      = succinctlcp.get_rank(select_1, false)
-                              + 1 - suffix;
-
-
-      const uint32_t succinct_lcp = *succinctplcpiter;
-      if (lcp != lcpvalue || succinct_lcp != lcpvalue)
+      try
       {
-        fprintf(stderr,"lcpmismatch: %zu, %" PRIu32 ", %zu, %" PRIu32 "\n",
-                       idx, lcpvalue, lcp, succinct_lcp);
-        exit(EXIT_FAILURE);
+        const size_t select_1 = succinctlcp.get_select(suffix, true);
+        const size_t lcp = succinctlcp.get_rank(select_1, false) + 1 - suffix;
+        const uint32_t succinct_lcp = *succinctplcpiter;
+        if (lcp != lcpvalue || succinct_lcp != lcpvalue)
+        {
+          fprintf(stderr,"lcpmismatch: %zu, %" PRIu32 ", %zu, %" PRIu32 "\n",
+                         idx, lcpvalue, lcp, succinct_lcp);
+          exit(EXIT_FAILURE);
+        }
+      }
+      catch (const std::exception &err)
+      {
+        std::cerr << argv[0] << ": indexname \"" << indexname
+                  << "\": " << err.what() << '\n';
+        haserr = true;
+        break;
       }
 
       ++succinctplcpiter;
@@ -95,11 +97,6 @@ int main(int argc,char *argv[])
         break;
       }
     }
-
-    // printf("%zu\n", idx);
-    // for (; succinctplcpiter != succinctplcptable.end(); ++succinctplcpiter) {
-    //   printf("additional %d\n", *succinctplcpiter);
-    // }
     std::cout << "# reverse_complement\t"
               << (suffixarray->with_reverse_complement() ? "true" : "false")
               << '\n';
@@ -110,7 +107,7 @@ int main(int argc,char *argv[])
   delete suffixarray;
   if (!haserr)
   {
-    rt_overall.show(std::format("sa_reader\t{}", indexname));
+    rt_overall.show(std::format("lcp_check\t{}", indexname));
   }
   return haserr ? EXIT_FAILURE : EXIT_SUCCESS;
 }

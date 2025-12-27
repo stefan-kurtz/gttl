@@ -79,16 +79,38 @@ test_check_guess_and_multi:sa_induced.x
 	@echo "$@ passed"
 
 .PHONY:test_saincheck
-test_saincheck:sa_induced.x
+test_saincheck:sa_induced.x lcp_checker.x
+	@echo "test 1"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab
+	@echo "test 2"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --relative_suftab
+	@echo "test 3"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --lcptab kasai13n
+	@echo "test 4"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --lcptab kasai9n
+	@echo "test 5"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --lcptab plcp5n
+	@echo "test 6"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --reverse_complement --lcptab kasai13n
+	@echo "test 7"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab kasai9n
+	@echo "test 8"
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab plcp5n
 	@echo "$@ passed"
+
+.PHONY:test_succinct
+test_succinct:sa_induced.x lcp_checker.x
+	@echo "test 9"
+	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab plcp5n --succinct
+	@echo "$@ passed"
+
+.PHONY:test_small_dna
+test_small_dna:sa_induced.x lcp_checker.x
+	@./test_succinct.sh small_dna.fasta
+
+.PHONY:test_small_protein
+test_small_protein:sa_induced.x lcp_checker.x
+	@./test_succinct.sh small_protein.fasta
 
 test_plcp:sa_induced.x
 	@for filename in ${GTTL_FASTA_FILES} ; do \
