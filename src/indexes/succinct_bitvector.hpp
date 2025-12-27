@@ -353,12 +353,14 @@ class SuccinctBitvector
 
   [[nodiscard]] size_t get_superblock_count(size_t superblock_index) const
   {
+    assert(superblock_index < rank.size());
     return rank[superblock_index].second >> 20;
   }
 
   [[nodiscard]] size_t
   get_block_count(size_t superblock_index, size_t block_index) const
   {
+    assert(superblock_index < rank.size());
     if (block_index == 7)
     {
       return (rank[superblock_index].second >> 8) & 0xFFF;
