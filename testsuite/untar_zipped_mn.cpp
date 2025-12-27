@@ -11,7 +11,7 @@ static void entry_show(const DecompressedFile &entry)
 {
   std::cout << entry.filename_get() << "\t" << entry.size() << "\t"
             << (entry.is_directory() ? "d" : "f") << '\n';
-  if (entry.size() < 1000)
+  if (entry.size() < 500)
   {
     std::cout << "'''file_contents\n";
     std::cout << std::string_view((const char *) entry.data(),entry.size());

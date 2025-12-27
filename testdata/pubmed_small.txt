@@ -1,2 +1,2 @@
-pubmed0.xml	1808	f
-pubmed1.xml	176798	f
+pubmed0.xml	998	f
+pubmed1.xml	89488	f
