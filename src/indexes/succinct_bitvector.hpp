@@ -123,10 +123,10 @@ class SuccinctBitvector
 
   [[nodiscard]] bool get(size_t index) const
   {
-    return (data_vector[index / 64] >> (index % 64)) & 1;
+    return (data_vector[index / 64] >> (index % 64)) & uint64_t(1);
   }
 
-  void buildAccelerationStructures()
+  void buildAccelerationStructures(void)
   {
     clear();
     size_t global_count = 0;

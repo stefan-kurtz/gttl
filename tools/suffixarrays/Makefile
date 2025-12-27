@@ -104,13 +104,16 @@ test_succinct:sa_induced.x lcp_checker.x
 	@FASTA_FILES="$(GTTL_FASTA_FILES)" ./saincheck.py --absolute_suftab --reverse_complement --lcptab plcp5n --succinct
 	@echo "$@ passed"
 
-.PHONY:test_small_dna
-test_small_dna:sa_induced.x lcp_checker.x
-	@./test_succinct.sh small_dna.fasta
+.PHONY:test_succinct_small_dna
+test_succinct_small_dna:sa_induced.x lcp_checker.x
+	@./test_succinct.sh small_dna.fna
 
-.PHONY:test_small_protein
-test_small_protein:sa_induced.x lcp_checker.x
-	@./test_succinct.sh small_protein.fasta
+.PHONY:test_succinct_small_protein
+test_succinct_small_protein:sa_induced.x lcp_checker.x
+	@./test_succinct.sh small_protein.fsa
+
+.PHONY:test_succinct_fail
+test_succinct_fail:test_succinct_small_protein test_succinct_small_dna
 
 test_plcp:sa_induced.x
 	@for filename in ${GTTL_FASTA_FILES} ; do \
