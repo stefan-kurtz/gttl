@@ -84,14 +84,14 @@ class TarReader
       }
       line.push_back(static_cast<char>(cc));
     }
-    std::vector<std::string> line_vector = gttl_split_string(line,' ');
+    std::vector<std::string> line_vector = gttl_split_string(line, ' ');
     if (line_vector.size() < 6)
     {
       throw std::ios_base::failure(
             std::string("line \"") + line +
             std::string("\" does not consist of exactly 6 columns"));
     }
-    if (std::sscanf(line_vector[2].data(),"%zu",&current_file_size) != 1)
+    if (std::sscanf(line_vector[2].data(), "%zu", &current_file_size) != 1)
     {
       throw std::ios_base::failure(
               std::string("cannot extract byte number from \"") +
@@ -158,7 +158,9 @@ class TarReader
   }
 
   public:
-  TarReader(const std::string &filename,bool with_rapidgzip,bool _append_0_byte)
+  TarReader(const std::string &filename,
+            bool with_rapidgzip,
+            bool _append_0_byte)
     : data_ptr(nullptr)
     , bytes_allocated(0)
     , current_file_size(0)
@@ -168,13 +170,13 @@ class TarReader
   {
     if (with_rapidgzip and not filename.ends_with(".tar"))
     {
-      popen_reader = new PopenReader({"gtar","tar"},
-                                     "tar","-I","rapidgzip","-Oxvvf",
+      popen_reader = new PopenReader({"gtar", "tar"},
+                                     "tar", "-I", "rapidgzip", "-Oxvvf",
                                      filename.c_str());
     } else
     {
-      popen_reader = new PopenReader({"gltar","gtar","tar"},
-                                     "tar",option_string(filename),
+      popen_reader = new PopenReader({"gltar", "gtar", "tar"},
+                                     "tar", option_string(filename),
                                      filename.c_str());
     }
     next_file();

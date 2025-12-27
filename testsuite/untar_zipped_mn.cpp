@@ -7,14 +7,14 @@
 #include "utilities/untar_zipped.hpp"
 #include "untar_zipped_op.hpp"
 
-static void entry_show(const DecompressedFile &entry)
+static void entry_show(const DecompressedFile &entry, size_t max_size_show)
 {
   std::cout << entry.filename_get() << "\t" << entry.size() << "\t"
             << (entry.is_directory() ? "d" : "f") << '\n';
-  if (entry.size() < 500)
+  if (entry.size() <= max_size_show)
   {
     std::cout << "'''file_contents\n";
-    std::cout << std::string_view((const char *) entry.data(),entry.size());
+    std::cout << std::string_view((const char *) entry.data(), entry.size());
     std::cout << "'''\n";
   }
 }
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
   UnzippedTarOptions options;
   try
   {
-    options.parse(argc,argv);
+    options.parse(argc, argv);
   }
   catch (const std::invalid_argument &e)
   {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
                                 gttl_is_in_PATH("rapidgzip");
     for (auto &&inputfile : options.inputfiles_get())
     {
-      TarReader tar_reader(inputfile,with_rapidgzip,false);
+      TarReader tar_reader(inputfile, with_rapidgzip, false);
       for (auto entry : tar_reader)
       {
         if (options.store_option_is_set())
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
           decompressed_files.push_back(entry);
         } else
         {
-          entry_show(entry);
+          entry_show(entry, options.max_size_show_get());
         }
       }
     }
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   {
     for (auto &entry: decompressed_files)
     {
-      entry_show(entry);
+      entry_show(entry, options.max_size_show_get());
     }
   }
   return EXIT_SUCCESS;

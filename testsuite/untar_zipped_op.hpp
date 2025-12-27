@@ -7,9 +7,10 @@ class UnzippedTarOptions
 {
   private:
   std::vector<std::string> inputfiles;
-  bool store_option = false,
-       no_rapidgzip_option = false,
-       help_option = false;
+  bool store_option = false;
+  bool no_rapidgzip_option = false;
+  bool help_option = false;
+  size_t max_size_show = size_t(500);
   public:
   UnzippedTarOptions(void);
   void parse(int argc, char **argv);
@@ -18,5 +19,6 @@ class UnzippedTarOptions
   [[nodiscard]] bool store_option_is_set(void) const noexcept;
   [[nodiscard]] bool help_option_is_set(void) const noexcept;
   [[nodiscard]] bool no_rapidgzip_option_is_set(void) const noexcept;
+  [[nodiscard]] size_t max_size_show_get(void) const noexcept;
 };
 #endif

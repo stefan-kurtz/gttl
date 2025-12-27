@@ -14,9 +14,10 @@ UnzippedTarOptions::UnzippedTarOptions(void) = default;
 
 void UnzippedTarOptions::parse(int argc, char **argv)
 {
-  cxxopts::Options options(argv[0],"unzip tar file and process content of "
-                                   "files in memory; files must have suffix "
-                                   ".tar.gz or .tar.bz2");
+  cxxopts::Options options(argv[0], "extract files from possibly zipped tar "
+                                    "file and process content of "
+                                    "files in memory; files must have suffix "
+                                    ".tar, .tar.gz, .tar.bz2");
   options.set_width(80);
   options.custom_help(std::string("[options] inputfile0 [inputfile1...]"));
   options.set_tab_expansion();
@@ -27,6 +28,9 @@ void UnzippedTarOptions::parse(int argc, char **argv)
     ("n,no_rapidgzip",
      "do not use rapidgzip, even if available",
      cxxopts::value<bool>(no_rapidgzip_option)->default_value("false"))
+    ("max_size_show",
+     "specify maximum size of XML-file content to show",
+     cxxopts::value<size_t>(max_size_show)->default_value("500"))
     ("h,help", "Print usage information");
   try
   {
@@ -73,4 +77,9 @@ bool UnzippedTarOptions::help_option_is_set(void) const noexcept
 bool UnzippedTarOptions::no_rapidgzip_option_is_set(void) const noexcept
 {
   return no_rapidgzip_option;
+}
+
+size_t UnzippedTarOptions::max_size_show_get(void) const noexcept
+{
+  return max_size_show;
 }

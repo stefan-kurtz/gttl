@@ -395,10 +395,11 @@ test_multiseq_factory:multiseq_factory_mn.x fastq_mn.x
 
 .PHONY:test_untar
 test_untar:untar_zipped_mn.x
-	@for suffix in gz bz2; do \
+	@gzip -d -c ../testdata/pubmed_small.tar.gz > ../testdata/pubmed_small.tar
+	@for suffix in .tar .tar.gz .tar.bz2; do \
 	  for norapidgzip in "" "--no_rapidgzip"; do \
-	    for store_in_memory  in "" "--store_in_memory"; do \
-	      ${VALGRIND} ./untar_zipped_mn.x $${norapidgzip} $${store_in_memory} ../testdata/pubmed_small.tar.$${suffix} | diff --strip-trailing-cr - ../testdata/pubmed_small.txt || exit 1;\
+	    for store_in_memory in "" "--store_in_memory"; do \
+	      ${VALGRIND} ./untar_zipped_mn.x $${norapidgzip} $${store_in_memory} ../testdata/pubmed_small$${suffix} | diff --strip-trailing-cr - ../testdata/pubmed_small.txt || exit 1;\
 	    done \
 	  done \
 	done
