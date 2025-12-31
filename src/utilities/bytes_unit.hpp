@@ -198,7 +198,7 @@ class BytesUnit
       {
         std::cout << std::right << std::setw(4)
                   << static_cast<int>(bytes[j])
-                  << (j == sizeof_unit - 1 ? "\n" : " ");
+                  << (j == sizeof_unit - 1 ? '\n' : ' ');
       }
     }
 };
