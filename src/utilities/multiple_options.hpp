@@ -80,7 +80,7 @@ class GttlMultipleOptions
   {
     constexpr const int shift
       = gttl_find_lit_string_at_compile_time(option_args, key.value);
-    static_assert(shift < option_args.size());
+    static_assert(shift < option_args.size(), "illegal option argument");
     return flags & the_bit(shift);
   }
 
