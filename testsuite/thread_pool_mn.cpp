@@ -59,13 +59,13 @@ int main(int argc, char *argv[])
   const size_t num_threads = static_cast<size_t>(readlong1);
   const size_t n = static_cast<size_t>(readlong2);
   std::vector<size_t> thread_sums(num_threads,0);
-  GttlThreadPoolVar(num_threads,10,sum_fibonacci_var,n,thread_sums.data());
+  gttl_thread_pool_var(num_threads,10,sum_fibonacci_var,n,thread_sums.data());
   for (size_t idx = 0; idx < num_threads; idx++)
   {
     std::cout << "thread\t" << idx << "\t" << thread_sums[idx] << '\n';
   }
   SumFibThreadData thread_data(num_threads,n);
-  GttlThreadPool(num_threads,10,sum_fibonacci,&thread_data);
+  gttl_thread_pool(num_threads,10,sum_fibonacci,&thread_data);
   thread_data.output();
   return EXIT_SUCCESS;
 }

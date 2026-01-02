@@ -653,15 +653,16 @@ class HashedQgramsGeneric
       assert(!at_constant_distance);
       HashedQgramVectorTable<sizeof_unit>
         hashed_qgram_vector_table(number_of_threads);
-      GttlThreadPoolVar(number_of_threads,
-                        multiseq.sequences_number_get(),
-                        append_hashed_qgrams_threaded<sizeof_unit,HashIterator>,
-                        multiseq,
-                        qgram_length,
-                        window_size,
-                        hash_mask,
-                        hashed_qgram_packer,
-                        &hashed_qgram_vector_table);
+      gttl_thread_pool_var(number_of_threads,
+                           multiseq.sequences_number_get(),
+                           append_hashed_qgrams_threaded<sizeof_unit,
+                                                         HashIterator>,
+                           multiseq,
+                           qgram_length,
+                           window_size,
+                           hash_mask,
+                           hashed_qgram_packer,
+                           &hashed_qgram_vector_table);
       RunTimeClass rt_concat{};
       hashed_qgram_vector_table
         .concat_hashed_qgram_vectors(&hashed_qgram_vector);

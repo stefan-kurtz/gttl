@@ -60,12 +60,11 @@ void gttl_all_vs_all(const T &tasks0,const T &tasks1,Data &data,
   } else
   {
     GttlThreadData<T,Data> thread_data(tasks0,tasks1,data);
-    [[maybe_unused]]
-    GttlThreadPool thread_pool(num_threads,tasks0.size(),
-                               gttl_thread_runner<T,R,Data,first_index,
-                                                  process_pair,
-                                                  process_result>,
-                               &thread_data);
+    gttl_thread_pool (num_threads,tasks0.size(),
+                      gttl_thread_runner<T,R,Data,first_index,
+                                         process_pair,
+                                         process_result>,
+                      &thread_data);
   }
 }
 #endif

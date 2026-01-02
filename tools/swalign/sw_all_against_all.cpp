@@ -199,15 +199,15 @@ static void sw_all_against_all(const SWOptions &options,
                                MatrixPartition(cutlen,
                                                db_sequences_number,
                                                query_sequences_number);
-  GttlThreadPoolVar(options.num_threads,
-                    mp.size(),
-                    all_against_all_compare_pairs<ThisSWcomparator,
-                                                  GttlMultiseq>,
-                    *db_multiseq,
-                    *query_multiseq,
-                    db_multiseq == query_multiseq,
-                    mp,
-                    comparator_vector);
+  gttl_thread_pool_var(options.num_threads,
+                       mp.size(),
+                       all_against_all_compare_pairs<ThisSWcomparator,
+                                                     GttlMultiseq>,
+                       *db_multiseq,
+                       *query_multiseq,
+                       db_multiseq == query_multiseq,
+                       mp,
+                       comparator_vector);
   for (size_t t = 0; t < options.num_threads; t++)
   {
     delete comparator_vector[t];
