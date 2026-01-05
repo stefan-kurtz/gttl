@@ -68,8 +68,13 @@ int main(int argc,char *argv[])
       const uint32_t suffix = suffixarray->get_suftab_abspos().at(idx + 1) + 1;
       try
       {
-        const size_t select_1 = succinctlcp.get_select(suffix, true);
-        const size_t lcp = succinctlcp.get_rank(select_1, false) + 1 - suffix;
+        size_t lcp;
+        if (suffix > (succinctlcp.get_length() + 1)  / 2) {
+          lcp = 0;
+        } else {
+          const size_t select_1 = succinctlcp.get_select(suffix, true);
+          lcp =  succinctlcp.get_rank(select_1, false) + 1 - suffix;
+        }
         const uint32_t succinct_lcp = *succinctplcpiter;
         if (lcp != lcpvalue || succinct_lcp != lcpvalue)
         {
