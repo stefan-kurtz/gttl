@@ -24,6 +24,15 @@ class BytesUnit
     uint8_t bytes[sizeof_unit];
   public:
     BytesUnit() = default;
+    BytesUnit(uint64_t value)
+    {
+      static_assert(sizeof_unit == 8);
+      const uint8_t *bptr = reinterpret_cast<const uint8_t *>(&value);
+      for (size_t idx = 0; idx < sizeof(value); idx++)
+      {
+        bytes[idx] = bptr[idx];
+      }
+    }
     BytesUnit(const GttlBitPacker<sizeof_unit,bit_groups> &bitpacker,
               const std::array<uint64_t, bit_groups> &to_be_encoded)
     {
