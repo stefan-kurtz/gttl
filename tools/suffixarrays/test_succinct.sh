@@ -10,7 +10,7 @@ set -e -x
 
 inputfile=$1
 ./sa_induced.x --verbose --indexname sa --lcptab plcp5n --absolute_suftab ${inputfile}
-./sa_induced.x --verbose --indexname sa --succinct --lcptab plcp5n --absolute_suftab ${inputfile}
+./sa_induced.x --verbose --indexname sa --lcptab plcp5n --absolute_suftab --succinct ${inputfile}
 ./lcp_checker.x sa
 for suffix in prj lcp ll2 ll4 lls suf tis isa bsf
 do

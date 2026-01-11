@@ -53,7 +53,7 @@ int main(int argc,char *argv[])
     std::cout << "# read the succinct representaton from file " << indexname
               << ".lls\n";
     const std::string lls_filename{std::string(indexname) + ".lls"};
-    const SuccinctBitvector succinctlcp = SuccinctBitvector(lls_filename);
+    const SuccinctBitvector succinctlcp(lls_filename);
     const SuccinctPlcpTable<uint32_t> succinctplcptable(indexname);
     auto succinctplcpiter = succinctplcptable.begin();
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
@@ -69,7 +69,7 @@ int main(int argc,char *argv[])
       try
       {
         size_t lcp;
-        if (suffix > (succinctlcp.get_length() + 1)  / 2) {
+        if (suffix > (succinctlcp.length_get() + 1)  / 2) {
           lcp = 0;
         } else {
           const size_t select_1 = succinctlcp.get_select(suffix, true);

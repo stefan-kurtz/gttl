@@ -341,7 +341,7 @@ class SuccinctBitvector
     std::fclose(out_fp);
   }
 
-  [[nodiscard]] size_t get_length() const noexcept { return length; }
+  [[nodiscard]] size_t length_get() const noexcept { return length; }
 
   private:
 

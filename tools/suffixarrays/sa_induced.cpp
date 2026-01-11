@@ -134,27 +134,24 @@ static void lcptab_output_saturated(const std::string &indexname,
 
 template<class SuftabBaseType>
 static void lcptab_output_succinct(const std::string &indexname,
-                                   PlcpTable<SuftabBaseType>
-                                     &plcp_table)
+                                   const PlcpTable<SuftabBaseType> &plcp_table)
 {
-  SuccinctBitvector b;
+  SuccinctBitvector sbit_vec;
   size_t last = size_t(1);
-  for (size_t pos = 0; pos < plcp_table.get_total_length(); pos++){
+  for (size_t pos = 0; pos < plcp_table.get_total_length(); pos++)
+  {
     const size_t cur = plcp_table.plcp_value_get(pos);
     const size_t unary = cur - last + 1;
-
-    b.push_false_n(unary);
-
-    b.push(true);
+    sbit_vec.push_false_n(unary);
+    sbit_vec.push(true);
     last = cur;
   }
-
-  b.buildAccelerationStructures();
+  sbit_vec.buildAccelerationStructures();
   // printf("%zu, %zu\n", plcp_table.get_total_length(),
-  //                      b.get_rank(b.get_length(), 1));
+  //                      sbit_vec.get_rank(sbit_vec.length_get(), 1));
   const std::string lls_filename(indexname + ".lls");
-  b.serialize(lls_filename);
-  // b.print();
+  sbit_vec.serialize(lls_filename);
+  // sbit_vec.print();
 }
 
 template<class Generator>

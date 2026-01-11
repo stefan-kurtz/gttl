@@ -74,7 +74,7 @@ class SuccinctPlcpTable
    : suftab_inputfile(indexname + ".suf")
    , lcp_inputfile(indexname + ".lls")
    , succinct_plcp_table(lcp_inputfile)
-   , totallength(succinct_plcp_table.get_rank(succinct_plcp_table.get_length(),
+   , totallength(succinct_plcp_table.get_rank(succinct_plcp_table.length_get(),
                                               true))
   { }
   ~SuccinctPlcpTable(void) = default;

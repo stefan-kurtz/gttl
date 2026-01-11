@@ -39,6 +39,7 @@ install:sa_induced.x
 .PHONY:text
 test:all \
      test_error \
+     test_succinct \
      test_plain_mixed_gzip \
      test_skylines \
      test_check_guess_and_multi \
