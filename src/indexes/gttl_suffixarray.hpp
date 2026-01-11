@@ -27,10 +27,12 @@
 #include <vector>
 #include <cstdint>
 #include <cinttypes>
+#include <format>
 #include <tuple>
 
 #include "utilities/read_vector.hpp"
 #include "utilities/gttl_mmap.hpp"
+#include "utilities/compile_time_map_str_to_number.hpp"
 
 class LCPtable
 {
@@ -121,14 +123,18 @@ class GttlSuffixArray
 {
   using SuftabBaseType = uint32_t;
   /* Adjust the following value, when adding additional integer keys */
-  static constexpr const int num_integer_keys = 6;
-  const std::vector<std::string> keys = {"reverse_complement",
-                                         "nonspecial_suffixes",
-                                         "sequences_number",
-                                         "sequences_number_bits",
-                                         "sequences_length_bits",
-                                         "sizeof_suftab_entry",
-                                         "inputfile"};
+  static constexpr const GttlLitStringInitializerList keys
+  {
+    "reverse_complement",
+    "nonspecial_suffixes",
+    "sequences_number",
+    "sequences_number_bits",
+    "sequences_length_bits",
+    "sizeof_suftab_entry",
+    "inputfile"
+  };
+  static constexpr const size_t num_integer_keys = keys.size() - 1;
+  static constexpr const CompileTimeMapStrToNumber<keys> key2number_map{};
   private:
   std::vector<SuftabBaseType> suftab_abspos;
   std::vector<uint8_t> suftab_bytes;
@@ -140,9 +146,19 @@ class GttlSuffixArray
   bool int_values_set[num_integer_keys] = {false};
   std::vector<std::string> inputfiles;
 
-  [[nodiscard]] int key2index(const std::string &key) const noexcept
+  /* if the key is known at compile time then the following function
+     can be used to find the index in keys */
+  template<GttlStringLiteral this_key>
+  [[nodiscard]] consteval size_t key2index(void) const noexcept
   {
-    auto found = std::ranges::find(keys, key);
+    return key2number_map.get<this_key>();
+  }
+
+  /* if the key is known at runtime, then the following function
+     can be used to find the index in keys */
+  [[nodiscard]] int key2index(const std::string &this_key) const noexcept
+  {
+    auto found = std::ranges::find(keys, this_key);
     if (found == keys.end())
     {
       return -1;
@@ -159,37 +175,38 @@ class GttlSuffixArray
     in_file.open(prj_filename, std::ifstream::in);
     if (in_file.fail() )
     {
-      throw std::ios_base::failure(std::string("file ").append(prj_filename)
-                                   .append(": cannot open; possibly index "
-                                           "needs to be created"));
+      throw std::ios_base::failure(std::format("file {}: cannot open; "
+                                               "possibly index needs to be "
+                                               "created", prj_filename));
     }
     /* number of keys with integer values */
-    while (std::getline (in_file,line))
+    while (std::getline (in_file, line))
     {
       if ((sep_pos = line.find('\t')) == std::string::npos)
       {
-        throw std::ios_base::failure(std::string("file ").append(prj_filename)
-                                     .append(": missing tabulator in line ")
-                                     .append(line));
+        throw std::ios_base::failure(std::format("file {}: missing tabulator "
+                                                 "in line {}",
+                                                 prj_filename, line));
       }
       const std::string this_key = line.substr(0, sep_pos);
       const int idx = key2index(this_key);
       if (idx == -1)
       {
-        throw std::ios_base::failure(std::string("file ").append(prj_filename)
-                                     .append(": illegal key ").append(this_key)
-                                     .append(" in line ").append(line));
+        throw std::ios_base::failure(std::format("file {}: illegal key {} in "
+                                                 "line {}", prj_filename,
+                                                            this_key,
+                                                            line));
       }
-      if (idx < num_integer_keys)
+      if (static_cast<size_t>(idx) < num_integer_keys)
       {
         int64_t read_int;
-        if (sscanf(line.substr(sep_pos + 1).c_str(),"%" PRId64, &read_int) != 1
+        if (sscanf(line.substr(sep_pos + 1).c_str(), "%" PRId64, &read_int) != 1
             || read_int < 0)
         {
-          throw std::ios_base::failure(std::string("file ").append(prj_filename)
-                                    .append(": value for key ")
-                                    .append(this_key)
-                                    .append(" must be a positive integer"));
+          throw std::ios_base::failure(std::format("file {}: value for key {} "
+                                                   "must be a positive integer",
+                                                   prj_filename,
+                                                   this_key));
         }
         int_values[idx] = static_cast<size_t>(read_int);
         int_values_set[idx] = true;
@@ -199,14 +216,15 @@ class GttlSuffixArray
       }
     }
     in_file.close();
-    for (int idx = 0; idx < num_integer_keys; idx++)
+    for (size_t idx = 0; idx < num_integer_keys; idx++)
     {
-      if (!int_values_set[idx])
+      const std::string this_key{*(keys.begin() + idx)};
+      if (not int_values_set[idx])
       {
         throw std::ios_base::failure(std::string("file ") + prj_filename +
                                      std::string(": missing line for integer "
                                                  "key \"") +
-                                     keys[idx] + std::string("\""));
+                                     this_key + std::string("\""));
       }
     }
     if (inputfiles.empty())
@@ -287,27 +305,27 @@ class GttlSuffixArray
   }
   [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
-    return int_values[key2index("reverse_complement")] == 1;
+    return int_values[key2index<"reverse_complement">()] == 1;
   }
   [[nodiscard]] size_t nonspecial_suffixes_get(void) const noexcept
   {
-    return int_values[key2index("nonspecial_suffixes")];
+    return int_values[key2index<"nonspecial_suffixes">()];
   }
   [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
-    return int_values[key2index("sequences_number")];
+    return int_values[key2index<"sequences_number">()];
   }
   [[nodiscard]] int sequences_number_bits_get(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index("sequences_number_bits")]);
+    return static_cast<int>(int_values[key2index<"sequences_number_bits">()]);
   }
   [[nodiscard]] int sequences_length_bits_get(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index("sequences_length_bits")]);
+    return static_cast<int>(int_values[key2index<"sequences_length_bits">()]);
   }
   [[nodiscard]] int sizeof_suftab_entry(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index("sizeof_suftab_entry")]);
+    return static_cast<int>(int_values[key2index<"sizeof_suftab_entry">()]);
   }
   [[nodiscard]] const std::vector<std::string> &
   inputfiles_get(void) const noexcept
@@ -316,10 +334,10 @@ class GttlSuffixArray
   }
   private:
   [[nodiscard]] SuftabBaseType lcp_interval_find_rightbound(uint8_t cc,
-                                                          size_t offset,
-                                                          SuftabBaseType left,
-                                                          SuftabBaseType right)
-                                                           const
+                                                            size_t offset,
+                                                            SuftabBaseType left,
+                                                            SuftabBaseType right
+                                                           ) const
   {
     while (left + 1 < right)
     {
@@ -340,7 +358,7 @@ class GttlSuffixArray
   {
     return idx == tistab.size() ? UINT8_MAX : tistab[idx];
   }
-  [[nodiscard]] std::tuple<bool,SuftabBaseType,SuftabBaseType>
+  [[nodiscard]] std::tuple<bool, SuftabBaseType, SuftabBaseType>
     lcp_interval_find_child_intv(uint8_t cc,
                                  size_t offset,
                                  SuftabBaseType left,
@@ -359,22 +377,22 @@ class GttlSuffixArray
         break;
       }
       const SuftabBaseType rightbound
-        = lcp_interval_find_rightbound(leftcc,offset,leftbound,right);
+        = lcp_interval_find_rightbound(leftcc, offset, leftbound, right);
       if (leftcc == cc)
       {
-        return std::make_tuple(true,leftbound,rightbound);
+        return std::make_tuple(true, leftbound, rightbound);
       }
       if (leftcc > cc)
       {
-        return std::make_tuple(false,0,0);
+        return std::make_tuple(false, 0, 0);
       }
       leftbound = rightbound + 1;
     }
     if (leftcc == cc)
     {
-      return std::make_tuple(true,leftbound,right);
+      return std::make_tuple(true, leftbound, right);
     }
-    return std::make_tuple(false,0,0);
+    return std::make_tuple(false, 0, 0);
   }
   public:
   auto find_maximal_prefix(const uint8_t *query, size_t querylen) const
@@ -400,12 +418,12 @@ class GttlSuffixArray
         break;
       }
     }
-    return std::make_tuple(idx,suftab_abspos.begin() + left,
-                               suftab_abspos.begin() + right + 1);
+    return std::make_tuple(idx, suftab_abspos.begin() + left,
+                                suftab_abspos.begin() + right + 1);
   }
   size_t find_maximal_prefix_length(const uint8_t *query, size_t querylen) const
   {
-    return std::get<0>(find_maximal_prefix(query,querylen));
+    return std::get<0>(find_maximal_prefix(query, querylen));
   }
 };
 #endif  // SUFFIXARRAY_HPP

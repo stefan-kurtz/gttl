@@ -1,6 +1,7 @@
 #ifndef MULTIPLE_OPTIONS_HPP
 #define MULTIPLE_OPTIONS_HPP
 
+#include "utilities/gttl_string_literal.hpp"
 #include "utilities/find_lit_string.hpp"
 #include "utilities/string_tokenizer.hpp"
 #include "utilities/string_values_join.hpp"
@@ -11,23 +12,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-template<size_t length_of_literal>
-struct GttlStringLiteral
-{
-  /*
-   Literal class type that wraps a constant expression string.
-   Uses implicit conversion to allow templates to *seemingly* accept
-   constant strings. Adapted from
-   https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
-  */
-  char value[length_of_literal];
-  constexpr GttlStringLiteral(const char (&str)[length_of_literal])
-  {
-    std::copy_n(str, length_of_literal, value);
-  }
-};
-
 
 template<const GttlLitStringInitializerList &option_args>
 class GttlMultipleOptions
