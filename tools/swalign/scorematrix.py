@@ -249,7 +249,7 @@ if __name__ == '__main__':
     if args.alp:
       show_alp_background(args.scorematrix,
                           args.alphabet, scorematrix.background_get())
-      print(scorematrix.pretty_print(args.alphabet))
+    print(scorematrix.pretty_print(args.alphabet))
   else:
     if args.verbose:
       show_verbose(scorematrix.characters_get(), scorematrix.background_get())
