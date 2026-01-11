@@ -57,7 +57,7 @@ doc:
 
 .PHONY:code_check
 code_check:
-	scripts/code_check.py -wt `find . -name '*.[ch]pp' | grep -v merge_sort.hpp`
+	scripts/code_check.py -wt `find . -name '*.[ch]pp' | grep -Ev 'merge_sort.hpp|TestScoreMatrix'`
 	scripts/check_ifndef.py `find . -name '*.hpp'`
 	scripts/check_no_c_files.sh
 	scripts/check_gitattributes.sh

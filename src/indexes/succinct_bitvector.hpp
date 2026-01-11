@@ -91,7 +91,7 @@ class SuccinctBitvector
     }
     std::fclose(in_fp);
   }
-  void push(bool value)
+  void push(bool value) noexcept
   {
     clear();
     if (length % 64 == 0)
@@ -102,14 +102,14 @@ class SuccinctBitvector
     length++;
   }
 
-  void push_false_n(size_t n)
+  void push_false_n(size_t n) noexcept
   {
     clear();
     length += n;
     data_vector.resize((length + 63) / 64);
   }
 
-  void set(size_t index, bool value)
+  void set(size_t index, bool value) noexcept
   {
     clear();
     if (value)
@@ -121,12 +121,12 @@ class SuccinctBitvector
     }
   }
 
-  [[nodiscard]] bool get(size_t index) const
+  [[nodiscard]] bool get(size_t index) const noexcept
   {
     return (data_vector[index / 64] >> (index % 64)) & uint64_t(1);
   }
 
-  void buildAccelerationStructures(void)
+  void buildAccelerationStructures(void) noexcept
   {
     clear();
     size_t global_count = 0;
@@ -190,10 +190,7 @@ class SuccinctBitvector
 
   [[nodiscard]] size_t get_rank(size_t index, bool value) const
   {
-    if (rank.empty())
-    {
-      throw std::runtime_error("Acceleration structure not build.");
-    }
+    assert (not rank.empty());
     if (not value)
     {
       return index - get_rank(index, true);
@@ -230,19 +227,14 @@ class SuccinctBitvector
     return r;
   }
 
-
-  [[nodiscard]] size_t get_select(size_t count, bool value) const
+  [[nodiscard]] size_t get_select(size_t count, bool value) const noexcept
   {
-    if (select_1.empty())
-    {
-      throw std::runtime_error("Acceleration structure not build.");
-    }
-
     if (not value)
     {
       return 0;
     }
 
+    assert (not select_1.empty());
     const size_t select_index = count / INDEXINTERVAL;
 
     const size_t min = select_index > 0 ? select_1[select_index - 1] : 0;
@@ -307,7 +299,7 @@ class SuccinctBitvector
         return index * 64 + select_uint64_t(data_vector[index], rem, true);
       }
     }
-    throw std::runtime_error("unreacheable case");
+    assert(false);
     return 0;
   }
 
@@ -341,24 +333,29 @@ class SuccinctBitvector
     std::fclose(out_fp);
   }
 
-  [[nodiscard]] size_t length_get() const noexcept { return length; }
+  [[nodiscard]] size_t length_get() const noexcept
+  {
+    return length;
+  }
 
   private:
 
-  void clear(void)
+  void clear(void) noexcept
   {
     rank.clear();
     select_1.clear();
   }
 
-  [[nodiscard]] size_t get_superblock_count(size_t superblock_index) const
+  [[nodiscard]]
+  size_t get_superblock_count(size_t superblock_index) const noexcept
   {
     assert(superblock_index < rank.size());
     return rank[superblock_index].second >> 20;
   }
 
-  [[nodiscard]] size_t
-  get_block_count(size_t superblock_index, size_t block_index) const
+  [[nodiscard]]
+  size_t get_block_count(size_t superblock_index,
+                         size_t block_index) const noexcept
   {
     assert(superblock_index < rank.size());
     if (block_index == 7)
@@ -378,15 +375,16 @@ class SuccinctBitvector
     return 0;
   }
 
-  size_t select_uint64_t(uint64_t d, size_t count, bool value) const
+  size_t select_uint64_t(uint64_t d, size_t count, bool value) const noexcept
   {
     size_t l = 0;
     size_t r = 63;
     while (l < r)
     {
       const size_t m = (l + r) / 2;
+      assert(m <= 63);
       const size_t shift = 63 - m;
-      const uint64_t shifted = d << shift;
+      const uint64_t shifted = d << static_cast<int>(shift);
       const size_t pop = value ? std::popcount(shifted)
                                : (std::popcount(shifted) - shift);
       if (pop < count)

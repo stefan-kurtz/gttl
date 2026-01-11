@@ -27,6 +27,21 @@
 #include "indexes/succinct_bitvector.hpp"
 #include "succinct_plcp_table.hpp"
 
+static inline
+  uint32_t lcp_from_succinct_table(size_t idx,
+                                   const GttlSuffixArray *suffixarray,
+                                   const SuccinctBitvector &succinctlcp)
+{
+  assert(idx > 0);
+  const auto suffix = suffixarray->get_suftab_single_abspos(idx) + 1;
+  if (suffix <= (succinctlcp.length_get() + 1)  / 2)
+  {
+    const size_t select_1 = succinctlcp.get_select(suffix, true);
+    return succinctlcp.get_rank(select_1, false) + 1 - suffix;
+  }
+  return 0;
+}
+
 int main(int argc,char *argv[])
 {
   if (argc != 2)
@@ -58,42 +73,27 @@ int main(int argc,char *argv[])
     auto succinctplcpiter = succinctplcptable.begin();
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
     const LCPtable &lcptable = suffixarray->lcptable_get();
-    size_t idx = 0;
+    size_t idx = 1;
     size_t lcpvalue_sum = 0;
     for (const uint32_t lcpvalue : lcptable)
     {
        /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
-      const uint32_t suffix = suffixarray->get_suftab_abspos().at(idx + 1) + 1;
-      try
+      const uint32_t lcp = lcp_from_succinct_table(idx,
+                                                   suffixarray,
+                                                   succinctlcp);
+      const uint32_t succinct_lcp = *succinctplcpiter;
+      if (lcp != lcpvalue || succinct_lcp != lcpvalue)
       {
-        size_t lcp;
-        if (suffix > (succinctlcp.length_get() + 1)  / 2) {
-          lcp = 0;
-        } else {
-          const size_t select_1 = succinctlcp.get_select(suffix, true);
-          lcp =  succinctlcp.get_rank(select_1, false) + 1 - suffix;
-        }
-        const uint32_t succinct_lcp = *succinctplcpiter;
-        if (lcp != lcpvalue || succinct_lcp != lcpvalue)
-        {
-          fprintf(stderr,"lcpmismatch: %zu, %" PRIu32 ", %zu, %" PRIu32 "\n",
-                         idx, lcpvalue, lcp, succinct_lcp);
-          exit(EXIT_FAILURE);
-        }
-      }
-      catch (const std::exception &err)
-      {
-        std::cerr << argv[0] << ": indexname \"" << indexname
-                  << "\": " << err.what() << '\n';
-        haserr = true;
-        break;
+        fprintf(stderr,"wrong lcp value at idx %zu: %" PRIu32
+                       ", %" PRIu32 ", %" PRIu32 "\n",
+                       idx, lcpvalue, lcp, succinct_lcp);
+        exit(EXIT_FAILURE);
       }
 
       ++succinctplcpiter;
       lcpvalue_sum += static_cast<size_t>(lcpvalue);
-      idx++;
       if (idx == nonspecial_suffixes)
       {
         /* all following lcp-values are 0 as they are all suffixes
@@ -101,6 +101,7 @@ int main(int argc,char *argv[])
            symbols */
         break;
       }
+      idx++;
     }
     std::cout << "# reverse_complement\t"
               << (suffixarray->with_reverse_complement() ? "true" : "false")

@@ -88,9 +88,9 @@ class LCPtable
       return current_idx != other.end_idx;
     }
   };
-  std::vector<uint8_t> small_lcptab;
-  std::vector<uint16_t> ll2tab;
-  std::vector<uint32_t> ll4tab;
+  const std::vector<uint8_t> small_lcptab;
+  const std::vector<uint16_t> ll2tab;
+  const std::vector<uint32_t> ll4tab;
 public:
   LCPtable(const std::string &infile_base)
     : small_lcptab(gttl_read_vector<uint8_t>(infile_base + ".lcp"))
@@ -166,7 +166,7 @@ class GttlSuffixArray
     /* number of keys with integer values */
     while (std::getline (in_file,line))
     {
-      if((sep_pos = line.find('\t')) == std::string::npos)
+      if ((sep_pos = line.find('\t')) == std::string::npos)
       {
         throw std::ios_base::failure(std::string("file ").append(prj_filename)
                                      .append(": missing tabulator in line ")
@@ -223,7 +223,7 @@ class GttlSuffixArray
     , lcptable(nullptr)
   {
     read_in_prj_file(infile_base + ".prj");
-    for(const auto& value: saf_vec)
+    for (const auto& value: saf_vec)
     {
       if (value == LCPTAB_file)
       {
@@ -264,10 +264,11 @@ class GttlSuffixArray
     assert(not suftab_abspos.empty());
     return suftab_abspos;
   }
-  [[nodiscard]] const std::vector<uint8_t> &get_suftab_bytes() const noexcept
+  [[nodiscard]]
+  SuftabBaseType get_suftab_single_abspos(size_t idx) const noexcept
   {
-    assert(not suftab_bytes.empty());
-    return suftab_bytes;
+    assert(not suftab_abspos.empty());
+    return suftab_abspos[idx];
   }
   [[nodiscard]] const uint8_t *get_mmap_suftab_bytes(void) const noexcept
   {
