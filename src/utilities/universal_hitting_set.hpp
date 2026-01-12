@@ -7,10 +7,16 @@
 #include <unordered_set>
 #include "utilities/one_hashing_blocked_bloom_filter.hpp"
 
-struct UHSMinimizerKey
+class UHSMinimizerKey
 {
-  bool in_uhs;
-  uint64_t hash;
+  const bool in_uhs;
+  const uint64_t hash;
+
+  public:
+  explicit UHSMinimizerKey(bool _in_uhs, uint64_t _hash)
+    : in_uhs(_in_uhs)
+    , hash(_hash)
+  { }
 
   [[nodiscard]] bool operator < (const UHSMinimizerKey& other)
     const noexcept
@@ -21,10 +27,16 @@ struct UHSMinimizerKey
 };
 
 template <class Hash, class UHS>
-struct UHSKeyBuilder
+class UHSKeyBuilder
 {
   const UHS& uhs;
   static constexpr Hash hash{};
+
+  public:
+
+  explicit UHSKeyBuilder(const UHS& _uhs)
+    : uhs(_uhs)
+  { }
 
   [[nodiscard]] UHSMinimizerKey operator () (std::string_view kmer)
     const noexcept

@@ -35,7 +35,7 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
 }
 
 
-template <class HashIterator, class MinimizerValueClass, class GeneratorT>
+template <class MinimizerValueClass, class GeneratorT>
 inline void run_minimizer_generator(const GttlMultiseq &multiseq,
                                     const MinimizerOptions &options,
                                     int hash_bits)
@@ -127,14 +127,14 @@ int main(int argc, char *argv[])
       using GeneratorT = GttlHashedMinimizerGenerator<HashIter,
                                                       MinimizerValueClass>;
 
-      run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
+      run_minimizer_generator<MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);
     } else {
       using HashIter = QgramNtHashFwdIterator4;
       using GeneratorT = GttlHashedMinimizerGenerator<HashIter,
                                                       MinimizerValueClass>;
 
-      run_minimizer_generator<HashIter, MinimizerValueClass, GeneratorT>(
+      run_minimizer_generator<MinimizerValueClass, GeneratorT>(
           multiseq, options, hash_bits);
     }
   } catch (const std::exception &err)

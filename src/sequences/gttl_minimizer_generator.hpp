@@ -346,9 +346,10 @@ class GttlHashedMinimizerGenerator
 
 
 
-// Hash must have an operator() that induces a
-// strict weak ordering on kmers.
-// An example might be std::hash(a) < std::hash(b)
+// KeyBuilder must have an operator() that produces
+// objects which can be compared using a < relation.
+// An example might be our own UHSKeyBuilder or a functor
+// class that simply calls std::hash.
 template <class MinimizerValueClass, class KeyBuilder>
 class GttlMinimizerGenerator
 {
