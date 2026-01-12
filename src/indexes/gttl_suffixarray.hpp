@@ -134,7 +134,7 @@ class GttlSuffixArray
     "inputfile"
   };
   static constexpr const size_t num_integer_keys = keys.size() - 1;
-  static constexpr const CompileTimeMapStrToNumber<keys> key2number_map{};
+  static constexpr const CompileTimeMapStrToNumber<keys> map_key2number{};
   private:
   std::vector<SuftabBaseType> suftab_abspos;
   std::vector<uint8_t> suftab_bytes;
@@ -149,21 +149,21 @@ class GttlSuffixArray
   /* if the key is known at compile time then the following function
      can be used to find the index in keys */
   template<GttlStringLiteral this_key>
-  [[nodiscard]] consteval size_t key2index(void) const noexcept
+  [[nodiscard]] constexpr size_t key2index(void) const noexcept
   {
-    return key2number_map.get<this_key>();
+    return this->map_key2number.get<this_key>();
   }
 
   /* if the key is known at runtime, then the following function
      can be used to find the index in keys */
   [[nodiscard]] int key2index(const std::string &this_key) const noexcept
   {
-    auto found = std::ranges::find(keys, this_key);
-    if (found == keys.end())
+    auto found = std::ranges::find(this->keys, this_key);
+    if (found == this->keys.end())
     {
       return -1;
     }
-    return static_cast<int>(found - keys.begin());
+    return static_cast<int>(found - this->keys.begin());
   }
 
   void read_in_prj_file(const std::string &prj_filename)
@@ -218,7 +218,7 @@ class GttlSuffixArray
     in_file.close();
     for (size_t idx = 0; idx < num_integer_keys; idx++)
     {
-      const std::string this_key{*(keys.begin() + idx)};
+      const std::string this_key{*(this->keys.begin() + idx)};
       if (not int_values_set[idx])
       {
         throw std::ios_base::failure(std::string("file ") + prj_filename +
