@@ -33,10 +33,10 @@
 #include "utilities/read_vector.hpp"
 #include "utilities/gttl_mmap.hpp"
 #include "utilities/compile_time_map_str_to_number.hpp"
+#include "indexes/succinct_bitvector.hpp"
 
 class LCPtable
 {
-  private:
   struct Iterator
   {
     private:
@@ -116,7 +116,8 @@ enum Suffixarrayfiles : uint8_t
   SUFTAB_file,
   BU_SUFTAB_file,
   MMAP_BU_SUFTAB_file,
-  TIS_file
+  TIS_file,
+  LCPTAB_file_RandomAccess,
 };
 
 class GttlSuffixArray
@@ -151,7 +152,7 @@ class GttlSuffixArray
   template<GttlStringLiteral this_key>
   [[nodiscard]] constexpr size_t key2index(void) const noexcept
   {
-    return this->map_key2number.get<this_key>();
+    return map_key2number.get<this_key>();
   }
 
   /* if the key is known at runtime, then the following function
@@ -305,27 +306,30 @@ class GttlSuffixArray
   }
   [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
-    return int_values[key2index<"reverse_complement">()] == 1;
+    return int_values[this->key2index<"reverse_complement">()] == 1;
   }
   [[nodiscard]] size_t nonspecial_suffixes_get(void) const noexcept
   {
-    return int_values[key2index<"nonspecial_suffixes">()];
+    return int_values[this->key2index<"nonspecial_suffixes">()];
   }
   [[nodiscard]] size_t sequences_number_get(void) const noexcept
   {
-    return int_values[key2index<"sequences_number">()];
+    return int_values[this->key2index<"sequences_number">()];
   }
   [[nodiscard]] int sequences_number_bits_get(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index<"sequences_number_bits">()]);
+    return static_cast<int>(int_values
+                              [this->key2index<"sequences_number_bits">()]);
   }
   [[nodiscard]] int sequences_length_bits_get(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index<"sequences_length_bits">()]);
+    return static_cast<int>(int_values
+                              [this->key2index<"sequences_length_bits">()]);
   }
   [[nodiscard]] int sizeof_suftab_entry(void) const noexcept
   {
-    return static_cast<int>(int_values[key2index<"sizeof_suftab_entry">()]);
+    return static_cast<int>(int_values
+                              [this->key2index<"sizeof_suftab_entry">()]);
   }
   [[nodiscard]] const std::vector<std::string> &
   inputfiles_get(void) const noexcept
@@ -424,6 +428,31 @@ class GttlSuffixArray
   size_t find_maximal_prefix_length(const uint8_t *query, size_t querylen) const
   {
     return std::get<0>(find_maximal_prefix(query, querylen));
+  }
+};
+
+class LCPtableRandomAccess
+{
+  const GttlSuffixArray *suffixarray;
+  const std::string lls_filename;
+  const SuccinctBitvector succinctlcp;
+  public:
+  LCPtableRandomAccess(const GttlSuffixArray *_suffixarray,
+                       const std::string &indexname)
+    : suffixarray(_suffixarray)
+    , lls_filename{indexname + ".lls"}
+    , succinctlcp(SuccinctBitvector(lls_filename))
+  { }
+  uint32_t operator [] (size_t idx) const
+  {
+    assert(idx > 0);
+    const auto suffix = suffixarray->get_suftab_single_abspos(idx) + 1;
+    if (suffix <= (succinctlcp.length_get() + 1)  / 2)
+    {
+      const size_t select_1 = succinctlcp.get_select(suffix, true);
+      return succinctlcp.get_rank(select_1, false) + 1 - suffix;
+    }
+    return 0;
   }
 };
 #endif  // SUFFIXARRAY_HPP

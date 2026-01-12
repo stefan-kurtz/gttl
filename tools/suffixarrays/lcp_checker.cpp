@@ -24,23 +24,7 @@
 #include <format>
 #include "utilities/runtime_class.hpp"
 #include "indexes/gttl_suffixarray.hpp"
-#include "indexes/succinct_bitvector.hpp"
 #include "succinct_plcp_table.hpp"
-
-static inline
-  uint32_t lcp_from_succinct_table(size_t idx,
-                                   const GttlSuffixArray *suffixarray,
-                                   const SuccinctBitvector &succinctlcp)
-{
-  assert(idx > 0);
-  const auto suffix = suffixarray->get_suftab_single_abspos(idx) + 1;
-  if (suffix <= (succinctlcp.length_get() + 1)  / 2)
-  {
-    const size_t select_1 = succinctlcp.get_select(suffix, true);
-    return succinctlcp.get_rank(select_1, false) + 1 - suffix;
-  }
-  return 0;
-}
 
 int main(int argc,char *argv[])
 {
@@ -67,8 +51,7 @@ int main(int argc,char *argv[])
   {
     std::cout << "# read the succinct representaton from file " << indexname
               << ".lls\n";
-    const std::string lls_filename{std::string(indexname) + ".lls"};
-    const SuccinctBitvector succinctlcp(lls_filename);
+    const LCPtableRandomAccess lcptable_ra(suffixarray, std::string(indexname));
     const SuccinctPlcpTable<uint32_t> succinctplcptable(indexname);
     auto succinctplcpiter = succinctplcptable.begin();
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
@@ -80,9 +63,7 @@ int main(int argc,char *argv[])
        /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
-      const uint32_t lcp = lcp_from_succinct_table(idx,
-                                                   suffixarray,
-                                                   succinctlcp);
+      const uint32_t lcp = lcptable_ra[idx];
       const uint32_t succinct_lcp = *succinctplcpiter;
       if (lcp != lcpvalue || succinct_lcp != lcpvalue)
       {

@@ -8,7 +8,7 @@ template<const GttlLitStringInitializerList &string_list>
 struct CompileTimeMapStrToNumber
 {
   template<GttlStringLiteral key>
-  [[nodiscard]] consteval size_t get(void) const noexcept
+  [[nodiscard]] constexpr size_t get(void) const noexcept
   {
     return gttl_find_lit_string_at_compile_time(string_list, key.value);
   }
