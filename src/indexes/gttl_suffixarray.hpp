@@ -140,6 +140,7 @@ class GttlSuffixArray
   std::vector<SuftabBaseType> suftab_abspos;
   std::vector<uint8_t> suftab_bytes;
   Gttlmmap<uint8_t> *gttl_mmap_suftab_bytes;
+  const SuccinctBitvector *succinct_lcptable;
 
   std::vector<uint8_t> tistab;
   LCPtable *lcptable;
@@ -239,6 +240,7 @@ class GttlSuffixArray
   GttlSuffixArray(const std::string &infile_base,
                   const std::vector<Suffixarrayfiles> &saf_vec)
     : gttl_mmap_suftab_bytes(nullptr)
+    , succinct_lcptable(nullptr)
     , lcptable(nullptr)
   {
     read_in_prj_file(infile_base + ".prj");
@@ -270,12 +272,18 @@ class GttlSuffixArray
         tistab = gttl_read_vector<uint8_t>(infile_base + ".tis");
         continue;
       }
+      if (value == LCPTAB_file_RandomAccess)
+      {
+        const std::string lls_filename{infile_base + ".lls"};
+        succinct_lcptable = new SuccinctBitvector(lls_filename);
+      }
     }
   }
   ~GttlSuffixArray()
   {
-    delete lcptable;
     delete gttl_mmap_suftab_bytes;
+    delete succinct_lcptable;
+    delete lcptable;
   }
   [[nodiscard]] const std::vector<SuftabBaseType> &
   get_suftab_abspos() const noexcept
@@ -303,6 +311,19 @@ class GttlSuffixArray
   {
     assert(lcptable != nullptr);
     return *lcptable;
+  }
+  uint32_t lcpvalue_get(size_t idx) const
+  {
+    assert(succinct_lcptable != nullptr and idx > 0);
+    const auto suffix = get_suftab_single_abspos(idx) + 1;
+    if (suffix <= (succinct_lcptable->length_get() + 1) / 2)
+    {
+      const size_t select_1 = succinct_lcptable->get_select(suffix, true);
+      const size_t rank = succinct_lcptable->get_rank(select_1, false);
+      assert(rank + 1 >= suffix);
+      return rank + 1 - suffix;
+    }
+    return 0;
   }
   [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
@@ -428,31 +449,6 @@ class GttlSuffixArray
   size_t find_maximal_prefix_length(const uint8_t *query, size_t querylen) const
   {
     return std::get<0>(find_maximal_prefix(query, querylen));
-  }
-};
-
-class LCPtableRandomAccess
-{
-  const GttlSuffixArray *suffixarray;
-  const std::string lls_filename;
-  const SuccinctBitvector succinctlcp;
-  public:
-  LCPtableRandomAccess(const GttlSuffixArray *_suffixarray,
-                       const std::string &indexname)
-    : suffixarray(_suffixarray)
-    , lls_filename{indexname + ".lls"}
-    , succinctlcp(SuccinctBitvector(lls_filename))
-  { }
-  uint32_t operator [] (size_t idx) const
-  {
-    assert(idx > 0);
-    const auto suffix = suffixarray->get_suftab_single_abspos(idx) + 1;
-    if (suffix <= (succinctlcp.length_get() + 1)  / 2)
-    {
-      const size_t select_1 = succinctlcp.get_select(suffix, true);
-      return succinctlcp.get_rank(select_1, false) + 1 - suffix;
-    }
-    return 0;
   }
 };
 #endif  // SUFFIXARRAY_HPP

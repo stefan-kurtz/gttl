@@ -39,7 +39,9 @@ int main(int argc,char *argv[])
   bool haserr = false;
   try
   {
-    suffixarray = new GttlSuffixArray(indexname,{LCPTAB_file, SUFTAB_file});
+    suffixarray = new GttlSuffixArray(indexname,{LCPTAB_file,
+                                                 LCPTAB_file_RandomAccess,
+                                                 SUFTAB_file});
   }
   catch (const std::exception &err)
   {
@@ -51,7 +53,6 @@ int main(int argc,char *argv[])
   {
     std::cout << "# read the succinct representaton from file " << indexname
               << ".lls\n";
-    const LCPtableRandomAccess lcptable_ra(suffixarray, std::string(indexname));
     const SuccinctPlcpTable<uint32_t> succinctplcptable(indexname);
     auto succinctplcpiter = succinctplcptable.begin();
     const size_t nonspecial_suffixes = suffixarray->nonspecial_suffixes_get();
@@ -63,7 +64,7 @@ int main(int argc,char *argv[])
        /* at idx */
       /* HAL: verify that the lcp value at index idx
          from the succinct representation equals lcpvalue */
-      const uint32_t lcp = lcptable_ra[idx];
+      const uint32_t lcp = suffixarray->lcpvalue_get(idx);
       const uint32_t succinct_lcp = *succinctplcpiter;
       if (lcp != lcpvalue || succinct_lcp != lcpvalue)
       {

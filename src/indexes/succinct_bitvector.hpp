@@ -9,14 +9,9 @@
 #include <vector>
 #include <stdexcept>
 
-struct Superblock {
-  uint64_t first;
-  uint64_t second;
-};
-
 class SuccinctBitvector
 {
-  private:
+  using Superblock = std::pair<uint64_t, uint64_t>;
   std::vector<uint64_t> data_vector;
   size_t length;
   std::vector<Superblock> rank;
@@ -114,10 +109,10 @@ class SuccinctBitvector
     clear();
     if (value)
     {
-      data_vector[index / 64] |= (uint64_t)1 << (index % 64);
+      data_vector[index / 64] |= uint64_t(1) << (index % 64);
     } else
     {
-      data_vector[index / 64] &= ~((uint64_t)1 << (index % 64));
+      data_vector[index / 64] &= ~(uint64_t(1) << (index % 64));
     }
   }
 
@@ -183,12 +178,12 @@ class SuccinctBitvector
 
       global_count += local_count;
       second |= global_count << 20;
-      rank.push_back({first, second});
+      rank.push_back(std::make_pair(first, second));
     }
     select_1.push_back(length);
   }
 
-  [[nodiscard]] size_t get_rank(size_t index, bool value) const
+  [[nodiscard]] size_t get_rank(size_t index, bool value) const noexcept
   {
     assert (not rank.empty());
     if (not value)
@@ -256,10 +251,6 @@ class SuccinctBitvector
       }
     }
 
-    size_t block_l = 0;
-    size_t block_r = 7;
-
-
     size_t superblock_count;
     if (superblock_l > 0)
     {
@@ -269,10 +260,11 @@ class SuccinctBitvector
       superblock_count = 0;
     }
 
+    size_t block_l = 0;
+    size_t block_r = 7;
     while (block_l < block_r)
     {
       const size_t m = (block_l + block_r) / 2;
-
       if (get_block_count(superblock_l, m + 1) + superblock_count >= count)
       {
         block_r = m;
@@ -283,20 +275,21 @@ class SuccinctBitvector
     }
 
     const size_t block_count = get_block_count(superblock_l, block_l);
-    size_t local_count = 0;
-    for (int i = 0; i < 8; i++)
+    const size_t index_start = superblock_l * 64 + block_l * 8;
+    const size_t index_end = index_start + 8;
+    size_t pop_sum = 0;
+    for (size_t idx = index_start; idx < index_end; idx++)
     {
-      const size_t index = superblock_l * 64 + block_l * 8 + i;
-      const size_t pop
-       = index >= data_vector.size()
-           ? 0 : std::popcount(data_vector[index]);
-      local_count += pop;
-      if (superblock_count + block_count + local_count >= count)
+      const size_t pop = idx >= data_vector.size()
+                           ? 0
+                           : std::popcount(data_vector[idx]);
+      pop_sum += pop;
+      if (superblock_count + block_count + pop_sum >= count)
       {
         const size_t rem = count - (superblock_count + block_count +
-                                    local_count - pop);
+                                    pop_sum - pop);
 
-        return index * 64 + select_uint64_t(data_vector[index], rem, true);
+        return idx * 64 + select_uint64_t(data_vector[idx], rem, true);
       }
     }
     assert(false);
@@ -350,7 +343,7 @@ class SuccinctBitvector
   size_t get_superblock_count(size_t superblock_index) const noexcept
   {
     assert(superblock_index < rank.size());
-    return rank[superblock_index].second >> 20;
+    return std::get<1>(rank[superblock_index]) >> 20;
   }
 
   [[nodiscard]]
@@ -360,17 +353,18 @@ class SuccinctBitvector
     assert(superblock_index < rank.size());
     if (block_index == 7)
     {
-      return (rank[superblock_index].second >> 8) & 0xFFF;
+      return (std::get<1>(rank[superblock_index]) >> 8) & 0xFFF;
     }
     if (block_index == 6)
     {
-      size_t t = (rank[superblock_index].second & 0xFF) << 4;
-      t |= (rank[superblock_index].first >> 60) & 0xF;
+      size_t t = (std::get<1>(rank[superblock_index]) & 0xFF) << 4;
+      t |= (std::get<0>(rank[superblock_index]) >> 60) & 0xF;
       return t;
     }
     if (block_index > 0)
     {
-      return (rank[superblock_index].first >> ((block_index - 1) * 12)) & 0xFFF;
+      return (std::get<0>(rank[superblock_index])
+              >> ((block_index - 1) * 12)) & 0xFFF;
     }
     return 0;
   }
