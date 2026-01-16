@@ -201,10 +201,10 @@ class BytesUnit
       }
     }
 
-    [[nodiscard]] uint64_t integer_get(void) const noexcept
+    [[nodiscard]] basetype integer_get(void) const noexcept
     {
       static_assert(sizeof_unit == sizeof(basetype));
-      return *reinterpret_cast<const uint64_t *>(bytes);
+      return *reinterpret_cast<const basetype *>(bytes);
     }
 
     void show(void) const noexcept
