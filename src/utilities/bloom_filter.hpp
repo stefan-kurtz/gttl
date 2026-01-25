@@ -5,8 +5,8 @@
 #ifndef BLOOM_FILTER_HPP
 #define BLOOM_FILTER_HPP
 
+#include "utilities/bitvector.hpp"
 #include "utilities/bloom_filter_hash_function.hpp"
-#include "utilities/bloom_filter_u64.hpp"
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -20,7 +20,7 @@ class BloomFilter
   double ln_error; /* only used in one case */
   size_t num_hash_functions;
   size_t num_bits;
-  std::vector<BloomFilterU64<thread_safe>> data_vec;
+  std::vector<Bitvector<thread_safe>> data_vec;
   bool set_bit(uint64_t idx)
   {
     return data_vec[idx / 64].set_bit(idx % 64);
@@ -44,7 +44,7 @@ class BloomFilter
     : ln_error(0.0)
     , num_hash_functions(_num_hash_functions)
     , num_bits(_num_bits)
-    , data_vec(std::vector<BloomFilterU64<thread_safe>>((num_bits + 63) / 64))
+    , data_vec(std::vector<Bitvector<thread_safe>>((num_bits + 63) / 64))
   { }
 
   BloomFilter(double error, size_t number_of_elements)
@@ -54,7 +54,7 @@ class BloomFilter
     , num_hash_functions(static_cast<size_t>(ln_error * -std::numbers::log2e))
     , num_bits(static_cast<size_t>(static_cast<double>(number_of_elements) *
                                    ln_error * -2.081368))
-    , data_vec(std::vector<BloomFilterU64<thread_safe>>((num_bits + 63) / 64))
+    , data_vec(std::vector<Bitvector<thread_safe>>((num_bits + 63) / 64))
   { }
 
   BloomFilter(double error, size_t number_of_elements,
@@ -64,7 +64,7 @@ class BloomFilter
     , num_bits(num_bits_3args(error,
                               static_cast<double>(number_of_elements),
                               static_cast<double>(_num_hash_functions)))
-    , data_vec(std::vector<BloomFilterU64<thread_safe>>((num_bits + 63) / 64))
+    , data_vec(std::vector<Bitvector<thread_safe>>((num_bits + 63) / 64))
   { }
 
   [[nodiscard]] size_t num_bits_get(void) const
@@ -99,7 +99,7 @@ class BloomFilter
 
   [[nodiscard]] size_t size_in_bytes(void) const
   {
-    return data_vec.size() * sizeof(BloomFilterU64<thread_safe>);
+    return data_vec.size() * sizeof(Bitvector<thread_safe>);
   }
 
   [[nodiscard]] size_t num_hash_functions_get(void) const

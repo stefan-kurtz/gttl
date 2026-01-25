@@ -5,7 +5,7 @@
 #ifndef BLOCKED_BLOOM_FILTER_HPP
 #define BLOCKED_BLOOM_FILTER_HPP
 
-#include "utilities/bloom_filter_u64.hpp"
+#include "utilities/bitvector.hpp"
 #include "utilities/bloom_filter_hash_function.hpp"
 #include <array>
 #include <cstddef>
@@ -21,7 +21,7 @@ class BlockedBloomFilter
   class Block
   {
    private:
-    std::array<BloomFilterU64<thread_safe>, 8> data;
+    std::array<Bitvector<thread_safe>, 8> data;
     bool set_bit(uint64_t index)
     {
       return data[index / 64].set_bit(index % 64);

@@ -5,7 +5,7 @@
 #ifndef ONE_HASHING_BLOCKED_BLOOM_FILTER_HPP
 #define ONE_HASHING_BLOCKED_BLOOM_FILTER_HPP
 
-#include "utilities/bloom_filter_u64.hpp"
+#include "utilities/bitvector.hpp"
 #include "utilities/bloom_filter_hash_function.hpp"
 #include <array>
 #include <cstddef>
@@ -22,7 +22,7 @@ class OneHashingBlockedBloomFilter
   class Block
   {
    private:
-    std::array<BloomFilterU64<ThreadSafe>, 8> data;
+    std::array<Bitvector<ThreadSafe>, 8> data;
 
     bool set_bit(uint64_t index)
     {
