@@ -23,10 +23,9 @@ class BytesUnit
   private:
     uint8_t bytes[sizeof_unit];
   public:
-    BytesUnit() = default;
-    BytesUnit(uint64_t value)
+    BytesUnit(void) = default;
+    BytesUnit(basetype value)
     {
-      static_assert(sizeof_unit == 8);
       const uint8_t *bptr = reinterpret_cast<const uint8_t *>(&value);
       for (size_t idx = 0; idx < sizeof(value); idx++)
       {
