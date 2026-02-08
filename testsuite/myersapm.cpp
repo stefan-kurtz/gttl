@@ -22,10 +22,10 @@ static void run_myers_bitvector_algorithm(const std::string &pattern_file,
     MyersBitvectorAlgorithm<uint64_t> myers_bitvector_algorithm(pattern);
     constexpr const size_t buf_size = size_t{1} << size_t{14};
     GttlFastAGenerator<buf_size> gttl_si(sequence_file.c_str());
+    size_t count_matches = 0;
     for (auto &&si : gttl_si)
     {
       const std::string_view &sequence = si->sequence_get();
-      size_t count_matches = 0;
       for (size_t j = 0; j < sequence.size(); j++)
       {
         const size_t cost = myers_bitvector_algorithm.transform(sequence[j]);
@@ -34,9 +34,9 @@ static void run_myers_bitvector_algorithm(const std::string &pattern_file,
           count_matches++;
         }
       }
-      std::cout << pattern << '\t' << count_matches << '\n';
       myers_bitvector_algorithm.reset_for_next_sequence();
     }
+    std::cout << pattern << '\t' << count_matches << '\n';
   }
 }
 
