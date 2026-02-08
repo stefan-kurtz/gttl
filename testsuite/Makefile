@@ -39,7 +39,8 @@ test:test_alphabet \
      test_read_vector \
      test_string_of_digits \
      test_binary_iterator \
-     test_multiple_options
+     test_multiple_options \
+     test_myersapm
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -438,6 +439,11 @@ test_multiple_options:multiple_options_mn.x
 .PHONY:test_multibitvector
 test_multibitvector:multibitvector.x
 	@./multibitvector.x
+	@echo "Congratulations. $@ passed"
+
+.PHONY:test_myersapm
+test_myersapm:myersapm.x
+	@./test_myersapm.sh
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
