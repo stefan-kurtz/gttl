@@ -167,7 +167,11 @@ void benchmark_threaded(const char *name, AMD &amd,
   RunTimeClass rt_check_inserted{};
   for (uint32_t t = 0; t < num_threads; t++)
   {
-    threads.push_back(std::thread([t, &amd, &insert_data, &num_threads]() {
+    threads.push_back(std::thread([t,
+#ifndef NDEBUG
+                                   &amd,
+#endif
+                                   &insert_data, &num_threads]() {
       const uint64_t size = insert_data.size();
       const uint64_t start = (size / num_threads) * t;
       const uint64_t end =
