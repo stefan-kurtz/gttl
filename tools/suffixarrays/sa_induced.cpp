@@ -56,22 +56,26 @@
 #include "plcp_table.hpp"
 
 static void prj_file_write(const std::string &filename,
+                           int alphabet_size,
                            bool reverse_complement,
+                           size_t sequences_total_length,
                            size_t nonspecial_suffixes,
                            size_t sequences_number,
                            int sequences_number_bits,
                            int sequences_length_bits,
-                           size_t sizeof_suftab_entry,
+                           size_t bits_suftab_entry,
                            const std::vector<std::string> &inputfiles)
 {
   std::ofstream out_stream;
   out_stream.open(filename);
+  out_stream << "alphabet_size\t" << alphabet_size << '\n';
   out_stream << "reverse_complement\t" << (reverse_complement ? 1 : 0) << '\n';
+  out_stream << "sequences_total_length\t" << sequences_total_length << '\n';
   out_stream << "nonspecial_suffixes\t" << nonspecial_suffixes << '\n';
   out_stream << "sequences_number\t" << sequences_number << '\n';
   out_stream << "sequences_number_bits\t" << sequences_number_bits << '\n';
   out_stream << "sequences_length_bits\t" << sequences_length_bits << '\n';
-  out_stream << "sizeof_suftab_entry\t" << sizeof_suftab_entry << '\n';
+  out_stream << "bits_suftab_entry\t" << bits_suftab_entry << '\n';
   for (auto &&inputfile : inputfiles)
   {
     out_stream << "inputfile\t" << inputfile << '\n';
@@ -331,7 +335,9 @@ static void enhanced_suffixarray_plain_input_format(GttlMemoryTracker
   const int sequences_number_bits = 0;
   const int sequences_length_bits = required_bits;
   prj_file_write(indexname + ".prj",
+                 256,
                  sainoptions.reverse_complement_option_is_set(),
+                 totallength,
                  nonspecial_suffixes,
                  sequences_number,
                  sequences_number_bits,
@@ -352,13 +358,14 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
   const int sequences_number_bits = multiseq->sequences_number_bits_get();
   const int sequences_length_bits = multiseq->sequences_length_bits_get();
   const int required_bits = sequences_number_bits + sequences_length_bits;
+  const int alphabet_size = is_protein ? 20 : 4;
 
   if (sainoptions.verbose_opt_is_set())
   {
     std::cout << "# totallength\t" << totallength << '\n';
     std::cout << "# number of sequences\t" << multiseq->sequences_number_get()
               << '\n';
-    std::cout << "# alphabet size\t" << (is_protein ? 20 : 4) << '\n';
+    std::cout << "# alphabet size\t" << alphabet_size << '\n';
     std::cout << "# sequences_number_bits\t" << sequences_number_bits << '\n';
     std::cout << "# sequences_length_bits\t" << sequences_length_bits << '\n';
     std::cout << "# required_bits\t" << required_bits << '\n';
@@ -695,7 +702,9 @@ static void enhanced_suffixarray_multiseq(GttlMemoryTracker *memory_tracker,
     suftab = nullptr;
   }
   prj_file_write(indexname + ".prj",
+                 alphabet_size,
                  sainoptions.reverse_complement_option_is_set(),
+                 multiseq->sequences_total_length_get(),
                  nonspecial_suffixes,
                  sequences_number,
                  sequences_number_bits,

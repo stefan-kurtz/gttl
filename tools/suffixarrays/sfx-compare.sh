@@ -54,13 +54,13 @@ fi
 
 if test -f "${sain}".prj
 then
-  sizeof_suftab_entry=$(grep '^sizeof_suftab_entry' "${sain}".prj | cut -f 2)
+  bits_suftab_entry=$(grep '^bits_suftab_entry' "${sain}".prj | cut -f 2)
 else
   echo "$0: FAILURE: ${sain}.prj does not exist"
   exit 1
 fi
 
-if test "${sizeof_suftab_entry}" -eq 32
+if test "${bits_suftab_entry}" -eq 32
 then
   suffixerator_size_option=-suftabuint
 fi

@@ -126,12 +126,14 @@ class GttlSuffixArray
   /* Adjust the following value, when adding additional integer keys */
   static constexpr const GttlLitStringInitializerList keys
   {
+    "alphabet_size",
     "reverse_complement",
+    "sequences_total_length",
     "nonspecial_suffixes",
     "sequences_number",
     "sequences_number_bits",
     "sequences_length_bits",
-    "sizeof_suftab_entry",
+    "bits_suftab_entry",
     "inputfile"
   };
   static constexpr const size_t num_integer_keys = keys.size() - 1;
@@ -325,9 +327,17 @@ class GttlSuffixArray
     }
     return 0;
   }
+  [[nodiscard]] int alphabet_size_get(void) const noexcept
+  {
+    return static_cast<int>(int_values[this->key2index<"alphabet_size">()]);
+  }
   [[nodiscard]] bool with_reverse_complement(void) const noexcept
   {
     return int_values[this->key2index<"reverse_complement">()] == 1;
+  }
+  [[nodiscard]] size_t sequences_total_length_get(void) const noexcept
+  {
+    return int_values[this->key2index<"sequences_total_length">()];
   }
   [[nodiscard]] size_t nonspecial_suffixes_get(void) const noexcept
   {
@@ -347,10 +357,9 @@ class GttlSuffixArray
     return static_cast<int>(int_values
                               [this->key2index<"sequences_length_bits">()]);
   }
-  [[nodiscard]] int sizeof_suftab_entry(void) const noexcept
+  [[nodiscard]] int bits_suftab_entry(void) const noexcept
   {
-    return static_cast<int>(int_values
-                              [this->key2index<"sizeof_suftab_entry">()]);
+    return static_cast<int>(int_values[this->key2index<"bits_suftab_entry">()]);
   }
   [[nodiscard]] const std::vector<std::string> &
   inputfiles_get(void) const noexcept
