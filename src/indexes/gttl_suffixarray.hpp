@@ -299,6 +299,11 @@ class GttlSuffixArray
     assert(not suftab_abspos.empty());
     return suftab_abspos[idx];
   }
+  [[nodiscard]] const std::vector<uint8_t> &get_suftab_bytes() const noexcept
+  {
+    assert(not suftab_bytes.empty());
+    return suftab_bytes;
+  }
   [[nodiscard]] const uint8_t *get_mmap_suftab_bytes(void) const noexcept
   {
     assert(gttl_mmap_suftab_bytes);
