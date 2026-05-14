@@ -22,9 +22,12 @@ static void myers_bitvector_algorithm_p_times_s(
   {
     if (error_threshold > pattern.size()/2)
     {
-      throw std::format("error threshold {} is too large; maximum value for "
-                        "pattern of length {} is {}", error_threshold,
-                        pattern.size(), pattern.size()/2);
+      throw std::invalid_argument(
+               std::format("error threshold {} is too large; maximum value for "
+                           "pattern of length {} is {}",
+                           error_threshold,
+                           pattern.size(),
+                           pattern.size()/2));
     }
     count_patterns++;
     MyersBitvectorAlgorithm<uint64_t> myers_bitvector_algorithm(pattern);
@@ -66,9 +69,12 @@ static void myers_bitvector_algorithm_s_times_p(
   {
     if (error_threshold > pattern.size()/2)
     {
-      throw std::format("error threshold {} is too large; maximum value for "
-                        "pattern of length {} is {}", error_threshold,
-                        pattern.size(), pattern.size()/2);
+      throw std::invalid_argument(
+               std::format("error threshold {} is too large; maximum value for "
+                           "pattern of length {} is {}",
+                           error_threshold,
+                           pattern.size(),
+                           pattern.size()/2));
     }
     pattern_vector.push_back(pattern);
     mbv_vector.push_back(MyersBitvectorAlgorithm<uint64_t>(pattern));
@@ -145,7 +151,7 @@ int main(int argc, char *argv[])
                                               sequence_file,
                                               error_threshold);
   }
-  catch (const std::runtime_error &err)
+  catch (const std::exception &err)
   {
     std::cerr << argv[0] << ": " <<  err.what() << '\n';
     return EXIT_FAILURE;

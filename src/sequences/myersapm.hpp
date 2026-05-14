@@ -31,9 +31,10 @@ class MyersBitvectorAlgorithm
     constexpr const size_t max_pattern_length = sizeof(T) * CHAR_BIT;
     if (pattern_length > max_pattern_length)
     {
-      throw std::format("MyersBitvectorAlgorithm cannot handle patterns of "
-                        "length {}; the maximum pattern length is {}" ,
-                        pattern_length, max_pattern_length);
+      throw std::invalid_argument(
+               std::format("MyersBitvectorAlgorithm cannot handle patterns of "
+                           "length {}; the maximum pattern length is {}",
+                           pattern_length, max_pattern_length));
     }
     eq_bits.fill(0);
     for (size_t idx = 0; idx < pattern_length; idx++)
