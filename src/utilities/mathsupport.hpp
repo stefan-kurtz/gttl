@@ -68,8 +68,8 @@ inline constexpr double mega_bytes(size_t bytes) noexcept
   return static_cast<double>(bytes)/bytesPerMegaByte;
 }
 
-template<typename T>
-static constexpr T gttl_safe_power(T a, T b)
+template<typename T, bool safe>
+static constexpr T gttl_power(T a, T b)
 {
   static_assert(std::is_integral_v<T> and std::is_unsigned_v<T>);
 
@@ -80,7 +80,24 @@ static constexpr T gttl_safe_power(T a, T b)
   {
     if ((b & 1) == 1)
     {
-      if (a != 0 and prod > max_value / a)
+      if constexpr (safe)
+      {
+        if (a != 0 and prod > max_value / a)
+        {
+          throw std::overflow_error(
+                std::string("overflow when evaluating ")
+              + std::to_string(prod) + " * " + std::to_string(a)
+              + std::string(" to compute pow(")
+              + std::to_string(a) + std::string(", ")
+              + std::to_string(b) + std::string(")"));
+        }
+      }
+      prod *= a;
+    }
+    b >>= 1;
+    if constexpr (safe)
+    {
+      if (b > 0 and a != 0 and a > max_value / a)
       {
         throw std::overflow_error(
               std::string("overflow when evaluating ")
@@ -89,17 +106,6 @@ static constexpr T gttl_safe_power(T a, T b)
             + std::to_string(a) + std::string(", ")
             + std::to_string(b) + std::string(")"));
       }
-      prod *= a;
-    }
-    b >>= 1;
-    if (b > 0 and a != 0 and a > max_value / a)
-    {
-        throw std::overflow_error(
-              std::string("overflow when evaluating ")
-            + std::to_string(prod) + " * " + std::to_string(a)
-            + std::string(" to compute pow(")
-            + std::to_string(a) + std::string(", ")
-            + std::to_string(b) + std::string(")"));
     }
     a *= a;
   }

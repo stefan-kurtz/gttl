@@ -23,7 +23,8 @@ static inline size_t max_integer_code_get(size_t alphabetsize,
     assert(qgram_length == 32);
     return std::numeric_limits<size_t>::max();
   }
-  return gttl_safe_power<size_t>(alphabetsize,qgram_length) - 1;
+  static const bool safe = true;
+  return gttl_power<size_t, safe>(alphabetsize,qgram_length) - 1;
 }
 #endif
 
