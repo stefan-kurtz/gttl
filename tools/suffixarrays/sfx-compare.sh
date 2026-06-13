@@ -16,14 +16,7 @@ inputfile=$1
 # TransProtAlphabetOrder.txt which is compatible with
 # alphabet::amino_acids.
 
-if test "${GTDIR}" = ""
-then
-  echo "$0: environment variable GTDIR not defined => skip test"
-  exit 0
-fi
-if test ! -d "${GTDIR}"
-then
-  echo "$0: directory ${GTDIR} does not exist => skip test"
+if ! [ -x "$(command -v gt)" ]; then
   exit 0
 fi
 
@@ -35,7 +28,7 @@ else
   file_type_option=-dna
 fi
 sfx=$(mktemp --tmpdir=. TMP.XXXXXX) || exit 1
-cmd="${GTDIR}/bin/gt encseq encode ${file_type_option} -indexname ${sfx} ${inputfile}"
+cmd="gt encseq encode ${file_type_option} -indexname ${sfx} ${inputfile}"
 ${cmd}
 if test $? -ne 0
 then
@@ -65,7 +58,7 @@ then
   suffixerator_size_option=-suftabuint
 fi
 
-cmd="${GTDIR}/bin/gt suffixerator -ii ${sfx} -lcp -suf ${suffixerator_size_option}"
+cmd="gt suffixerator -ii ${sfx} -lcp -suf ${suffixerator_size_option}"
 ${cmd}
 if test $? -ne 0
 then
