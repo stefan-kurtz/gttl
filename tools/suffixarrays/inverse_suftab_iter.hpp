@@ -15,7 +15,7 @@ class InverseSuftabReader
 {
   const std::string inverse_suftab_outputfile;
   const BinaryFileReader<SuftabBaseType> inverse_suftab_reader;
-  [[nodiscard]] bool isa_file_is_up_to_date(const std::string &indexname) const
+  [[nodiscard]] static bool isa_file_is_up_to_date(const std::string &indexname)
   {
     const std::string suftab_inputfile(indexname + ".suf");
     const std::string inverse_suftab_inputfile(indexname + ".isa");
@@ -24,10 +24,10 @@ class InverseSuftabReader
            std::filesystem::last_write_time(suftab_inputfile) <
            std::filesystem::last_write_time(inverse_suftab_inputfile);
   }
-  const std::string create_inverse_suftab_file(
+  static const std::string create_inverse_suftab_file(
               GttlMemoryTracker *memory_tracker,
               const std::string &indexname,
-              size_t totallength) const
+              size_t totallength)
   {
     const std::string inverse_suftab_filename{indexname + ".isa"};
     if (not isa_file_is_up_to_date(indexname))
