@@ -35,7 +35,11 @@ ifeq ($(OS),Windows_NT)
 	CPPFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
 	LDLIBS+=-L C:\\vcpkg\\packages\\zlib_x64-windows\\lib -lzlib
 else
-	LDLIBS+=-lm -lz -lpthread -lstdc++
+  ifeq ($(SYSTEM),Darwin)
+    LDLIBS+=-lm -lz -lpthread
+  else
+    LDLIBS+=-lm -lz -lpthread -lstdc++
+  endif
   SHELL=/bin/bash
 endif
 
