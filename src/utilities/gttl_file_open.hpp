@@ -6,13 +6,13 @@
 #include <string>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 #include "utilities/file_size.hpp"
 #include "utilities/has_gzip_header.hpp"
 
 #ifndef GTTL_WITHOUT_ZLIB
 #include <cstring>
 #include <cassert>
-#include <vector>
 #include <zlib.h>
 
 using GttlFpType = gzFile;
@@ -57,7 +57,7 @@ inline size_t gttl_fp_type_read(void* buf, size_t size, size_t count, FILE* fp)
 #endif
 
 template<typename BaseType>
-static inline std::basic_string<BaseType>
+static inline std::vector<BaseType>
   gttl_read_files(const std::vector<std::string> &inputfiles)
 {
   std::vector<size_t> file_size_vec;
@@ -80,7 +80,7 @@ static inline std::basic_string<BaseType>
     file_size_vec.push_back(file_size);
     sum_file_size += file_size;
   }
-  std::basic_string<BaseType> concatenated_content;
+  std::vector<BaseType> concatenated_content;
   if (not append_sequences)
   {
     concatenated_content.resize(sum_file_size);
@@ -158,6 +158,7 @@ static inline std::basic_string<BaseType>
 static inline std::string gttl_read_file(const char *file_name)
 {
   const std::vector<std::string> inputfiles{std::string(file_name)};
-  return gttl_read_files<char>(inputfiles);
+  auto vec = gttl_read_files<char>(inputfiles);
+  return std::string(vec.begin(), vec.end());
 }
 #endif

@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 class DNAQgramDecoder
 {
   class Iterator
@@ -76,13 +77,13 @@ class DNAQgramDecoder
   }
 };
 
-static inline std::basic_string<uint8_t> dna_sequence_decode(
+static inline std::vector<uint8_t> dna_sequence_decode(
                                                 const uint64_t *sub_unit_ptr,
                                                 size_t sequence_length)
 {
   int shift = 62;
   size_t current_unit = 0;
-  std::basic_string<uint8_t> s;
+  std::vector<uint8_t> s;
   s.reserve(sequence_length);
   for (size_t idx = 0; idx < sequence_length; idx++)
   {

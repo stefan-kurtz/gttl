@@ -200,8 +200,8 @@ static void process_encoded_sequence_part(
     std::tie(sub_unit_ptr, sequence_length) = *it;
     if (sequence_length >= qgram_length)
     {
-      std::basic_string<uint8_t> ds = dna_sequence_decode(sub_unit_ptr,
-                                                          sequence_length);
+      std::vector<uint8_t> ds = dna_sequence_decode(sub_unit_ptr,
+                                                   sequence_length);
       assert(sequence_length == ds.size());
       HashValueIterator qgiter(qgram_length, ds.data(), sequence_length);
       for (auto const &&code_pair : qgiter)
