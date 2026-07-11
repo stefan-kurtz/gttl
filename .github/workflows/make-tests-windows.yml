@@ -36,7 +36,9 @@ jobs:
       run: vcpkg install zlib
     - name: Install Clang 22
       run: choco install llvm --version=22.1.7 -y --allow-downgrade || true
-    - name: Add Clang 22 to PATH
-      run: echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+    - name: Add Clang 22 and ZLib DLL to PATH
+      run: |
+        echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+        echo "C:\vcpkg\installed\x64-windows\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: make
       run: make -j4
