@@ -302,9 +302,9 @@ test_split_string:split_string_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "A" > ${TMPFILE}
 	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
-	@echo "A\tB" > ${TMPFILE}
+	@printf "A\tB\n" > ${TMPFILE}
 	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
-	@echo "A\tB\nC" > ${TMPFILE}
+	@printf "A\tB\nC\n" > ${TMPFILE}
 	@${VALGRIND} ./split_string_mn.x '	' ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "Congratulations. $@ passed"
