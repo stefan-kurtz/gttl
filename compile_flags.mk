@@ -33,7 +33,7 @@ endif
 # Windows specific fixes, include ZLlib and disable some CRT-warnings from Microsoft
 ifeq ($(OS),Windows_NT)
 	CPPFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS
-	LDLIBS+=C:/vcpkg/installed/x64-windows/lib/zlib.lib
+	LDLIBS+=C:/vcpkg/installed/x64-windows/lib/z.lib
 else
   ifeq ($(SYSTEM),Darwin)
     LDLIBS+=-lm -lz -lpthread
