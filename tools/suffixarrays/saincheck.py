@@ -50,6 +50,7 @@ verbose_opt = '-v' if args.verbose else ''
 file_list_plain_paths = [filename for filename in os.listdir('.')
                                   if os.path.getsize(filename) > 0
                                   if os.path.isfile(filename)
+                                  if not filename.lower().startswith('tmp')
                                   if not is_index_file(filename,index_suffixes)]
 
 if 'FASTA_FILES' in os.environ:
