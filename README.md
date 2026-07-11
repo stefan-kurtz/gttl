@@ -11,4 +11,4 @@ vcpkg install zlib
 ```
 With a `vcpkg` instance in `C:\vcpkg`.
 Windows users will also need to set the environment variables `CXX="clang++"` and
-`CPLUS_INCLUDE_PATH="C:\vcpkg\installed\x64-windows\include\"`.
+`CPLUS_INCLUDE_PATH="C:/vcpkg/installed/x64-windows/include/"`.
