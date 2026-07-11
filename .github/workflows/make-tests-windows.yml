@@ -36,7 +36,8 @@ jobs:
       run: vcpkg install zlib
     - name: Run Diagnostics
       run: |
-        Get-ChildItem -Path C:\vcpkg -Filter *zlib* -Recurse -ErrorAction SilentlyContinue | Select-Object -Property FullName
+        Get-Content C:\vcpkg\installed\vcpkg\info\zlib_1.3.2_x64-windows.list
+        Get-ChildItem -Path C:\vcpkg\installed\x64-windows\lib -Recurse
     - name: Install Clang 22
       run: choco install llvm --version=22.1.7 -y --allow-downgrade || true
     - name: Add Clang 22 to PATH
