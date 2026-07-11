@@ -28,7 +28,7 @@ jobs:
 
     env:
       CXX: clang++
-      CPLUS_INCLUDE_PATH: "C:\\vcpkg\\packages\\zlib_x64-windows\\include"
+      CPLUS_INCLUDE_PATH: "C:\\vcpkg\\installed\\x64-windows\\include"
 
     steps:
     - uses: actions/checkout@v7
