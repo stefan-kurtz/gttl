@@ -10,5 +10,5 @@ Note that Windows users will need to install ZLib as an additional dependency, e
 vcpkg install zlib
 ```
 With a `vcpkg` instance in `C:\vcpkg`.
-Windows users will also need to set the environment variables `CXX="clang++"` and
-`CPLUS_INCLUDE_PATH="C:/vcpkg/installed/x64-windows/include/"`.
+Windows users will also need to set the environment variable `CXX="clang++"`.
+The build system will automatically find the headers and library files. If `vcpkg` is installed in a non-standard location, you can set the environment variable `VCPKG_ROOT` to your vcpkg installation path.
