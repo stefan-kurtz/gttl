@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 /*
-  Copyright (c) 2021 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2021 Stefan Kurtz <stefan.kurtz@uni-hamburg.de>
   Copyright (c) 2021 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
