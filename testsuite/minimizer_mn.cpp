@@ -76,28 +76,29 @@ void run_nt_minimizer(const MinimizerOptions &options)
                           options.hash_bits_get());
   assert(var_sizeof_unit_hashed_qgram == 8 or
          var_sizeof_unit_hashed_qgram == 9);
-   constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
-   {
-     if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
-     {
-       std::vector<std::string> log_vector;
-       if (options.canonical_option_is_set())
-       {
-        using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
-                                                 QgramNtHashIterator4>;
-        const HashedQgrams hqg(multiseq,
-                               options.number_of_threads_get(),
-                               options.qgram_length_get(),
-                               options.window_size_get(),
-                               hash_bits,
-                               options.sort_by_hash_value_option_is_set(),
-                               options.at_constant_distance_option_is_set(),
-                               options.max_replicates_get(),
-                               &log_vector);
-        RunTimeClass rt_output_hashed_qgrams{};
-        hqg.show();
-        log_vector.push_back(rt_output_hashed_qgrams
-                             .to_string("output of hashed kmers"));
+  printf("# hash_bits\t%d\n", hash_bits);
+  constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
+  {
+    if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
+    {
+      std::vector<std::string> log_vector;
+      if (options.canonical_option_is_set())
+      {
+       using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                QgramNtHashIterator4>;
+       const HashedQgrams hqg(multiseq,
+                              options.number_of_threads_get(),
+                              options.qgram_length_get(),
+                              options.window_size_get(),
+                              hash_bits,
+                              options.sort_by_hash_value_option_is_set(),
+                              options.at_constant_distance_option_is_set(),
+                              options.max_replicates_get(),
+                              &log_vector);
+       RunTimeClass rt_output_hashed_qgrams{};
+       hqg.show();
+       log_vector.push_back(rt_output_hashed_qgrams
+                            .to_string("output of hashed kmers"));
       } else
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
