@@ -152,7 +152,7 @@ static std::pair<size_t,bool> append_minimizers(
     size_t seqpos = std::get<0>(range);
     const char *const seqptr = sequence + seqpos;
     HashIterator qgiter(qgram_length, seqptr, this_length);
-    count_all_qgrams += (this_length - qgram_length - 1);
+    count_all_qgrams += (this_length - qgram_length + 1);
 
 #ifdef VALIDATE_MINIMIZER
     HashedQgramVector<sizeof_unit> all_hashed_qgrams;
@@ -329,7 +329,7 @@ static std::pair<size_t,bool> append_constant_distance_hashed_qgrams(
     size_t seqpos = std::get<0>(range);
     const char *const seqptr = sequence + seqpos;
     HashIterator qgiter(qgram_length, seqptr, this_length);
-    count_all_qgrams += (this_length - qgram_length - 1);
+    count_all_qgrams += (this_length - qgram_length + 1);
     size_t steps = 0;
     for (auto const &&code_pair : qgiter)
     {
@@ -378,11 +378,11 @@ template<int sizeof_unit>
 struct HashedQgramVectorTable
 {
   /* common data */
-  std::vector<size_t> count_all_qgrams;
+  std::vector<size_t> count_all_qgrams_vector;
   std::vector<std::atomic<bool>> has_wildcards;
   std::vector<HashedQgramVector<sizeof_unit>> table;
   HashedQgramVectorTable(size_t number_of_threads)
-    : count_all_qgrams(number_of_threads,0)
+    : count_all_qgrams_vector(number_of_threads,0)
     , table(number_of_threads,HashedQgramVector<sizeof_unit>{})
   {
     has_wildcards = std::vector<std::atomic<bool>>(number_of_threads);
@@ -423,7 +423,7 @@ struct HashedQgramVectorTable
   [[nodiscard]] size_t count_all_qgrams_get(void) const noexcept
   {
     size_t total_count_all_qgrams = 0;
-    for (auto count : count_all_qgrams)
+    for (auto count : count_all_qgrams_vector)
     {
       total_count_all_qgrams += count;
     }
@@ -465,7 +465,7 @@ static void append_hashed_qgrams_threaded(size_t thread_id,
                         multiseq.sequence_ptr_get(task_num),
                         multiseq.sequence_length_get(task_num),
                         task_num);
-  hashed_qgram_vector_table->count_all_qgrams[thread_id] += this_count;
+  hashed_qgram_vector_table->count_all_qgrams_vector[thread_id] += this_count;
   if(this_has_wildcards)
   {
     hashed_qgram_vector_table->has_wildcards[thread_id]
@@ -619,10 +619,8 @@ class HashedQgramsGeneric
     assert(number_of_threads >= 1);
     if (log_vector != nullptr)
     {
-      log_vector->push_back(std::string("kmer_size\t") +
-                            std::to_string(qgram_length));
-      log_vector->push_back(std::string("window_size\t") +
-                            std::to_string(window_size));
+      log_vector->push_back(std::format("kmer_size\t{}", qgram_length));
+      log_vector->push_back(std::format("window_size\t{}", window_size));
     }
     const uint64_t hash_mask = gttl_bits2maxvalue<uint64_t>(hashbits);
     if (number_of_threads == 1)
@@ -725,18 +723,20 @@ class HashedQgramsGeneric
     }
     if (log_vector != nullptr)
     {
-      log_vector->push_back(std::string("number of hashed kmers\t") +
-                            std::to_string(this->size()));
+      log_vector->push_back(std::format("number of minimizers\t{}",
+                                        this->size()));
+      log_vector->push_back(std::format("number of all hashed {}-mers\t{}",
+                                         qgram_length,
+                                         this->count_all_qgrams_get()));
       const double density
         = static_cast<double>(size())/this->count_all_qgrams_get();
-      log_vector->push_back(std::format("hashed kmers density\t{:.2f}",
-                                        density));
+      log_vector->push_back(std::format("minimizer density\t{:.2f}", density));
       const double space_in_mega_bytes = mega_bytes(this->size() * sizeof_unit);
       log_vector->push_back(std::format("SPACE\thashed kmers (MB)\t{:.0f}",
                                         std::ceil(space_in_mega_bytes)));
     }
   }
-  /* Construktor to be instantiated by Vector of bitpacker (Cached IO) */
+  /* Constructor to be instantiated by Vector of bitpacker (Cached IO) */
   HashedQgramsGeneric(const GttlMultiseq &_multiseq,
                       size_t _qgram_length,
                       int _hashbits,
