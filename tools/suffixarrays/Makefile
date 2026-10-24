@@ -122,7 +122,7 @@ test_plcp:sa_induced.x
 	   echo "test_plcp.sh $${filename}"; \
 	   ./test_plcp.sh $${filename} || exit 1; \
 	done
-	@for filename in `enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
+	@for filename in `./enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
 	  echo "test_plcp.sh $${filename}"; \
 	  ./test_plcp.sh $${filename} || exit 1; \
 	done
@@ -139,7 +139,7 @@ test_sfx_compare:sa_induced.x
 	@echo "$@ passed"
 
 test_big:sa_induced.x
-	@for filename in `enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
+	@for filename in `./enum_big_files.py ECOLI HIQ SOIL_UNIQUE`; do\
 	  ./sa_induced.x --relative_suftab --verbose --check_suftab $${filename} || exit 1; \
 	  ${RM} `basename $${filename}`.bsf `basename $${filename}`.prj; \
 	done

@@ -11,7 +11,7 @@ def enum_big_fasta_files(environment_vars):
 
 if __name__ == '__main__':
   import sys, argparse
-  p = argparse.ArgumentParser(description=('output list of files files from a '
+  p = argparse.ArgumentParser(description=('output list of files from a '
                                            'given list of environment vars'))
   p.add_argument('environ_vars',nargs='+',
                   help='specify enivorment vars')
