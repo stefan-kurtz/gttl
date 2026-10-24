@@ -617,11 +617,6 @@ class HashedQgramsGeneric
     assert(hashbits != -1);
     RunTimeClass rt_collect{};
     assert(number_of_threads >= 1);
-    if (log_vector != nullptr)
-    {
-      log_vector->push_back(std::format("kmer_size\t{}", qgram_length));
-      log_vector->push_back(std::format("window_size\t{}", window_size));
-    }
     const uint64_t hash_mask = gttl_bits2maxvalue<uint64_t>(hashbits);
     if (number_of_threads == 1)
     {

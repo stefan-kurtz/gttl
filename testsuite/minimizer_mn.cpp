@@ -76,6 +76,8 @@ void run_nt_minimizer(const MinimizerOptions &options)
                           options.hash_bits_get());
   assert(var_sizeof_unit_hashed_qgram == 8 or
          var_sizeof_unit_hashed_qgram == 9);
+  printf("# kmer_size\t%zu\n", options.qgram_length_get());
+  printf("# window_size\t%zu\n", options.window_size_get());
   printf("# hash_bits\t%d\n", hash_bits);
   constexpr_for<8,9+1,1>([&](auto sizeof_unit_hashed_qgram)
   {
