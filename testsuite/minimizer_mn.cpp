@@ -52,6 +52,38 @@ std::pair<int,int> determine_hash_bits(int sequences_bits,
                       requested_hash_bits));
 }
 
+template<class HashedQgrams>
+static void show_minimizers(int show_mode, const HashedQgrams &hqg)
+{
+  if (show_mode != 0)
+  {
+    if (show_mode == 1)
+    {
+      hqg.show();
+    } else
+    {
+      if (show_mode == 2)
+      {
+        for (auto &&dhqg : hqg)
+        {
+          printf("%" PRIu64 "\t%zu\t%zu\n",
+                 dhqg.hash_value,
+                 dhqg.sequence_number,
+                 dhqg.startpos);
+        }
+      } else
+      {
+        assert(show_mode == 3);
+        auto count_runs = hqg.hash_value_run_statistics();
+        for (auto &[r,c] : count_runs)
+        {
+          printf("%zu\t%zu\n",r,c);
+        }
+      }
+    }
+  }
+}
+
 void run_nt_minimizer(const MinimizerOptions &options)
 {
   RunTimeClass rt_create_multiseq{};
@@ -84,23 +116,21 @@ void run_nt_minimizer(const MinimizerOptions &options)
     if (sizeof_unit_hashed_qgram == var_sizeof_unit_hashed_qgram)
     {
       std::vector<std::string> log_vector;
+      RunTimeClass rt_output_hashed_qgrams{};
       if (options.canonical_option_is_set())
       {
-       using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
-                                                QgramNtHashIterator4>;
-       const HashedQgrams hqg(multiseq,
-                              options.number_of_threads_get(),
-                              options.qgram_length_get(),
-                              options.window_size_get(),
-                              hash_bits,
-                              options.sort_by_hash_value_option_is_set(),
-                              options.at_constant_distance_option_is_set(),
-                              options.max_replicates_get(),
-                              &log_vector);
-       RunTimeClass rt_output_hashed_qgrams{};
-       hqg.show();
-       log_vector.push_back(rt_output_hashed_qgrams
-                            .to_string("output of hashed kmers"));
+        using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
+                                                 QgramNtHashIterator4>;
+        const HashedQgrams hqg(multiseq,
+                               options.number_of_threads_get(),
+                               options.qgram_length_get(),
+                               options.window_size_get(),
+                               hash_bits,
+                               options.sort_by_hash_value_option_is_set(),
+                               options.at_constant_distance_option_is_set(),
+                               options.max_replicates_get(),
+                               &log_vector);
+        show_minimizers<HashedQgrams>(options.show_mode_get(), hqg);
       } else
       {
         using HashedQgrams = HashedQgramsGeneric<sizeof_unit_hashed_qgram,
@@ -114,37 +144,10 @@ void run_nt_minimizer(const MinimizerOptions &options)
                                options.at_constant_distance_option_is_set(),
                                options.max_replicates_get(),
                                &log_vector);
-        if (options.show_mode_get() != 0)
-        {
-          RunTimeClass rt_output_hashed_qgrams{};
-          if (options.show_mode_get() == 1)
-          {
-            hqg.show();
-          } else
-          {
-            if (options.show_mode_get() == 2)
-            {
-              for (auto &&dhqg : hqg)
-              {
-                printf("%" PRIu64 "\t%zu\t%zu\n",
-                       dhqg.hash_value,
-                       dhqg.sequence_number,
-                       dhqg.startpos);
-              }
-            } else
-            {
-              assert(options.show_mode_get() == 3);
-              auto count_runs = hqg.hash_value_run_statistics();
-              for (auto &[r,c] : count_runs)
-              {
-                printf("%zu\t%zu\n",r,c);
-              }
-            }
-          }
-          log_vector.push_back(rt_output_hashed_qgrams
-                               .to_string("output of hashed kmers"));
-        }
+        show_minimizers<HashedQgrams>(options.show_mode_get(), hqg);
       }
+      log_vector.push_back(rt_output_hashed_qgrams
+                           .to_string("output of hashed kmers"));
       for (auto &msg : log_vector)
       {
         printf("# %s\n",msg.c_str());
