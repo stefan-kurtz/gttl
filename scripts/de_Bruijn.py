@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import argparse
-
 '''
 A de Bruijn sequence of order q over an alphabet A is a cyclic string in
 which every possible q-gram over A occurs exactly once as a substring.
@@ -11,15 +9,14 @@ Generation (see
 https://git.sagemath.org/sage.git/tree/src/sage/combinat/debruijn_sequence.pyx)
 '''
 
-def de_bruijn(alphabet: str, q: int) -> str:
-    alpha_size = len(alphabet)
+def de_bruijn_char_codes(alpha_size: int, q: int) -> list:
     a = [0] * alpha_size * q
-    sequence = []
+    char_codes = list()
 
     def dbseq(t, p):
         if t > q:
             if q % p == 0:
-                sequence.extend(a[1 : p + 1])
+                char_codes.extend(a[1 : p + 1])
         else:
             a[t] = a[t - p]
             dbseq(t + 1, p)
@@ -28,39 +25,45 @@ def de_bruijn(alphabet: str, q: int) -> str:
                 dbseq(t + 1, t)
 
     dbseq(1, 1)
-    return ''.join(alphabet[i] for i in sequence)
+    return char_codes
 
-def parse_arguments():
-  p = argparse.ArgumentParser(description=('generate de Bruijn sequence with '
-                                           'respect to q and given alphabet'))
-  p.add_argument('-q','--qgram_length',type=int,default=3,metavar='<int>',
-                  help='specify parameter q')
-  alphabet_group = p.add_mutually_exclusive_group(required=True)
-  p.add_argument('-t','--transform',action='store_true',default=False,
-                  help=('use integer code from 0 to alpha_size-1 for each '
-                        'character'))
-  alphabet_group.add_argument('-a','--alphabet',type=str,metavar='<characters>',
-                              help='specify alphabet')
-  alphabet_group.add_argument('--dna',action='store_true',default=False,
-                              help='use DNA alphabet')
-  alphabet_group.add_argument('--protein',action='store_true',default=False,
-                              help='use Protein alphabet')
-  p.add_argument('--fasta',action='store_true',default=False,
-                 help='output sequences in fasta format')
-  return p.parse_args()
+if __name__ == '__main__':
+  import sys
+  import argparse
+  def parse_command_line(argv):
+    p = argparse.ArgumentParser(description=('generate de Bruijn sequence with '
+                                             'respect to q and given alphabet'))
+    p.add_argument('-q', '--qgram_length', type=int, default=3, metavar='<int>',
+                    help='specify parameter q')
+    alphabet_group = p.add_mutually_exclusive_group(required=True)
+    p.add_argument('-t', '--transform', action='store_true', default=False,
+                    help=('use integer code from 0 to alpha_size-1 for each '
+                          'character'))
+    alphabet_group.add_argument('-a', '--alphabet', type=str, 
+                                metavar='<characters>',
+                                help='specify alphabet')
+    alphabet_group.add_argument('--dna', action='store_true', default=False,
+                                help='use DNA alphabet')
+    alphabet_group.add_argument('--protein', action='store_true', default=False,
+                                help='use Protein alphabet')
+    p.add_argument('--fasta', action='store_true', default=False,
+                   help='output sequences in fasta format')
+    return p.parse_args(argv)
 
-args = parse_arguments()
-if args.dna:
-  args.alphabet = 'ACGT'
-elif args.protein:
-  args.alphabet = 'ADEFGHIKLMNPQRSTVWY'
-if args.transform:
-  args.alphabet = ''.join(map(chr,range(len(args.alphabet))))
-seq = de_bruijn(args.alphabet,args.qgram_length)
-if args.fasta:
-  print('>de Bruijn sequence for alphabet={}, q={}'.format(args.alphabet,args.qgram_length))
-  width = 60
-  for start in range(0,len(seq),width):
-    print('{}'.format(seq[start:start + width]))
-else:
-  print(seq,end='')
+  args = parse_command_line(sys.argv[1:])
+  if args.dna:
+    args.alphabet = 'ACGT'
+  elif args.protein:
+    args.alphabet = 'ADEFGHIKLMNPQRSTVWY'
+  if args.transform:
+    args.alphabet = ''.join(map(chr, range(len(args.alphabet))))
+  char_codes = de_bruijn_char_codes(len(args.alphabet), args.qgram_length)
+  seq = ''.join(args.alphabet[i] for i in char_codes)
+  if args.fasta:
+    print(f'>de Bruijn sequence for alphabet={args.alphabet}, '
+          f'q={args.qgram_length}')
+    width = 60
+    for start in range(0, len(seq), width):
+      print(seq[start:start + width])
+  else:
+    print(seq, end='')
