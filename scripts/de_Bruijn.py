@@ -7,6 +7,9 @@ The following Python code calculates a de Bruijn sequence for a given
 alphabet and q, based on an algorithm from Frank Ruskey's Combinatorial
 Generation (see
 https://git.sagemath.org/sage.git/tree/src/sage/combinat/debruijn_sequence.pyx)
+The cyclic sequence is extended by its first q-1 characters, so that
+every q-gram also occurs exactly once as a substring of the resulting
+linear sequence of length |A|^q+q-1.
 '''
 
 def de_bruijn_char_codes(alpha_size: int, q: int) -> list:
@@ -25,6 +28,7 @@ def de_bruijn_char_codes(alpha_size: int, q: int) -> list:
                 dbseq(t + 1, t)
 
     dbseq(1, 1)
+    char_codes.extend(char_codes[:q - 1])
     return char_codes
 
 if __name__ == '__main__':
