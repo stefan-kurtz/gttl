@@ -40,7 +40,8 @@ test:test_alphabet \
      test_string_of_digits \
      test_binary_iterator \
      test_multiple_options \
-     test_myersapm
+     test_myersapm \
+     test_de_Bruijn
 	@echo "Congratulations. $@ passed."
 ifeq ($(valgrind),yes)
 	@echo "Valgrind could find no issues in the executables it tested"
@@ -444,6 +445,11 @@ test_multibitvector:multibitvector.x
 .PHONY:test_myersapm
 test_myersapm:myersapm.x
 	@./test_myersapm.sh
+	@echo "Congratulations. $@ passed"
+
+.PHONy:test_de_Bruijn
+test_de_Bruijn:../scripts/de_Bruijn.py test_de_Bruijn.py 
+	@./test_de_Bruijn.py 
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o

@@ -26,7 +26,6 @@ check_deBruijn3:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "> de Bruijn sequence for q=3" > ${TMPFILE}
 	@${GTTL}/scripts/de_Bruijn.py -q 3 --dna >> ${TMPFILE}
-	@echo "AA" >> ${TMPFILE}
 	@./test_de_bruijn.py -q 3 ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -36,7 +35,6 @@ check_deBruijn1:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "> de Bruijn sequence for q=1" > ${TMPFILE}
 	@${GTTL}/scripts/de_Bruijn.py -q 1 --dna >> ${TMPFILE}
-	@echo "A" >> ${TMPFILE}
 	@./test_de_bruijn.py -q 1 ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
@@ -46,7 +44,6 @@ check_deBruijn10:unwords_mn.x
 	@$(eval TMPFILE := $(shell mktemp --tmpdir=.))
 	@echo "> de Bruijn sequence for q=10" > ${TMPFILE}
 	@${GTTL}/scripts/de_Bruijn.py -q 10 --dna >> ${TMPFILE}
-	@echo "AAAAAAAAA" >> ${TMPFILE}
 	@./test_de_bruijn.py -q 10 ${TMPFILE}
 	@${RM} ${TMPFILE}
 	@echo "$@ passed"
