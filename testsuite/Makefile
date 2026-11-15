@@ -447,9 +447,9 @@ test_myersapm:myersapm.x
 	@./test_myersapm.sh
 	@echo "Congratulations. $@ passed"
 
-.PHONy:test_de_Bruijn
-test_de_Bruijn:../scripts/de_Bruijn.py test_de_Bruijn.py 
-	@./test_de_Bruijn.py 
+.PHONY:test_de_Bruijn
+test_de_Bruijn:../scripts/de_Bruijn.py test_de_Bruijn.py
+	@./test_de_Bruijn.py
 	@echo "Congratulations. $@ passed"
 
 fastq_mn.x:fastq_mn.o seq_reader_options.o
